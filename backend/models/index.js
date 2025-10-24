@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../controller/dbController.js";
+import sequelize from "../controller/db.controller.js";
 
 
 import defineUser from "./user.model.js";

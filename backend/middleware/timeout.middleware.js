@@ -12,7 +12,7 @@ const timeoutMiddleware = (req, res, next) => {
       }
     }
     // try to destroy the socket to avoid lingering resources
-    try { req.socket && req.socket.destroy(); } catch (e) { /* ignore */ }
+    try { req.socket && req.socket.destroy(); } catch (e) { logger.error({ message: 'Error destroying socket after timeout', error: e }); }
   }, TIMEOUT_MS);
 
   // clear timer when response finishes or connection closes
