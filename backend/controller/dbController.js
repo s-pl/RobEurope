@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-
+import logger from '../utils/logger.js';
 config();
 
 // Resolve __dirname for ES modules
@@ -61,10 +61,10 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
 sequelize
   .authenticate()
   .then(() => {
-    console.log("Database connection has been established successfully.");
+    logger.info('Sequelize: connection authenticated')
   })
   .catch((error) => {
-    console.error("Unable to connect to the database:", error);
+    logger.error({ sequelize: true, event: 'authenticate', message: error.message, stack: error.stack, errors: error.errors });
   });
 
 export default sequelize;
