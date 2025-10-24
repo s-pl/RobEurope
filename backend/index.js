@@ -16,7 +16,7 @@ app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }
 
 app.use(express.json());
 app.use(timeoutMiddleware);
-app.use('/', apiRoutes);
+app.use('/api', apiRoutes);
 
 // error handler — registra errores en error log
 // centralized error handler — registra errores en error log y responde según tipo
