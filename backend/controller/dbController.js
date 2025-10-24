@@ -4,7 +4,8 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import logger from '../utils/logger.js';
-config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Resolve __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -15,7 +16,7 @@ const DB_HOST = process.env.DB_HOST || process.env.DB_URL; // DB_URL was used as
 const DB_PORT = parseInt(process.env.DB_PORT || "3306", 10);
 const DB_NAME = process.env.DB_NAME || process.env.MYSQL_DATABASE; // avoid hardcoding "mysql"
 const DB_USER = process.env.DB_USERNAME || process.env.DB_USER;
-const DB_PASS = process.env.DB_PASSWORD;
+const DB_PASS = process.env.DB_PASS;
 console.log(`Connecting to DB at ${DB_HOST}:${DB_PORT}, database: ${DB_NAME}, user: ${DB_USER}`);
 // SSL CA certificate handling (DigitalOcean Managed DBs require TLS)
 // Default to the cert shipped in backend/certs if no env override provided
