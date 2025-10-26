@@ -12,130 +12,151 @@ Redesign of robeurope.com by Samuel Ponce Luna, Ángel Lallave Herrera, and Nés
 ## 📘 Diagrama Entidad-Relación (ERD)
 
 ```mermaid
+---
+config:
+  layout: elk
+---
 erDiagram
-    USERS ||--o{ USER_PROFILES : has
-    USERS ||--o{ POSTS : writes
-    USERS ||--o{ NOTIFICATIONS : receives
-    USERS ||--o{ MEDIA : uploads
-    USERS ||--o{ AUDIT_LOG : actor
-    USERS }o--o{ TEAM_MEMBERS : member_of
-    USERS }o--o{ COMPETITION_REGISTRATIONS : registers
-
-    ROLES ||--o{ USERS : assigns
-
-    TEAMS ||--o{ TEAM_MEMBERS : has
-    TEAMS }o--o{ COMPETITION_REGISTRATIONS : participates
-
-    COMPETITIONS ||--o{ COMPETITION_MEDIA : has
-    COMPETITIONS }o--o{ COMPETITION_REGISTRATIONS : contains
-    COMPETITIONS ||--o{ STREAMS : hosts
-
-    MEDIA ||--o{ COMPETITION_MEDIA : linked_to
-
-    POSTS ||--o{ POST_COMMENTS : has
-
     USERS {
-        uuid id PK
-        string email
-        string passwordHash
-        boolean isActive
-        datetime createdAt
-        uuid roleId FK
+        BIGINT id PK
+        VARCHAR first_name
+        VARCHAR last_name
+        VARCHAR email
+        VARCHAR password_hash
+        VARCHAR profile_photo_url
+        BOOLEAN is_admin
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
     }
-
-    ROLES {
-        uuid id PK
-        string name
-        string description
-    }
-
     TEAMS {
-        uuid id PK
-        string name
-        string description
-        boolean isPublic
-        uuid createdBy FK
+        BIGINT id PK
+        VARCHAR name
+        VARCHAR logo_url
+        TEXT description
+        BIGINT created_by_user_id FK
+        TIMESTAMP created_at
     }
-
     TEAM_MEMBERS {
-        uuid id PK
-        uuid teamId FK
-        uuid userId FK
-        string roleInTeam
+        BIGINT id PK
+        BIGINT team_id FK
+        BIGINT user_id FK
+        BOOLEAN is_captain
+        TIMESTAMP joined_at
     }
-
     COMPETITIONS {
-        uuid id PK
-        string slug
-        string title
-        string description
-        datetime startAt
-        datetime endAt
-        string location
-        string status
-        uuid createdBy FK
+        BIGINT id PK
+        VARCHAR title
+        TEXT description
+        VARCHAR location
+        DATETIME start_date
+        DATETIME end_date
+        ENUM status
+        TIMESTAMP created_at
     }
-
-    COMPETITION_REGISTRATIONS {
-        uuid id PK
-        uuid competitionId FK
-        uuid teamId FK
-        uuid userId FK
-        string status
+    COMPETITION_TEAMS {
+        BIGINT competition_id FK
+        BIGINT team_id FK
+        ENUM status
+        TIMESTAMP requested_at
+        TIMESTAMP approved_at
     }
-
-    COMPETITION_MEDIA {
-        uuid id PK
-        uuid competitionId FK
-        uuid mediaId FK
-        string mediaKind
+    ROLES {
+        BIGINT id PK
+        VARCHAR name
+        VARCHAR description
     }
-
-    MEDIA {
-        uuid id PK
-        string filename
-        string url
-        string contentType
-        bigint sizeBytes
+    TEAM_MEMBER_ROLES {
+        BIGINT id PK
+        BIGINT team_member_id FK
+        BIGINT role_id FK
+        TIMESTAMP assigned_at
     }
-
+    PLATFORMS {
+        BIGINT id PK
+        VARCHAR name
+        VARCHAR url_template
+        TIMESTAMP created_at
+    }
+    TEAM_STREAMS {
+        BIGINT id PK
+        BIGINT team_id FK
+        BIGINT competition_id FK
+        BIGINT platform_id FK
+        VARCHAR stream_url
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    CHAT_MESSAGES {
+        BIGINT id PK
+        BIGINT competition_id FK
+        BIGINT user_id FK
+        BIGINT team_id FK
+        BIGINT parent_message_id FK
+        TEXT content
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    CHAT_LIKES {
+        BIGINT message_id FK
+        BIGINT user_id FK
+        TIMESTAMP created_at
+    }
+    FILES {
+        BIGINT id PK
+        BIGINT uploader_id FK
+        VARCHAR file_name
+        VARCHAR file_path
+        VARCHAR mime_type
+        BIGINT size_bytes
+        TIMESTAMP uploaded_at
+    }
+    GALLERY {
+        BIGINT id PK
+        BIGINT competition_id FK
+        VARCHAR title
+        BIGINT file_id FK
+        BIGINT uploaded_by FK
+        TIMESTAMP created_at
+    }
     POSTS {
-        uuid id PK
-        string title
-        string slug
-        text content
-        uuid authorId FK
+        BIGINT id PK
+        BIGINT admin_id FK
+        VARCHAR title
+        VARCHAR description
+        TEXT content
+        VARCHAR image_url
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
     }
+    SYSTEM_LOGS {
+        BIGINT id PK
+        BIGINT user_id FK
+        VARCHAR action
+        VARCHAR entity_type
+        BIGINT entity_id
+        TEXT details
+        TIMESTAMP timestamp
+    }
+    USERS ||--o{ TEAM_MEMBERS : "has"
+    USERS ||--o{ CHAT_MESSAGES : "sends"
+    USERS ||--o{ CHAT_LIKES : "likes"
+    USERS ||--o{ FILES : "uploads"
+    USERS ||--o{ POSTS : "creates "
+    USERS ||--o{ TEAMS : "creates"
+    TEAMS ||--o{ TEAM_MEMBERS : "contains"
+    TEAMS ||--o{ COMPETITION_TEAMS : "participates"
+    TEAMS ||--o{ TEAM_STREAMS : "has"
+    TEAM_MEMBERS ||--o{ TEAM_MEMBER_ROLES : "has role"
+    ROLES ||--o{ TEAM_MEMBER_ROLES : "applies to"
+    COMPETITIONS ||--o{ COMPETITION_TEAMS : "has teams"
+    COMPETITIONS ||--o{ TEAM_STREAMS : "has streams"
+    COMPETITIONS ||--o{ CHAT_MESSAGES : "has chat"
+    COMPETITIONS ||--o{ GALLERY : "has images"
+    CHAT_MESSAGES ||--o{ CHAT_LIKES : "receives likes"
+    CHAT_MESSAGES ||--o{ CHAT_MESSAGES : "replies"
+    FILES ||--o{ GALLERY : "used in"
+    PLATFORMS ||--o{ TEAM_STREAMS : "supports streams"
 
-    POST_COMMENTS {
-        uuid id PK
-        uuid postId FK
-        uuid userId FK
-        text content
-    }
-
-    STREAMS {
-        uuid id PK
-        uuid competitionId FK
-        string title
-        string publicUrl
-    }
-
-    NOTIFICATIONS {
-        uuid id PK
-        uuid userId FK
-        string title
-        string body
-        boolean isRead
-    }
-
-    AUDIT_LOG {
-        uuid id PK
-        uuid actorUserId FK
-        string actionType
-        string targetType
-        string details
-    }
 ```
 ## Use case diagram
 ![Use Case Diagram](https://github.com/s-pl/RobEurope/blob/develop/img/usecase.png?raw=true)
