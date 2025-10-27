@@ -1,12 +1,16 @@
 {
-  "name": "robeurope-backend",
-  "version": "1.0.0",
-  "description": "Redesign of robeurope.com by Samuel Ponce Luna, Ángel Lallave Herrera, and Néstor García Santos from IES El Rincón.",
-  "license": "ISC",
-  "author": "",
   "type": "module",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "mysql2": "^3.15.2",
+    "sequelize": "^6.37.7",
+    "winston": "^3.18.3",
+    "winston-daily-rotate-file": "^5.0.0"
   }
 }
