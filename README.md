@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-=======
+
 # RobEurope
 Redesign of robeurope.com by Samuel Ponce Luna, Ángel Lallave Herrera, and Néstor García Santos from IES El Rincón.
 
@@ -163,4 +162,4 @@ erDiagram
 ## Use case diagram
 ![Use Case Diagram](https://github.com/s-pl/RobEurope/blob/develop/img/usecase.png?raw=true)
 
->>>>>>> ed0fc07f58971f4aea7c98c7081ddc90b1521228
+
