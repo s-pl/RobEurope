@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { sequelize } from '../../models/index.js';
+
 const router = Router();
 import  authenticateToken  from '../../middleware/auth.middleware.js';
 router.get('/health', authenticateToken, (req, res) => {
