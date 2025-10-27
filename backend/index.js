@@ -3,7 +3,6 @@ import apiRoutes from './routes/api/dbhealt.api.js'
 import timeoutMiddleware from './middleware/timeout.middleware.js';
 import morgan from 'morgan';
 import logger from './utils/logger.js';
-
 import dotenv from 'dotenv';
 dotenv.config();
 // import userRoutes from './routes/userRoutes.js';

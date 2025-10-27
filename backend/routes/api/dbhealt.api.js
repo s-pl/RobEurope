@@ -1,7 +1,7 @@
 import { Router } from 'express';
-
+import sequelize from '../../controller/db.controller.js';
 const router = Router();
-import  authenticateToken  from '../../middleware/auth.middleware.js';
+import {authenticateToken}  from '../../middleware/auth.middleware.js';
 router.get('/health', authenticateToken, (req, res) => {
     checkDatabaseConnection().then(isHealthy => {
         res.status(200).json({
@@ -12,6 +12,7 @@ router.get('/health', authenticateToken, (req, res) => {
         });
     });
 });
+
 
 function checkDatabaseConnection() {
   return sequelize.authenticate()

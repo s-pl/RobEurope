@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 const SECRET_KEY = process.env.JWT_SECRET; // Store this in an environment variable for security
 
-const authenticateToken = (req, res, next) => {
+export function authenticateToken  (req, res, next)  {
   const token = req.headers['authorization']?.split(' ')[1]; // Extract the token from the Authorization header
 
 
@@ -19,4 +19,10 @@ const authenticateToken = (req, res, next) => {
   });
 }
 
-export default authenticateToken;
+export function signToken  (payload)  {
+  const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
+  return token
+}
+
+
+

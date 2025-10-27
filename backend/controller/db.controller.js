@@ -1,10 +1,10 @@
 import { Sequelize } from "sequelize";
-import { config } from "dotenv";
+import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import logger from '../utils/logger.js';
-import dotenv from 'dotenv';
+import dbConfig from "../config/db.config.js";
 dotenv.config();
 
 // Resolve __dirname for ES modules
@@ -12,11 +12,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Prefer explicit envs following the tutorial, with sane fallbacks for current vars
-const DB_HOST = process.env.DB_HOST || process.env.DB_URL; // DB_URL was used as host before
-const DB_PORT = parseInt(process.env.DB_PORT || "3306", 10);
-const DB_NAME = process.env.DB_NAME || process.env.MYSQL_DATABASE; // avoid hardcoding "mysql"
-const DB_USER = process.env.DB_USERNAME || process.env.DB_USER;
-const DB_PASS = process.env.DB_PASS;
+const DB_HOST = dbConfig.DB_HOST; // DB_URL was used as host before
+const DB_PORT = parseInt(dbConfig.DB_PORT || "3306", 10);
+const DB_NAME = dbConfig.DB_NAME // avoid hardcoding "mysql"
+const DB_USER = dbConfig.DB_USER;
+const DB_PASS = dbConfig.DB_PASS;
 console.log(`Connecting to DB at ${DB_HOST}:${DB_PORT}, database: ${DB_NAME}, user: ${DB_USER}`);
 // SSL CA certificate handling (DigitalOcean Managed DBs require TLS)
 // Default to the cert shipped in backend/certs if no env override provided
