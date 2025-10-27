@@ -138,7 +138,7 @@ erDiagram
         TEXT details
         TIMESTAMP timestamp
     }
-    USERS ||--o{ TEAM_MEMBERS : "has"
+    USERS ||--o{ TEAM_MEMBERS : "belongs to"
     USERS ||--o{ CHAT_MESSAGES : "sends"
     USERS ||--o{ CHAT_LIKES : "likes"
     USERS ||--o{ FILES : "uploads"

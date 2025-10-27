@@ -19,10 +19,7 @@ export function authenticateToken  (req, res, next)  {
   });
 }
 
-export function signToken  (payload)  {
-  const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
-  return token
-}
+
 
 
 
