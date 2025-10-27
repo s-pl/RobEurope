@@ -87,11 +87,6 @@ erDiagram
         BIGINT competition_id FK
         BIGINT team_id FK
         ENUM status "pending, approved, rejected, disqualified"
-        JSON technical_details
-        INTEGER final_rank
-        DECIMAL final_score
-        JSON awards
-        TEXT admin_notes
         TIMESTAMP requested_at
         TIMESTAMP reviewed_at
         BIGINT reviewed_by_user_id FK
