@@ -1,6 +1,6 @@
-import { Country } from '../config/db.js';
+import db from '../models/index.js';
+const { Country } = db;
 
-// ✅ Obtener todos los países
 export const getCountries = async (req, res) => {
   try {
     const countries = await Country.findAll({ order: [['name', 'ASC']] });
@@ -10,7 +10,7 @@ export const getCountries = async (req, res) => {
   }
 };
 
-// ✅ Obtener un país por ID
+
 export const getCountryById = async (req, res) => {
   try {
     const country = await Country.findByPk(req.params.id);
@@ -21,7 +21,7 @@ export const getCountryById = async (req, res) => {
   }
 };
 
-// ✅ Crear un país (opcional, útil si amplías tu catálogo)
+
 export const createCountry = async (req, res) => {
   try {
     const { code, name, flag_emoji } = req.body;
@@ -32,7 +32,7 @@ export const createCountry = async (req, res) => {
   }
 };
 
-// ✅ Actualizar país
+
 export const updateCountry = async (req, res) => {
   try {
     const { id } = req.params;
@@ -45,7 +45,7 @@ export const updateCountry = async (req, res) => {
   }
 };
 
-// ✅ Eliminar país
+
 export const deleteCountry = async (req, res) => {
   try {
     const deleted = await Country.destroy({ where: { id: req.params.id } });

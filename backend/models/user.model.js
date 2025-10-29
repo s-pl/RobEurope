@@ -1,4 +1,5 @@
-export default function defineUser(sequelize, DataTypes) {
+import sequelize from "../controller/db.controller.js";
+export default (sequelize, DataTypes) => {
   return sequelize.define('User', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     first_name: { type: DataTypes.STRING },
@@ -8,14 +9,12 @@ export default function defineUser(sequelize, DataTypes) {
     phone: { type: DataTypes.STRING },
     profile_photo_url: { type: DataTypes.STRING },
     country_id: { type: DataTypes.BIGINT },
-    role: { type: DataTypes.ENUM('super_admin', 'user'), defaultValue: 'user' },
+    role: { type: DataTypes.ENUM('super_admin', 'user'), allowNull: false, defaultValue: 'user' },
     is_active: { type: DataTypes.BOOLEAN, defaultValue: true },
-    created_at: {type: DataTypes.TIMESTAMP, defaultValue: DataTypes.literal('CURRENT_TIMESTAMP')},
-    updated_at: {type: DataTypes.TIMESTAMP, defaultValue: DataTypes.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')}
+    created_at: { type: DataTypes.DATE, allowNull: false, defaultValue: sequelize.literal('CURRENT_TIMESTAMP') },
+    updated_at: { type: DataTypes.DATE, defaultValue: sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP') }
   }, {
     tableName: 'USERS',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
+    timestamps: false,
   });
 }
