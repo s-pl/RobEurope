@@ -10,6 +10,8 @@ export default function defineUser(sequelize, DataTypes) {
     country_id: { type: DataTypes.BIGINT },
     role: { type: DataTypes.ENUM('super_admin', 'user'), defaultValue: 'user' },
     is_active: { type: DataTypes.BOOLEAN, defaultValue: true },
+    created_at: {type: DataTypes.TIMESTAMP, defaultValue: DataTypes.literal('CURRENT_TIMESTAMP')},
+    updated_at: {type: DataTypes.TIMESTAMP, defaultValue: DataTypes.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')}
   }, {
     tableName: 'USERS',
     timestamps: true,
