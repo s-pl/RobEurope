@@ -1,5 +1,5 @@
-import sequelize from "../controller/db.controller";
-export default function defineCountry(sequelize, DataTypes) {
+import sequelize from "../controller/db.controller.js";
+export default (sequelize, DataTypes) => {
   return sequelize.define('Country', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
     code: { type: DataTypes.STRING(2), allowNull: false, unique: true },
