@@ -39,7 +39,7 @@ erDiagram
     TEAMS {
         BIGINT id PK
         VARCHAR name
-        VARCHAR short_code "MIT, UCSD"
+        VARCHAR short_code 
         BIGINT country_id FK
         VARCHAR city
         VARCHAR institution
@@ -99,22 +99,8 @@ erDiagram
         VARCHAR platform "twitch, youtube, kick"
         VARCHAR stream_url
         BOOLEAN is_live
-        TIMESTAMP created_at
-    }
-
-    STREAM_TEAMS {
-        BIGINT id PK
-        BIGINT stream_id FK
-        BIGINT team_id FK
-        BOOLEAN is_host
-        TIMESTAMP created_at
-    }
-
-    STREAM_COMPETITIONS {
-        BIGINT id PK
-        BIGINT stream_id FK
-        BIGINT competition_id FK
-        BOOLEAN is_official
+        BIGINT host_team_id FK  "opcional"
+        BIGINT competition_id FK "opcional"
         TIMESTAMP created_at
     }
 
@@ -144,7 +130,7 @@ erDiagram
     COMPETITION_POSTS {
         BIGINT id PK
         BIGINT competition_id FK
-        BIGINT team_id FK
+        BIGINT team_id FK "opcional"
         BIGINT author_user_id FK
         VARCHAR title
         TEXT content
@@ -155,18 +141,19 @@ erDiagram
         TIMESTAMP updated_at
     }
 
-    POST_LIKES {
-        BIGINT post_id FK
+    LIKES {
+        BIGINT id PK
         BIGINT user_id FK
-        ENUM post_type "global, competition"
+        ENUM target_type "global_post, competition_post"
+        BIGINT target_id
         TIMESTAMP created_at
     }
 
     CHAT_MESSAGES {
         BIGINT id PK
-        BIGINT competition_id FK
+        BIGINT competition_id FK "opcional"
         BIGINT user_id FK
-        BIGINT parent_id FK
+        BIGINT parent_id FK "opcional"
         TEXT content
         BOOLEAN is_pinned
         BOOLEAN is_deleted
@@ -182,10 +169,10 @@ erDiagram
 
     MEDIA {
         BIGINT id PK
-        BIGINT competition_id FK
-        BIGINT team_id FK
         BIGINT uploaded_by_user_id FK
-        ENUM type "photo, video"
+        ENUM object_type "competition,team,global_post,competition_post,user"
+        BIGINT object_id
+        ENUM type "photo, video, other"
         VARCHAR title
         VARCHAR file_path
         VARCHAR thumbnail_path
@@ -201,12 +188,7 @@ erDiagram
         ENUM tier "platinum, gold, silver, bronze"
         INTEGER display_order
         BOOLEAN is_active
-    }
-
-    SPONSOR_COMPETITIONS {
-        BIGINT id PK
-        BIGINT sponsor_id FK
-        BIGINT competition_id FK
+        TIMESTAMP created_at
     }
 
     NOTIFICATIONS {
@@ -220,7 +202,7 @@ erDiagram
         TIMESTAMP created_at
     }
 
-    %% Relaciones
+    %% Relaciones (simplificadas)
     USERS }o--|| COUNTRIES : "from"
     USERS ||--o{ TEAM_MEMBERS : "joins"
     USERS ||--o{ TEAMS : "creates"
@@ -228,8 +210,9 @@ erDiagram
     USERS ||--o{ COMPETITION_POSTS : "writes"
     USERS ||--o{ CHAT_MESSAGES : "sends"
     USERS ||--o{ NOTIFICATIONS : "receives"
-    USERS ||--o{ POST_LIKES : "likes"
+    USERS ||--o{ LIKES : "likes"
     USERS ||--o{ CHAT_REACTIONS : "reacts"
+    USERS ||--o{ MEDIA : "uploads"
 
     COUNTRIES ||--o{ TEAMS : "represents"
     COUNTRIES ||--o{ COMPETITIONS : "hosts"
@@ -238,27 +221,19 @@ erDiagram
     TEAMS ||--o{ REGISTRATIONS : "registers"
     TEAMS ||--o{ TEAM_SOCIALS : "links"
     TEAMS ||--o{ COMPETITION_POSTS : "posts"
-    TEAMS ||--o{ STREAM_TEAMS : "streams"
     TEAMS ||--o{ MEDIA : "uploads"
+    TEAMS ||--o{ STREAMS : "hosts"
 
     COMPETITIONS ||--o{ REGISTRATIONS : "entries"
     COMPETITIONS ||--o{ COMPETITION_POSTS : "content"
     COMPETITIONS ||--o{ CHAT_MESSAGES : "chat"
-    COMPETITIONS ||--o{ STREAM_COMPETITIONS : "streams"
     COMPETITIONS ||--o{ MEDIA : "gallery"
-    COMPETITIONS ||--o{ SPONSOR_COMPETITIONS : "sponsored_by"
+    COMPETITIONS ||--o{ STREAMS : "has_stream"
 
     REGISTRATIONS }o--|| USERS : "reviewed_by"
 
-    STREAMS ||--o{ STREAM_TEAMS : "features"
-    STREAMS ||--o{ STREAM_COMPETITIONS : "covers"
-
     CHAT_MESSAGES ||--o{ CHAT_REACTIONS : "reactions"
     CHAT_MESSAGES ||--o{ CHAT_MESSAGES : "replies"
-
-    MEDIA }o--|| USERS : "uploaded_by"
-
-    SPONSORS ||--o{ SPONSOR_COMPETITIONS : "supports"
 
 
 ```
