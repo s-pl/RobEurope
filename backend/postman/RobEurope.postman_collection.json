@@ -1,0 +1,85 @@
+{
+  "info": {
+    "name": "RobEurope API",
+    "_postman_id": "robeurope-collection-0001",
+    "description": "Collection for RobEurope auth endpoints (register + login)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register - Ana Garcia",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"first_name\": \"Ana\",\n  \"last_name\": \"García\",\n  \"email\": \"ana.garcia@example.com\",\n  \"password\": \"P@ssw0rd1\",\n  \"phone\": \"+34123456789\",\n  \"country_id\": 34\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/register",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api","auth","register"]
+        }
+      }
+    },
+    {
+      "name": "Register - Luca Rossi",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\n  \"first_name\": \"Luca\",\n  \"last_name\": \"Rossi\",\n  \"email\": \"luca.rossi@example.com\",\n  \"password\": \"P@ssw0rd2\",\n  \"phone\": \"+393331112233\",\n  \"country_id\": 39\n}" },
+        "url": { "raw": "http://localhost:3000/api/auth/register", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","auth","register"] }
+      }
+    },
+    {
+      "name": "Register - Admin User",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\n  \"first_name\": \"Admin\",\n  \"last_name\": \"User\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"Adm1nP@ss\",\n  \"phone\": \"+441234567890\",\n  \"country_id\": 44\n}" },
+        "url": { "raw": "http://localhost:3000/api/auth/register", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","auth","register"] }
+      }
+    },
+    {
+      "name": "Login - Ana Garcia (valid)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"ana.garcia@example.com\",\n  \"password\": \"P@ssw0rd1\"\n}" },
+        "url": { "raw": "http://localhost:3000/api/auth/login", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","auth","login"] }
+      }
+    },
+    {
+      "name": "Login - Luca Rossi (invalid)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"luca.rossi@example.com\",\n  \"password\": \"wrong-password\"\n}" },
+        "url": { "raw": "http://localhost:3000/api/auth/login", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","auth","login"] }
+      }
+    },
+    {
+      "name": "Login - Admin (valid)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Adm1nP@ss\"\n}" },
+        "url": { "raw": "http://localhost:3000/api/auth/login", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","auth","login"] }
+      }
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": { "exec": [], "type": "text/javascript" }
+    },
+    {
+      "listen": "test",
+      "script": { "exec": [], "type": "text/javascript" }
+    }
+  ]
+}
