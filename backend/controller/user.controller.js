@@ -1,42 +1,60 @@
-// import models from '../models/index.js';
-// const { User, Role, UserProfile } = models;
-// import bcrypt from 'bcryptjs';
-// const saltRounds = 10;
-// import jwt from 'jsonwebtoken';
-// import dotenv from 'dotenv';
-// dotenv.config();
-// const SECRET_KEY = process.env.JWT_SECRET; // Store this in an environment variable for security
+import { User } from '../models/index.js';
+import bcrypt from 'bcryptjs';
+
+export const createUser = async (req, res) => {
+  try {
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const user = await User.create({ ...req.body, password: hashedPassword });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 
-// export const registerUser = async (req, res, next) => {
-//   try {
-//     const { username, password, email } = req.body;
-//     const hashedPassword = await bcrypt.hash(password, saltRounds);
-//     const newUser = await User.create({ username, passwordHash: hashedPassword, email });
-//     res.status(201).json({ message: 'User registered successfully', userId: newUser.id });
-    
-//   } catch (error) {
-//     res.status(500).json({ message: 'Error registering user', error: error.message });
-//   }
-// };
+export const getUsers = async (req, res) => {
+  try {
+    const users = await User.findAll();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 
-// export const loginUser = async (req, res, next) => {
-//   try {
-//     const { username, password } = req.body;
-//     const user = await User.findOne({ where: { username } });
-//     if (!user) {
-//       return res.status(401).json({ message: 'Invalid username or password' });
-//     }
-//     const isMatch = await bcrypt.compare(password, user.passwordHash);
-//     if (!isMatch) {
-//       return res.status(401).json({ message: 'Invalid username or password' });
-//     }
-//     const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h' });
-//     res.status(200).json({ message: 'Login successful', token });
-//   } catch (error) {
-//     res.status(500).json({ message: 'Error logging in', error: error.message });
-//   }
-// };
+export const getUserById = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 
+export const updateUser = async (req, res) => {
+  try {
+    const [updated] = await User.update(req.body, {
+      where: { id: req.params.id }
+    });
+    if (!updated) return res.status(404).json({ error: 'Usuario no encontrado' });
+    const updatedUser = await User.findByPk(req.params.id);
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+export const deleteUser = async (req, res) => {
+  try {
+    const deleted = await User.destroy({
+      where: { id: req.params.id }
+    });
+    if (!deleted) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json({ message: 'Usuario eliminado correctamente' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
