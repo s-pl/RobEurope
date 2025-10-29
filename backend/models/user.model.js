@@ -1,4 +1,3 @@
-import sequelize from "../controller/db.controller.js";
 export default (sequelize, DataTypes) => {
   return sequelize.define('User', {
     id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
@@ -11,10 +10,17 @@ export default (sequelize, DataTypes) => {
     country_id: { type: DataTypes.BIGINT },
     role: { type: DataTypes.ENUM('super_admin', 'user'), allowNull: false, defaultValue: 'user' },
     is_active: { type: DataTypes.BOOLEAN, defaultValue: true },
-    created_at: { type: DataTypes.DATE, allowNull: false, defaultValue: sequelize.literal('CURRENT_TIMESTAMP') },
-    updated_at: { type: DataTypes.DATE, defaultValue: sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP') }
+    // created_at and updated_at will be set by controllers to avoid DB-specific SQL defaults
+    created_at: { type: DataTypes.DATE },
+    updated_at: { type: DataTypes.DATE }
   }, {
     tableName: 'USERS',
-    timestamps: false,
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    indexes: [
+      { unique: true, fields: ['email'] },
+      { fields: ['country_id'] }
+    ]
   });
-}
+};
