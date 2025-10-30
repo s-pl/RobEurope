@@ -96,8 +96,8 @@ process.on('unhandledRejection', (reason, promise) => {
 
 if(process.env.NODE_ENV === 'production') {
   const sslOptions = {
-    key: fs.readFileSync(process.env.SSL_KEY_PATH || '/certs/key.pem'),
-    cert: fs.readFileSync(process.env.SSL_CERT_PATH || '/certs/cert.pem')
+    key: fs.readFileSync(process.env.SSL_KEY_PATH || import.meta.dirname + '/certs/key.pem'),
+    cert: fs.readFileSync(process.env.SSL_CERT_PATH || import.meta.dirname +  '/certs/cert.pem')
   };
 
   https.createServer(sslOptions, app).listen(PORT, () => {
