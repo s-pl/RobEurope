@@ -3,196 +3,263 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>RobEurope API Tester</title>
+  <title>RobEurope — Test UI</title>
   <style>
-    body { font-family: Arial, Helvetica, sans-serif; max-width: 900px; margin: 20px auto; padding: 0 12px; }
-    h1,h2 { color:#222 }
-    form { border:1px solid #ddd; padding:12px; margin-bottom:12px; border-radius:6px }
-    label { display:block; margin-top:8px }
-    input, select, textarea { width:100%; padding:8px; box-sizing:border-box }
-    button { margin-top:10px; padding:8px 12px }
-    pre { background:#f7f7f7; padding:10px; overflow:auto }
-    .row { display:flex; gap:12px }
-    .col { flex:1 }
+    body { font-family: Arial, sans-serif; max-width:900px; margin:20px auto; padding:0 16px; }
+    section { border:1px solid #ddd; padding:16px; margin-bottom:16px; border-radius:6px; }
+    label { display:block; margin-top:8px; }
+    input, select { width:100%; padding:8px; box-sizing:border-box; margin-top:4px; }
+    button { margin-top:12px; padding:8px 12px; }
+    .row { display:flex; gap:12px; }
+    .col { flex:1; }
+    pre { background:#f7f7f7; padding:8px; overflow:auto; }
+    .msg { margin-top:8px; color:green; }
+    .err { margin-top:8px; color:red; }
   </style>
 </head>
 <body>
-  <h1>RobEurope — Interfaz de prueba</h1>
-  <p>Esta página sirve para probar <code>/api/auth/register</code>, <code>/api/auth/login</code>, y cualquier endpoint CRUD bajo <code>/api/</code>. El servidor debe ejecutarse en el mismo host (ej. <code>http://localhost:3000</code>).</p>
+  <h1>RobEurope — Test UI</h1>
 
-  <h2>Registro (register)</h2>
-  <form id="registerForm">
-    <div class="row">
-      <div class="col"><label>First name <input name="first_name" required></label></div>
-      <div class="col"><label>Last name <input name="last_name" required></label></div>
-    </div>
-    <label>Email <input name="email" type="email" required></label>
-    <label>Password <input name="password" type="password" required></label>
-    <label>Phone <input name="phone" required></label>
-    <label>Country <select name="country_id" id="countrySelect" required>
-      <option value="">Cargando países...</option>
-    </select></label>
-    <button type="submit">Register</button>
-  </form>
-
-  <h2>Login</h2>
-  <form id="loginForm">
-    <label>Email <input name="email" type="email" required></label>
-    <label>Password <input name="password" type="password" required></label>
-    <button type="submit">Login</button>
-  </form>
-
-  <div style="margin-bottom:12px">
-    <button id="btnGetCountries">Get countries (/api/countries)</button>
-    <button id="btnShowToken">Show saved token</button>
-    <button id="btnClearToken">Clear token</button>
-  </div>
-
-  <h2>Manual API requester</h2>
-  <form id="manualForm">
-    <label>Method
-      <select name="method">
-        <option>GET</option>
-        <option>POST</option>
-        <option>PUT</option>
-        <option>PATCH</option>
-        <option>DELETE</option>
-      </select>
-    </label>
-    <label>Path (relative to /api) <input name="path" placeholder="e.g. auth/login or users/1" required></label>
-    <label>JSON body (optional) <textarea name="body" rows="6" placeholder='{ "name": "value" }'></textarea></label>
-    <label><input type="checkbox" name="useAuth" checked> Include Authorization: Bearer &lt;token&gt;</label>
-    <button type="submit">Send request</button>
-  </form>
-
-  <h2>Mi perfil</h2>
-  <div id="profileArea">
-    <button id="btnLoadProfile">Cargar mi perfil</button>
-    <form id="profileForm" style="display:none">
-      <label>First name <input name="first_name"></label>
-      <label>Last name <input name="last_name"></label>
-      <label>Phone <input name="phone"></label>
-      <label>Profile photo URL <input name="profile_photo_url"></label>
-      <label>Country <select name="country_id" id="profileCountrySelect"><option value="">Cargando...</option></select></label>
-      <button type="submit">Guardar cambios</button>
+  <section id="auth">
+    <h2>Register</h2>
+    <form id="registerForm">
+      <div class="row">
+        <div class="col">
+          <label>First name<input name="first_name" required></label>
+        </div>
+        <div class="col">
+          <label>Last name<input name="last_name" required></label>
+        </div>
+      </div>
+      <label>Email<input name="email" type="email" required></label>
+      <label>Password<input name="password" type="password" required></label>
+      <label>Phone<input name="phone" required></label>
+      <label>Country<select id="countrySelect" name="country_id" required></select></label>
+      <button type="submit">Register</button>
+      <div id="registerMsg"></div>
     </form>
-  </div>
 
-  <h2>Respuesta</h2>
-  <pre id="output">(esperando acciones...)</pre>
+    <h2 style="margin-top:18px">Login</h2>
+    <form id="loginForm">
+      <label>Email<input name="email" type="email" required></label>
+      <label>Password<input name="password" type="password" required></label>
+      <button type="submit">Login</button>
+      <div id="loginMsg"></div>
+    </form>
+  </section>
+
+  <section id="profileSection" style="display:none">
+    <h2>My profile</h2>
+    <button id="loadProfileBtn">Load my profile</button>
+    <div id="profileMsg"></div>
+
+    <form id="profileForm" style="display:none; margin-top:12px">
+      <label>First name<input name="first_name" required></label>
+      <label>Last name<input name="last_name" required></label>
+      <label>Phone<input name="phone" required></label>
+      <label>Profile photo URL<input name="profile_photo_url"></label>
+      <label>Country<select id="profileCountrySelect" name="country_id" required></select></label>
+
+      <div class="row">
+        <button type="submit">Save changes</button>
+        <button type="button" id="deleteAccountBtn" style="background:#c33;color:#fff">Delete account</button>
+        <button type="button" id="logoutBtn">Logout</button>
+      </div>
+
+      <div id="profileResult"></div>
+    </form>
+  </section>
+
+  <section>
+    <h2>Quick API tester</h2>
+    <p>Search users (q param):</p>
+    <form id="searchForm">
+      <input name="q" placeholder="email or name" required>
+      <button>Search</button>
+    </form>
+    <pre id="searchResult"></pre>
+  </section>
 
   <script>
-    const out = el => document.getElementById('output').textContent = typeof el === 'string' ? el : JSON.stringify(el, null, 2);
+    const baseUrl = window.location.origin;
+    const countrySelect = document.getElementById('countrySelect');
+    const profileCountrySelect = document.getElementById('profileCountrySelect');
 
-    const saveToken = token => { localStorage.setItem('robeurope_token', token); }
-    const getToken = () => localStorage.getItem('robeurope_token') || '';
+    function getToken() { return localStorage.getItem('token'); }
+    function setToken(t) { if (t) localStorage.setItem('token', t); else localStorage.removeItem('token'); updateAuthUI(); }
 
     async function loadCountries() {
-      const sel = document.getElementById('countrySelect');
       try {
-        const res = await fetch('/api/countries');
-        if (!res.ok) throw new Error('No se pudieron cargar los países: ' + res.status);
+        const res = await fetch(baseUrl + '/api/countries');
+        if (!res.ok) throw new Error('Failed to load countries: ' + res.status);
         const countries = await res.json();
-        sel.innerHTML = '<option value="">-- Selecciona un país --</option>' + countries.map(c => `
-          <option value="${c.id}">${c.flag_emoji ? c.flag_emoji + ' ' : ''}${c.name} (${c.code})</option>
-        `).join('');
+        countrySelect.innerHTML = '<option value="">Select country</option>';
+        profileCountrySelect.innerHTML = '<option value="">Select country</option>';
+        countries.forEach(c => {
+          const txt = `${c.flag_emoji ? c.flag_emoji + ' ' : ''}${c.name} (${c.code})`;
+          const opt = `<option value="${c.id}">${txt}</option>`;
+          countrySelect.insertAdjacentHTML('beforeend', opt);
+          profileCountrySelect.insertAdjacentHTML('beforeend', opt);
+        });
       } catch (err) {
-        sel.innerHTML = '<option value="">Error al cargar países</option>';
-        out({ error: err.message });
+        console.error(err);
+        countrySelect.innerHTML = '<option value="">Error loading countries</option>';
+        profileCountrySelect.innerHTML = '<option value="">Error</option>';
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => loadCountries());
-
+    // Register
     document.getElementById('registerForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const f = new FormData(e.target);
-      const body = Object.fromEntries(f.entries());
+      const f = e.target;
+      const body = {
+        first_name: f.first_name.value.trim(),
+        last_name: f.last_name.value.trim(),
+        email: f.email.value.trim(),
+        password: f.password.value,
+        phone: f.phone.value.trim(),
+        country_id: Number(f.country_id.value)
+      };
+      const msg = document.getElementById('registerMsg');
+      msg.textContent = '';
       try {
-        const res = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        const data = await res.json(); out(data);
-        if (res.ok && data.token) saveToken(data.token);
-      } catch (err) { out({ error: err.message }) }
+        const res = await fetch(baseUrl + '/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
+        // store token
+        if (data.token) setToken(data.token);
+        msg.className='msg'; msg.textContent = 'Registered. Token saved.';
+        // show profile section
+        document.getElementById('profileSection').style.display = 'block';
+      } catch (err) {
+        msg.className='err'; msg.textContent = err.message;
+      }
     });
 
+    // Login
     document.getElementById('loginForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const f = new FormData(e.target);
-      const body = Object.fromEntries(f.entries());
+      const f = e.target;
+      const body = { email: f.email.value.trim(), password: f.password.value };
+      const msg = document.getElementById('loginMsg'); msg.textContent='';
       try {
-        const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        const data = await res.json(); out(data);
-        if (res.ok && data.token) saveToken(data.token);
-      } catch (err) { out({ error: err.message }) }
-    });
-
-    document.getElementById('btnGetCountries').addEventListener('click', async () => {
-      try {
-        const res = await fetch('/api/countries');
-        const data = await res.json(); out(data);
-      } catch (err) { out({ error: err.message }); }
-    });
-
-    document.getElementById('btnShowToken').addEventListener('click', () => out({ token: getToken() }));
-    document.getElementById('btnClearToken').addEventListener('click', () => { localStorage.removeItem('robeurope_token'); out('(token borrado)'); });
-
-    document.getElementById('manualForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      const f = new FormData(e.target);
-      const { method, path, body, useAuth } = Object.fromEntries(f.entries());
-      const url = '/api/' + path.replace(/^\/+/, '');
-      const opts = { method };
-      opts.headers = {};
-      if (body && body.trim()) {
-        try { opts.body = JSON.stringify(JSON.parse(body)); opts.headers['Content-Type'] = 'application/json'; }
-        catch (err) { return out({ error: 'JSON inválido: ' + err.message }); }
-      }
-      if (useAuth && getToken()) opts.headers['Authorization'] = 'Bearer ' + getToken();
-      try {
-        const res = await fetch(url, opts);
-        const text = await res.text();
-        try { out(JSON.parse(text)); } catch (e) { out(text); }
-      } catch (err) { out({ error: err.message }); }
-    });
-
-    // Profile load & edit
-    document.getElementById('btnLoadProfile').addEventListener('click', async () => {
-      const token = getToken();
-      if (!token) return out({ error: 'No estás logueado' });
-      try {
-        const res = await fetch('/api/users/me', { headers: { 'Authorization': 'Bearer ' + token } });
+        const res = await fetch(baseUrl + '/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify(body)
+        });
         const data = await res.json();
-        if (!res.ok) return out(data);
-        // populate form
-        const f = document.getElementById('profileForm');
-        f.style.display = 'block';
-        f.elements['first_name'].value = data.first_name || '';
-        f.elements['last_name'].value = data.last_name || '';
-        f.elements['phone'].value = data.phone || '';
-        f.elements['profile_photo_url'].value = data.profile_photo_url || '';
-        // fill countries for profile select
-        const psel = document.getElementById('profileCountrySelect');
-        try {
-          const cres = await fetch('/api/countries');
-          const countries = await cres.json();
-          psel.innerHTML = '<option value="">-- Selecciona un país --</option>' + countries.map(c => `\n            <option value="${c.id}">${c.flag_emoji ? c.flag_emoji + ' ' : ''}${c.name} (${c.code})</option>\n          `).join('');
-          if (data.country_id) psel.value = data.country_id;
-        } catch (e) { psel.innerHTML = '<option value="">Error</option>'; }
-        out(data);
-      } catch (err) { out({ error: err.message }); }
+        if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
+        setToken(data.token);
+        msg.className='msg'; msg.textContent = 'Logged in. Token saved.';
+        document.getElementById('profileSection').style.display = 'block';
+      } catch (err) {
+        msg.className='err'; msg.textContent = err.message;
+      }
     });
 
+    // Load my profile
+    document.getElementById('loadProfileBtn').addEventListener('click', loadMyProfile);
+
+    async function loadMyProfile() {
+      const token = getToken();
+      const msg = document.getElementById('profileMsg'); msg.textContent='';
+      if (!token) { msg.className='err'; msg.textContent='No token. Login first.'; return; }
+      try {
+        const res = await fetch(baseUrl + '/api/users/me', { headers: { Authorization: 'Bearer ' + token } });
+        const data = await res.json();
+        if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
+        msg.className='msg'; msg.textContent='Profile loaded';
+        const form = document.getElementById('profileForm');
+        form.style.display = 'block';
+        form.first_name.value = data.first_name || '';
+        form.last_name.value = data.last_name || '';
+        form.phone.value = data.phone || '';
+        form.profile_photo_url.value = data.profile_photo_url || '';
+        profileCountrySelect.value = data.country_id || '';
+        document.getElementById('profileResult').textContent = '';
+      } catch (err) {
+        msg.className='err'; msg.textContent = err.message;
+      }
+    }
+
+    // Update profile
     document.getElementById('profileForm').addEventListener('submit', async e => {
       e.preventDefault();
       const token = getToken();
-      if (!token) return out({ error: 'No estás logueado' });
-      const f = new FormData(e.target);
-      const body = Object.fromEntries(f.entries());
+      const msg = document.getElementById('profileResult'); msg.textContent='';
+      if (!token) { msg.className='err'; msg.textContent='No token.'; return; }
+      const f = e.target;
+      const body = {
+        first_name: f.first_name.value.trim(),
+        last_name: f.last_name.value.trim(),
+        phone: f.phone.value.trim(),
+        profile_photo_url: f.profile_photo_url.value.trim(),
+        country_id: Number(f.country_id.value)
+      };
       try {
-        const res = await fetch('/api/users/me', { method: 'PATCH', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(body) });
-        const data = await res.json(); out(data);
-      } catch (err) { out({ error: err.message }); }
+        const res = await fetch(baseUrl + '/api/users/me', {
+          method: 'PATCH',
+          headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
+        msg.className='msg'; msg.textContent = 'Profile updated';
+      } catch (err) {
+        msg.className='err'; msg.textContent = err.message;
+      }
     });
+
+    // Delete account
+    document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
+      if (!confirm('¿Borrar cuenta? Esta acción no se puede deshacer.')) return;
+      const token = getToken();
+      if (!token) return alert('No token.');
+      try {
+        const res = await fetch(baseUrl + '/api/users/me', { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
+        const data = await res.json();
+        if (!res.ok) return alert('Error: ' + (data.error || JSON.stringify(data)));
+        setToken(null);
+        alert('Cuenta eliminada');
+        document.getElementById('profileForm').style.display = 'none';
+        document.getElementById('profileSection').style.display = 'none';
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => { setToken(null); alert('Logged out'); });
+
+    // Search users
+    document.getElementById('searchForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const q = e.target.q.value.trim();
+      const out = document.getElementById('searchResult'); out.textContent = 'Loading...';
+      try {
+        const res = await fetch(baseUrl + '/api/users?q=' + encodeURIComponent(q));
+        const data = await res.json();
+        out.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        out.textContent = err.message;
+      }
+    });
+
+    function updateAuthUI() {
+      const token = getToken();
+      document.getElementById('profileSection').style.display = token ? 'block' : 'none';
+    }
+
+    // Init
+    (async function init() {
+      await loadCountries();
+      updateAuthUI();
+    })();
   </script>
 </body>
 </html>

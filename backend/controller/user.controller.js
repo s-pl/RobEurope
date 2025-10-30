@@ -18,7 +18,11 @@ export const createUser = async (req, res) => {
 export const getUsers = async (req, res) => {
   try {
     const users = await User.findAll();
-    res.json(users);
+    const mapped_users = users.map(user => {
+      const { password_hash, phone, role, email, ...userData } = user.toJSON(); // exclude sensitive fields
+      return userData;
+    });
+    res.json(mapped_users);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -109,14 +113,35 @@ export const updateSelf = async (req, res) => {
 };
 
 
+export const deleteSelf = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    await user.destroy();
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// delete by id (admin-style) — validate numeric id
 export const deleteUser = async (req, res) => {
   try {
-    const deleted = await User.destroy({
-      where: { id: req.params.id }
-    });
-    if (!deleted) return res.status(404).json({ error: 'Usuario no encontrado' });
-    res.json({ message: 'Usuario eliminado correctamente' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    const idParam = req.params.id;
+    // protect against receiving 'me' or invalid strings
+    if (idParam === 'me') return res.status(400).json({ error: "Use /me endpoint to delete your own account" });
+
+    const id = Number(idParam);
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid user id' });
+
+    const user = await User.findByPk(id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    await user.destroy();
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 };
