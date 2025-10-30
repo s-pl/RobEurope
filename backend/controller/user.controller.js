@@ -32,7 +32,7 @@ export const getUsers = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
-    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -45,7 +45,7 @@ export const updateUser = async (req, res) => {
     const [updated] = await User.update(req.body, {
       where: { id: req.params.id }
     });
-    if (!updated) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (!updated) return res.status(404).json({ error: 'User not found' });
     const updatedUser = await User.findByPk(req.params.id);
     res.json(updatedUser);
   } catch (error) {
@@ -78,7 +78,7 @@ export const getSelf = async (req, res) => {
     const id = req.user && req.user.id;
     if (!id) return res.status(401).json({ error: 'No autorizado' });
     const user = await User.findByPk(id, { attributes: { exclude: ['password_hash'] } });
-    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -103,7 +103,7 @@ export const updateSelf = async (req, res) => {
     updates.updated_at = new Date();
 
     const [updated] = await User.update(updates, { where: { id } });
-    if (!updated) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (!updated) return res.status(404).json({ error: 'User not found' });
 
     const updatedUser = await User.findByPk(id, { attributes: { exclude: ['password_hash'] } });
     res.json(updatedUser);
