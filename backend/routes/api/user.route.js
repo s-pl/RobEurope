@@ -1,24 +1,25 @@
 import express from 'express';
-import { createUser, getUsers, getUserById, updateUser, deleteUser, searchUsers, getSelf, updateSelf } from '../../controller/user.controller.js';
-import { authenticateToken } from '../../middleware/auth.middleware.js';
+import authenticateToken from '../../middleware/auth.middleware.js';
+import {
+  searchUsers,
+  getUserById,
+  deleteUser,
+  getSelf,
+  updateSelf,
+  deleteSelf
+} from '../../controller/user.controller.js';
 
 const router = express.Router();
 
-// Public search endpoint: /api/users?q=term
 router.get('/', searchUsers);
 
-// Create user (admin or open) - keep existing create
-router.post('/', createUser);
-
-// Authenticated routes for the current user
+// rutas para el usuario autenticado: MUST be before "/:id"
 router.get('/me', authenticateToken, getSelf);
 router.patch('/me', authenticateToken, updateSelf);
+router.delete('/me', authenticateToken, deleteSelf);
 
-// Get specific user by id
+// rutas por id (solo después de /me)
 router.get('/:id', getUserById);
-
-// General admin-style update/delete by id
-router.put('/:id', updateUser);
-router.delete('/:id', deleteUser);
+router.delete('/:id', authenticateToken, deleteUser);
 
 export default router;

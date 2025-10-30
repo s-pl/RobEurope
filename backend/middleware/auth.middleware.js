@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 const SECRET_KEY = process.env.JWT_SECRET; // Store this in an environment variable for security
 
-export function authenticateToken  (req, res, next)  {
+export default function authenticateToken  (req, res, next)  {
   const token = req.headers['authorization']?.split(' ')[1]; // Extract the token from the Authorization header
 
 
