@@ -16,6 +16,8 @@ app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }
 
 app.use(express.json());
 app.use(timeoutMiddleware);
+// Serve static files from backend/public so we can host a simple test UI
+app.use(express.static('public'));
 app.use('/api', apiRoutes);
 
 
