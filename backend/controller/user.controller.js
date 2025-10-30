@@ -49,7 +49,7 @@ export const updateUser = async (req, res) => {
   }
 };
 
-// Search users by email or name (public)
+
 export const searchUsers = async (req, res) => {
   try {
     const q = (req.query.q || '').trim();
@@ -68,7 +68,7 @@ export const searchUsers = async (req, res) => {
   }
 };
 
-// Return the authenticated user's profile
+
 export const getSelf = async (req, res) => {
   try {
     const id = req.user && req.user.id;
@@ -81,7 +81,7 @@ export const getSelf = async (req, res) => {
   }
 };
 
-// Update the authenticated user's own profile (no role, id, or password changes here)
+
 export const updateSelf = async (req, res) => {
   try {
     const id = req.user && req.user.id;
