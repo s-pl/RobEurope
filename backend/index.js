@@ -6,6 +6,8 @@ import logger from './utils/logger.js';
 import dotenv from 'dotenv';
 import streamRoutes from './routes/api/stream.route.js';
 
+import fs from 'fs';
+import https from 'https';
 dotenv.config();
 // import userRoutes from './routes/userRoutes.js';
 
@@ -23,8 +25,8 @@ app.use('/api', apiRoutes);
 app.use('/api/streams', streamRoutes);
 export default app; 
 
-// error handler — registra errores en error log
-// centralized error handler — registra errores en error log y responde según tipo
+// error handler
+// centralized error handler
 app.use((err, req, res, next) => {
   const isSequelize = err && err.name && err.name.startsWith('Sequelize');
   if (isSequelize) {
@@ -84,8 +86,28 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 
+// add ssl 
+// const options = {
+//   key: fs.readFileSync('/certs/key.pem'),
+//   cert: fs.readFileSync('cert.pem')
+// };
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
 
+// https.createServer(options, app).listen(PORT, () => {
+//   console.log(`Server running in https://localhost:${PORT}`);
+// });
+
+if(process.env.NODE_ENV === 'production') {
+  const sslOptions = {
+    key: fs.readFileSync(process.env.SSL_KEY_PATH || import.meta.dirname + '/certs/key.pem'),
+    cert: fs.readFileSync(process.env.SSL_CERT_PATH || import.meta.dirname +  '/certs/cert.pem')
+  };
+
+  https.createServer(sslOptions, app).listen(PORT, () => {
+    console.log(`Server running in https://localhost:${PORT}`);
+  });
+} else {
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
+}
