@@ -2,7 +2,7 @@
 import express from 'express';
 import streamController from '../../controller/stream.controller.js';
 
-const { 
+const {
   create: createStream,
   getAll: getStreams,
   getById: getStreamById,
@@ -10,7 +10,7 @@ const {
   delete: deleteStream
 } = streamController;
 
-import { authenticateToken } from '../../middleware/auth.middleware.js';
+import authenticateToken from '../../middleware/auth.middleware.js';
 
 const router = express.Router();
 
