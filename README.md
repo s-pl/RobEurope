@@ -305,7 +305,6 @@ classDiagram
         +titulo: string
         +descripcion: string
         +ubicacion: string
-        +pais: Pais
         +estado: EstadoCompeticion
         +fechaInicio: datetime
         +fechaFin: datetime
@@ -389,13 +388,22 @@ classDiagram
     }
 
     %% ==== Relaciones ====
-    Usuario "1" --> "many" Equipo : crea >
-    Usuario "1" --> "many" MiembroEquipo : participa >
-    Equipo "1" --> "many" MiembroEquipo
-    Equipo "1" --> "many" Registro : se_inscribe >
-    Competicion "1" --> "
-
+    Usuario --> Equipo : crea
+    Usuario --> MiembroEquipo : participa
+    Equipo --> MiembroEquipo : contiene
+    Equipo --> Registro : inscribe
+    Competicion --> Registro : recibe
+    Competicion --> PostCompeticion : publica
+    Competicion --> Media : contiene
+    Competicion --> Puntuacion : genera
+    Usuario --> Notificacion : recibe
+    Usuario --> Media : sube
+    Usuario --> Post : publica
+    Post <|-- PostGlobal
+    Post <|-- PostCompeticion
+    Juez --> Competicion : asignado
     Usuario --> Rol
     Competicion --> EstadoCompeticion
     Registro --> EstadoRegistro
     Usuario --> Pais
+```
