@@ -114,7 +114,7 @@ erDiagram
 
     GLOBAL_POSTS {
         BIGINT id PK
-        BIGINT author_user_id FK
+        BIGINT author_user_id FK "solo super_admin"
         VARCHAR title
         VARCHAR slug
         TEXT content
@@ -141,14 +141,6 @@ erDiagram
         TIMESTAMP updated_at
     }
 
-    LIKES {
-        BIGINT id PK
-        BIGINT user_id FK
-        ENUM target_type "global_post, competition_post"
-        BIGINT target_id
-        TIMESTAMP created_at
-    }
-
     CHAT_MESSAGES {
         BIGINT id PK
         BIGINT competition_id FK "opcional"
@@ -157,13 +149,6 @@ erDiagram
         TEXT content
         BOOLEAN is_pinned
         BOOLEAN is_deleted
-        TIMESTAMP created_at
-    }
-
-    CHAT_REACTIONS {
-        BIGINT message_id FK
-        BIGINT user_id FK
-        VARCHAR emoji
         TIMESTAMP created_at
     }
 
@@ -202,16 +187,26 @@ erDiagram
         TIMESTAMP created_at
     }
 
-    %% Relaciones (simplificadas)
+    REACTIONS {
+        BIGINT id PK
+        BIGINT user_id FK
+        ENUM target_type "global_post, competition_post, chat_message"
+        BIGINT global_post_id FK "nullable"
+        BIGINT competition_post_id FK "nullable"
+        BIGINT chat_message_id FK "nullable"
+        VARCHAR emoji "❤️ 👍 🔥 😂 etc."
+        TIMESTAMP created_at
+    }
+
+    %% Relaciones (actualizadas)
     USERS }o--|| COUNTRIES : "from"
     USERS ||--o{ TEAM_MEMBERS : "joins"
     USERS ||--o{ TEAMS : "creates"
-    USERS ||--o{ GLOBAL_POSTS : "writes"
+    USERS ||--o{ GLOBAL_POSTS : "writes (super_admin only)"
     USERS ||--o{ COMPETITION_POSTS : "writes"
     USERS ||--o{ CHAT_MESSAGES : "sends"
     USERS ||--o{ NOTIFICATIONS : "receives"
-    USERS ||--o{ LIKES : "likes"
-    USERS ||--o{ CHAT_REACTIONS : "reacts"
+    USERS ||--o{ REACTIONS : "reacts"
     USERS ||--o{ MEDIA : "uploads"
 
     COUNTRIES ||--o{ TEAMS : "represents"
@@ -232,8 +227,13 @@ erDiagram
 
     REGISTRATIONS }o--|| USERS : "reviewed_by"
 
-    CHAT_MESSAGES ||--o{ CHAT_REACTIONS : "reactions"
     CHAT_MESSAGES ||--o{ CHAT_MESSAGES : "replies"
+
+    %% Relaciones de REACTIONS
+    GLOBAL_POSTS ||--o{ REACTIONS : "receives"
+    COMPETITION_POSTS ||--o{ REACTIONS : "receives"
+    CHAT_MESSAGES ||--o{ REACTIONS : "receives"
+
 
 
 ```
