@@ -1,85 +1,242 @@
 {
   "info": {
     "name": "RobEurope API",
-    "_postman_id": "robeurope-collection-0001",
-    "description": "Collection for RobEurope auth endpoints (register + login)",
+    "_postman_id": "robeurope-collection-001",
+    "description": "Complete Postman collection for RobEurope: Auth, Health, Countries, and Users endpoints.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:85", "type": "string" },
+    { "key": "jwt_token", "value": "", "type": "string" }
+  ],
   "item": [
     {
-      "name": "Register - Ana Garcia",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"first_name\": \"Ana\",\n  \"last_name\": \"García\",\n  \"email\": \"ana.garcia@example.com\",\n  \"password\": \"P@ssw0rd1\",\n  \"phone\": \"+34123456789\",\n  \"country_id\": 34\n}"
-        },
-        "url": {
-          "raw": "http://localhost:3000/api/auth/register",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "3000",
-          "path": ["api","auth","register"]
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check (requires auth)",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "url": { "raw": "{{base_url}}/api/health", "host": ["{{base_url}}"], "path": ["api","health"] }
+          }
         }
-      }
+      ]
     },
     {
-      "name": "Register - Luca Rossi",
-      "request": {
-        "method": "POST",
-        "header": [ { "key": "Content-Type", "value": "application/json" } ],
-        "body": { "mode": "raw", "raw": "{\n  \"first_name\": \"Luca\",\n  \"last_name\": \"Rossi\",\n  \"email\": \"luca.rossi@example.com\",\n  \"password\": \"P@ssw0rd2\",\n  \"phone\": \"+393331112233\",\n  \"country_id\": 39\n}" },
-        "url": { "raw": "http://localhost:3000/api/auth/register", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","auth","register"] }
-      }
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register - Example",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Ana\",\n  \"last_name\": \"García\",\n  \"email\": \"ana.garcia@example.com\",\n  \"password\": \"P@ssw0rd1\",\n  \"phone\": \"+34123456789\",\n  \"country_id\": 34\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api","auth","register"] }
+          }
+        },
+        {
+          "name": "Login - Example",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ana.garcia@example.com\",\n  \"password\": \"P@ssw0rd1\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api","auth","login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login returns token', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200,201]);",
+                  "  var json = {};",
+                  "  try { json = pm.response.json(); } catch(e) {}",
+                  "  pm.expect(json).to.have.property('token');",
+                  "  if (json.token) { pm.collectionVariables.set('jwt_token', json.token); }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     },
     {
-      "name": "Register - Admin User",
-      "request": {
-        "method": "POST",
-        "header": [ { "key": "Content-Type", "value": "application/json" } ],
-        "body": { "mode": "raw", "raw": "{\n  \"first_name\": \"Admin\",\n  \"last_name\": \"User\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"Adm1nP@ss\",\n  \"phone\": \"+441234567890\",\n  \"country_id\": 44\n}" },
-        "url": { "raw": "http://localhost:3000/api/auth/register", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","auth","register"] }
-      }
+      "name": "Countries",
+      "item": [
+        {
+          "name": "Get All Countries",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/countries", "host": ["{{base_url}}"], "path": ["api","countries"] }
+          }
+        },
+        {
+          "name": "Get Country by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/countries/{{country_id}}", "host": ["{{base_url}}"], "path": ["api","countries","{{country_id}}"] }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": { "exec": [ "if (!pm.variables.get('country_id')) { pm.variables.set('country_id', '1'); }" ], "type": "text/javascript" }
+            }
+          ]
+        },
+        {
+          "name": "Create Country",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"XX\",\n  \"name\": \"New Country\",\n  \"flag_emoji\": \"🏳️\"\n}" },
+            "url": { "raw": "{{base_url}}/api/countries", "host": ["{{base_url}}"], "path": ["api","countries"] }
+          }
+        },
+        {
+          "name": "Update Country",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Country Name\"\n}" },
+            "url": { "raw": "{{base_url}}/api/countries/{{country_id}}", "host": ["{{base_url}}"], "path": ["api","countries","{{country_id}}"] }
+          }
+        },
+        {
+          "name": "Delete Country",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{base_url}}/api/countries/{{country_id}}", "host": ["{{base_url}}"], "path": ["api","countries","{{country_id}}"] }
+          }
+        }
+      ]
     },
     {
-      "name": "Login - Ana Garcia (valid)",
-      "request": {
-        "method": "POST",
-        "header": [ { "key": "Content-Type", "value": "application/json" } ],
-        "body": { "mode": "raw", "raw": "{\n  \"email\": \"ana.garcia@example.com\",\n  \"password\": \"P@ssw0rd1\"\n}" },
-        "url": { "raw": "http://localhost:3000/api/auth/login", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","auth","login"] }
-      }
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/users", "host": ["{{base_url}}"], "path": ["api","users"] } }
+        },
+        {
+          "name": "Search Users",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/users?q=john", "host": ["{{base_url}}"], "path": ["api","users"], "query": [ { "key": "q", "value": "john" } ] } }
+        },
+        {
+          "name": "Get User by ID",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/api/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["api","users","{{user_id}}"] } },
+          "event": [ { "listen": "prerequest", "script": { "exec": [ "if (!pm.variables.get('user_id')) { pm.variables.set('user_id', '1'); }" ], "type": "text/javascript" } } ]
+        },
+        {
+          "name": "Get My Profile",
+          "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ], "url": { "raw": "{{base_url}}/api/users/me", "host": ["{{base_url}}"], "path": ["api","users","me"] } }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"phone\": \"+34123456789\",\n  \"profile_photo_url\": \"https://example.com/photo.jpg\",\n  \"country_id\": 1\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/users/me", "host": ["{{base_url}}"], "path": ["api","users","me"] }
+          }
+        },
+        {
+          "name": "Delete My Account",
+          "request": { "method": "DELETE", "header": [ { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ], "url": { "raw": "{{base_url}}/api/users/me", "host": ["{{base_url}}"], "path": ["api","users","me"] } }
+        },
+        {
+          "name": "Delete User by ID",
+          "request": { "method": "DELETE", "header": [ { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ], "url": { "raw": "{{base_url}}/api/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["api","users","{{user_id}}"] } }
+        }
+      ]
     },
     {
-      "name": "Login - Luca Rossi (invalid)",
-      "request": {
-        "method": "POST",
-        "header": [ { "key": "Content-Type", "value": "application/json" } ],
-        "body": { "mode": "raw", "raw": "{\n  \"email\": \"luca.rossi@example.com\",\n  \"password\": \"wrong-password\"\n}" },
-        "url": { "raw": "http://localhost:3000/api/auth/login", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","auth","login"] }
-      }
-    },
-    {
-      "name": "Login - Admin (valid)",
-      "request": {
-        "method": "POST",
-        "header": [ { "key": "Content-Type", "value": "application/json" } ],
-        "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Adm1nP@ss\"\n}" },
-        "url": { "raw": "http://localhost:3000/api/auth/login", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","auth","login"] }
-      }
-    }
-  ],
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": { "exec": [], "type": "text/javascript" }
-    },
-    {
-      "listen": "test",
-      "script": { "exec": [], "type": "text/javascript" }
+      "name": "Streams",
+      "item": [
+        {
+          "name": "Get All Streams",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/streams", "host": ["{{base_url}}"], "path": ["api","streams"] }
+          }
+        },
+        {
+          "name": "Get Stream by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/streams/{{stream_id}}", "host": ["{{base_url}}"], "path": ["api","streams","{{stream_id}}"] }
+          },
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript", "exec": [ "if (!pm.variables.get('stream_id')) { pm.variables.set('stream_id', '1'); }" ] } }
+          ]
+        },
+        {
+          "name": "Create Stream",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Matchday Live\",\n  \"description\": \"Round highlights\",\n  \"platform\": \"twitch\",\n  \"stream_url\": \"https://twitch.tv/example\",\n  \"is_live\": false,\n  \"host_team_id\": null,\n  \"competition_id\": null\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/streams", "host": ["{{base_url}}"], "path": ["api","streams"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create returns stream id', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200,201]);",
+                  "  var json = {};",
+                  "  try { json = pm.response.json(); } catch(e) {}",
+                  "  pm.expect(json).to.have.property('id');",
+                  "  if (json.id) { pm.variables.set('stream_id', String(json.id)); }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Stream",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Matchday Live (updated)\",\n  \"description\": \"Now with interviews\",\n  \"platform\": \"youtube\",\n  \"stream_url\": \"https://youtube.com/watch?v=abc123\",\n  \"is_live\": true,\n  \"host_team_id\": null,\n  \"competition_id\": null\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/streams/{{stream_id}}", "host": ["{{base_url}}"], "path": ["api","streams","{{stream_id}}"] }
+          },
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript", "exec": [ "if (!pm.variables.get('stream_id')) { pm.variables.set('stream_id', '1'); }" ] } }
+          ]
+        },
+        {
+          "name": "Delete Stream",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{jwt_token}}" } ],
+            "url": { "raw": "{{base_url}}/api/streams/{{stream_id}}", "host": ["{{base_url}}"], "path": ["api","streams","{{stream_id}}"] }
+          },
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript", "exec": [ "if (!pm.variables.get('stream_id')) { pm.variables.set('stream_id', '1'); }" ] } }
+          ]
+        }
+      ]
     }
   ]
 }
