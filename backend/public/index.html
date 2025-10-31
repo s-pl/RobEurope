@@ -98,6 +98,34 @@
     <pre id="searchResult"></pre>
   </section>
 
+  <section id="streamsSection">
+    <h2>Streams</h2>
+    <div style="display:flex;gap:12px;align-items:flex-start">
+      <div style="flex:1">
+        <h3>Create stream</h3>
+        <form id="createStreamForm">
+          <label>Title<input name="title" required></label>
+          <label>Description<textarea name="description"></textarea></label>
+          <label>Platform<select name="platform"><option value="twitch">twitch</option><option value="youtube">youtube</option><option value="kick">kick</option></select></label>
+          <label>Stream URL<input name="stream_url"></label>
+          <label>Is live <input type="checkbox" name="is_live"></label>
+          <label>Host team id <input name="host_team_id" placeholder="optional"></label>
+          <label>Competition id <input name="competition_id" placeholder="optional"></label>
+          <button type="submit">Create stream</button>
+        </form>
+        <div id="streamCreateMsg"></div>
+      </div>
+
+      <div style="flex:1">
+        <h3>List & view</h3>
+        <div style="margin-bottom:8px"><button id="btnListStreams">List streams</button></div>
+        <label>Get by id <input id="getStreamId" placeholder="stream id"></label>
+        <button id="btnGetStream">Get stream</button>
+        <pre id="streamsList" style="max-height:300px; overflow:auto"></pre>
+      </div>
+    </div>
+  </section>
+
   <script>
     const baseUrl = window.location.origin;
     const countrySelect = document.getElementById('countrySelect');
@@ -332,6 +360,51 @@
     (async function init() {
       await loadCountries();
       updateAuthUI();
+
+      // Streams handlers
+      document.getElementById('createStreamForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const token = getToken();
+        const msg = document.getElementById('streamCreateMsg'); msg.textContent=''; msg.className='';
+        if (!token) { msg.className='err'; msg.textContent='No token'; return; }
+        const f = e.target;
+        const body = {
+          title: f.title.value,
+          description: f.description.value,
+          platform: f.platform.value,
+          stream_url: f.stream_url.value,
+          is_live: f.is_live.checked,
+          host_team_id: f.host_team_id.value ? Number(f.host_team_id.value) : null,
+          competition_id: f.competition_id.value ? Number(f.competition_id.value) : null
+        };
+        try {
+          const res = await authFetch(baseUrl + '/api/streams', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(body) });
+          const data = await res.json();
+          if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
+          msg.className='msg'; msg.textContent = 'Stream created (id: ' + (data.id || '?') + ')';
+        } catch (err) { msg.className='err'; msg.textContent = err.message; }
+      });
+
+      document.getElementById('btnListStreams').addEventListener('click', async () => {
+        const out = document.getElementById('streamsList'); out.textContent = 'Loading...';
+        try {
+          const res = await fetch(baseUrl + '/api/streams');
+          const data = await res.json();
+          out.textContent = JSON.stringify(data, null, 2);
+        } catch (err) { out.textContent = err.message; }
+      });
+
+      document.getElementById('btnGetStream').addEventListener('click', async () => {
+        const id = document.getElementById('getStreamId').value.trim();
+        const out = document.getElementById('streamsList'); out.textContent = 'Loading...';
+        if (!id) return out.textContent = 'Provide stream id';
+        try {
+          const res = await fetch(baseUrl + '/api/streams/' + encodeURIComponent(id));
+          const data = await res.json();
+          out.textContent = JSON.stringify(data, null, 2);
+        } catch (err) { out.textContent = err.message; }
+      });
+
     })();
   </script>
 </body>
