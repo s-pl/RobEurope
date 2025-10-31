@@ -243,6 +243,7 @@ erDiagram
 
 # 📘 Diagrama de Clases – System RobEurope
 
+```mermaid
 classDiagram
     direction LR
 
@@ -392,18 +393,8 @@ classDiagram
     Usuario "1" --> "many" MiembroEquipo : participa >
     Equipo "1" --> "many" MiembroEquipo
     Equipo "1" --> "many" Registro : se_inscribe >
-    Competicion "1" --> "many" Registro : recibe >
-    Competicion "1" --> "many" PostCompeticion
-    Competicion "1" --> "many" Media
-    Competicion "1" --> "many" Puntuacion
-    Usuario "1" --> "many" Notificacion
-    Usuario "1" --> "many" Media
-    Usuario "1" --> "many" Post
-    Post <|-- PostGlobal
-    Post <|-- PostCompeticion
-    Juez "1" --> "many" Competicion : asignado_a >
+    Competicion "1" --> "
 
-    %% Enumeraciones
     Usuario --> Rol
     Competicion --> EstadoCompeticion
     Registro --> EstadoRegistro
