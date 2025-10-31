@@ -65,7 +65,7 @@ export const searchUsers = async (req, res) => {
       ]
     } : {};
 
-    const users = await User.findAll({ where, attributes: { exclude: ['password_hash'] } });
+    const users = await User.findAll({ where, attributes: { exclude: ['password_hash', 'phone', 'role', 'email'] } });
     res.json(users);
   } catch (error) {
     res.status(500).json({ error: error.message });
