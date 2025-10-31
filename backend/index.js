@@ -4,6 +4,8 @@ import timeoutMiddleware from './middleware/timeout.middleware.js';
 import morgan from 'morgan';
 import logger from './utils/logger.js';
 import dotenv from 'dotenv';
+import streamRoutes from './routes/api/stream.route.js';
+
 import fs from 'fs';
 import https from 'https';
 dotenv.config();
@@ -20,7 +22,8 @@ app.use(timeoutMiddleware);
 // Serve static files from backend/public so we can host a simple test UI
 app.use(express.static('public'));
 app.use('/api', apiRoutes);
-
+app.use('/api/streams', streamRoutes);
+export default app; 
 
 // error handler
 // centralized error handler
