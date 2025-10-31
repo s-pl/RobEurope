@@ -1,7 +1,9 @@
 {
   "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "migrate": "node scripts/run-migrations.js",
+    "seed": "node scripts/run-seeders.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
