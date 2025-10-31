@@ -107,6 +107,17 @@ if(process.env.NODE_ENV === 'production') {
     console.log(`Server running in https://localhost:${PORT}`);
   });
 } else {
+  // In development, ensure models are loaded and DB synced (creates missing tables)
+  try {
+    const modelsModule = await import('./models/index.js');
+    const db = modelsModule.default;
+    console.log('Syncing database (development mode) — this may alter tables...');
+    await db.sequelize.sync({ alter: true });
+    console.log('Database sync complete');
+  } catch (err) {
+    console.error('Database sync failed:', err && err.message ? err.message : err);
+  }
+
   app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
   });

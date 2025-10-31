@@ -6,6 +6,17 @@ import {
   updateStream,
   deleteStream
 } from '../../controller/stream.controller.js';
+import streamController from '../../controller/stream.controller.js';
+
+const {
+  create: createStream,
+  getAll: getStreams,
+  getById: getStreamById,
+  update: updateStream,
+  delete: deleteStream
+} = streamController;
+
+import authenticateToken from '../../middleware/auth.middleware.js';
 
 const router = express.Router();
 

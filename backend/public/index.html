@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>RobEurope — Test UI</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width:900px; margin:20px auto; padding:0 16px; }
+    body { font-family: Arial, sans-serif; max-width:980px; margin:20px auto; padding:0 16px; }
     section { border:1px solid #ddd; padding:16px; margin-bottom:16px; border-radius:6px; }
     label { display:block; margin-top:8px; }
-    input, select { width:100%; padding:8px; box-sizing:border-box; margin-top:4px; }
-    button { margin-top:12px; padding:8px 12px; }
+    input, select, textarea { width:100%; padding:8px; box-sizing:border-box; margin-top:4px; }
+    button { margin-top:12px; padding:8px 12px; cursor:pointer; }
     .row { display:flex; gap:12px; }
     .col { flex:1; }
     pre { background:#f7f7f7; padding:8px; overflow:auto; }
     .msg { margin-top:8px; color:green; }
     .err { margin-top:8px; color:red; }
+    .tokenBox { background:#111; color:#0f0; padding:8px; border-radius:4px; font-family:monospace; white-space:pre-wrap; word-break:break-all; }
+    .big { font-weight:700; font-size:0.95rem; }
+    .small { font-size:0.85rem; color:#666; }
   </style>
 </head>
 <body>
@@ -46,6 +49,21 @@
       <button type="submit">Login</button>
       <div id="loginMsg"></div>
     </form>
+
+    <div id="authInfo" style="margin-top:18px; display:none;">
+      <h3>Authentication info (JWT)</h3>
+      <div class="small">Authorization header:</div>
+      <div id="authHeader" class="tokenBox small"></div>
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button id="copyTokenBtn">Copy token</button>
+        <button id="revokeTokenBtn">Clear token</button>
+      </div>
+      <h4 style="margin-top:12px">Token (compact JWT)</h4>
+      <textarea id="tokenField" rows="3" readonly class="tokenBox"></textarea>
+      <h4 style="margin-top:12px">Decoded payload</h4>
+      <pre id="tokenPayload" class="tokenBox"></pre>
+      <div id="authUser" class="big" style="margin-top:8px"></div>
+    </div>
   </section>
 
   <section id="profileSection" style="display:none">
@@ -80,13 +98,86 @@
     <pre id="searchResult"></pre>
   </section>
 
+  <section id="streamsSection">
+    <h2>Streams</h2>
+    <div style="display:flex;gap:12px;align-items:flex-start">
+      <div style="flex:1">
+        <h3>Create stream</h3>
+        <form id="createStreamForm">
+          <label>Title<input name="title" required></label>
+          <label>Description<textarea name="description"></textarea></label>
+          <label>Platform<select name="platform"><option value="twitch">twitch</option><option value="youtube">youtube</option><option value="kick">kick</option></select></label>
+          <label>Stream URL<input name="stream_url"></label>
+          <label>Is live <input type="checkbox" name="is_live"></label>
+          <label>Host team id <input name="host_team_id" placeholder="optional"></label>
+          <label>Competition id <input name="competition_id" placeholder="optional"></label>
+          <button type="submit">Create stream</button>
+        </form>
+        <div id="streamCreateMsg"></div>
+      </div>
+
+      <div style="flex:1">
+        <h3>List & view</h3>
+        <div style="margin-bottom:8px"><button id="btnListStreams">List streams</button></div>
+        <label>Get by id <input id="getStreamId" placeholder="stream id"></label>
+        <button id="btnGetStream">Get stream</button>
+        <pre id="streamsList" style="max-height:300px; overflow:auto"></pre>
+      </div>
+    </div>
+  </section>
+
   <script>
     const baseUrl = window.location.origin;
     const countrySelect = document.getElementById('countrySelect');
     const profileCountrySelect = document.getElementById('profileCountrySelect');
 
     function getToken() { return localStorage.getItem('token'); }
-    function setToken(t) { if (t) localStorage.setItem('token', t); else localStorage.removeItem('token'); updateAuthUI(); }
+    function setToken(t) { if (t) localStorage.setItem('token', t); else localStorage.removeItem('token'); updateAuthUI(); showToken(t); }
+
+    function parseJwt(token) {
+      try {
+        const parts = token.split('.');
+        if (parts.length !== 3) return null;
+        const payload = parts[1].replace(/-/g,'+').replace(/_/g,'/');
+        const json = decodeURIComponent(atob(payload).split('').map(c=> '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(json);
+      } catch(e) { return null; }
+    }
+
+    function showToken(token) {
+      const info = document.getElementById('authInfo');
+      const field = document.getElementById('tokenField');
+      const header = document.getElementById('authHeader');
+      const payloadPre = document.getElementById('tokenPayload');
+      const authUser = document.getElementById('authUser');
+
+      if (!token) {
+        info.style.display = 'none';
+        field.value = '';
+        header.textContent = '';
+        payloadPre.textContent = '';
+        authUser.textContent = '';
+        return;
+      }
+      info.style.display = 'block';
+      field.value = token;
+      header.textContent = 'Authorization: Bearer ' + token;
+      const payload = parseJwt(token);
+      payloadPre.textContent = payload ? JSON.stringify(payload, null, 2) : 'Unable to decode payload';
+      authUser.textContent = payload ? `Authenticated as: ${payload.email || payload.id || 'unknown'} — role: ${payload.role || 'n/a'}` : '';
+    }
+
+    document.getElementById('copyTokenBtn').addEventListener('click', async () => {
+      const token = getToken();
+      if (!token) return alert('No token');
+      try {
+        await navigator.clipboard.writeText(token);
+        alert('Token copied to clipboard');
+      } catch (e) {
+        prompt('Copy token manually:', token);
+      }
+    });
+    document.getElementById('revokeTokenBtn').addEventListener('click', () => { setToken(null); alert('Token cleared'); });
 
     async function loadCountries() {
       try {
@@ -108,20 +199,21 @@
       }
     }
 
-    // Register
+    // Register: send email/password base64 encoded (server decodes with atob)
     document.getElementById('registerForm').addEventListener('submit', async e => {
       e.preventDefault();
       const f = e.target;
+      const rawEmail = f.email.value.trim();
+      const rawPassword = f.password.value;
       const body = {
         first_name: f.first_name.value.trim(),
         last_name: f.last_name.value.trim(),
-        email: f.email.value.trim(),
-        password: f.password.value,
+        email: btoa(rawEmail),
+        password: btoa(rawPassword),
         phone: f.phone.value.trim(),
         country_id: Number(f.country_id.value)
       };
-      const msg = document.getElementById('registerMsg');
-      msg.textContent = '';
+      const msg = document.getElementById('registerMsg'); msg.textContent=''; msg.className='';
       try {
         const res = await fetch(baseUrl + '/api/auth/register', {
           method: 'POST',
@@ -132,20 +224,21 @@
         if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
         // store token
         if (data.token) setToken(data.token);
-        msg.className='msg'; msg.textContent = 'Registered. Token saved.';
-        // show profile section
+        msg.className='msg'; msg.textContent = 'Registered. Token saved and visible below.';
         document.getElementById('profileSection').style.display = 'block';
       } catch (err) {
         msg.className='err'; msg.textContent = err.message;
       }
     });
 
-    // Login
+    // Login: send base64 email/password
     document.getElementById('loginForm').addEventListener('submit', async e => {
       e.preventDefault();
       const f = e.target;
-      const body = { email: f.email.value.trim(), password: f.password.value };
-      const msg = document.getElementById('loginMsg'); msg.textContent='';
+      const rawEmail = f.email.value.trim();
+      const rawPassword = f.password.value;
+      const body = { email: btoa(rawEmail), password: btoa(rawPassword) };
+      const msg = document.getElementById('loginMsg'); msg.textContent=''; msg.className='';
       try {
         const res = await fetch(baseUrl + '/api/auth/login', {
           method: 'POST',
@@ -155,7 +248,7 @@
         const data = await res.json();
         if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
         setToken(data.token);
-        msg.className='msg'; msg.textContent = 'Logged in. Token saved.';
+        msg.className='msg'; msg.textContent = 'Logged in. Token saved and visible below.';
         document.getElementById('profileSection').style.display = 'block';
       } catch (err) {
         msg.className='err'; msg.textContent = err.message;
@@ -165,12 +258,19 @@
     // Load my profile
     document.getElementById('loadProfileBtn').addEventListener('click', loadMyProfile);
 
+    async function authFetch(url, opts = {}) {
+      const token = getToken();
+      opts.headers = opts.headers || {};
+      if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+      return fetch(url, opts);
+    }
+
     async function loadMyProfile() {
       const token = getToken();
-      const msg = document.getElementById('profileMsg'); msg.textContent='';
+      const msg = document.getElementById('profileMsg'); msg.textContent=''; msg.className='';
       if (!token) { msg.className='err'; msg.textContent='No token. Login first.'; return; }
       try {
-        const res = await fetch(baseUrl + '/api/users/me', { headers: { Authorization: 'Bearer ' + token } });
+        const res = await authFetch(baseUrl + '/api/users/me');
         const data = await res.json();
         if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
         msg.className='msg'; msg.textContent='Profile loaded';
@@ -191,7 +291,7 @@
     document.getElementById('profileForm').addEventListener('submit', async e => {
       e.preventDefault();
       const token = getToken();
-      const msg = document.getElementById('profileResult'); msg.textContent='';
+      const msg = document.getElementById('profileResult'); msg.textContent=''; msg.className='';
       if (!token) { msg.className='err'; msg.textContent='No token.'; return; }
       const f = e.target;
       const body = {
@@ -202,9 +302,9 @@
         country_id: Number(f.country_id.value)
       };
       try {
-        const res = await fetch(baseUrl + '/api/users/me', {
+        const res = await authFetch(baseUrl + '/api/users/me', {
           method: 'PATCH',
-          headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token },
+          headers: { 'Content-Type':'application/json' },
           body: JSON.stringify(body)
         });
         const data = await res.json();
@@ -221,7 +321,7 @@
       const token = getToken();
       if (!token) return alert('No token.');
       try {
-        const res = await fetch(baseUrl + '/api/users/me', { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
+        const res = await authFetch(baseUrl + '/api/users/me', { method: 'DELETE' });
         const data = await res.json();
         if (!res.ok) return alert('Error: ' + (data.error || JSON.stringify(data)));
         setToken(null);
@@ -253,12 +353,58 @@
     function updateAuthUI() {
       const token = getToken();
       document.getElementById('profileSection').style.display = token ? 'block' : 'none';
+      showToken(token);
     }
 
     // Init
     (async function init() {
       await loadCountries();
       updateAuthUI();
+
+      // Streams handlers
+      document.getElementById('createStreamForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const token = getToken();
+        const msg = document.getElementById('streamCreateMsg'); msg.textContent=''; msg.className='';
+        if (!token) { msg.className='err'; msg.textContent='No token'; return; }
+        const f = e.target;
+        const body = {
+          title: f.title.value,
+          description: f.description.value,
+          platform: f.platform.value,
+          stream_url: f.stream_url.value,
+          is_live: f.is_live.checked,
+          host_team_id: f.host_team_id.value ? Number(f.host_team_id.value) : null,
+          competition_id: f.competition_id.value ? Number(f.competition_id.value) : null
+        };
+        try {
+          const res = await authFetch(baseUrl + '/api/streams', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(body) });
+          const data = await res.json();
+          if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
+          msg.className='msg'; msg.textContent = 'Stream created (id: ' + (data.id || '?') + ')';
+        } catch (err) { msg.className='err'; msg.textContent = err.message; }
+      });
+
+      document.getElementById('btnListStreams').addEventListener('click', async () => {
+        const out = document.getElementById('streamsList'); out.textContent = 'Loading...';
+        try {
+          const res = await fetch(baseUrl + '/api/streams');
+          const data = await res.json();
+          out.textContent = JSON.stringify(data, null, 2);
+        } catch (err) { out.textContent = err.message; }
+      });
+
+      document.getElementById('btnGetStream').addEventListener('click', async () => {
+        const id = document.getElementById('getStreamId').value.trim();
+        const out = document.getElementById('streamsList'); out.textContent = 'Loading...';
+        if (!id) return out.textContent = 'Provide stream id';
+        try {
+          const res = await fetch(baseUrl + '/api/streams/' + encodeURIComponent(id));
+          const data = await res.json();
+          out.textContent = JSON.stringify(data, null, 2);
+        } catch (err) { out.textContent = err.message; }
+      });
+
     })();
   </script>
 </body>
