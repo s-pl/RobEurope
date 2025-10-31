@@ -49,16 +49,19 @@ const streamController = {
       if (errors.length) return res.status(400).json({ errors });
 
       const now = new Date();
-      const stream = await Stream.create({
+      // only include created_at if the model actually defines it
+      const createData = {
         title: String(body.title).trim(),
         description: body.description || null,
         platform: body.platform,
         stream_url: body.stream_url || null,
         is_live: body.is_live,
         host_team_id: body.host_team_id,
-        competition_id: body.competition_id,
-        created_at: now
-      });
+        competition_id: body.competition_id
+      };
+      if (Stream.rawAttributes && Stream.rawAttributes.created_at) createData.created_at = now;
+
+      const stream = await Stream.create(createData);
 
       return res.status(201).json(stream);
     } catch (error) {
@@ -69,7 +72,11 @@ const streamController = {
   // READ ALL
   async getAll(req, res) {
     try {
-      const streams = await Stream.findAll({ order: [['created_at', 'DESC']] });
+      // prefer ordering by created_at when available, fallback to id
+      const orderCol = (Stream.rawAttributes && Stream.rawAttributes.created_at) ? 'created_at' : (Stream.rawAttributes && Stream.rawAttributes.id ? 'id' : null);
+      const opts = {};
+      if (orderCol) opts.order = [[orderCol, 'DESC']];
+      const streams = await Stream.findAll(opts);
       return res.json(streams);
     } catch (error) {
       return res.status(500).json({ error: error.message });
