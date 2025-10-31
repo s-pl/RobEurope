@@ -241,3 +241,170 @@ erDiagram
 ![Use Case Diagram](https://www.plantuml.com/plantuml/png/VLV1ajis3BthApYRWxtJfisbCptq4DT9qypiTZoxsVROWINOHbSY7P9AchJzc7n0JhdrwXyhI0fhIbnrFRCZFJo004W2q7FdmVg-Qwk5UlhqgLeRlQDzRw6cqnUj6bGldQVM167bxaaVmKAdeFR6tleFBIfuZyvqc0bxXsjmgFwg5F_z2FNztffUDslJ6gj-Ev37936sGPlG9zyz2x-8hwmrxyVmFvbvYxK7lMzbWHapnS9FVle-_4QsjF5YfgJptyjdvHBhP-77PeQKlJbzzlsG8K-U_Nf1i6Vh4DB7cJ0kFDmvfgXD2nvsnWv2qntHKqr6enDxBt17cXxolmgfHXVDnxIhNycH1-rnUB-uSprOCke6z-IyXSPSA72y8bgXhE58_lGfxUZRdew9mh07qWFh6hKt3ogt_H6jMZKTwS1DJ-BapsXHrmGJ3rbwfrNfZs9nhy-UgzferPq-ESLhTEICgywo7_xc1OBpoPgu_lNWd_gGN56ERNWwIdgdQrR1H3GcOMP8CfK1UNJZJLljRNzaU-nhoD7fIoExNPsFuWMxtqDB7uUBipdzkssfXelXTFKEQt21XtQyxMchrh-p8E0bEsrNpXkGahgo_lIvPlUSUjMQBRGZyoobA2mLRxr5w7BoW9JK3NXhQjAS4JiodmHyB_Aql4BdvIIlUzGUN94IsJBhKCmb2EsO-3fS2s1lqGMRGhuoUz8PKvOrchaTgGtQ7RN2JczbNByOJpkgeTYLA9WFI_Qd26jj4MJtn5p0UFl6n3jDrg622JV1K_9g2xenkh0iE5kVIyLhlJFiS3lH38HvfMl2RckDozc2pUdSO8DEtPgQv0IAPiBcapcv6ZCdfGYUyMa4cpxUFniwcaTDZL7Bf7GfMXip7xXSYK8fmODQ_BSubulUXGGFvIbqc4c5By_7j-S5XPeVxSWfoyBgQCsMbM-mFi17i5Brnjl4u2JJhxL72tLSOjYV8iSlzJk2s0iS_84AjLeVm8lTy3pT4pQO8W3H4dQGJUWlcBUuHlMgTnuMQdb5z_YGtF0ofj_sMmfrhJxGE-FKyXeRWWT-b4Pe4cZS0N9UvfXK3INMShUbVOpo5vh3x1b_Oq97Q8sJ-vzhhjfs_c3D56dH3QToikgrQT3cHrduB0ZOp4epfJh8a-J_Z_xZxWsoy_Z33k2VyNZdim2CUoWJcP_r_-Mghf45nzGdpUMv_pCvxuSbBlsl5EKzhXHAJoj5qhmAYVIXYK1wJhLuRDPPXk6eWH3xMUshopHi17LfGeBaZKQmh5i8b3S5mQQbNs2vgl8kbr40kMtoFhbD75WvCUQ1ITWSrZ1S9IFIJKfGcaOXagum4N122piRKnZFAdAra0dnKKTPl79zHvrnwcsFOHxj4ltO8pEFqZ5GAstOLupD4cFiLR8yzeCjPaFopAf9ndfvESzHgTKJJEgFeAFQKg31ep5NQeDWawi_WULUowtcinX7_jYve1sc-_YvP6b_yChiqeYkr1MeWtmDB7TjQ4bnfBvacQEzZbDLp3YswSEH1QHtQEaXzmUeqIfl6iEorepOoeKSKr3BsTzKg1iLFAggv_pOT-r_)
 
 
+# 📘 Diagrama de Clases – System RobEurope
+
+classDiagram
+    direction LR
+
+    %% ==== Clases principales ====
+    class Usuario {
+        +id: bigint
+        +nombre: string
+        +apellido: string
+        +email: string
+        +passwordHash: string
+        +telefono: string
+        +fotoPerfil: string
+        +pais: Pais
+        +rol: Rol
+        +registrarse()
+        +iniciarSesion()
+        +subirMedia()
+        +comentarPost()
+        +recibirNotificacion()
+    }
+
+    class Rol {
+        <<enumeration>>
+        super_admin
+        user
+        juez
+        invitado
+    }
+
+    class Pais {
+        +id: bigint
+        +codigo: string
+        +nombre: string
+        +bandera: string
+    }
+
+    class Equipo {
+        +id: bigint
+        +nombre: string
+        +codigoCorto: string
+        +ciudad: string
+        +institucion: string
+        +descripcion: string
+        +activo: bool
+        +crearEquipo()
+        +unirse()
+        +salir()
+    }
+
+    class MiembroEquipo {
+        +id: bigint
+        +rol: string
+        +activo: bool
+        +fechaIngreso: datetime
+    }
+
+    class Competicion {
+        +id: bigint
+        +titulo: string
+        +descripcion: string
+        +ubicacion: string
+        +pais: Pais
+        +estado: EstadoCompeticion
+        +fechaInicio: datetime
+        +fechaFin: datetime
+        +maxEquipos: int
+        +abrirRegistro()
+        +cerrarRegistro()
+        +publicarResultados()
+    }
+
+    class EstadoCompeticion {
+        <<enumeration>>
+        draft
+        open
+        in_progress
+        completed
+        cancelled
+    }
+
+    class Registro {
+        +id: bigint
+        +estado: EstadoRegistro
+        +solicitadoEn: datetime
+        +revisadoEn: datetime
+    }
+
+    class EstadoRegistro {
+        <<enumeration>>
+        pending
+        approved
+        rejected
+        disqualified
+    }
+
+    class Post {
+        <<abstract>>
+        +id: bigint
+        +titulo: string
+        +contenido: text
+        +autor: Usuario
+        +fechaPublicacion: datetime
+        +publicar()
+    }
+
+    class PostGlobal {
+        +destacado: bool
+    }
+
+    class PostCompeticion {
+        +likes: int
+        +destacado: bool
+    }
+
+    class Media {
+        +id: bigint
+        +tipo: string
+        +titulo: string
+        +rutaArchivo: string
+        +subidoPor: Usuario
+    }
+
+    class Notificacion {
+        +id: bigint
+        +titulo: string
+        +mensaje: text
+        +tipo: string
+        +leida: bool
+        +enviar()
+    }
+
+    class Puntuacion {
+        +id: bigint
+        +valor: decimal
+        +comentario: text
+        +registrar()
+    }
+
+    class Juez {
+        +asignarCompeticion()
+        +registrarPuntuacion()
+        +verReportes()
+    }
+
+    %% ==== Relaciones ====
+    Usuario "1" --> "many" Equipo : crea >
+    Usuario "1" --> "many" MiembroEquipo : participa >
+    Equipo "1" --> "many" MiembroEquipo
+    Equipo "1" --> "many" Registro : se_inscribe >
+    Competicion "1" --> "many" Registro : recibe >
+    Competicion "1" --> "many" PostCompeticion
+    Competicion "1" --> "many" Media
+    Competicion "1" --> "many" Puntuacion
+    Usuario "1" --> "many" Notificacion
+    Usuario "1" --> "many" Media
+    Usuario "1" --> "many" Post
+    Post <|-- PostGlobal
+    Post <|-- PostCompeticion
+    Juez "1" --> "many" Competicion : asignado_a >
+
+    %% Enumeraciones
+    Usuario --> Rol
+    Competicion --> EstadoCompeticion
+    Registro --> EstadoRegistro
+    Usuario --> Pais
