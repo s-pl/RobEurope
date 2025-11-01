@@ -558,24 +558,6 @@ backend/
 
 ---
 
-## Database Schema
-
-The application uses MySQL with the following main tables:
-
-- **USERS**: User accounts with authentication
-- **COUNTRIES**: Reference data for countries
-- **TEAMS**: Team organization and management
-- **TEAM_MEMBERS**: Team membership with roles
-- **COMPETITIONS**: Events and competitions
-- **REGISTRATIONS**: Team registration for competitions
-- **STREAMS**: Live streaming information
-- **GLOBAL_POSTS**: Global announcements (super_admin only)
-- **COMPETITION_POSTS**: Competition-specific posts
-- **CHAT_MESSAGES**: Messaging system
-- **MEDIA**: File and media management
-
----
-
 ## Logging
 
 The backend uses Winston logger with daily file rotation:
@@ -585,12 +567,6 @@ The backend uses Winston logger with daily file rotation:
 - Exception logs: `logs/exceptions-YYYY-MM-DD.log`
 
 Logs are also output to console in development mode.
-
----
-
-## Testing
-
-Use the included test UI at `http://localhost:3000` or the Postman collection at `backend/postman/RobEurope.postman_collection.json` to test the API.
 
 ---
 
@@ -606,7 +582,3 @@ When `NODE_ENV=production`, the server uses HTTPS with certificates from:
 ## Authors
 
 Designed and built by Samuel Ponce Luna, Ángel Lallave Herrera, and Néstor García Santos from IES El Rincón.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
