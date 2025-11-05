@@ -17,225 +17,312 @@ Redesign of robeurope.com by Samuel Ponce Luna, Ángel Lallave Herrera, and Nés
 
 ```mermaid
 erDiagram
-    USERS {
-        BIGINT id PK
-        VARCHAR first_name
-        VARCHAR last_name
-        VARCHAR email
-        VARCHAR password_hash
-        VARCHAR phone
-        VARCHAR profile_photo_url
-        BIGINT country_id FK
-        ENUM role "super_admin, user"
-        BOOLEAN is_active
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
-    }
 
-    COUNTRIES {
-        BIGINT id PK
-        VARCHAR code "ISO alpha-2"
-        VARCHAR name
-        VARCHAR flag_emoji
-    }
+  
 
-    TEAMS {
-        BIGINT id PK
-        VARCHAR name
-        VARCHAR short_code 
-        BIGINT country_id FK
-        VARCHAR city
-        VARCHAR institution
-        VARCHAR logo_url
-        TEXT description
-        VARCHAR contact_email
-        VARCHAR website_url
-        BIGINT created_by_user_id FK
-        BOOLEAN is_active
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
-    }
+  USERS {
 
-    TEAM_MEMBERS {
-        BIGINT id PK
-        BIGINT team_id FK
-        BIGINT user_id FK
-        ENUM role "captain, member, mentor"
-        BOOLEAN is_active
-        TIMESTAMP joined_at
-        TIMESTAMP left_at
-    }
+    BIGINT id PK
 
-    COMPETITIONS {
-        BIGINT id PK
-        VARCHAR title
-        VARCHAR slug
-        TEXT description
-        VARCHAR location
-        BIGINT country_id FK
-        DATETIME registration_start
-        DATETIME registration_end
-        DATETIME start_date
-        DATETIME end_date
-        ENUM status "draft, open, closed, in_progress, completed, cancelled"
-        VARCHAR banner_url
-        TEXT rules_url
-        INTEGER max_teams
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
-    }
+    VARCHAR first_name
 
-    REGISTRATIONS {
-        BIGINT id PK
-        BIGINT competition_id FK
-        BIGINT team_id FK
-        ENUM status "pending, approved, rejected, disqualified"
-        TIMESTAMP requested_at
-        TIMESTAMP reviewed_at
-        BIGINT reviewed_by_user_id FK
-    }
+    VARCHAR last_name
 
-    STREAMS {
-        BIGINT id PK
-        VARCHAR title
-        TEXT description
-        VARCHAR platform "twitch, youtube, kick"
-        VARCHAR stream_url
-        BOOLEAN is_live
-        BIGINT host_team_id FK  "opcional"
-        BIGINT competition_id FK "opcional"
-        TIMESTAMP created_at
-    }
+    VARCHAR email
 
-    TEAM_SOCIALS {
-        BIGINT id PK
-        BIGINT team_id FK
-        VARCHAR platform "twitter, instagram, discord, github"
-        VARCHAR url
-        TIMESTAMP created_at
-    }
+	VARCHAR username
 
-    GLOBAL_POSTS {
-        BIGINT id PK
-        BIGINT author_user_id FK "solo super_admin"
-        VARCHAR title
-        VARCHAR slug
-        TEXT content
-        VARCHAR cover_image_url
-        ENUM status "draft, published"
-        BOOLEAN is_pinned
-        INTEGER views_count
-        TIMESTAMP published_at
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
-    }
+    VARCHAR password_hash
 
-    COMPETITION_POSTS {
-        BIGINT id PK
-        BIGINT competition_id FK
-        BIGINT team_id FK "opcional"
-        BIGINT author_user_id FK
-        VARCHAR title
-        TEXT content
-        JSON media_urls
-        INTEGER likes_count
-        BOOLEAN is_featured
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
-    }
+    VARCHAR phone
 
-    CHAT_MESSAGES {
-        BIGINT id PK
-        BIGINT competition_id FK "opcional"
-        BIGINT user_id FK
-        BIGINT parent_id FK "opcional"
-        TEXT content
-        BOOLEAN is_pinned
-        BOOLEAN is_deleted
-        TIMESTAMP created_at
-    }
+    VARCHAR profile_photo_url
 
-    MEDIA {
-        BIGINT id PK
-        BIGINT uploaded_by_user_id FK
-        ENUM object_type "competition,team,global_post,competition_post,user"
-        BIGINT object_id
-        ENUM type "photo, video, other"
-        VARCHAR title
-        VARCHAR file_path
-        VARCHAR thumbnail_path
-        BOOLEAN is_featured
-        TIMESTAMP uploaded_at
-    }
+    BIGINT country_id FK
 
-    SPONSORS {
-        BIGINT id PK
-        VARCHAR name
-        VARCHAR logo_url
-        VARCHAR website_url
-        ENUM tier "platinum, gold, silver, bronze"
-        INTEGER display_order
-        BOOLEAN is_active
-        TIMESTAMP created_at
-    }
+    ENUM role "super_admin, user"
 
-    NOTIFICATIONS {
-        BIGINT id PK
-        BIGINT user_id FK
-        VARCHAR title
-        TEXT message
-        ENUM type "registration, score, team_invite, mention"
-        VARCHAR action_url
-        BOOLEAN is_read
-        TIMESTAMP created_at
-    }
+    BOOLEAN is_active
 
-    REACTIONS {
-        BIGINT id PK
-        BIGINT user_id FK
-        ENUM target_type "global_post, competition_post, chat_message"
-        BIGINT global_post_id FK "nullable"
-        BIGINT competition_post_id FK "nullable"
-        BIGINT chat_message_id FK "nullable"
-        VARCHAR emoji "❤️ 👍 🔥 😂 etc."
-        TIMESTAMP created_at
-    }
+    TIMESTAMP created_at
 
-    %% Relaciones (actualizadas)
-    USERS }o--|| COUNTRIES : "from"
-    USERS ||--o{ TEAM_MEMBERS : "joins"
-    USERS ||--o{ TEAMS : "creates"
-    USERS ||--o{ GLOBAL_POSTS : "writes (super_admin only)"
-    USERS ||--o{ COMPETITION_POSTS : "writes"
-    USERS ||--o{ CHAT_MESSAGES : "sends"
-    USERS ||--o{ NOTIFICATIONS : "receives"
-    USERS ||--o{ REACTIONS : "reacts"
-    USERS ||--o{ MEDIA : "uploads"
+    TIMESTAMP updated_at
 
-    COUNTRIES ||--o{ TEAMS : "represents"
-    COUNTRIES ||--o{ COMPETITIONS : "hosts"
+  }
 
-    TEAMS ||--o{ TEAM_MEMBERS : "has"
-    TEAMS ||--o{ REGISTRATIONS : "registers"
-    TEAMS ||--o{ TEAM_SOCIALS : "links"
-    TEAMS ||--o{ COMPETITION_POSTS : "posts"
-    TEAMS ||--o{ MEDIA : "uploads"
-    TEAMS ||--o{ STREAMS : "hosts"
 
-    COMPETITIONS ||--o{ REGISTRATIONS : "entries"
-    COMPETITIONS ||--o{ COMPETITION_POSTS : "content"
-    COMPETITIONS ||--o{ CHAT_MESSAGES : "chat"
-    COMPETITIONS ||--o{ MEDIA : "gallery"
-    COMPETITIONS ||--o{ STREAMS : "has_stream"
 
-    REGISTRATIONS }o--|| USERS : "reviewed_by"
+  COUNTRIES {
 
-    CHAT_MESSAGES ||--o{ CHAT_MESSAGES : "replies"
+    BIGINT id PK
 
-    %% Relaciones de REACTIONS
-    GLOBAL_POSTS ||--o{ REACTIONS : "receives"
-    COMPETITION_POSTS ||--o{ REACTIONS : "receives"
-    CHAT_MESSAGES ||--o{ REACTIONS : "receives"
+    VARCHAR code "ISO alpha-2"
+
+    VARCHAR name
+
+    VARCHAR flag_emoji
+
+  }
+
+
+
+  TEAMS {
+
+    BIGINT id PK
+
+    VARCHAR name
+
+    VARCHAR short_code 
+
+    BIGINT country_id FK
+
+    VARCHAR city
+
+    VARCHAR institution
+
+    VARCHAR logo_url
+
+    TEXT description
+
+    VARCHAR contact_email
+
+    VARCHAR website_url
+
+    JSON social_links "twitter, instagram, discord, github"
+
+    BIGINT created_by_user_id FK
+
+    BOOLEAN is_active
+
+    TIMESTAMP created_at
+
+    TIMESTAMP updated_at
+
+  }
+
+
+
+  TEAM_MEMBERS {
+
+    BIGINT id PK
+
+    BIGINT team_id FK
+
+    BIGINT user_id FK
+
+    ENUM role "captain, member"
+
+    BOOLEAN is_active
+
+    TIMESTAMP joined_at
+
+    TIMESTAMP left_at
+
+  }
+
+
+
+  COMPETITIONS {
+
+    BIGINT id PK
+
+    VARCHAR title
+
+    VARCHAR slug
+
+    TEXT description
+
+    VARCHAR location
+
+    BIGINT country_id FK
+
+    DATETIME registration_start
+
+    DATETIME registration_end
+
+    DATETIME start_date
+
+    DATETIME end_date
+
+    ENUM status "draft, open, closed, in_progress, completed, cancelled"
+
+    VARCHAR banner_url
+
+    TEXT rules_url
+
+    INTEGER max_teams
+
+    VARCHAR stream_url "twitch, youtube, kick"
+
+    BOOLEAN is_streaming
+
+    TIMESTAMP created_at
+
+    TIMESTAMP updated_at
+
+  }
+
+
+
+  REGISTRATIONS {
+
+    BIGINT id PK
+
+    BIGINT competition_id FK
+
+    BIGINT team_id FK
+
+    ENUM status "pending, approved, rejected, disqualified"
+
+    TIMESTAMP requested_at
+
+    TIMESTAMP reviewed_at
+
+    BIGINT reviewed_by_user_id FK
+
+  }
+
+
+
+  POSTS {
+
+    BIGINT id PK
+
+    BIGINT competition_id FK "nullable - global if null"
+
+    BIGINT team_id FK "nullable"
+
+    BIGINT author_user_id FK
+
+    VARCHAR title
+
+    VARCHAR slug "nullable - only for global post"
+
+    TEXT content
+
+    VARCHAR cover_image_url
+
+    JSON media_urls
+
+    ENUM status "draft, published"
+
+    BOOLEAN is_pinned
+
+    BOOLEAN is_featured
+
+    INTEGER likes_count
+
+    INTEGER views_count
+
+    TIMESTAMP published_at
+
+    TIMESTAMP created_at
+
+    TIMESTAMP updated_at
+
+  }
+
+
+
+  REACTIONS {
+
+    BIGINT id PK
+
+    BIGINT user_id FK
+
+    ENUM target_type "post, chat_message"
+
+    BIGINT target_id
+
+    VARCHAR emoji "❤️ 👍 🔥 😂"
+
+    TIMESTAMP created_at
+
+  }
+
+
+
+  NOTIFICATIONS {
+
+    BIGINT id PK
+
+    BIGINT user_id FK
+
+    VARCHAR title
+
+    TEXT message
+
+    ENUM type "registration_status, team_invite, mention"
+
+    VARCHAR action_url
+
+    BOOLEAN is_read
+
+    TIMESTAMP created_at
+
+  }
+
+
+
+  SPONSORS {
+
+    BIGINT id PK
+
+    VARCHAR name
+
+    VARCHAR logo_url
+
+    VARCHAR website_url
+
+    ENUM tier "platinum, gold, silver, bronze"
+
+    INTEGER display_order
+
+    BOOLEAN is_active
+
+    TIMESTAMP created_at
+
+  }
+
+
+
+  %% Relaciones SQL
+
+  USERS }o--|| COUNTRIES : "from"
+
+  USERS ||--o{ TEAM_MEMBERS : "joins"
+
+  USERS ||--o{ TEAMS : "creates"
+
+  USERS ||--o{ POSTS : "writes"
+
+  USERS ||--o{ NOTIFICATIONS : "receives"
+
+  USERS ||--o{ REACTIONS : "reacts"
+
+
+
+  COUNTRIES ||--o{ TEAMS : "represents"
+
+  COUNTRIES ||--o{ COMPETITIONS : "hosts"
+
+
+
+  TEAMS ||--o{ TEAM_MEMBERS : "has"
+
+  TEAMS ||--o{ REGISTRATIONS : "registers"
+
+  TEAMS ||--o{ POSTS : "posts"
+
+
+
+  COMPETITIONS ||--o{ REGISTRATIONS : "entries"
+
+  COMPETITIONS ||--o{ POSTS : "content"
+
+
+
+  REGISTRATIONS }o--|| USERS : "reviewed_by"
 
 
 
