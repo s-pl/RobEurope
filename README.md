@@ -1,39 +1,4 @@
 
----
-
-## Developer utilities added
-
-I added several development utilities to speed up testing and reset workflows. Files are under the `backend/` folder.
-
-- `backend/public/api-tester.html` — small single-file web UI to exercise common endpoints (login, list posts, create post). Open it in the browser while the backend runs (e.g., http://localhost:3000/api).
-- `backend/postman_collection.json` — Postman collection with sample requests (login, get posts, create post, competitions, teams, registrations, notifications). Import it in Postman and set the `base_url` variable to your API base.
-- `backend/scripts/reset-data.js` — truncates all tables (disables foreign keys), then runs the seeders to repopulate example data. Use with caution: it will delete all rows from existing tables.
-- `backend/scripts/drop-tables.js` — drops all tables from the current database. Use only if you want to remove the schema completely.
-
-NPM scripts were added in `backend/package.json`:
-
-```powershell
-# from backend folder
-npm run migrate      # run migrations
-npm run seed         # run all seeders
-npm run reset-data   # truncate tables and re-run seeders (destructive)
-npm run drop-tables  # drop all tables from DB (destructive)
-```
-
-Notes on safety
-- Both `reset-data` and `drop-tables` are destructive. Make sure `backend/config/db.config.js` is pointed at a development database before running them.
-- `reset-data.js` temporarily disables foreign key checks to truncate tables safely, then re-enables them.
-
-Postman
-- Import `backend/postman_collection.json` into Postman. Set `{{base_url}}` to `http://localhost:3000/api` (or your deployed base URL).
-
-API tester UI
-- Open `backend/public/api-tester.html` in your browser. Enter the API base URL and (optionally) a Bearer token. The UI has quick buttons for common endpoints and a simple Create Post form.
-
-If you want me to also:
-- Add a script that fully recreates the schema from scratch (drop tables -> run migrations -> run seeders) instead of truncating.
-- Add a safer "wipe only development data" mode that only removes rows created after a certain date or with a specific marker.
-
 # RobEurope
 Redesign of robeurope.com by Samuel Ponce Luna, Ángel Lallave Herrera, and Néstor García Santos from IES El Rincón.
 
