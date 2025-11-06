@@ -1,7 +1,6 @@
-import sequelize from '../controller/db.controller.js';
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.bulkInsert('COUNTRIES', [
+    await queryInterface.bulkInsert('Country', [
        {
     "code": "AW",
     "name": "Aruba",
@@ -1251,10 +1250,10 @@ export default {
     "code": "ZW",
     "name": "Zimbabwe",
     "flag_emoji": "🇿🇼"
-  }],{});
+  }], {});
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('COUNTRIES', null, {});
+    await queryInterface.bulkDelete('Country', null, {});
   }
 };
