@@ -11,13 +11,18 @@ import registrationRouter from './registration.route.js';
 import sponsorsRouter from './sponsors.route.js';
 import teamsRouter from './teams.route.js';
 import teamMembersRouter from './team_members.route.js';
+import authenticateToken from '../../middleware/auth.middleware.js';
 const router = express.Router();
 
+// Public routes: auth (register/login) should be available without token
+router.use('/auth', authRouter);
+
+// Protect all routes after this middleware: only authenticated users can access
+router.use(authenticateToken);
 
 router.use('/countries', countriesRouter);
 router.use('/users', usersRouter);
 router.use('/streams', streamsRouter);
-router.use('/auth', authRouter);
 router.use('/competitions', competitionsRouter);
 router.use('/posts', postsRouter);
 router.use('/notifications', notificationsRouter);

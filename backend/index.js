@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import logger from './utils/logger.js';
 import dotenv from 'dotenv';
 import streamRoutes from './routes/api/stream.route.js';
+import swaggerRouter from './swagger.js';
 
 import fs from 'fs';
 import https from 'https';
@@ -22,6 +23,8 @@ app.use(express.json());
 app.use(timeoutMiddleware);
 // Serve static files from backend/public so we can host a simple test UI
 app.use(express.static('public'));
+// Serve API documentation (Swagger UI)
+app.use('/api-docs', swaggerRouter);
   // Apply rate limiting on API routes
   app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
 app.use('/api/streams', streamRoutes);
