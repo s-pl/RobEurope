@@ -1,631 +1,508 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>RobEurope — Test UI</title>
+  <meta charset="UTF-8">
+  <title>API Tester</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: Arial, sans-serif; max-width:980px; margin:20px auto; padding:0 16px; }
-    section { border:1px solid #ddd; padding:16px; margin-bottom:16px; border-radius:6px; }
-    label { display:block; margin-top:8px; }
-    input, select, textarea { width:100%; padding:8px; box-sizing:border-box; margin-top:4px; }
-    button { margin-top:12px; padding:8px 12px; cursor:pointer; }
-    .row { display:flex; gap:12px; }
-    .col { flex:1; }
-    pre { background:#f7f7f7; padding:8px; overflow:auto; }
-    .msg { margin-top:8px; color:green; }
-    .err { margin-top:8px; color:red; }
-    .tokenBox { background:#111; color:#0f0; padding:8px; border-radius:4px; font-family:monospace; white-space:pre-wrap; word-break:break-all; }
-    .big { font-weight:700; font-size:0.95rem; }
-    .small { font-size:0.85rem; color:#666; }
+    body {
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+      margin: 20px;
+    }
+    input, button, select, textarea {
+      font: inherit;
+      padding: 8px;
+      margin: 4px;
+    }
+    .section {
+      border: 1px solid #ddd;
+      padding: 12px;
+      margin: 8px 0;
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    h3, h4 {
+      margin-bottom: 6px;
+    }
+    /* helper and error styles */
+    .help-text{font-size:12px;color:#666;margin-left:4px}
+    .help-icon{font-weight:bold;margin-left:6px;color:#999;cursor:help}
+    .field-error{color:#b00020;font-size:12px;margin-top:4px}
+    .input-error{outline:1px solid #b00020}
+    .toast-container{position:fixed;right:20px;top:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+    .toast{padding:10px 14px;border-radius:6px;color:white;box-shadow:0 2px 8px rgba(0,0,0,0.15);opacity:0;transform:translateY(-8px);transition:all .25s}
+    .toast.visible{opacity:1;transform:translateY(0)}
+    .toast.info{background:#2b6cb0}
+    .toast.success{background:#2f855a}
+    .toast.error{background:#c53030}
   </style>
 </head>
 <body>
-  <h1>RobEurope — Test UI</h1>
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
-  <section id="auth">
-    <h2>Register</h2>
-    <form id="registerForm">
-      <div class="row">
-        <div class="col">
-          <label>First name<input name="first_name" required></label>
-        </div>
-        <div class="col">
-          <label>Last name<input name="last_name" required></label>
-        </div>
-      </div>
-      <label>Email<input name="email" type="email" required></label>
-      <label>Password<input name="password" type="password" required></label>
-      <label>Phone<input name="phone" required></label>
-      <label>Country<select id="countrySelect" name="country_id" required></select></label>
-      <button type="submit">Register</button>
-      <div id="registerMsg"></div>
-    </form>
-
-    <h2 style="margin-top:18px">Login</h2>
-    <form id="loginForm">
-      <label>Email<input name="email" type="email" required></label>
-      <label>Password<input name="password" type="password" required></label>
-      <button type="submit">Login</button>
-      <div id="loginMsg"></div>
-    </form>
-
-    <div id="authInfo" style="margin-top:18px; display:none;">
-      <h3>Authentication info (JWT)</h3>
-      <div class="small">Authorization header:</div>
-      <div id="authHeader" class="tokenBox small"></div>
-      <div style="display:flex; gap:8px; margin-top:8px;">
-        <button id="copyTokenBtn">Copy token</button>
-        <button id="revokeTokenBtn">Clear token</button>
-      </div>
-      <h4 style="margin-top:12px">Token (compact JWT)</h4>
-      <textarea id="tokenField" rows="3" readonly class="tokenBox"></textarea>
-      <h4 style="margin-top:12px">Decoded payload</h4>
-      <pre id="tokenPayload" class="tokenBox"></pre>
-      <div id="authUser" class="big" style="margin-top:8px"></div>
-    </div>
-  </section>
-
-  <section id="profileSection" style="display:none">
-    <h2>My profile</h2>
-    <button id="loadProfileBtn">Load my profile</button>
-    <div id="profileMsg"></div>
-
-    <form id="profileForm" style="display:none; margin-top:12px">
-      <label>First name<input name="first_name" required></label>
-      <label>Last name<input name="last_name" required></label>
-      <label>Phone<input name="phone" required></label>
-      <label>Profile photo URL<input name="profile_photo_url"></label>
-      <label>Country<select id="profileCountrySelect" name="country_id" required></select></label>
-
-      <div class="row">
-        <button type="submit">Save changes</button>
-        <button type="button" id="deleteAccountBtn" style="background:#c33;color:#fff">Delete account</button>
-        <button type="button" id="logoutBtn">Logout</button>
-      </div>
-
-      <div id="profileResult"></div>
-    </form>
-  </section>
-
-  <section>
-    <h2>Quick API tester</h2>
-    <p>Search users (q param):</p>
-    <form id="searchForm">
-      <input name="q" placeholder="email or name" required>
-      <button>Search</button>
-    </form>
-    <pre id="searchResult"></pre>
-  </section>
-
-  <section id="usersAdminSection">
-    <h2>Users admin</h2>
-    <div class="small">Requires a valid token for destructive actions.</div>
+  <div class="section">
+    <h3>Connection</h3>
     <div class="row">
-      <div class="col">
-        <label>Get user by id
-          <input id="getUserByIdInput" placeholder="user id">
-        </label>
-        <button id="btnGetUserById">Get user</button>
-      </div>
-      <div class="col">
-        <label>Delete user by id
-          <input id="deleteUserByIdInput" placeholder="user id">
-        </label>
-        <button id="btnDeleteUserById" style="background:#c33;color:#fff">Delete user</button>
-      </div>
+      <input id="baseUrl" placeholder="Base URL (e.g. http://localhost:85)" style="min-width:300px">
+      <input id="authToken" placeholder="Auth token (optional)" style="min-width:300px">
     </div>
-    <pre id="usersAdminResult"></pre>
-  </section>
+  </div>
 
-  <section id="countriesSection">
-    <h2>Countries</h2>
+  <div class="section">
+    <h3>Auth</h3>
     <div class="row">
-      <div class="col">
-        <h3>List & view</h3>
-        <div style="margin-bottom:8px"><button id="btnListCountries">List countries</button></div>
-        <label>Get by id <input id="getCountryId" placeholder="country id"></label>
-        <button id="btnGetCountry">Get country</button>
-      </div>
-      <div class="col">
-        <h3>Create country</h3>
-        <form id="createCountryForm">
-          <label>Name<input name="name" required></label>
-          <label>Code<input name="code" required></label>
-          <label>Flag emoji<input name="flag_emoji"></label>
-          <button type="submit">Create</button>
-        </form>
-      </div>
+      <input id="loginEmail" placeholder="email for login" />
+      <input id="loginPassword" type="password" placeholder="password for login" />
+      <button onclick="login()">Login</button>
+      <button onclick="document.getElementById('authToken').value=''">Clear Token</button>
     </div>
-    <div class="row" style="margin-top:12px">
-      <div class="col">
-        <h3>Update country</h3>
-        <form id="updateCountryForm">
-          <label>Id<input name="id" required placeholder="country id"></label>
-          <label>Name<input name="name" required></label>
-          <label>Code<input name="code" required></label>
-          <label>Flag emoji<input name="flag_emoji"></label>
-          <button type="submit">Update</button>
-        </form>
-      </div>
-      <div class="col">
-        <h3>Delete country</h3>
-        <form id="deleteCountryForm">
-          <label>Id<input name="id" required placeholder="country id"></label>
-          <button type="submit" style="background:#c33;color:#fff">Delete</button>
-        </form>
-      </div>
+    <div class="row">
+      <input id="regUsername" placeholder="username (register)" />
+      <input id="regEmail" placeholder="email (register)" />
+      <input id="regPassword" type="password" placeholder="password (register)" />
+      <input id="regFirst" placeholder="first_name" />
+      <input id="regLast" placeholder="last_name" />
+      <button onclick="register()">Register</button>
     </div>
-    <pre id="countriesResult" style="max-height:300px; overflow:auto"></pre>
-  </section>
+  </div>
 
-  <section id="streamsSection">
-    <h2>Streams</h2>
-    <div style="display:flex;gap:12px;align-items:flex-start">
-      <div style="flex:1">
-        <h3>Create stream</h3>
-        <form id="createStreamForm">
-          <label>Title<input name="title" required></label>
-          <label>Description<textarea name="description"></textarea></label>
-          <label>Platform<select name="platform"><option value="twitch">twitch</option><option value="youtube">youtube</option><option value="kick">kick</option></select></label>
-          <label>Stream URL<input name="stream_url"></label>
-          <label>Is live <input type="checkbox" name="is_live"></label>
-          <label>Host team id <input name="host_team_id" placeholder="optional"></label>
-          <label>Competition id <input name="competition_id" placeholder="optional"></label>
-          <button type="submit">Create stream</button>
-        </form>
-        <div id="streamCreateMsg"></div>
-      </div>
+  <div class="section">
+    <h3>Resources</h3>
+    <div class="row">
+      <button onclick="apiGet('/health')">GET /health</button>
+      <button onclick="apiGet('/countries')">GET /countries</button>
+      <button onclick="apiGet('/users')">GET /users</button>
+      <button onclick="apiGet('/streams')">GET /streams</button>
+      <button onclick="apiGet('/posts')">GET /posts</button>
+      <button onclick="apiGet('/competitions')">GET /competitions</button>
+      <button onclick="apiGet('/teams')">GET /teams</button>
+      <button onclick="apiGet('/registrations')">GET /registrations</button>
+      <button onclick="apiGet('/sponsors')">GET /sponsors</button>
+      <button onclick="apiGet('/team-members')">GET /team-members</button>
+      <button onclick="apiGet('/notifications')">GET /notifications</button>
+    </div>
 
-      <div style="flex:1">
-        <h3>List & view</h3>
-        <div style="margin-bottom:8px"><button id="btnListStreams">List streams</button></div>
-        <label>Get by id <input id="getStreamId" placeholder="stream id"></label>
-        <button id="btnGetStream">Get stream</button>
-        <pre id="streamsList" style="max-height:300px; overflow:auto"></pre>
-      </div>
+    <h4>Get by ID</h4>
+    <div class="row">
+      <input id="resourceId" placeholder="resource id" />
+      <select id="resourceSelect">
+        <option value="posts">posts</option>
+        <option value="competitions">competitions</option>
+        <option value="teams">teams</option>
+        <option value="registrations">registrations</option>
+        <option value="sponsors">sponsors</option>
+        <option value="streams">streams</option>
+        <option value="team-members">team-members</option>
+        <option value="notifications">notifications</option>
+        <option value="users">users</option>
+        <option value="countries">countries</option>
+      </select>
+      <button onclick="getById()">GET /:id</button>
     </div>
-    <div style="display:flex;gap:12px;align-items:flex-start;margin-top:12px">
-      <div style="flex:1">
-        <h3>Update stream</h3>
-        <form id="updateStreamForm">
-          <label>Id<input name="id" required placeholder="stream id"></label>
-          <label>Title<input name="title" required></label>
-          <label>Description<textarea name="description"></textarea></label>
-          <label>Platform<select name="platform"><option value="twitch">twitch</option><option value="youtube">youtube</option><option value="kick">kick</option></select></label>
-          <label>Stream URL<input name="stream_url"></label>
-          <label>Is live <input type="checkbox" name="is_live"></label>
-          <label>Host team id <input name="host_team_id" placeholder="optional"></label>
-          <label>Competition id <input name="competition_id" placeholder="optional"></label>
-          <button type="submit">Update stream</button>
-        </form>
-        <div id="streamUpdateMsg"></div>
-      </div>
-      <div style="flex:1">
-        <h3>Delete stream</h3>
-        <form id="deleteStreamForm">
-          <label>Id<input name="id" required placeholder="stream id"></label>
-          <button type="submit" style="background:#c33;color:#fff">Delete stream</button>
-        </form>
-        <div id="streamDeleteMsg"></div>
-      </div>
+
+    <h4>Create Post</h4>
+    <div class="row">
+      <input id="postTitle" placeholder="title (required)" />
+      <input id="postContent" placeholder="content (required)" />
+      <input id="postAuthorId" placeholder="author_id (optional UUID)" />
+      <input id="postMedia" placeholder="media_urls (comma-separated)" />
+      <button onclick="createPost()">POST /posts</button>
     </div>
-  </section>
+
+    <h4>Create Competition</h4>
+    <div class="row">
+      <input id="compTitle" placeholder="title (required)" />
+      <input id="compSlug" placeholder="slug (required)" />
+      <input id="compDescription" placeholder="description" />
+      <input id="compCountryId" placeholder="country_id (optional)" />
+      <input id="compRegistrationStart" type="date" placeholder="registration_start" />
+      <input id="compRegistrationEnd" type="date" placeholder="registration_end" />
+      <input id="compStartDate" type="date" placeholder="start_date" />
+      <input id="compEndDate" type="date" placeholder="end_date" />
+      <input id="compRulesUrl" placeholder="rules_url" />
+      <input id="compStreamUrl" placeholder='stream_url (JSON or URL)' />
+      <button onclick="createCompetition()">POST /competitions</button>
+    </div>
+
+    <h4>Create Team</h4>
+    <div class="row">
+      <input id="teamName" placeholder="name (required)" />
+      <input id="teamCountryId" placeholder="country_id (optional)" />
+      <input id="teamCity" placeholder="city" />
+      <input id="teamInstitution" placeholder="institution" />
+      <input id="teamLogo" placeholder="logo_url" />
+      <input id="teamSocialLinks" placeholder='social_links (JSON, e.g. {"twitter":"@x"})' />
+      <input id="teamCreatedBy" placeholder="created_by_user_id (UUID)" />
+      <button onclick="createTeam()">POST /teams</button>
+    </div>
+
+    <h4>Create Registration</h4>
+    <div class="row">
+      <input id="regTeamId" placeholder="team_id (required)" />
+      <input id="regCompetitionId" placeholder="competition_id (required)" />
+      <select id="regStatus">
+        <option value="pending">pending</option>
+        <option value="approved">approved</option>
+        <option value="rejected">rejected</option>
+      </select>
+      <input id="regDate" type="date" placeholder="registration_date" />
+      <button onclick="createRegistration()">POST /registrations</button>
+    </div>
+
+    <h4>Team Members</h4>
+    <div class="row">
+      <input id="tmTeamId" placeholder="team_id (required)" />
+      <input id="tmUserId" placeholder="user_id (required UUID)" />
+      <input id="tmRole" placeholder="role (required)" />
+      <input id="tmJoinedAt" type="date" placeholder="joined_at" />
+      <input id="tmLeftAt" type="date" placeholder="left_at" />
+      <button onclick="createTeamMember()">POST /team-members</button>
+    </div>
+
+    <h4>Notifications</h4>
+    <div class="row">
+      <label>User: 
+        <select id="noteUserId" style="min-width:200px">
+          <option value="">-- select user --</option>
+        </select>
+      </label>
+      <input id="noteTitle" placeholder="title (required)" />
+      <label>Type:
+        <select id="noteType">
+          <option value="">-- select type --</option>
+          <option value="registration_team_status">registration_team_status</option>
+          <option value="team_invite">team_invite</option>
+          <option value="mention">mention</option>
+        </select>
+      </label>
+      <input id="noteMessage" placeholder="message (required)" />
+      <button onclick="createNotification()">POST /notifications</button>
+      <input id="noteId" placeholder="notification id" />
+      <button onclick="markNotificationRead()">PUT /notifications/:id (mark read)</button>
+      <button onclick="deleteNotification()">DELETE /notifications/:id</button>
+    </div>
+
+    <h4>Countries / Sponsors</h4>
+    <div class="row">
+      <input id="countryName" placeholder="country name (required)" />
+      <input id="countryCode" placeholder="country code (required)" />
+      <input id="countryFlag" placeholder="flag_emoji" />
+      <button onclick="createCountry()">POST /countries</button>
+      <label>Or select country: 
+        <select id="countrySelect" style="min-width:180px">
+          <option value="">-- select country --</option>
+        </select>
+      </label>
+      <input id="sponsorName" placeholder="sponsor name (required)" />
+      <input id="sponsorLogo" placeholder="logo_url" />
+      <input id="sponsorWebsite" placeholder="website_url" />
+      <button onclick="createSponsor()">POST /sponsors</button>
+    </div>
+
+    <h4>Streams (auth required)</h4>
+    <div class="row">
+      <input id="streamTitle" placeholder="stream title (required)" />
+      <input id="streamDescription" placeholder="description" />
+      <select id="streamPlatform">
+        <option value="twitch">twitch</option>
+        <option value="youtube">youtube</option>
+        <option value="kick">kick</option>
+      </select>
+      <input id="streamUrl" placeholder="stream_url" />
+      <label>Is live: 
+        <select id="streamIsLive">
+          <option value="false">false</option>
+          <option value="true">true</option>
+        </select>
+      </label>
+      <input id="streamHostTeam" placeholder="host_team_id" />
+      <input id="streamCompetitionId" placeholder="competition_id" />
+      <button onclick="createStream()">POST /streams</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Response</h3>
+    <pre id="output" style="white-space:pre-wrap;max-height:400px;overflow:auto;background:#f8f8f8;padding:8px"></pre>
+  </div>
 
   <script>
-    const baseUrl = window.location.origin;
-    const countrySelect = document.getElementById('countrySelect');
-    const profileCountrySelect = document.getElementById('profileCountrySelect');
-
-    function getToken() { return localStorage.getItem('token'); }
-    function setToken(t) { if (t) localStorage.setItem('token', t); else localStorage.removeItem('token'); updateAuthUI(); showToken(t); }
-
-    function parseJwt(token) {
-      try {
-        const parts = token.split('.');
-        if (parts.length !== 3) return null;
-        const payload = parts[1].replace(/-/g,'+').replace(/_/g,'/');
-        const json = decodeURIComponent(atob(payload).split('').map(c=> '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-        return JSON.parse(json);
-      } catch(e) { return null; }
+    // --- UTILITIES ---
+    function clearFieldErrors(){ document.querySelectorAll('.field-error').forEach(n=>n.remove()); document.querySelectorAll('.input-error').forEach(i=>i.classList.remove('input-error')); }
+    function showFieldError(field, msg){ try{ const el = document.getElementById(field) || document.querySelector('[name="'+field+'"]'); if(!el) return; el.classList.add('input-error'); const d=document.createElement('div'); d.className='field-error'; d.textContent = msg; if(el.nextSibling) el.parentNode.insertBefore(d, el.nextSibling); else el.parentNode.appendChild(d);}catch(e){console.warn('showFieldError',e)} }
+    function showToast(message, type='info'){
+      try{
+        const container = document.getElementById('toastContainer'); if(!container) return;
+        const t = document.createElement('div'); t.className = 'toast '+type; t.textContent = message;
+        container.appendChild(t);
+        // reveal
+        setTimeout(()=>t.classList.add('visible'),10);
+        // hide after timeout
+        setTimeout(()=>{ t.classList.remove('visible'); setTimeout(()=>t.remove(),300); }, 6000);
+      }catch(e){console.warn('showToast',e)}
     }
 
-    function showToken(token) {
-      const info = document.getElementById('authInfo');
-      const field = document.getElementById('tokenField');
-      const header = document.getElementById('authHeader');
-      const payloadPre = document.getElementById('tokenPayload');
-      const authUser = document.getElementById('authUser');
-
-      if (!token) {
-        info.style.display = 'none';
-        field.value = '';
-        header.textContent = '';
-        payloadPre.textContent = '';
-        authUser.textContent = '';
-        return;
+    function out(v){ clearFieldErrors(); document.getElementById('output').textContent = JSON.stringify(v,null,2); if (v && v.body){ const b = v.body; if (b.error) showToast(typeof b.error==='string'?b.error:JSON.stringify(b.error),'error'); if (b.message) showToast(b.message,'error'); } }
+    function showStatus(status, body){ clearFieldErrors(); out({ status, body }); if (status>=200 && status<300) showToast('OK ('+status+')','success'); }
+    function showError(status, err){ clearFieldErrors(); try{ const j = typeof err === 'string' ? { error: err } : (err || {}); out({ status, body: j }); if (j){ if (j.error) showToast(j.error,'error'); if (j.message) showToast(j.message,'error'); if (j.errors && typeof j.errors === 'object'){ Object.keys(j.errors).forEach(f=> showFieldError(f, Array.isArray(j.errors[f])?j.errors[f].join(', '):String(j.errors[f]))); } // common one-off shapes
+        if (j.validation && Array.isArray(j.validation)){ j.validation.forEach(vi=> showToast(vi,'error')); }
       }
-      info.style.display = 'block';
-      field.value = token;
-      header.textContent = 'Authorization: Bearer ' + token;
-      const payload = parseJwt(token);
-      payloadPre.textContent = payload ? JSON.stringify(payload, null, 2) : 'Unable to decode payload';
-      authUser.textContent = payload ? `Authenticated as: ${payload.email || payload.id || 'unknown'} — role: ${payload.role || 'n/a'}` : '';
+    }catch(e){ out({ status, error: String(err) }); showToast(String(err),'error'); } }
+    function getBase(){ const b=document.getElementById('baseUrl').value.trim(); if(!b) throw {status:400, body:{error:'Base URL not set'}}; return b.replace(/\/$/,''); }
+    function getHeaders(){ const t=document.getElementById('authToken').value.trim(); return t?{ 'Authorization': t, 'Content-Type':'application/json'}:{'Content-Type':'application/json'} }
+
+    async function safeFetch(url, opts){
+      const r = await fetch(url, opts);
+      let body = null;
+      try{ body = await r.json(); }catch(e){ body = await r.text().catch(()=>null); }
+      if (!r.ok) throw { status: r.status, body };
+      return { status: r.status, body };
     }
 
-    document.getElementById('copyTokenBtn').addEventListener('click', async () => {
-      const token = getToken();
-      if (!token) return alert('No token');
-      try {
-        await navigator.clipboard.writeText(token);
-        alert('Token copied to clipboard');
-      } catch (e) {
-        prompt('Copy token manually:', token);
-      }
-    });
-    document.getElementById('revokeTokenBtn').addEventListener('click', () => { setToken(null); alert('Token cleared'); });
+    async function apiGet(path){
+      try{ const res = await safeFetch(getBase()+path, { headers:getHeaders() }); showStatus(res.status, res.body); }
+      catch(e){ showError(e.status||500, e.body||e); }
+    }
 
-    async function loadCountries() {
-      try {
-        const res = await fetch(baseUrl + '/api/countries');
-        if (!res.ok) throw new Error('Failed to load countries: ' + res.status);
-        const countries = await res.json();
-        countrySelect.innerHTML = '<option value="">Select country</option>';
-        profileCountrySelect.innerHTML = '<option value="">Select country</option>';
-        countries.forEach(c => {
-          const txt = `${c.flag_emoji ? c.flag_emoji + ' ' : ''}${c.name} (${c.code})`;
-          const opt = `<option value="${c.id}">${txt}</option>`;
-          countrySelect.insertAdjacentHTML('beforeend', opt);
-          profileCountrySelect.insertAdjacentHTML('beforeend', opt);
+    // --- Auth helpers (login/register) and selects population ---
+    async function login(){
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      if (!email || !password) return out({ error: 'email and password are required' });
+      try{
+        const res = await safeFetch(getBase() + '/auth/login', { method:'POST', headers: getHeaders(), body: JSON.stringify({ email, password })});
+        if (res.body && res.body.token) document.getElementById('authToken').value = 'Bearer ' + res.body.token;
+        showStatus(res.status, res.body);
+        await refreshLists();
+      }catch(e){ showError(e.status||500, e.body||e); }
+    }
+
+    async function register(){
+      const username = document.getElementById('regUsername').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const first_name = document.getElementById('regFirst').value.trim();
+      const last_name = document.getElementById('regLast').value.trim();
+      if (!username || !email || !password) return out({ error: 'username, email and password are required' });
+      try{
+        const res = await safeFetch(getBase() + '/auth/register', { method:'POST', headers:getHeaders(), body: JSON.stringify({ username, email, password, first_name, last_name })});
+        if (res.body && res.body.token) document.getElementById('authToken').value = 'Bearer ' + res.body.token;
+        showStatus(res.status, res.body);
+        await refreshLists();
+      }catch(e){ showError(e.status||500, e.body||e); }
+    }
+
+    async function fetchUsers(){
+      try{
+        const r = await safeFetch(getBase() + '/users', { headers: getHeaders() });
+        const users = r.body;
+        const selIds = ['tmUserId','noteUserId','teamCreatedBy','postAuthorId'];
+        selIds.forEach(id => {
+          const sel = document.getElementById(id);
+          if (!sel) return;
+          const placeholder = sel.querySelector('option');
+          sel.innerHTML = '';
+          sel.appendChild(placeholder || document.createElement('option'));
+          sel.firstChild.value = '';
+          sel.firstChild.textContent = '-- select user --';
+          if (Array.isArray(users)) users.forEach(u => { const opt=document.createElement('option'); opt.value=u.id; opt.textContent=(u.username|| (u.first_name+' '+(u.last_name||''))).trim() + ' ('+u.id+')'; sel.appendChild(opt); });
         });
-      } catch (err) {
-        console.error(err);
-        countrySelect.innerHTML = '<option value="">Error loading countries</option>';
-        profileCountrySelect.innerHTML = '<option value="">Error</option>';
-      }
+      }catch(e){ console.warn('fetchUsers failed', e); }
     }
 
-    // Register: send email/password base64 encoded (server decodes with atob)
-    document.getElementById('registerForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      const f = e.target;
-      const rawEmail = f.email.value.trim();
-      const rawPassword = f.password.value;
-      const body = {
-        first_name: f.first_name.value.trim(),
-        last_name: f.last_name.value.trim(),
-        email: btoa(rawEmail),
-        password: btoa(rawPassword),
-        phone: f.phone.value.trim(),
-        country_id: Number(f.country_id.value)
+    async function fetchCountries(){
+      try{
+        const r = await safeFetch(getBase() + '/countries', { headers: getHeaders() });
+        const countries = r.body;
+        const sel = document.getElementById('countrySelect');
+        if (!sel) return;
+        const placeholder = sel.querySelector('option'); sel.innerHTML = ''; sel.appendChild(placeholder||document.createElement('option'));
+        sel.firstChild.value=''; sel.firstChild.textContent='-- select country --';
+        if (Array.isArray(countries)) countries.forEach(c => { const opt=document.createElement('option'); opt.value=c.id; opt.textContent=(c.name||c.code)+' ('+c.id+')'; sel.appendChild(opt); });
+      }catch(e){ console.warn('fetchCountries failed', e); }
+    }
+
+    async function refreshLists(){ await Promise.all([fetchUsers(), fetchCountries()]); out({ info: 'Lists refreshed' }); }
+
+    // --- CREATE HELPERS ---
+    async function createPost(){
+      const title = postTitle.value.trim();
+      const content = postContent.value.trim();
+      if (!title || !content) return out({ error: 'title and content are required' });
+      const payload = { title, content };
+      if (postAuthorId.value.trim()) payload.author_id = postAuthorId.value.trim();
+      if (postMedia.value.trim()) payload.media_urls = postMedia.value.split(',').map(s=>s.trim());
+      try{ const res = await safeFetch(getBase()+'/posts',{method:'POST',headers:getHeaders(),body:JSON.stringify(payload)}); showStatus(res.status,res.body); }
+      catch(e){ showError(e.status||500,e.body||e); }
+    }
+
+    async function createCompetition(){
+      const title = compTitle.value.trim();
+      const slug = compSlug.value.trim();
+      if (!title || !slug) return out({ error: 'title and slug are required' });
+      const payload = {
+        title, slug,
+        description: compDescription.value.trim() || undefined,
+        country_id: compCountryId.value || undefined,
+        registration_start: compRegistrationStart.value || undefined,
+        registration_end: compRegistrationEnd.value || undefined,
+        start_date: compStartDate.value || undefined,
+        end_date: compEndDate.value || undefined,
+        rules_url: compRulesUrl.value || undefined,
+        stream_url: (()=>{const v=compStreamUrl.value.trim();try{return v?JSON.parse(v):undefined}catch(e){return v||undefined}})()
       };
-      const msg = document.getElementById('registerMsg'); msg.textContent=''; msg.className='';
-      try {
-        const res = await fetch(baseUrl + '/api/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
-        // store token
-        if (data.token) setToken(data.token);
-        msg.className='msg'; msg.textContent = 'Registered. Token saved and visible below.';
-        document.getElementById('profileSection').style.display = 'block';
-      } catch (err) {
-        msg.className='err'; msg.textContent = err.message;
-      }
-    });
-
-    // Login: send base64 email/password
-    document.getElementById('loginForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      const f = e.target;
-      const rawEmail = f.email.value.trim();
-      const rawPassword = f.password.value;
-      const body = { email: btoa(rawEmail), password: btoa(rawPassword) };
-      const msg = document.getElementById('loginMsg'); msg.textContent=''; msg.className='';
-      try {
-        const res = await fetch(baseUrl + '/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
-        setToken(data.token);
-        msg.className='msg'; msg.textContent = 'Logged in. Token saved and visible below.';
-        document.getElementById('profileSection').style.display = 'block';
-      } catch (err) {
-        msg.className='err'; msg.textContent = err.message;
-      }
-    });
-
-    // Load my profile
-    document.getElementById('loadProfileBtn').addEventListener('click', loadMyProfile);
-
-    async function authFetch(url, opts = {}) {
-      const token = getToken();
-      opts.headers = opts.headers || {};
-      if (token) opts.headers['Authorization'] = 'Bearer ' + token;
-      return fetch(url, opts);
+      try{ const res = await safeFetch(getBase()+'/competitions',{method:'POST',headers:getHeaders(),body:JSON.stringify(payload)}); showStatus(res.status,res.body); }
+      catch(e){ showError(e.status||500,e.body||e); }
     }
 
-    async function loadMyProfile() {
-      const token = getToken();
-      const msg = document.getElementById('profileMsg'); msg.textContent=''; msg.className='';
-      if (!token) { msg.className='err'; msg.textContent='No token. Login first.'; return; }
-      try {
-        const res = await authFetch(baseUrl + '/api/users/me');
-        const data = await res.json();
-        if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
-        msg.className='msg'; msg.textContent='Profile loaded';
-        const form = document.getElementById('profileForm');
-        form.style.display = 'block';
-        form.first_name.value = data.first_name || '';
-        form.last_name.value = data.last_name || '';
-        form.phone.value = data.phone || '';
-        form.profile_photo_url.value = data.profile_photo_url || '';
-        profileCountrySelect.value = data.country_id || '';
-        document.getElementById('profileResult').textContent = '';
-      } catch (err) {
-        msg.className='err'; msg.textContent = err.message;
-      }
-    }
-
-    // Update profile
-    document.getElementById('profileForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      const token = getToken();
-      const msg = document.getElementById('profileResult'); msg.textContent=''; msg.className='';
-      if (!token) { msg.className='err'; msg.textContent='No token.'; return; }
-      const f = e.target;
-      const body = {
-        first_name: f.first_name.value.trim(),
-        last_name: f.last_name.value.trim(),
-        phone: f.phone.value.trim(),
-        profile_photo_url: f.profile_photo_url.value.trim(),
-        country_id: Number(f.country_id.value)
+    async function createTeam(){
+      const name = teamName.value.trim();
+      if (!name) return out({ error: 'team name is required' });
+      const payload = {
+        name,
+        country_id: teamCountryId.value || undefined,
+        city: teamCity.value || undefined,
+        institution: teamInstitution.value || undefined,
+        logo_url: teamLogo.value || undefined,
+        social_links: (()=>{ const v=teamSocialLinks.value.trim(); if(!v)return undefined; try{return JSON.parse(v)}catch(e){return undefined}})(),
+        created_by_user_id: teamCreatedBy.value || undefined
       };
-      try {
-        const res = await authFetch(baseUrl + '/api/users/me', {
-          method: 'PATCH',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
-        msg.className='msg'; msg.textContent = 'Profile updated';
-      } catch (err) {
-        msg.className='err'; msg.textContent = err.message;
-      }
-    });
-
-    // Delete account
-    document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
-      if (!confirm('¿Borrar cuenta? Esta acción no se puede deshacer.')) return;
-      const token = getToken();
-      if (!token) return alert('No token.');
-      try {
-        const res = await authFetch(baseUrl + '/api/users/me', { method: 'DELETE' });
-        const data = await res.json();
-        if (!res.ok) return alert('Error: ' + (data.error || JSON.stringify(data)));
-        setToken(null);
-        alert('Cuenta eliminada');
-        document.getElementById('profileForm').style.display = 'none';
-        document.getElementById('profileSection').style.display = 'none';
-      } catch (err) {
-        alert(err.message);
-      }
-    });
-
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', () => { setToken(null); alert('Logged out'); });
-
-    // Search users
-    document.getElementById('searchForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      const q = e.target.q.value.trim();
-      const out = document.getElementById('searchResult'); out.textContent = 'Loading...';
-      try {
-        const res = await fetch(baseUrl + '/api/users?q=' + encodeURIComponent(q));
-        const data = await res.json();
-        out.textContent = JSON.stringify(data, null, 2);
-      } catch (err) {
-        out.textContent = err.message;
-      }
-    });
-
-    function updateAuthUI() {
-      const token = getToken();
-      document.getElementById('profileSection').style.display = token ? 'block' : 'none';
-      showToken(token);
+      try{ const res = await safeFetch(getBase()+'/teams',{method:'POST',headers:getHeaders(),body:JSON.stringify(payload)}); showStatus(res.status,res.body); }
+      catch(e){ showError(e.status||500,e.body||e); }
     }
 
-    // Init
-    (async function init() {
-      await loadCountries();
-      updateAuthUI();
+    async function createRegistration(){
+      const team_id = regTeamId.value.trim();
+      const competition_id = regCompetitionId.value.trim();
+      if (!team_id || !competition_id) return out({ error: 'team_id and competition_id are required' });
+      const payload = { team_id, competition_id, status: regStatus.value, registration_date: regDate.value || undefined };
+      try{ const res = await safeFetch(getBase()+'/registrations',{method:'POST',headers:getHeaders(),body:JSON.stringify(payload)}); showStatus(res.status,res.body); }
+      catch(e){ showError(e.status||500,e.body||e); }
+    }
 
-      // Streams handlers
-      document.getElementById('createStreamForm').addEventListener('submit', async e => {
-        e.preventDefault();
-        const token = getToken();
-        const msg = document.getElementById('streamCreateMsg'); msg.textContent=''; msg.className='';
-        if (!token) { msg.className='err'; msg.textContent='No token'; return; }
-        const f = e.target;
-        const body = {
-          title: f.title.value,
-          description: f.description.value,
-          platform: f.platform.value,
-          stream_url: f.stream_url.value,
-          is_live: f.is_live.checked,
-          host_team_id: f.host_team_id.value ? Number(f.host_team_id.value) : null,
-          competition_id: f.competition_id.value ? Number(f.competition_id.value) : null
-        };
-        try {
-          const res = await authFetch(baseUrl + '/api/streams', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(body) });
-          const data = await res.json();
-          if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
-          msg.className='msg'; msg.textContent = 'Stream created (id: ' + (data.id || '?') + ')';
-        } catch (err) { msg.className='err'; msg.textContent = err.message; }
+    async function createTeamMember(){
+      const team_id = tmTeamId.value.trim();
+      const user_id = tmUserId.value.trim();
+      const role = tmRole.value.trim();
+      if (!team_id || !user_id || !role) return out({ error: 'team_id, user_id and role are required' });
+      const payload = { team_id, user_id, role, joined_at: tmJoinedAt.value || undefined, left_at: tmLeftAt.value || undefined };
+      try{ const res = await safeFetch(getBase()+'/team-members',{method:'POST',headers:getHeaders(),body:JSON.stringify(payload)}); showStatus(res.status,res.body); }
+      catch(e){ showError(e.status||500,e.body||e); }
+    }
+
+    async function createNotification(){
+      const user_id = noteUserId.value.trim();
+      const title = noteTitle.value.trim();
+      const type = noteType.value;
+      const message = noteMessage.value.trim();
+      if (!user_id || !title || !type || !message) return out({ error: 'user_id, title, type and message are required' });
+      try{ const res = await safeFetch(getBase()+'/notifications',{method:'POST',headers:getHeaders(),body:JSON.stringify({user_id,title,type,message})}); showStatus(res.status,res.body); }
+      catch(e){ showError(e.status||500,e.body||e); }
+    }
+
+    async function markNotificationRead(){
+      const id = noteId.value.trim(); if(!id) return out({error:'provide id'});
+      try{ const res = await safeFetch(getBase()+'/notifications/'+encodeURIComponent(id),{method:'PUT',headers:getHeaders(),body:JSON.stringify({is_read:true})}); showStatus(res.status,res.body); }
+      catch(e){ showError(e.status||500,e.body||e); }
+    }
+
+    async function deleteNotification(){
+      const id = noteId.value.trim(); if(!id) return out({error:'provide id'});
+      try{ const res = await safeFetch(getBase()+'/notifications/'+encodeURIComponent(id),{method:'DELETE',headers:getHeaders()}); showStatus(res.status,res.body); }
+      catch(e){ showError(e.status||500,e.body||e); }
+    }
+
+    async function createCountry(){
+      const name = countryName.value.trim();
+      const code = countryCode.value.trim();
+      if (!name || !code) return out({ error: 'country name and code are required' });
+      const flag = countryFlag.value.trim() || undefined;
+      try{ const res = await safeFetch(getBase()+'/countries',{method:'POST',headers:getHeaders(),body:JSON.stringify({name,code,flag_emoji:flag})}); showStatus(res.status,res.body); }
+      catch(e){ showError(e.status||500,e.body||e); }
+    }
+
+    async function createSponsor(){
+      const name = sponsorName.value.trim();
+      if (!name) return out({ error: 'sponsor name is required' });
+      const logo = sponsorLogo.value.trim() || undefined;
+      const website = sponsorWebsite.value.trim() || undefined;
+      try{ const res = await safeFetch(getBase()+'/sponsors',{method:'POST',headers:getHeaders(),body:JSON.stringify({name,logo_url:logo,website_url:website})}); showStatus(res.status,res.body); }
+      catch(e){ showError(e.status||500,e.body||e); }
+    }
+
+    async function createStream(){
+      const title = streamTitle.value.trim();
+      if (!title) return out({ error: 'stream title is required' });
+      const payload = {
+        title,
+        description: streamDescription.value || undefined,
+        platform: streamPlatform.value || undefined,
+        stream_url: streamUrl.value || undefined,
+        is_live: streamIsLive.value === 'true',
+        host_team_id: streamHostTeam.value || undefined,
+        competition_id: streamCompetitionId.value || undefined
+      };
+      try{ const res = await safeFetch(getBase()+'/streams',{method:'POST',headers:getHeaders(),body:JSON.stringify(payload)}); showStatus(res.status,res.body); }
+      catch(e){ showError(e.status||500,e.body||e); }
+    }
+
+    async function getById(){
+      const id = resourceId.value.trim();
+      const res = resourceSelect.value;
+      if (!id) return out({ error: 'resource id is required' });
+      try{ const result = await safeFetch(getBase()+'/'+res+'/'+encodeURIComponent(id),{headers:getHeaders()}); showStatus(result.status,result.body); }
+      catch(e){ showError(e.status||500,e.body||e); }
+    }
+  </script>
+
+  <script>
+    // UI helper text injection and small UX helpers
+    const HELPERS = {
+      postTitle: 'Short, descriptive title. Example: "Best Robot 2025"',
+      postContent: 'Main content of the post. Markdown is supported in some endpoints.',
+      postAuthorId: 'Optional: UUID of an existing user. Use the selector after login to pick a user.',
+      compTitle: 'Competition full name (required).',
+      compSlug: 'URL-friendly identifier (no spaces).',
+      compCountryId: 'Optional: choose a host country id from the countries selector.',
+      teamName: 'Team official name. Required.',
+      teamCountryId: 'Optional: choose a country id from the countries selector.',
+      teamCreatedBy: 'Optional: choose the user who created this team. If left blank, the authenticated user will be used when supported.',
+      noteTitle: 'Short title shown in user notifications. Required.',
+      noteType: 'Notification category. Pick the best match for the event.',
+      noteMessage: 'Full message body of the notification. Keep it concise.',
+      countryName: 'Country display name, e.g. "Spain"',
+      countryCode: 'ISO country code, e.g. "ES"',
+      sponsorName: 'Sponsor or partner name (required).',
+      streamTitle: 'Short title for the stream (required).'
+    };
+
+    function insertHelpTexts(){
+      Object.keys(HELPERS).forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        // avoid duplicating
+        const next = el.nextElementSibling;
+        if (next && next.classList && next.classList.contains('help-text')) return;
+        const d = document.createElement('div'); d.className='help-text'; d.textContent = HELPERS[id];
+        if (el.parentNode) el.parentNode.insertBefore(d, el.nextSibling);
+        // clear field error when user types
+        el.addEventListener('input', ()=>{ if (el.classList.contains('input-error')){ el.classList.remove('input-error'); const fe = el.parentNode.querySelector('.field-error'); if (fe) fe.remove(); } });
       });
-
-      document.getElementById('btnListStreams').addEventListener('click', async () => {
-        const out = document.getElementById('streamsList'); out.textContent = 'Loading...';
-        try {
-          const res = await fetch(baseUrl + '/api/streams');
-          const data = await res.json();
-          out.textContent = JSON.stringify(data, null, 2);
-        } catch (err) { out.textContent = err.message; }
+      // Add little help icons to section headings for quick tips
+      document.querySelectorAll('.section h3, .section h4').forEach(h=>{
+        if (h.querySelector('.help-icon')) return;
+        const ic = document.createElement('span'); ic.className='help-icon'; ic.textContent='?'; ic.title = 'Use the fields below to create and test API resources. Hover inputs for inline help.';
+        h.appendChild(ic);
       });
+    }
 
-      document.getElementById('btnGetStream').addEventListener('click', async () => {
-        const id = document.getElementById('getStreamId').value.trim();
-        const out = document.getElementById('streamsList'); out.textContent = 'Loading...';
-        if (!id) return out.textContent = 'Provide stream id';
-        try {
-          const res = await fetch(baseUrl + '/api/streams/' + encodeURIComponent(id));
-          const data = await res.json();
-          out.textContent = JSON.stringify(data, null, 2);
-        } catch (err) { out.textContent = err.message; }
-      });
-
-      // Users admin handlers
-      document.getElementById('btnGetUserById').addEventListener('click', async () => {
-        const id = document.getElementById('getUserByIdInput').value.trim();
-        const out = document.getElementById('usersAdminResult'); out.textContent = 'Loading...';
-        if (!id) return out.textContent = 'Provide user id';
-        try {
-          const res = await fetch(baseUrl + '/api/users/' + encodeURIComponent(id));
-          const data = await res.json();
-          out.textContent = JSON.stringify(data, null, 2);
-        } catch (err) { out.textContent = err.message; }
-      });
-
-      document.getElementById('btnDeleteUserById').addEventListener('click', async () => {
-        const id = document.getElementById('deleteUserByIdInput').value.trim();
-        const out = document.getElementById('usersAdminResult'); out.textContent = '';
-        if (!id) { out.textContent = 'Provide user id'; return; }
-        const token = getToken();
-        if (!token) { out.textContent = 'No token. Login first.'; return; }
-        try {
-          const res = await authFetch(baseUrl + '/api/users/' + encodeURIComponent(id), { method: 'DELETE' });
-          const data = await res.json();
-          if (!res.ok) { out.textContent = data.error || JSON.stringify(data); return; }
-          out.textContent = 'User deleted';
-        } catch (err) { out.textContent = err.message; }
-      });
-
-      // Countries handlers
-      document.getElementById('btnListCountries').addEventListener('click', async () => {
-        const out = document.getElementById('countriesResult'); out.textContent = 'Loading...';
-        try {
-          const res = await fetch(baseUrl + '/api/countries');
-          const data = await res.json();
-          out.textContent = JSON.stringify(data, null, 2);
-        } catch (err) { out.textContent = err.message; }
-      });
-
-      document.getElementById('btnGetCountry').addEventListener('click', async () => {
-        const id = document.getElementById('getCountryId').value.trim();
-        const out = document.getElementById('countriesResult'); out.textContent = 'Loading...';
-        if (!id) return out.textContent = 'Provide country id';
-        try {
-          const res = await fetch(baseUrl + '/api/countries/' + encodeURIComponent(id));
-          const data = await res.json();
-          out.textContent = JSON.stringify(data, null, 2);
-        } catch (err) { out.textContent = err.message; }
-      });
-
-      document.getElementById('createCountryForm').addEventListener('submit', async e => {
-        e.preventDefault();
-        const out = document.getElementById('countriesResult'); out.textContent = '';
-        const f = e.target;
-        const body = { name: f.name.value.trim(), code: f.code.value.trim(), flag_emoji: f.flag_emoji.value.trim() };
-        try {
-          const res = await fetch(baseUrl + '/api/countries', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(body) });
-          const data = await res.json();
-          if (!res.ok) { out.textContent = data.error || JSON.stringify(data); return; }
-          out.textContent = 'Country created (id: ' + (data.id || '?') + ')';
-          loadCountries();
-        } catch (err) { out.textContent = err.message; }
-      });
-
-      document.getElementById('updateCountryForm').addEventListener('submit', async e => {
-        e.preventDefault();
-        const out = document.getElementById('countriesResult'); out.textContent = '';
-        const f = e.target;
-        const id = f.id.value.trim();
-        if (!id) { out.textContent = 'Provide country id'; return; }
-        const body = { name: f.name.value.trim(), code: f.code.value.trim(), flag_emoji: f.flag_emoji.value.trim() };
-        try {
-          const res = await fetch(baseUrl + '/api/countries/' + encodeURIComponent(id), { method: 'PUT', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(body) });
-          const data = await res.json();
-          if (!res.ok) { out.textContent = data.error || JSON.stringify(data); return; }
-          out.textContent = 'Country updated';
-          loadCountries();
-        } catch (err) { out.textContent = err.message; }
-      });
-
-      document.getElementById('deleteCountryForm').addEventListener('submit', async e => {
-        e.preventDefault();
-        const out = document.getElementById('countriesResult'); out.textContent = '';
-        const f = e.target;
-        const id = f.id.value.trim();
-        if (!id) { out.textContent = 'Provide country id'; return; }
-        try {
-          const res = await fetch(baseUrl + '/api/countries/' + encodeURIComponent(id), { method: 'DELETE' });
-          const data = await res.json().catch(()=>({}));
-          if (!res.ok) { out.textContent = (data && (data.error || JSON.stringify(data))) || 'Delete failed (' + res.status + ')'; return; }
-          out.textContent = 'Country deleted';
-          loadCountries();
-        } catch (err) { out.textContent = err.message; }
-      });
-
-      // Streams update/delete
-      document.getElementById('updateStreamForm').addEventListener('submit', async e => {
-        e.preventDefault();
-        const token = getToken();
-        const msg = document.getElementById('streamUpdateMsg'); msg.textContent=''; msg.className='';
-        if (!token) { msg.className='err'; msg.textContent='No token'; return; }
-        const f = e.target;
-        const id = f.id.value.trim();
-        if (!id) { msg.className='err'; msg.textContent='Provide stream id'; return; }
-        const body = {
-          title: f.title.value,
-          description: f.description.value,
-          platform: f.platform.value,
-          stream_url: f.stream_url.value,
-          is_live: f.is_live.checked,
-          host_team_id: f.host_team_id.value ? Number(f.host_team_id.value) : null,
-          competition_id: f.competition_id.value ? Number(f.competition_id.value) : null
-        };
-        try {
-          const res = await authFetch(baseUrl + '/api/streams/' + encodeURIComponent(id), { method: 'PUT', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(body) });
-          const data = await res.json();
-          if (!res.ok) { msg.className='err'; msg.textContent = data.error || JSON.stringify(data); return; }
-          msg.className='msg'; msg.textContent = 'Stream updated';
-        } catch (err) { msg.className='err'; msg.textContent = err.message; }
-      });
-
-      document.getElementById('deleteStreamForm').addEventListener('submit', async e => {
-        e.preventDefault();
-        const token = getToken();
-        const msg = document.getElementById('streamDeleteMsg'); msg.textContent=''; msg.className='';
-        if (!token) { msg.className='err'; msg.textContent='No token'; return; }
-        const f = e.target;
-        const id = f.id.value.trim();
-        if (!id) { msg.className='err'; msg.textContent='Provide stream id'; return; }
-        try {
-          const res = await authFetch(baseUrl + '/api/streams/' + encodeURIComponent(id), { method: 'DELETE' });
-          const data = await res.json().catch(()=>({}));
-          if (!res.ok) { msg.className='err'; msg.textContent = (data && (data.error || JSON.stringify(data))) || 'Delete failed (' + res.status + ')'; return; }
-          msg.className='msg'; msg.textContent = 'Stream deleted';
-        } catch (err) { msg.className='err'; msg.textContent = err.message; }
-      });
-
-    })();
+    // Run on load
+    window.addEventListener('load', ()=>{
+      insertHelpTexts();
+    });
   </script>
 </body>
 </html>

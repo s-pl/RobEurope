@@ -1,0 +1,165 @@
+{
+  "info": {
+    "_postman_id": "robeurope-collection",
+    "name": "RobEurope API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection to test the RobEurope backend API. Set variable base_url (e.g. http://localhost:3000/api)"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000/api" },
+    { "key": "token", "value": "" },
+    { "key": "user_id", "value": "" },
+    { "key": "post_id", "value": "" },
+    { "key": "competition_id", "value": "" },
+    { "key": "team_id", "value": "" },
+    { "key": "registration_id", "value": "" },
+    { "key": "sponsor_id", "value": "" },
+    { "key": "stream_id", "value": "" },
+    { "key": "team_member_id", "value": "" },
+    { "key": "notification_id", "value": "" },
+    { "key": "country_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"ChangeMe123!\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth","login"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"tester1\",\n  \"email\": \"tester1@example.com\",\n  \"password\": \"Test12345\",\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth","register"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Search / List",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/users?q=", "host": ["{{base_url}}"], "path": ["users"], "query": [{ "key": "q", "value": "" }] } }
+        },
+        {
+          "name": "Get /me",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/users/me", "host": ["{{base_url}}"], "path": ["users","me"] } }
+        },
+        {
+          "name": "Patch /me",
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"first_name\": \"Updated\",\n  \"phone\": \"+123456789\"\n}" }, "url": { "raw": "{{base_url}}/users/me", "host": ["{{base_url}}"], "path": ["users","me"] } }
+        },
+        {
+          "name": "Delete /me",
+          "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/users/me", "host": ["{{base_url}}"], "path": ["users","me"] } }
+        },
+        {
+          "name": "Get /:id",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["users","{{user_id}}"] } }
+        },
+        {
+          "name": "Delete /:id",
+          "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["users","{{user_id}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": { "raw": "{{base_url}}/posts", "host": ["{{base_url}}"], "path": ["posts"] } } },
+        { "name": "Get /:id", "request": { "method": "GET", "url": { "raw": "{{base_url}}/posts/{{post_id}}", "host": ["{{base_url}}"], "path": ["posts","{{post_id}}"] } } },
+        { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Hello\",\n  \"content\": \"From Postman\"\n}" }, "url": { "raw": "{{base_url}}/posts", "host": ["{{base_url}}"], "path": ["posts"] } } },
+        { "name": "Update", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated\"\n}" }, "url": { "raw": "{{base_url}}/posts/{{post_id}}", "host": ["{{base_url}}"], "path": ["posts","{{post_id}}"] } } },
+        { "name": "Delete", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/posts/{{post_id}}", "host": ["{{base_url}}"], "path": ["posts","{{post_id}}"] } } }
+      ]
+    },
+    {
+      "name": "Competitions",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": { "raw": "{{base_url}}/competitions", "host": ["{{base_url}}"], "path": ["competitions"] } } },
+        { "name": "Get /:id", "request": { "method": "GET", "url": { "raw": "{{base_url}}/competitions/{{competition_id}}", "host": ["{{base_url}}"], "path": ["competitions","{{competition_id}}"] } } },
+        { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Test Competition\",\n  \"start_date\": \"2025-12-01\",\n  \"end_date\": \"2025-12-02\"\n}" }, "url": { "raw": "{{base_url}}/competitions", "host": ["{{base_url}}"], "path": ["competitions"] } } },
+        { "name": "Update", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Competition\"\n}" }, "url": { "raw": "{{base_url}}/competitions/{{competition_id}}", "host": ["{{base_url}}"], "path": ["competitions","{{competition_id}}"] } } },
+        { "name": "Delete", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/competitions/{{competition_id}}", "host": ["{{base_url}}"], "path": ["competitions","{{competition_id}}"] } } }
+      ]
+    },
+    {
+      "name": "Teams",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": { "raw": "{{base_url}}/teams", "host": ["{{base_url}}"], "path": ["teams"] } } },
+        { "name": "Get /:id", "request": { "method": "GET", "url": { "raw": "{{base_url}}/teams/{{team_id}}", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}"] } } },
+        { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Team Alpha\"\n}" }, "url": { "raw": "{{base_url}}/teams", "host": ["{{base_url}}"], "path": ["teams"] } } },
+        { "name": "Update", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Team Updated\"\n}" }, "url": { "raw": "{{base_url}}/teams/{{team_id}}", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}"] } } },
+        { "name": "Delete", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/teams/{{team_id}}", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}"] } } }
+      ]
+    },
+    {
+      "name": "Team Members",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": { "raw": "{{base_url}}/team-members", "host": ["{{base_url}}"], "path": ["team-members"] } } },
+        { "name": "Get /:id", "request": { "method": "GET", "url": { "raw": "{{base_url}}/team-members/{{team_member_id}}", "host": ["{{base_url}}"], "path": ["team-members","{{team_member_id}}"] } } },
+        { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"team_id\": {{team_id}},\n  \"user_id\": \"{{user_id}}\",\n  \"role\": \"driver\"\n}" }, "url": { "raw": "{{base_url}}/team-members", "host": ["{{base_url}}"], "path": ["team-members"] } } },
+        { "name": "Update", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"role\": \"coach\"\n}" }, "url": { "raw": "{{base_url}}/team-members/{{team_member_id}}", "host": ["{{base_url}}"], "path": ["team-members","{{team_member_id}}"] } } },
+        { "name": "Delete", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/team-members/{{team_member_id}}", "host": ["{{base_url}}"], "path": ["team-members","{{team_member_id}}"] } } }
+      ]
+    },
+    {
+      "name": "Registrations",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": { "raw": "{{base_url}}/registrations", "host": ["{{base_url}}"], "path": ["registrations"] } } },
+        { "name": "Get /:id", "request": { "method": "GET", "url": { "raw": "{{base_url}}/registrations/{{registration_id}}", "host": ["{{base_url}}"], "path": ["registrations","{{registration_id}}"] } } },
+        { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"competition_id\": {{competition_id}},\n  \"team_id\": {{team_id}}\n}" }, "url": { "raw": "{{base_url}}/registrations", "host": ["{{base_url}}"], "path": ["registrations"] } } },
+        { "name": "Update", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"confirmed\"\n}" }, "url": { "raw": "{{base_url}}/registrations/{{registration_id}}", "host": ["{{base_url}}"], "path": ["registrations","{{registration_id}}"] } } },
+        { "name": "Delete", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/registrations/{{registration_id}}", "host": ["{{base_url}}"], "path": ["registrations","{{registration_id}}"] } } }
+      ]
+    },
+    {
+      "name": "Sponsors",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": { "raw": "{{base_url}}/sponsors", "host": ["{{base_url}}"], "path": ["sponsors"] } } },
+        { "name": "Get /:id", "request": { "method": "GET", "url": { "raw": "{{base_url}}/sponsors/{{sponsor_id}}", "host": ["{{base_url}}"], "path": ["sponsors","{{sponsor_id}}"] } } },
+        { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Acme\",\n  \"website\": \"https://acme.example\"\n}" }, "url": { "raw": "{{base_url}}/sponsors", "host": ["{{base_url}}"], "path": ["sponsors"] } } },
+        { "name": "Update", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Acme Updated\"\n}" }, "url": { "raw": "{{base_url}}/sponsors/{{sponsor_id}}", "host": ["{{base_url}}"], "path": ["sponsors","{{sponsor_id}}"] } } },
+        { "name": "Delete", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/sponsors/{{sponsor_id}}", "host": ["{{base_url}}"], "path": ["sponsors","{{sponsor_id}}"] } } }
+      ]
+    },
+    {
+      "name": "Streams",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": { "raw": "{{base_url}}/streams", "host": ["{{base_url}}"], "path": ["streams"] } } },
+        { "name": "Get /:id", "request": { "method": "GET", "url": { "raw": "{{base_url}}/streams/{{stream_id}}", "host": ["{{base_url}}"], "path": ["streams","{{stream_id}}"] } } },
+        { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Live\",\n  \"url\": \"https://example.com/stream\"\n}" }, "url": { "raw": "{{base_url}}/streams", "host": ["{{base_url}}"], "path": ["streams"] } } },
+        { "name": "Update", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated Live\"\n}" }, "url": { "raw": "{{base_url}}/streams/{{stream_id}}", "host": ["{{base_url}}"], "path": ["streams","{{stream_id}}"] } } },
+        { "name": "Delete", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/streams/{{stream_id}}", "host": ["{{base_url}}"], "path": ["streams","{{stream_id}}"] } } }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": { "raw": "{{base_url}}/notifications", "host": ["{{base_url}}"], "path": ["notifications"] } } },
+        { "name": "Get /:id", "request": { "method": "GET", "url": { "raw": "{{base_url}}/notifications/{{notification_id}}", "host": ["{{base_url}}"], "path": ["notifications","{{notification_id}}"] } } },
+  { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"title\": \"Hello\",\n  \"message\": \"Hello\",\n  \"type\": \"mention\"\n}" }, "url": { "raw": "{{base_url}}/notifications", "host": ["{{base_url}}"], "path": ["notifications"] } } },
+        { "name": "Update", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"is_read\": true\n}" }, "url": { "raw": "{{base_url}}/notifications/{{notification_id}}", "host": ["{{base_url}}"], "path": ["notifications","{{notification_id}}"] } } },
+        { "name": "Delete", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/notifications/{{notification_id}}", "host": ["{{base_url}}"], "path": ["notifications","{{notification_id}}"] } } }
+      ]
+    },
+    {
+      "name": "Countries",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": { "raw": "{{base_url}}/countries", "host": ["{{base_url}}"], "path": ["countries"] } } },
+        { "name": "Get /:id", "request": { "method": "GET", "url": { "raw": "{{base_url}}/countries/{{country_id}}", "host": ["{{base_url}}"], "path": ["countries","{{country_id}}"] } } },
+        { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Spain\",\n  \"code\": \"ES\"\n}" }, "url": { "raw": "{{base_url}}/countries", "host": ["{{base_url}}"], "path": ["countries"] } } }
+      ]
+    }
+  ]
+}

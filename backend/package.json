@@ -3,7 +3,9 @@
   "scripts": {
     "start": "node index.js",
     "migrate": "node scripts/run-migrations.js",
-    "seed": "node scripts/run-seeders.js"
+    "seed": "node scripts/run-seeders.js",
+    "reset-data": "node scripts/reset-data.js",
+    "drop-tables": "node scripts/drop-tables.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

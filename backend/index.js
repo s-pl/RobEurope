@@ -1,5 +1,6 @@
 import express from 'express';
 import apiRoutes from './routes/api/index.js';
+import rateLimit from './middleware/rateLimit.middleware.js';
 import timeoutMiddleware from './middleware/timeout.middleware.js';
 import morgan from 'morgan';
 import logger from './utils/logger.js';
@@ -21,7 +22,8 @@ app.use(express.json());
 app.use(timeoutMiddleware);
 // Serve static files from backend/public so we can host a simple test UI
 app.use(express.static('public'));
-app.use('/api', apiRoutes);
+  // Apply rate limiting on API routes
+  app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
 app.use('/api/streams', streamRoutes);
 export default app; 
 

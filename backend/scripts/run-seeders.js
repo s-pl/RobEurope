@@ -1,17 +1,47 @@
 import { Sequelize } from 'sequelize';
 import sequelize from '../controller/db.controller.js';
-import * as seeder from '../seeders/20251031-seed-superadmin.js';
+import path from 'path';
+import { fileURLToPath, pathToFileURL } from 'url';
+
+// Ordered list of seeders to run. Add new seeders here in the required order.
+const seeders = [
+  '../seeders/20251031-seed-superadmin.js',
+  '../seeders/20251106-seed-competitions.js',
+  '../seeders/20251106-seed-team-members.js',
+  '../seeders/20251106-seed-registrations.js',
+  '../seeders/20251106-seed-posts.js',
+  '../seeders/20251106-seed-sponsors.js',
+  '../seeders/20251106-seed-notifications.js',
+  '../seeders/country_seeder.js'
+];
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function run() {
   try {
     await sequelize.authenticate();
     console.log('DB authenticated — running seeders');
     const qi = sequelize.getQueryInterface();
-    if (typeof seeder.up !== 'function') {
-      throw new Error('Seeder file does not export an up() function');
+
+    for (const relPath of seeders) {
+      try {
+        const seederPath = path.resolve(__dirname, relPath);
+        const seederUrl = pathToFileURL(seederPath).href;
+        const module = await import(seederUrl);
+        const upFn = module.up || module.default?.up || module.default;
+        if (typeof upFn !== 'function') {
+          console.warn(`Skipping seeder ${relPath}: no exported up() function found`);
+          continue;
+        }
+        console.log(`Running seeder: ${relPath}`);
+        await upFn(qi, Sequelize);
+      } catch (innerErr) {
+        console.error(`Error running seeder ${relPath}:`, innerErr);
+        throw innerErr; // bubble up to abort
+      }
     }
-    await seeder.up(qi, Sequelize);
-    console.log('Seeders applied successfully');
+
+    console.log('All seeders applied successfully');
   } catch (err) {
     console.error('Seeding error:', err);
     process.exitCode = 1;

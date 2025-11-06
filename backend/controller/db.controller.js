@@ -48,8 +48,10 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
   dialectOptions,
   logging: false,
   define: {
-   
     freezeTableName: true,
+    // Do not let Sequelize automatically add `createdAt`/`updatedAt` camelCase columns
+    // Models in this project define their own `created_at`/`updated_at` fields explicitly.
+    timestamps: false,
   },
   pool: {
     max: 10,

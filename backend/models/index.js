@@ -19,7 +19,7 @@ const files = fs
 for (const file of files) {
   const modelPath = path.join(__dirname, file);
   const modelDef = (await import(pathToFileURL(modelPath).href)).default;
-  const model = modelDef(sequelize, DataTypes);
+  const model = await modelDef(sequelize, DataTypes);
   db[model.name] = model;
 }
 

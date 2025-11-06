@@ -1,221 +1,183 @@
-import bcrypt from 'bcryptjs';
-
+/**
+ * Migration: create initial tables based on models in backend/models
+ * Exports up and down functions for use with QueryInterface
+ */
 export async function up(queryInterface, Sequelize) {
-  // Create COUNTRIES first
-  await queryInterface.createTable('COUNTRIES', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    code: { type: Sequelize.STRING(8) },
-    name: { type: Sequelize.STRING },
-    flag_emoji: { type: Sequelize.STRING }
-  });
-
-  // USERS
-  await queryInterface.createTable('USERS', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    first_name: { type: Sequelize.STRING },
-    last_name: { type: Sequelize.STRING },
+  // Create User table (UUID primary key)
+  await queryInterface.createTable('User', {
+    id: {
+      type: Sequelize.UUID,
+      defaultValue: Sequelize.UUIDV4,
+      allowNull: false,
+      primaryKey: true
+    },
+    first_name: { type: Sequelize.STRING, allowNull: false },
+    last_name: { type: Sequelize.STRING, allowNull: false },
+    username: { type: Sequelize.STRING, allowNull: false, unique: true },
     email: { type: Sequelize.STRING, allowNull: false, unique: true },
-    password_hash: { type: Sequelize.STRING },
-    phone: { type: Sequelize.STRING },
-    profile_photo_url: { type: Sequelize.STRING },
-    country_id: { type: Sequelize.BIGINT },
-    role: { type: Sequelize.ENUM('super_admin','user'), allowNull: false, defaultValue: 'user' },
+    password_hash: { type: Sequelize.STRING, allowNull: false },
+    phone: { type: Sequelize.STRING, allowNull: true },
+    profile_photo_url: { type: Sequelize.STRING, allowNull: true },
+    role: { type: Sequelize.ENUM('user', 'super_admin'), defaultValue: 'user' },
     is_active: { type: Sequelize.BOOLEAN, defaultValue: true },
-    created_at: { type: Sequelize.DATE },
-    updated_at: { type: Sequelize.DATE }
+    created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
   });
 
-  // TEAMS
-  await queryInterface.createTable('TEAMS', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    name: { type: Sequelize.STRING },
-    short_code: { type: Sequelize.STRING },
-    country_id: { type: Sequelize.BIGINT },
-    city: { type: Sequelize.STRING },
-    institution: { type: Sequelize.STRING },
-    logo_url: { type: Sequelize.STRING },
-    description: { type: Sequelize.TEXT },
-    contact_email: { type: Sequelize.STRING },
-    website_url: { type: Sequelize.STRING },
-    created_by_user_id: { type: Sequelize.BIGINT },
-    is_active: { type: Sequelize.BOOLEAN, defaultValue: true },
-    created_at: { type: Sequelize.DATE },
-    updated_at: { type: Sequelize.DATE }
+  // Country table
+  await queryInterface.createTable('Country', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    name: { type: Sequelize.STRING, allowNull: false },
+    code: { type: Sequelize.STRING, allowNull: false },
+    flag_emoji: { type: Sequelize.STRING, allowNull: true }
   });
 
-  // TEAM_MEMBERS
-  await queryInterface.createTable('TEAM_MEMBERS', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    team_id: { type: Sequelize.BIGINT },
-    user_id: { type: Sequelize.BIGINT },
-    role: { type: Sequelize.ENUM('captain','member','mentor') },
-    is_active: { type: Sequelize.BOOLEAN, defaultValue: true },
-    joined_at: { type: Sequelize.DATE },
-    left_at: { type: Sequelize.DATE }
+  // Competition table
+  await queryInterface.createTable('Competition', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    title: { type: Sequelize.STRING, allowNull: false },
+    slug: { type: Sequelize.STRING, allowNull: false },
+    description: { type: Sequelize.STRING, allowNull: true },
+    country_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: { model: 'Country', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
+    registration_start: { type: Sequelize.DATE, allowNull: true },
+    registration_end: { type: Sequelize.DATE, allowNull: true },
+    start_date: { type: Sequelize.DATE, allowNull: true },
+    end_date: { type: Sequelize.DATE, allowNull: true },
+    rules_url: { type: Sequelize.STRING, allowNull: true },
+    stream_url: { type: Sequelize.JSON, allowNull: true }
   });
 
-  // COMPETITIONS
-  await queryInterface.createTable('COMPETITIONS', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    title: { type: Sequelize.STRING },
-    slug: { type: Sequelize.STRING },
-    description: { type: Sequelize.TEXT },
-    location: { type: Sequelize.STRING },
-    country_id: { type: Sequelize.BIGINT },
-    registration_start: { type: Sequelize.DATE },
-    registration_end: { type: Sequelize.DATE },
-    start_date: { type: Sequelize.DATE },
-    end_date: { type: Sequelize.DATE },
-    status: { type: Sequelize.ENUM('draft','open','closed','in_progress','completed','cancelled') },
-    banner_url: { type: Sequelize.STRING },
-    rules_url: { type: Sequelize.TEXT },
-    max_teams: { type: Sequelize.INTEGER },
-    created_at: { type: Sequelize.DATE },
-    updated_at: { type: Sequelize.DATE }
+  // Team table
+  await queryInterface.createTable('Team', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    name: { type: Sequelize.STRING, allowNull: false },
+    country_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: { model: 'Country', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
+    city: { type: Sequelize.STRING, allowNull: true },
+    institution: { type: Sequelize.STRING, allowNull: true },
+    logo_url: { type: Sequelize.STRING, allowNull: true },
+    social_links: { type: Sequelize.JSON, allowNull: true },
+    created_by_user_id: {
+      type: Sequelize.UUID,
+      allowNull: true,
+      references: { model: 'User', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
+    created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+    updated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
   });
 
-  // REGISTRATIONS
-  await queryInterface.createTable('REGISTRATIONS', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    competition_id: { type: Sequelize.BIGINT },
-    team_id: { type: Sequelize.BIGINT },
-    status: { type: Sequelize.ENUM('pending','approved','rejected','disqualified'), defaultValue: 'pending' },
-    requested_at: { type: Sequelize.DATE },
-    reviewed_at: { type: Sequelize.DATE },
-    reviewed_by_user_id: { type: Sequelize.BIGINT }
+  // TeamMembers table (note: model references were inconsistent; FK points to Team table)
+  await queryInterface.createTable('TeamMembers', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    team_id: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      references: { model: 'Team', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
+    },
+    user_id: {
+      type: Sequelize.UUID,
+      allowNull: false,
+      references: { model: 'User', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
+    },
+    role: { type: Sequelize.STRING, allowNull: false },
+    joined_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+    left_at: { type: Sequelize.DATE, allowNull: true }
   });
 
-  // STREAMS
-  await queryInterface.createTable('STREAMS', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    title: { type: Sequelize.STRING },
-    description: { type: Sequelize.TEXT },
-    platform: { type: Sequelize.STRING },
-    stream_url: { type: Sequelize.STRING },
-    is_live: { type: Sequelize.BOOLEAN, defaultValue: false },
-    host_team_id: { type: Sequelize.BIGINT },
-    competition_id: { type: Sequelize.BIGINT },
-    created_at: { type: Sequelize.DATE }
+  // Registration table
+  await queryInterface.createTable('Registration', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    team_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: { model: 'Team', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
+    competition_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: { model: 'Competition', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
+    status: { type: Sequelize.ENUM('pending', 'approved', 'rejected'), allowNull: false, defaultValue: 'pending' },
+    registration_date: { type: Sequelize.DATE, allowNull: false }
   });
 
-  // TEAM_SOCIALS
-  await queryInterface.createTable('TEAM_SOCIALS', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    team_id: { type: Sequelize.BIGINT },
-    platform: { type: Sequelize.STRING },
-    url: { type: Sequelize.STRING },
-    created_at: { type: Sequelize.DATE }
-  });
-
-  // GLOBAL_POSTS
-  await queryInterface.createTable('GLOBAL_POSTS', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    author_user_id: { type: Sequelize.BIGINT },
-    title: { type: Sequelize.STRING },
-    slug: { type: Sequelize.STRING },
-    content: { type: Sequelize.TEXT },
-    cover_image_url: { type: Sequelize.STRING },
-    status: { type: Sequelize.ENUM('draft','published') },
-    is_pinned: { type: Sequelize.BOOLEAN, defaultValue: false },
-    views_count: { type: Sequelize.INTEGER, defaultValue: 0 },
-    published_at: { type: Sequelize.DATE },
-    created_at: { type: Sequelize.DATE },
-    updated_at: { type: Sequelize.DATE }
-  });
-
-  // COMPETITION_POSTS
-  await queryInterface.createTable('COMPETITION_POSTS', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    competition_id: { type: Sequelize.BIGINT },
-    team_id: { type: Sequelize.BIGINT },
-    author_user_id: { type: Sequelize.BIGINT },
-    title: { type: Sequelize.STRING },
-    content: { type: Sequelize.TEXT },
-    media_urls: { type: Sequelize.JSON },
+  // Post table
+  await queryInterface.createTable('Post', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    title: { type: Sequelize.STRING, allowNull: false },
+    content: { type: Sequelize.TEXT, allowNull: false },
+    author_id: {
+      type: Sequelize.UUID,
+      allowNull: true,
+      references: { model: 'User', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
+    media_urls: { type: Sequelize.JSON, allowNull: true },
     likes_count: { type: Sequelize.INTEGER, defaultValue: 0 },
-    is_featured: { type: Sequelize.BOOLEAN, defaultValue: false },
-    created_at: { type: Sequelize.DATE },
-    updated_at: { type: Sequelize.DATE }
+    views_count: { type: Sequelize.INTEGER, defaultValue: 0 },
+    created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+    updated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
   });
 
-  // CHAT_MESSAGES
-  await queryInterface.createTable('CHAT_MESSAGES', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    competition_id: { type: Sequelize.BIGINT },
-    user_id: { type: Sequelize.BIGINT },
-    parent_id: { type: Sequelize.BIGINT },
-    content: { type: Sequelize.TEXT },
-    is_pinned: { type: Sequelize.BOOLEAN, defaultValue: false },
-    is_deleted: { type: Sequelize.BOOLEAN, defaultValue: false },
-    created_at: { type: Sequelize.DATE }
+  // Sponsor table
+  await queryInterface.createTable('Sponsor', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    name: { type: Sequelize.STRING, allowNull: false },
+    logo_url: { type: Sequelize.STRING, allowNull: true },
+    website_url: { type: Sequelize.STRING, allowNull: true },
+    created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+    updated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
   });
 
-  // MEDIA
-  await queryInterface.createTable('MEDIA', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    uploaded_by_user_id: { type: Sequelize.BIGINT },
-    object_type: { type: Sequelize.STRING },
-    object_id: { type: Sequelize.BIGINT },
-    type: { type: Sequelize.STRING },
-    title: { type: Sequelize.STRING },
-    file_path: { type: Sequelize.STRING },
-    thumbnail_path: { type: Sequelize.STRING },
-    is_featured: { type: Sequelize.BOOLEAN, defaultValue: false },
-    uploaded_at: { type: Sequelize.DATE }
-  });
-
-  // SPONSORS
-  await queryInterface.createTable('SPONSORS', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    name: { type: Sequelize.STRING },
-    logo_url: { type: Sequelize.STRING },
-    website_url: { type: Sequelize.STRING },
-    tier: { type: Sequelize.ENUM('platinum','gold','silver','bronze') },
-    display_order: { type: Sequelize.INTEGER },
-    is_active: { type: Sequelize.BOOLEAN, defaultValue: true },
-    created_at: { type: Sequelize.DATE }
-  });
-
-  // NOTIFICATIONS
-  await queryInterface.createTable('NOTIFICATIONS', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    user_id: { type: Sequelize.BIGINT },
-    title: { type: Sequelize.STRING },
-    message: { type: Sequelize.TEXT },
-    type: { type: Sequelize.STRING },
-    action_url: { type: Sequelize.STRING },
+  // Notification table
+  await queryInterface.createTable('Notification', {
+    id: { type: Sequelize.UUID, defaultValue: Sequelize.UUIDV4, primaryKey: true },
+    user_id: {
+      type: Sequelize.UUID,
+      allowNull: false,
+      references: { model: 'User', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
+    },
+    title: { type: Sequelize.STRING, allowNull: false },
+    message: { type: Sequelize.STRING, allowNull: false },
+    type: { type: Sequelize.ENUM('registration_team_status', 'team_invite', 'mention'), allowNull: false },
     is_read: { type: Sequelize.BOOLEAN, defaultValue: false },
-    created_at: { type: Sequelize.DATE }
-  });
-
-  // REACTIONS
-  await queryInterface.createTable('REACTIONS', {
-    id: { type: Sequelize.BIGINT, primaryKey: true, autoIncrement: true },
-    user_id: { type: Sequelize.BIGINT },
-    target_type: { type: Sequelize.STRING },
-    global_post_id: { type: Sequelize.BIGINT },
-    competition_post_id: { type: Sequelize.BIGINT },
-    chat_message_id: { type: Sequelize.BIGINT },
-    emoji: { type: Sequelize.STRING },
-    created_at: { type: Sequelize.DATE }
+    created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
   });
 }
 
 export async function down(queryInterface, Sequelize) {
-  // Reverse in opposite order
-  await queryInterface.dropTable('REACTIONS');
-  await queryInterface.dropTable('NOTIFICATIONS');
-  await queryInterface.dropTable('SPONSORS');
-  await queryInterface.dropTable('MEDIA');
-  await queryInterface.dropTable('CHAT_MESSAGES');
-  await queryInterface.dropTable('COMPETITION_POSTS');
-  await queryInterface.dropTable('GLOBAL_POSTS');
-  await queryInterface.dropTable('TEAM_SOCIALS');
-  await queryInterface.dropTable('STREAMS');
-  await queryInterface.dropTable('REGISTRATIONS');
-  await queryInterface.dropTable('COMPETITIONS');
-  await queryInterface.dropTable('TEAM_MEMBERS');
-  await queryInterface.dropTable('TEAMS');
-  await queryInterface.dropTable('USERS');
-  await queryInterface.dropTable('COUNTRIES');
+  // Drop in reverse order to satisfy foreign key constraints
+  await queryInterface.dropTable('Notification');
+  await queryInterface.dropTable('Sponsor');
+  await queryInterface.dropTable('Post');
+  await queryInterface.dropTable('Registration');
+  await queryInterface.dropTable('TeamMembers');
+  await queryInterface.dropTable('Team');
+  await queryInterface.dropTable('Competition');
+  await queryInterface.dropTable('Country');
+  // Note: ENUM types created by Sequelize will be removed automatically when the table is dropped in MySQL.
+  await queryInterface.dropTable('User');
 }
