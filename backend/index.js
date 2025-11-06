@@ -22,7 +22,7 @@ const PORT = process.env.PORT;
 
 // registrar peticiones (access logs) vía winston
 app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }));
-import cors from 'cors';
+
 import express from 'express';
 
 
