@@ -7,17 +7,37 @@ import logger from './utils/logger.js';
 import dotenv from 'dotenv';
 import streamRoutes from './routes/api/stream.route.js';
 import swaggerRouter from './swagger.js';
-
+import cors from 'cors';
 import fs from 'fs';
 import https from 'https';
 dotenv.config();
 // import userRoutes from './routes/userRoutes.js';
+const allowedOrigins = [
+  /^https?:\/\/localhost(:\d+)?$/,    
+  /^http:\/\/46\.101\.255\.106(:85)?$/ 
+];
 
 const app = express();
 const PORT = process.env.PORT;
 
 // registrar peticiones (access logs) vía winston
 app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }));
+import cors from 'cors';
+import express from 'express';
+
+
+
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const allowed = allowedOrigins.some((pattern) => pattern.test(origin));
+    if (allowed) return callback(null, true);
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
+
 
 app.use(express.json());
 app.use(timeoutMiddleware);

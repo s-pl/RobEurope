@@ -14,28 +14,6 @@ const swaggerSpec = {
     { url: 'http://46.101.255.106:85/api', description: 'Remote test server' }
   ],
   paths: {
-    '/health': {
-      get: {
-        summary: 'Health check',
-        description: 'Returns a simple health status for the API. Use this endpoint to verify that the server is up and responding.',
-        responses: {
-          '200': {
-            description: 'Service is healthy',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    status: { type: 'string', example: 'ok' },
-                    uptime: { type: 'number', example: 12345 }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     '/auth/login': {
       post: {
         summary: 'User login',
