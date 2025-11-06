@@ -7,7 +7,7 @@ import logger from './utils/logger.js';
 import dotenv from 'dotenv';
 import streamRoutes from './routes/api/stream.route.js';
 import swaggerRouter from './swagger.js';
-import cors from 'cors';
+
 import fs from 'fs';
 import https from 'https';
 dotenv.config();
@@ -18,9 +18,7 @@ const PORT = process.env.PORT;
 
 // registrar peticiones (access logs) vía winston
 app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }));
-app.use(cors({
-  origin: ['http://localhost:85', 'http://46.101.255.106:85','http://localhost:5173']
-}));
+
 app.use(express.json());
 app.use(timeoutMiddleware);
 // Serve static files from backend/public so we can host a simple test UI
