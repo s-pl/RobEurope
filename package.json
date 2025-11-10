@@ -1,0 +1,29 @@
+{
+    "name": "robeurope",
+    "version": "0.1.0",
+    "description": "Proyecto RobEurope",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js",
+        "build": "echo \"No build step defined\"",
+        "test": "echo \"No tests specified\" && exit 0",
+        "lint": "eslint ."
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://example.com/robeurope.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://example.com/robeurope/issues"
+    },
+    "homepage": "https://example.com/robeurope#readme",
+    "dependencies": {},
+    "devDependencies": {
+        "nodemon": "^2.0.22",
+        "eslint": "^8.49.0"
+    }
+}
