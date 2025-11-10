@@ -24,7 +24,7 @@ seeders, minimal test UI, and Swagger API documentation.
 |------|------|--------------|
 | Samuel Ponce Luna | Full-Stack Developer / Architect | IES El Rincón |
 | Ángel Lallave Herrera | Frontend & UI/UX Designer | IES El Rincón |
-| Néstor García Santos | Backend & DB Engineer | IES El Rincón |
+| Néstor García Santos | Backend & Frontend | IES El Rincón |
 
 ---
 
