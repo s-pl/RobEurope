@@ -1,6 +1,4 @@
-import express from 'express';
-import { uploadFile, getMedia, getMediaByEntity, deleteMedia } from '../../controller/media.controller.js';
-import { authenticateToken } from '../../middleware/auth.middleware.js';
+import authenticateToken from '../../middleware/auth.middleware.js';
 
 const router = express.Router();
 
