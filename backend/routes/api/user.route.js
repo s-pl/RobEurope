@@ -1,5 +1,6 @@
 import express from 'express';
 import authenticateToken from '../../middleware/auth.middleware.js';
+import { requireOwnership } from '../../middleware/ownership.middleware.js';
 import {
   searchUsers,
   getUserById,
@@ -20,6 +21,6 @@ router.delete('/me', authenticateToken, deleteSelf);
 
 // rutas por id (solo después de /me)
 router.get('/:id', getUserById);
-router.delete('/:id', authenticateToken, deleteUser);
+router.delete('/:id', authenticateToken, requireOwnership('User'), deleteUser);
 
 export default router;

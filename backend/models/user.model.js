@@ -50,5 +50,9 @@ export default async function defineUserModel(sequelize, DataTypes) {
     }
   });
 
+  User.associate = (models) => {
+    User.hasMany(models.Media, { foreignKey: 'media_id', constraints: false, scope: { media_type: 'user' } });
+  };
+
   return User;
 }

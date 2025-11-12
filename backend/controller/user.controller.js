@@ -7,6 +7,7 @@ import { Op } from 'sequelize';
 export const createUser = async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
+   
     const user = await User.create({ ...req.body, password: hashedPassword });
     res.json(user);
   } catch (error) {
