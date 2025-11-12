@@ -172,6 +172,71 @@ const swaggerSpec = {
       get: { summary: 'Get team member', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'TeamMember', content: { 'application/json': { schema: { $ref: '#/components/schemas/TeamMember' } } } } } },
       put: { summary: 'Update team member', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/TeamMemberCreate' } } } }, responses: { '200': { description: 'Updated' } } },
       delete: { summary: 'Delete team member', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Deleted' } } }
+    },
+    '/media/upload': {
+      post: {
+        summary: 'Upload a file',
+        description: 'Upload a file and associate it with an entity (user, team, post, sponsor). Requires authentication.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  file: { type: 'string', format: 'binary', description: 'File to upload' },
+                  media_type: { type: 'string', enum: ['user', 'team', 'post', 'sponsor'], description: 'Type of entity' },
+                  media_id: { type: 'string', description: 'ID of the entity' }
+                },
+                required: ['file', 'media_type', 'media_id']
+              }
+            }
+          }
+        },
+        responses: {
+          '201': { description: 'File uploaded successfully', content: { 'application/json': { schema: { $ref: '#/components/schemas/Media' } } } },
+          '400': { description: 'Bad request' },
+          '401': { description: 'Unauthorized' },
+          '403': { description: 'Forbidden' }
+        }
+      }
+    },
+    '/media/{id}': {
+      get: {
+        summary: 'Get media by ID',
+        description: 'Retrieve media information by ID. Requires authentication.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': { description: 'Media', content: { 'application/json': { schema: { $ref: '#/components/schemas/Media' } } } },
+          '404': { description: 'Not found' }
+        }
+      },
+      delete: {
+        summary: 'Delete media',
+        description: 'Delete a media file. Only uploader or super admin can delete.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '204': { description: 'Deleted' },
+          '403': { description: 'Forbidden' }
+        }
+      }
+    },
+    '/media/{media_type}/{media_id}': {
+      get: {
+        summary: 'Get media by entity',
+        description: 'Retrieve all media associated with an entity. Requires authentication.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'media_type', in: 'path', required: true, schema: { type: 'string', enum: ['user', 'team', 'post', 'sponsor'] } },
+          { name: 'media_id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'List of media', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Media' } } } } }
+        }
+      }
     }
   }
   ,
@@ -199,7 +264,8 @@ const swaggerSpec = {
       Team: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' }, country_id: { type: 'string' } } },
       TeamCreate: { type: 'object', properties: { name: { type: 'string' }, country_id: { type: 'string' }, created_by_user_id: { type: 'string' } }, required: ['name'] },
       TeamMember: { type: 'object', properties: { id: { type: 'string' }, team_id: { type: 'string' }, user_id: { type: 'string' }, role: { type: 'string' } } },
-      TeamMemberCreate: { type: 'object', properties: { team_id: { type: 'string' }, user_id: { type: 'string' }, role: { type: 'string' } }, required: ['team_id','user_id','role'] }
+      TeamMemberCreate: { type: 'object', properties: { team_id: { type: 'string' }, user_id: { type: 'string' }, role: { type: 'string' } }, required: ['team_id','user_id','role'] },
+      Media: { type: 'object', properties: { id: { type: 'string' }, media_type: { type: 'string' }, media_id: { type: 'string' }, filename: { type: 'string' }, url: { type: 'string' }, mime_type: { type: 'string' }, size: { type: 'integer' }, uploaded_by: { type: 'string' }, created_at: { type: 'string', format: 'date-time' } } }
     }
   }
 };

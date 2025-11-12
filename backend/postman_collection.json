@@ -17,7 +17,9 @@
     { "key": "stream_id", "value": "" },
     { "key": "team_member_id", "value": "" },
     { "key": "notification_id", "value": "" },
-    { "key": "country_id", "value": "" }
+    { "key": "country_id", "value": "" },
+    { "key": "media_id", "value": "" },
+    { "key": "media_type", "value": "" }
   ],
   "item": [
     {
@@ -98,9 +100,9 @@
       "item": [
         { "name": "List", "request": { "method": "GET", "url": { "raw": "{{base_url}}/teams", "host": ["{{base_url}}"], "path": ["teams"] } } },
         { "name": "Get /:id", "request": { "method": "GET", "url": { "raw": "{{base_url}}/teams/{{team_id}}", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}"] } } },
-        { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Team Alpha\"\n}" }, "url": { "raw": "{{base_url}}/teams", "host": ["{{base_url}}"], "path": ["teams"] } } },
-        { "name": "Update", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Team Updated\"\n}" }, "url": { "raw": "{{base_url}}/teams/{{team_id}}", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}"] } } },
-        { "name": "Delete", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/teams/{{team_id}}", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}"] } } }
+        { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Team Alpha\"\n}" }, "url": { "raw": "{{base_url}}/teams", "host": ["{{base_url}}"], "path": ["teams"] } } },
+        { "name": "Update", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Team Updated\"\n}" }, "url": { "raw": "{{base_url}}/teams/{{team_id}}", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}"] } } },
+        { "name": "Delete", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/teams/{{team_id}}", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}"] } } }
       ]
     },
     {
@@ -128,9 +130,9 @@
       "item": [
         { "name": "List", "request": { "method": "GET", "url": { "raw": "{{base_url}}/sponsors", "host": ["{{base_url}}"], "path": ["sponsors"] } } },
         { "name": "Get /:id", "request": { "method": "GET", "url": { "raw": "{{base_url}}/sponsors/{{sponsor_id}}", "host": ["{{base_url}}"], "path": ["sponsors","{{sponsor_id}}"] } } },
-        { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Acme\",\n  \"website\": \"https://acme.example\"\n}" }, "url": { "raw": "{{base_url}}/sponsors", "host": ["{{base_url}}"], "path": ["sponsors"] } } },
-        { "name": "Update", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Acme Updated\"\n}" }, "url": { "raw": "{{base_url}}/sponsors/{{sponsor_id}}", "host": ["{{base_url}}"], "path": ["sponsors","{{sponsor_id}}"] } } },
-        { "name": "Delete", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/sponsors/{{sponsor_id}}", "host": ["{{base_url}}"], "path": ["sponsors","{{sponsor_id}}"] } } }
+        { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Acme\",\n  \"website\": \"https://acme.example\"\n}" }, "url": { "raw": "{{base_url}}/sponsors", "host": ["{{base_url}}"], "path": ["sponsors"] } } },
+        { "name": "Update", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Acme Updated\"\n}" }, "url": { "raw": "{{base_url}}/sponsors/{{sponsor_id}}", "host": ["{{base_url}}"], "path": ["sponsors","{{sponsor_id}}"] } } },
+        { "name": "Delete", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/sponsors/{{sponsor_id}}", "host": ["{{base_url}}"], "path": ["sponsors","{{sponsor_id}}"] } } }
       ]
     },
     {
@@ -159,6 +161,59 @@
         { "name": "List", "request": { "method": "GET", "url": { "raw": "{{base_url}}/countries", "host": ["{{base_url}}"], "path": ["countries"] } } },
         { "name": "Get /:id", "request": { "method": "GET", "url": { "raw": "{{base_url}}/countries/{{country_id}}", "host": ["{{base_url}}"], "path": ["countries","{{country_id}}"] } } },
         { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Spain\",\n  \"code\": \"ES\"\n}" }, "url": { "raw": "{{base_url}}/countries", "host": ["{{base_url}}"], "path": ["countries"] } } }
+      ]
+    },
+    {
+      "name": "Media",
+      "item": [
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] },
+                { "key": "media_type", "value": "{{media_type}}" },
+                { "key": "media_id", "value": "{{media_id}}" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/media/upload", "host": ["{{base_url}}"], "path": ["media","upload"] }
+          }
+        },
+        {
+          "name": "Get Media /:id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/media/{{media_id}}", "host": ["{{base_url}}"], "path": ["media","{{media_id}}"] }
+          }
+        },
+        {
+          "name": "Get Media by Entity",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/media/{{media_type}}/{{media_id}}", "host": ["{{base_url}}"], "path": ["media","{{media_type}}","{{media_id}}"] }
+          }
+        },
+        {
+          "name": "Delete Media",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/media/{{media_id}}", "host": ["{{base_url}}"], "path": ["media","{{media_id}}"] }
+          }
+        }
       ]
     }
   ]
