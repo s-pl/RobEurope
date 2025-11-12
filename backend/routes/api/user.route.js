@@ -5,6 +5,7 @@ import {
   searchUsers,
   getUserById,
   deleteUser,
+  updateUser,
   getSelf,
   updateSelf,
   deleteSelf
@@ -21,6 +22,7 @@ router.delete('/me', authenticateToken, deleteSelf);
 
 // rutas por id (solo después de /me)
 router.get('/:id', getUserById);
+router.put('/:id', authenticateToken, requireOwnership('User'), updateUser);
 router.delete('/:id', authenticateToken, requireOwnership('User'), deleteUser);
 
 export default router;

@@ -93,13 +93,12 @@ const swaggerSpec = {
       delete: { summary: 'Delete country', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Deleted' } } }
     },
     '/users': {
-      get: { summary: 'List users', responses: { '200': { description: 'List of users', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/User' } } } } } } },
-      post: { summary: 'Create user', requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/UserCreate' } } } }, responses: { '201': { description: 'Created' } } }
+      get: { summary: 'List users', responses: { '200': { description: 'List of users', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/User' } } } } } } } }
     },
     '/users/{id}': {
       get: { summary: 'Get user', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'User', content: { 'application/json': { schema: { $ref: '#/components/schemas/User' } } } } } },
-      put: { summary: 'Update user', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/UserCreate' } } } }, responses: { '200': { description: 'Updated' } } },
-      delete: { summary: 'Delete user', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Deleted' } } }
+      put: { summary: 'Update user', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/UserCreate' } } } }, responses: { '200': { description: 'Updated' } } },
+      delete: { summary: 'Delete user', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Deleted' } } }
     },
     '/streams': {
       get: { summary: 'List streams', responses: { '200': { description: 'Streams list', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Stream' } } } } } } },
