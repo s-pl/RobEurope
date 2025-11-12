@@ -1,6 +1,7 @@
 :root{
   --bg1: #e8dfe0;
   --blue1: #1e4ed8;
+  background-color: #ebe0e1;
 }
 
 .home{
@@ -213,7 +214,7 @@
   min-width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(244, 0, 0, 0.6);
 }
 
 .event__info {
@@ -391,8 +392,7 @@
 .archive__container {
   max-width: 900px;
   margin: 0 auto;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.3));
-  backdrop-filter: blur(20px);
+  background: linear-gradient(135deg, rgba(186, 193, 251, 0.5), rgba(76, 78, 137, 0.3));
   border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 20px;
   padding: 60px 50px;
