@@ -42,6 +42,8 @@ app.use(express.json());
 app.use(timeoutMiddleware);
 // Serve static files from backend/public so we can host a simple test UI
 app.use(express.static('public'));
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
 // Serve API documentation (Swagger UI)
 app.use('/api-docs', swaggerRouter);
   // Apply rate limiting on API routes
@@ -132,15 +134,15 @@ if(process.env.NODE_ENV === 'production') {
   });
 } else {
   // In development, ensure models are loaded and DB synced (creates missing tables)
-  try {
-    const modelsModule = await import('./models/index.js');
-    const db = modelsModule.default;
-    console.log('Syncing database (development mode) — this may alter tables...');
-    await db.sequelize.sync({ alter: true });
-    console.log('Database sync complete');
-  } catch (err) {
-    console.error('Database sync failed:', err && err.message ? err.message : err);
-  }
+  // try {
+  //   const modelsModule = await import('./models/index.js');
+  //   const db = modelsModule.default;
+  //   console.log('Syncing database (development mode) — this may alter tables...');
+  //   await db.sequelize.sync({ alter: true });
+  //   console.log('Database sync complete');
+  // } catch (err) {
+  //   console.error('Database sync failed:', err && err.message ? err.message : err);
+  // }
 
   app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
