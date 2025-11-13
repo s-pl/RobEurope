@@ -1,6 +1,7 @@
 import db from '../models/index.js';
 const { Team, User, Country } = db;
 import { Op } from 'sequelize';
+import { getFileInfo } from '../middleware/upload.middleware.js';
 
 export const createTeam = async (req, res) => {
   try {
@@ -18,7 +19,15 @@ export const createTeam = async (req, res) => {
       }
     }
 
-    const item = await Team.create(req.body);
+    const teamData = { ...req.body };
+
+    // Handle file upload
+    const fileInfo = getFileInfo(req);
+    if (fileInfo) {
+      teamData.logo_url = fileInfo.url;
+    }
+
+    const item = await Team.create(teamData);
     res.status(201).json(item);
   } catch (err) {
     // Map common DB constraint errors to 400 for better client experience
@@ -55,7 +64,15 @@ export const getTeamById = async (req, res) => {
 
 export const updateTeam = async (req, res) => {
   try {
-    const [updated] = await Team.update(req.body, { where: { id: req.params.id } });
+    const updates = { ...req.body };
+
+    // Handle file upload
+    const fileInfo = getFileInfo(req);
+    if (fileInfo) {
+      updates.logo_url = fileInfo.url;
+    }
+
+    const [updated] = await Team.update(updates, { where: { id: req.params.id } });
     if (!updated) return res.status(404).json({ error: 'Team not found' });
     const updatedItem = await Team.findByPk(req.params.id);
     res.json(updatedItem);

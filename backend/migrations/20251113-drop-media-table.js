@@ -1,8 +1,21 @@
 /**
- * Migration: create media table for file uploads
+ * Migration: drop media table
  * Exports up and down functions for use with QueryInterface
  */
 export async function up(queryInterface, Sequelize) {
+  // Check if table exists before dropping
+  const tableExists = await queryInterface.sequelize.query(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='Media';",
+    { type: Sequelize.QueryTypes.SELECT }
+  );
+
+  if (tableExists.length > 0) {
+    await queryInterface.dropTable('Media');
+  }
+}
+
+export async function down(queryInterface, Sequelize) {
+  // Recreate the Media table if needed for rollback
   await queryInterface.createTable('Media', {
     id: {
       type: Sequelize.INTEGER,
@@ -14,7 +27,7 @@ export async function up(queryInterface, Sequelize) {
       allowNull: false
     },
     media_id: {
-      type: Sequelize.STRING, // To accommodate UUID and INTEGER ids
+      type: Sequelize.STRING,
       allowNull: false
     },
     filename: {
@@ -49,8 +62,4 @@ export async function up(queryInterface, Sequelize) {
       defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
     }
   });
-}
-
-export async function down(queryInterface, Sequelize) {
-  await queryInterface.dropTable('Media');
 }

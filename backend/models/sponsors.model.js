@@ -28,7 +28,7 @@ export default async function defineSponsorsModel(sequelize, DataTypes) {
     });
 
     Sponsor.associate = (models) => {
-        Sponsor.hasMany(models.Media, { foreignKey: 'media_id', constraints: false, scope: { media_type: 'sponsor' } });
+        // Removed Media association
     };
 
     return Sponsor;

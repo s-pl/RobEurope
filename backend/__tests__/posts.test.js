@@ -4,14 +4,13 @@ import app from '../index.js';
 import db from '../models/index.js';
 import bcrypt from 'bcryptjs';
 
-const { User } = db;
+const { User, Post } = db;
 
-describe('User API', () => {
+describe('Posts API', () => {
   let token;
 
   beforeAll(async () => {
-    // Setup test database if needed
-    await db.sequelize.sync({ force: true }); // For testing, reset DB
+    await db.sequelize.sync({ force: true });
 
     // Create a test user
     const hashedPassword = await bcrypt.hash('password123', 10);
@@ -41,32 +40,35 @@ describe('User API', () => {
     await db.sequelize.close();
   });
 
-  it('should create a new user', async () => {
+  it('should create a post', async () => {
     const response = await request(app)
-      .post('/api/auth/register')
-      .send({
-        username: 'testuser2',
-        email: 'test2@example.com',
-        password: 'password123',
-        first_name: 'Test2',
-        last_name: 'User2'
-      });
+      .post('/api/posts')
+      .set('Authorization', `Bearer ${token}`)
+      .field('title', 'Test Post')
+      .field('content', 'This is a test post')
+      .field('author_id', 'test-user-id');
     expect(response.status).toBe(201);
-    expect(response.body.user).toHaveProperty('id');
+    expect(response.body).toHaveProperty('id');
   });
 
-  it('should get user by id', async () => {
-    const user = await User.create({
-      username: 'testuser3',
-      email: 'test3@example.com',
-      password_hash: await bcrypt.hash('password123', 10),
-      first_name: 'Test3',
-      last_name: 'User3'
-    });
+  it('should get posts', async () => {
     const response = await request(app)
-      .get(`/api/users/${user.id}`)
+      .get('/api/posts')
       .set('Authorization', `Bearer ${token}`);
     expect(response.status).toBe(200);
-    expect(response.body.username).toBe('testuser3');
+    expect(Array.isArray(response.body)).toBe(true);
+  });
+
+  it('should get post by id', async () => {
+    const post = await Post.create({
+      title: 'Test Post 2',
+      content: 'Content',
+      author_id: 'test-user-id'
+    });
+    const response = await request(app)
+      .get(`/api/posts/${post.id}`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(response.status).toBe(200);
+    expect(response.body.title).toBe('Test Post 2');
   });
 });

@@ -166,10 +166,68 @@ export async function up(queryInterface, Sequelize) {
     is_read: { type: Sequelize.BOOLEAN, defaultValue: false },
     created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
   });
+
+  // SystemLog table for auditing all system operations
+  await queryInterface.createTable('SystemLog', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    user_id: {
+      type: Sequelize.UUID,
+      allowNull: true,
+      references: { model: 'User', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+      comment: 'User who performed the action (null for system actions)'
+    },
+    action: {
+      type: Sequelize.ENUM('CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 'REGISTER', 'UPLOAD', 'DOWNLOAD'),
+      allowNull: false
+    },
+    entity_type: {
+      type: Sequelize.ENUM('User', 'Team', 'Post', 'Competition', 'Sponsor', 'Stream', 'Registration', 'Notification', 'Country', 'TeamMember', 'System'),
+      allowNull: false,
+      comment: 'Type of entity being acted upon'
+    },
+    entity_id: {
+      type: Sequelize.STRING,
+      allowNull: true,
+      comment: 'ID of the entity (string to accommodate UUID and integer IDs)'
+    },
+    old_values: {
+      type: Sequelize.JSON,
+      allowNull: true,
+      comment: 'Previous values (for UPDATE operations)'
+    },
+    new_values: {
+      type: Sequelize.JSON,
+      allowNull: true,
+      comment: 'New values (for CREATE and UPDATE operations)'
+    },
+    ip_address: {
+      type: Sequelize.STRING,
+      allowNull: true,
+      comment: 'IP address of the user'
+    },
+    user_agent: {
+      type: Sequelize.STRING,
+      allowNull: true,
+      comment: 'User agent string from browser/device'
+    },
+    details: {
+      type: Sequelize.TEXT,
+      allowNull: true,
+      comment: 'Additional details about the operation'
+    },
+    created_at: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      allowNull: false
+    }
+  });
 }
 
 export async function down(queryInterface, Sequelize) {
   // Drop in reverse order to satisfy foreign key constraints
+  await queryInterface.dropTable('SystemLog');
   await queryInterface.dropTable('Notification');
   await queryInterface.dropTable('Sponsor');
   await queryInterface.dropTable('Post');
