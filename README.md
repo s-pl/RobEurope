@@ -64,21 +64,8 @@ Complete project documentation is available in the [`docs/`](docs/) directory:
 | 📄 **API Docs** | Swagger UI (via `/api-docs`) |
 
 ---
-## 📘 ER Diagram
-
-
-![ERD Diagram](https://github.com/s-pl/RobEurope/blob/develop/img/db.png?raw=true)
-# Use case diagram
-![Use Case Diagram](https://github.com/s-pl/RobEurope/blob/develop/img/erd.png?raw=true)
-
-
-
-
----
-
-# 📘 Class Diagram
-
-![Class Diagram](https://github.com/s-pl/RobEurope/blob/develop/img/class.png?raw=true)
+## 📘 Diagrams
+Diagrams can be seen in ![Docs](https://github.com/s-pl/RobEurope/tree/change-upload-schema/docs)
 
 ## 🚀 Quickstart (Developer Setup)
 

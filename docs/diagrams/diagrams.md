@@ -31,6 +31,8 @@ graph TD
     Admin --> Y[View System Statistics]
     Admin --> Z[Clean System Logs]
 ```
+## Class Diagram
+![Class Diagram](https://github.com/s-pl/RobEurope/blob/develop/img/class.png?raw=true)
 
 ## Entity-Relationship Diagram (ERD)
 
