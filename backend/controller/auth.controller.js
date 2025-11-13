@@ -1,6 +1,7 @@
 import db from '../models/index.js';
 import bcrypt from 'bcryptjs';
 import signToken from '../utils/signToken.js';
+import SystemLogger from '../utils/systemLogger.js';
 
 const { User } = db;
 
@@ -59,6 +60,15 @@ export const register = async (req, res) => {
 
     const token = signToken({ id: user.id, email: user.email, role: user.role });
 
+    // Log user registration
+    await SystemLogger.logCreate('User', user.id, {
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      username: user.username,
+      role: user.role
+    }, req, 'User registration');
+
     return res.status(201).json({
       token,
       user: { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, username: user.username, role: user.role }
@@ -78,12 +88,23 @@ export const login = async (req, res) => {
     password = decodeIfBase64(password);
 
     const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(401).json({ error: 'Credenciales inválidas' });
+    if (!user) {
+      // Log failed login attempt
+      await SystemLogger.logAuth('LOGIN', null, req, `Failed login attempt for email: ${email}`);
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
 
     const match = await bcrypt.compare(password, user.password_hash);
-    if (!match) return res.status(401).json({ error: 'Credenciales inválidas' });
+    if (!match) {
+      // Log failed login attempt
+      await SystemLogger.logAuth('LOGIN', user.id, req, 'Failed login attempt - wrong password');
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
 
     const token = signToken({ id: user.id, email: user.email, role: user.role });
+
+    // Log successful login
+    await SystemLogger.logAuth('LOGIN', user.id, req, 'User login successful');
 
     return res.json({
       token,

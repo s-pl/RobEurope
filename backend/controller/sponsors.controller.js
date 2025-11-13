@@ -1,10 +1,19 @@
 import db from '../models/index.js';
 const { Sponsor } = db;
 import { Op } from 'sequelize';
+import { getFileInfo } from '../middleware/upload.middleware.js';
 
 export const createSponsor = async (req, res) => {
   try {
-    const item = await Sponsor.create(req.body);
+    const sponsorData = { ...req.body };
+
+    // Handle file upload
+    const fileInfo = getFileInfo(req);
+    if (fileInfo) {
+      sponsorData.logo_url = fileInfo.url;
+    }
+
+    const item = await Sponsor.create(sponsorData);
     res.status(201).json(item);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -35,7 +44,15 @@ export const getSponsorById = async (req, res) => {
 
 export const updateSponsor = async (req, res) => {
   try {
-    const [updated] = await Sponsor.update(req.body, { where: { id: req.params.id } });
+    const updates = { ...req.body };
+
+    // Handle file upload
+    const fileInfo = getFileInfo(req);
+    if (fileInfo) {
+      updates.logo_url = fileInfo.url;
+    }
+
+    const [updated] = await Sponsor.update(updates, { where: { id: req.params.id } });
     if (!updated) return res.status(404).json({ error: 'Sponsor not found' });
     const updatedItem = await Sponsor.findByPk(req.params.id);
     res.json(updatedItem);

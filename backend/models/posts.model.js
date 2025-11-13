@@ -46,7 +46,7 @@ export default function definePostsModel(sequelize, DataTypes) {
     });
 
     Post.associate = (models) => {
-        Post.hasMany(models.Media, { foreignKey: 'media_id', constraints: false, scope: { media_type: 'post' } });
+        // Removed Media association
     };
 
     return Post;
