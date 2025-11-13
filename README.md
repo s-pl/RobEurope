@@ -18,6 +18,21 @@ seeders, minimal test UI, and Swagger API documentation.
 
 ---
 
+## 📚 Documentation
+
+Complete project documentation is available in the [`docs/`](docs/) directory:
+
+- **[📖 Documentation Index](docs/index.md)** - Main documentation hub
+- **[🏗️ Architecture](docs/architecture.md)** - System architecture and design
+- **[🔌 API Reference](docs/api.md)** - Complete API documentation
+- **[💾 Database Schema](docs/database.md)** - Database models and relationships
+- **[🛠️ Development Guide](docs/development.md)** - Setup and development workflow
+- **[🔒 Security Guide](docs/security.md)** - Security measures and best practices
+- **[🤝 Contributing](docs/contributing.md)** - Contribution guidelines
+- **[📊 System Diagrams](docs/diagrams/diagrams.md)** - ERD, use cases, and architecture diagrams
+
+---
+
 ## 🧠 Authors & Credits
 
 | Name | Role | Institution |
