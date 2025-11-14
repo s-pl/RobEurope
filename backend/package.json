@@ -2,6 +2,9 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "vitest",
+    "test:verbose": "vitest run --reporter=verbose",
     "migrate": "node scripts/run-migrations.js",
     "seed": "node scripts/run-seeders.js",
     "reset-data": "node scripts/reset-data.js",
@@ -14,11 +17,17 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
+    "multer": "^2.0.2",
     "mysql2": "^3.15.2",
     "sequelize": "^6.37.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.3",
+    "uuid": "^13.0.0",
     "winston": "^3.18.3",
     "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "supertest": "^7.1.4",
+    "vitest": "^4.0.8"
   }
 }

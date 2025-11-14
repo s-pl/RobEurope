@@ -27,5 +27,9 @@ export default async function defineSponsorsModel(sequelize, DataTypes) {
         }
     });
 
+    Sponsor.associate = (models) => {
+        // Removed Media association
+    };
+
     return Sponsor;
 }

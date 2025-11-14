@@ -18,13 +18,28 @@ seeders, minimal test UI, and Swagger API documentation.
 
 ---
 
+## 📚 Documentation
+
+Complete project documentation is available in the [`docs/`](docs/) directory:
+
+- **[📖 Documentation Index](docs/index.md)** - Main documentation hub
+- **[🏗️ Architecture](docs/architecture.md)** - System architecture and design
+- **[🔌 API Reference](docs/api.md)** - Complete API documentation
+- **[💾 Database Schema](docs/database.md)** - Database models and relationships
+- **[🛠️ Development Guide](docs/development.md)** - Setup and development workflow
+- **[🔒 Security Guide](docs/security.md)** - Security measures and best practices
+- **[🤝 Contributing](docs/contributing.md)** - Contribution guidelines
+- **[📊 System Diagrams](docs/diagrams/diagrams.md)** - ERD, use cases, and architecture diagrams
+
+---
+
 ## 🧠 Authors & Credits
 
 | Name | Role | Institution |
 |------|------|--------------|
 | Samuel Ponce Luna | Full-Stack Developer / Architect | IES El Rincón |
 | Ángel Lallave Herrera | Frontend & UI/UX Designer | IES El Rincón |
-| Néstor García Santos | Backend & DB Engineer | IES El Rincón |
+| Néstor García Santos | Backend & Frontend | IES El Rincón |
 
 ---
 
@@ -49,21 +64,8 @@ seeders, minimal test UI, and Swagger API documentation.
 | 📄 **API Docs** | Swagger UI (via `/api-docs`) |
 
 ---
-## 📘 ER Diagram
-
-
-![ERD Diagram](https://github.com/s-pl/RobEurope/blob/develop/img/db.png?raw=true)
-# Use case diagram
-![Use Case Diagram](https://github.com/s-pl/RobEurope/blob/develop/img/erd.png?raw=true)
-
-
-
-
----
-
-# 📘 Class Diagram
-
-![Class Diagram](https://github.com/s-pl/RobEurope/blob/develop/img/class.png?raw=true)
+## 📘 Diagrams
+Diagrams can be seen in ![Docs](https://github.com/s-pl/RobEurope/tree/change-upload-schema/docs)
 
 ## 🚀 Quickstart (Developer Setup)
 

@@ -56,5 +56,9 @@ export default function defineTeamsModel(sequelize, DataTypes) {
 
     });
 
+    Team.associate = (models) => {
+        // Removed Media association
+    };
+
     return Team;
 }

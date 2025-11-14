@@ -45,5 +45,9 @@ export default function definePostsModel(sequelize, DataTypes) {
         }
     });
 
+    Post.associate = (models) => {
+        // Removed Media association
+    };
+
     return Post;
 }

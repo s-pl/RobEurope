@@ -50,5 +50,9 @@ export default async function defineUserModel(sequelize, DataTypes) {
     }
   });
 
+  User.associate = (models) => {
+    // Removed Media association
+  };
+
   return User;
 }

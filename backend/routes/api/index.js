@@ -11,6 +11,7 @@ import registrationRouter from './registration.route.js';
 import sponsorsRouter from './sponsors.route.js';
 import teamsRouter from './teams.route.js';
 import teamMembersRouter from './team_members.route.js';
+import systemLogRouter from './system_log.route.js';
 import authenticateToken from '../../middleware/auth.middleware.js';
 const router = express.Router();
 
@@ -30,6 +31,7 @@ router.use('/registrations', registrationRouter);
 router.use('/sponsors', sponsorsRouter);
 router.use('/teams', teamsRouter);
 router.use('/team-members', teamMembersRouter);
+router.use('/system-logs', systemLogRouter);
 
 
 export default router;

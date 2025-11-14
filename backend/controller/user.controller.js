@@ -3,10 +3,12 @@ const { User } = db;
 
 import bcrypt from 'bcryptjs';
 import { Op } from 'sequelize';
+import { getFileInfo } from '../middleware/upload.middleware.js';
 
 export const createUser = async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
+   
     const user = await User.create({ ...req.body, password: hashedPassword });
     res.json(user);
   } catch (error) {
@@ -42,7 +44,15 @@ export const getUserById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const [updated] = await User.update(req.body, {
+    const updates = { ...req.body };
+
+    // Handle file upload
+    const fileInfo = getFileInfo(req);
+    if (fileInfo) {
+      updates.profile_photo_url = fileInfo.url;
+    }
+
+    const [updated] = await User.update(updates, {
       where: { id: req.params.id }
     });
     if (!updated) return res.status(404).json({ error: 'User not found' });
@@ -96,6 +106,12 @@ export const updateSelf = async (req, res) => {
     const updates = {};
     for (const key of allowed) {
       if (Object.prototype.hasOwnProperty.call(req.body, key)) updates[key] = req.body[key];
+    }
+
+    // Handle file upload
+    const fileInfo = getFileInfo(req);
+    if (fileInfo) {
+      updates.profile_photo_url = fileInfo.url;
     }
 
     if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'No hay campos válidos para actualizar' });
