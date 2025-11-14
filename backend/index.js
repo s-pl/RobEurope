@@ -14,7 +14,8 @@ dotenv.config();
 // import userRoutes from './routes/userRoutes.js';
 const allowedOrigins = [
   /^https?:\/\/localhost(:\d+)?$/,    
-  /^http:\/\/46\.101\.255\.106(:85)?$/ 
+  /^http:\/\/46\.101\.255\.106(:85)?$/ ,
+  "http://46.101.255.106:5173"
 ];
 
 const app = express();
