@@ -19,7 +19,11 @@ npm install
 npm run dev
 ```
 
-The app runs on http://localhost:5173 with hot module replacement.
+The local dev server runs on http://localhost:5173 with hot module replacement, while the canonical public deployment lives at http://46.101.255.106:5173/.
+
+### Main URL
+
+The production-like environment is exposed at **http://46.101.255.106:5173/**. Share this URL with stakeholders when referring to “the RobEurope frontend”—all links and redirects should treat it as the primary entry point.
 
 ### Production build
 

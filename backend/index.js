@@ -13,9 +13,9 @@ import https from 'https';
 dotenv.config();
 // import userRoutes from './routes/userRoutes.js';
 const allowedOrigins = [
-  /^https?:\/\/localhost(:\d+)?$/,    
-  /^http:\/\/46\.101\.255\.106(:85)?$/ ,
-  "http://46.101.255.106:5173"
+  /^https?:\/\/localhost(:\d+)?$/,
+  /^http:\/\/46\.101\.255\.106(?::85)?$/,
+  /^http:\/\/46\.101\.255\.106:5173$/
 ];
 
 const app = express();
@@ -31,7 +31,7 @@ app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    const allowed = allowedOrigins.some((pattern) => pattern.test(origin));
+    const allowed = allowedOrigins.some((pattern) => (pattern instanceof RegExp ? pattern.test(origin) : pattern === origin));
     if (allowed) return callback(null, true);
     callback(new Error('Not allowed by CORS'));
   },

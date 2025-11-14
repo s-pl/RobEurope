@@ -47,6 +47,7 @@ Complete project documentation is available in the [`docs/`](docs/) directory:
 
 | Resource | Link |
 |-----------|------|
+| 🖥️ **Frontend (Main URL)** | [http://46.101.255.106:5173/](http://46.101.255.106:5173/) |
 | 🌐 **Live Swagger Docs** | [http://46.101.255.106:85/api-docs/](http://46.101.255.106:85/api-docs/) |
 | 🧩 **Postman Collection** | [View on Postman](https://solar-crater-87778.postman.co/workspace/Team-Workspace~863e014b-231f-4611-84da-6746814f344e/collection/15303917-8ce87247-fb50-4d0f-8770-de9131768fd1) |
 | 🎨 **Figma UI Design** | [View on Figma](https://www.figma.com/design/UptdKH6RgmLhRwNIkr5qpU/Sin-t%C3%ADtulo?node-id=0-1&t=WDyHv57bP0Kiux3v-1) |
