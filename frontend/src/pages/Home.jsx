@@ -142,7 +142,7 @@ const Home = () => {
                 </Link>
               </Button>
               <Button asChild variant="ghost">
-                <a href="/api-docs" target="_blank" rel="noreferrer">
+                <a href="http://46.101.255.106:85/api-docs" target="_blank" rel="noreferrer">
                   {t('home.hero.secondaryCta')}
                 </a>
               </Button>

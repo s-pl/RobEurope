@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Camera } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { Input } from '../components/ui/input';
@@ -18,6 +19,7 @@ const Profile = () => {
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   const [countries, setCountries] = useState([]);
   const [countriesStatus, setCountriesStatus] = useState({ loading: false, error: '' });
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (user) {
@@ -43,7 +45,7 @@ const Profile = () => {
       } catch (err) {
         if (active) {
           console.error('No se pudieron cargar los países', err);
-          setCountriesStatus({ loading: false, error: 'No se pudieron cargar los países. Comprueba la conexión con la API.' });
+          setCountriesStatus({ loading: false, error: 'countries-error' });
         }
         return;
       }
@@ -76,9 +78,9 @@ const Profile = () => {
       };
       if (payload.country_id === undefined) delete payload.country_id;
       await updateProfile(payload);
-      setFeedback({ type: 'success', message: 'Perfil actualizado correctamente.' });
+      setFeedback({ type: 'success', message: t('profile.feedback.success') });
     } catch (error) {
-      setFeedback({ type: 'error', message: error.message || 'Error al actualizar el perfil.' });
+      setFeedback({ type: 'error', message: error.message || t('profile.feedback.error') });
     } finally {
       setSaving(false);
     }
@@ -91,9 +93,9 @@ const Profile = () => {
     setFeedback({ type: '', message: '' });
     try {
       await uploadProfilePhoto(file);
-      setFeedback({ type: 'success', message: 'Foto actualizada correctamente.' });
+      setFeedback({ type: 'success', message: t('profile.feedback.photoSuccess') });
     } catch (error) {
-      setFeedback({ type: 'error', message: error.message || 'No se pudo subir la foto.' });
+      setFeedback({ type: 'error', message: error.message || t('profile.feedback.photoError') });
     } finally {
       setUploading(false);
       event.target.value = '';
@@ -101,7 +103,7 @@ const Profile = () => {
   };
 
   if (!user) {
-    return <p className="text-sm text-slate-500">No se encontró información del usuario.</p>;
+    return <p className="text-sm text-slate-500">{t('profile.feedback.error')}</p>;
   }
 
   const photoUrl = resolveMediaUrl(user.profile_photo_url);
@@ -124,17 +126,17 @@ const Profile = () => {
             )}
             <label className="absolute -bottom-2 -right-2 inline-flex cursor-pointer items-center gap-1 rounded-2xl border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
               <Camera className="h-3.5 w-3.5" />
-              {uploading ? 'Subiendo…' : 'Cambiar'}
+              {uploading ? t('buttons.uploading') : t('buttons.changePhoto')}
               <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} disabled={uploading} />
             </label>
           </div>
           <div className="space-y-1">
-            <p className="text-[0.65rem] uppercase tracking-[0.6em] text-white/60">Cuenta vinculada</p>
+            <p className="text-[0.65rem] uppercase tracking-[0.6em] text-white/60">{t('profile.heroTagline')}</p>
             <h1 className="text-3xl font-semibold">
               {user.first_name} {user.last_name}
             </h1>
             <p className="text-sm text-white/80">{user.email}</p>
-            <p className="text-xs text-white/60">Los cambios sincronizan con <code className="font-mono text-white">/users/me</code>.</p>
+            <p className="text-xs text-white/60">{t('profile.heroNote')}</p>
           </div>
         </div>
       </section>
@@ -153,19 +155,19 @@ const Profile = () => {
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <Label htmlFor="first_name">Nombre</Label>
+              <Label htmlFor="first_name">{t('forms.firstName')}</Label>
               <Input id="first_name" name="first_name" value={form.first_name} onChange={handleChange} required className="mt-2" />
             </div>
             <div>
-              <Label htmlFor="last_name">Apellidos</Label>
+              <Label htmlFor="last_name">{t('forms.lastName')}</Label>
               <Input id="last_name" name="last_name" value={form.last_name} onChange={handleChange} required className="mt-2" />
             </div>
             <div>
-              <Label htmlFor="phone">Teléfono</Label>
+              <Label htmlFor="phone">{t('forms.phone')}</Label>
               <Input id="phone" name="phone" value={form.phone} onChange={handleChange} className="mt-2" />
             </div>
             <div>
-              <Label htmlFor="country_id">País</Label>
+              <Label htmlFor="country_id">{t('forms.country')}</Label>
               <Select
                 id="country_id"
                 name="country_id"
@@ -174,7 +176,7 @@ const Profile = () => {
                 className="mt-2"
                 disabled={countriesStatus.loading}
               >
-                <option value="">{countriesStatus.loading ? 'Cargando países…' : 'Sin asignar'}</option>
+                <option value="">{countriesStatus.loading ? t('general.countriesLoading') : '—'}</option>
                 {countries.map((country) => (
                   <option key={country.id} value={country.id}>
                     {country.flag_emoji ? `${country.flag_emoji} ` : ''}
@@ -182,12 +184,12 @@ const Profile = () => {
                   </option>
                 ))}
               </Select>
-              {countriesStatus.error && <p className="mt-2 text-xs text-red-500">{countriesStatus.error}</p>}
+              {countriesStatus.error && <p className="mt-2 text-xs text-red-500">{t('profile.countriesError')}</p>}
             </div>
           </div>
 
           <Button type="submit" disabled={saving} className="w-full sm:w-auto">
-            {saving ? 'Guardando…' : 'Guardar cambios'}
+            {saving ? t('buttons.saving') : t('buttons.saveChanges')}
           </Button>
         </form>
       </Card>

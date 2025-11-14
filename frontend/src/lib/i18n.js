@@ -168,7 +168,8 @@ const resources = {
         title: 'Inicia sesión',
         description: 'Usa las credenciales emitidas por el backend (/auth/login) para generar tu token JWT.',
         noAccount: '¿No tienes cuenta?',
-        registerLink: 'Regístrate aquí'
+        registerLink: 'Regístrate aquí',
+        error: 'Credenciales inválidas'
       },
       register: {
         tagline: 'Programa nuevos equipos',
@@ -322,8 +323,9 @@ const resources = {
         tagline: 'RobEurope portal',
         title: 'Sign in',
         description: 'Use the credentials issued by the backend (/auth/login) to generate your JWT token.',
-  noAccount: 'Don\'t have an account?',
-        registerLink: 'Register here'
+        noAccount: 'Don\'t have an account?',
+        registerLink: 'Register here',
+        error: 'Invalid credentials'
       },
       register: {
         tagline: 'New teams program',
@@ -478,7 +480,8 @@ const resources = {
         title: 'Anmelden',
         description: 'Nutze die Zugangsdaten aus dem Backend (/auth/login), um dein JWT zu erhalten.',
         noAccount: 'Noch kein Konto?',
-        registerLink: 'Hier registrieren'
+        registerLink: 'Hier registrieren',
+        error: 'Ungültige Zugangsdaten'
       },
       register: {
         tagline: 'Programm für neue Teams',
