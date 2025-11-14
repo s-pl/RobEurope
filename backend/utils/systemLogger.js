@@ -5,17 +5,7 @@ const { SystemLog } = db;
  * Utility class for system logging
  */
 class SystemLogger {
-  /**
-   * Log a system operation
-   * @param {Object} logData - Log data
-   * @param {string} logData.action - Action type (CREATE, UPDATE, DELETE, etc.)
-   * @param {string} logData.entity_type - Entity type (User, Team, Post, etc.)
-   * @param {string|number} logData.entity_id - Entity ID
-   * @param {Object} logData.old_values - Previous values (for UPDATE)
-   * @param {Object} logData.new_values - New values (for CREATE/UPDATE)
-   * @param {string} logData.details - Additional details
-   * @param {Object} req - Express request object (optional, for extracting user/IP info)
-   */
+
   static async log(logData, req = null) {
     try {
       const logEntry = {

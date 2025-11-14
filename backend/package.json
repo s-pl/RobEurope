@@ -2,6 +2,7 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "vitest",
     "test:verbose": "vitest run --reporter=verbose",
     "migrate": "node scripts/run-migrations.js",
