@@ -15,7 +15,8 @@ dotenv.config();
 const allowedOrigins = [
   /^https?:\/\/localhost(:\d+)?$/,
   /^http:\/\/46\.101\.255\.106(?::85)?$/,
-  /^http:\/\/46\.101\.255\.106:5173$/
+  /^http:\/\/46\.101\.255\.106:5173$/,
+  /^https?:\/\/robeurope\.samuelponce\.es(?::\d+)?$/
 ];
 
 const app = express();
@@ -145,7 +146,7 @@ if(process.env.NODE_ENV === 'production') {
   //   console.error('Database sync failed:', err && err.message ? err.message : err);
   // }
 
-  app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running at http://0.0.0.0:${PORT}`);
   });
 }

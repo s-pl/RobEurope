@@ -1,4 +1,9 @@
-const FALLBACK_BASES = ['http://localhost:85/api', 'http://46.101.255.106:85/api'];
+const FALLBACK_BASES = [
+  'http://localhost:85/api',
+  'http://46.101.255.106:85/api',
+  'https://robeurope.samuelponce.es/api',
+  'http://robeurope.samuelponce.es/api'
+];
 const STORAGE_KEY = 'robeurope:apiBaseUrl';
 
 const normalizeBase = (url) => {
@@ -28,6 +33,9 @@ const resolveDefaultBase = () => {
   if (typeof window !== 'undefined') {
     const { origin } = window.location;
     if (origin.includes('46.101.255.106')) {
+      return normalizeBase(origin);
+    }
+    if (origin.includes('robeurope.samuelponce.es')) {
       return normalizeBase(origin);
     }
   }
