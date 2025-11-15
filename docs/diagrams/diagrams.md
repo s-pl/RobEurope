@@ -45,7 +45,7 @@ erDiagram
     User ||--o{ SystemLog : "performer"
 
     Country ||--o{ Team : "belongs_to"
-    Country ||--o{ Competition : "hosted_in"
+    
 
     Competition ||--o{ Registration : "has"
 
@@ -91,7 +91,7 @@ erDiagram
         string title
         string slug
         string description
-        integer country_id FK
+       
         datetime registration_start
         datetime registration_end
         datetime start_date
