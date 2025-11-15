@@ -37,13 +37,6 @@ export async function up(queryInterface, Sequelize) {
     title: { type: Sequelize.STRING, allowNull: false },
     slug: { type: Sequelize.STRING, allowNull: false },
     description: { type: Sequelize.STRING, allowNull: true },
-    country_id: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      references: { model: 'Country', key: 'id' },
-      onUpdate: 'CASCADE',
-      onDelete: 'SET NULL'
-    },
     registration_start: { type: Sequelize.DATE, allowNull: true },
     registration_end: { type: Sequelize.DATE, allowNull: true },
     start_date: { type: Sequelize.DATE, allowNull: true },

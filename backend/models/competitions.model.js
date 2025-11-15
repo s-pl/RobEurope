@@ -17,16 +17,6 @@ export default async function defineCompetitionsModel(sequelize, DataTypes) {
             type: DataTypes.STRING,
             allowNull: true
         },
-        country_id: {
-            type: DataTypes.INTEGER, // o INTEGER, según tu tipo de ID
-            allowNull: true,
-            references: {
-                model: 'Country', // tabla en la BD: 'Countries'
-                key: 'id'
-            },
-            onUpdate: 'CASCADE',
-            onDelete: 'SET NULL'
-        },
         registration_start: {
         type: DataTypes.DATE,
         allowNull: true
