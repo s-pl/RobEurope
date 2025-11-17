@@ -8,6 +8,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
+import Teams from './pages/Teams';
+import AcceptInvite from './pages/AcceptInvite';
 
 
 const GuestRoute = ({ children }) => {
@@ -26,6 +28,8 @@ function App() {
           <Route index element={<Home />} />
           <Route path="competitions" element={<Competitions />} />
           <Route path="contact" element={<Contact />} />
+          <Route path="teams" element={<Teams />} />
+          <Route path="teams/accept" element={<ProtectedRoute><AcceptInvite /></ProtectedRoute>} />
          
           <Route
             path="profile"
