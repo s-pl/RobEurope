@@ -1,5 +1,5 @@
 import db from '../models/index.js';
-const { TeamMembers } = db;
+const { TeamMembers, User } = db;
 import { Op } from 'sequelize';
 
 export const createTeamMember = async (req, res) => {
@@ -19,7 +19,19 @@ export const getTeamMembers = async (req, res) => {
     if (user_id) where.user_id = user_id;
 
     const items = await TeamMembers.findAll({ where, limit: Number(limit), offset: Number(offset), order: [['joined_at', 'DESC']] });
-    res.json(items);
+    // Enrich with user basic info
+    const userIds = [...new Set(items.map(i => i.user_id))];
+    let usersById = {};
+    if (userIds.length) {
+      const users = await User.findAll({ where: { id: userIds }, attributes: ['id','username','email','first_name','last_name'] });
+      usersById = Object.fromEntries(users.map(u => [u.id, u]));
+    }
+    const enriched = items.map(i => {
+      const u = usersById[i.user_id];
+      const plain = i.toJSON();
+      return { ...plain, user_username: u?.username || null, user_email: u?.email || null, user_name: u ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : null };
+    });
+    res.json(enriched);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

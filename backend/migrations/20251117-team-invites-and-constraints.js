@@ -8,6 +8,7 @@ export async function up(queryInterface, Sequelize) {
   }
 
   // TeamInvite table
+  try {
   await queryInterface.createTable('TeamInvite', {
     id: { type: Sequelize.UUID, defaultValue: Sequelize.UUIDV4, primaryKey: true },
     team_id: {
@@ -30,8 +31,12 @@ export async function up(queryInterface, Sequelize) {
     expires_at: { type: Sequelize.DATE, allowNull: true },
     created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
   });
+  } catch (e) {
+    // table may already exist; skip
+  }
 
   // TeamJoinRequest table
+  try {
   await queryInterface.createTable('TeamJoinRequest', {
     id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
     team_id: {
@@ -51,7 +56,14 @@ export async function up(queryInterface, Sequelize) {
     status: { type: Sequelize.ENUM('pending', 'approved', 'rejected'), defaultValue: 'pending' },
     created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
   });
-  await queryInterface.addIndex('TeamJoinRequest', ['team_id', 'user_id'], { unique: true, name: 'uniq_join_request_team_user' });
+  } catch (e) {
+    // table may already exist; skip
+  }
+  try {
+    await queryInterface.addIndex('TeamJoinRequest', ['team_id', 'user_id'], { unique: true, name: 'uniq_join_request_team_user' });
+  } catch (e) {
+    // index may already exist; skip
+  }
 }
 
 export async function down(queryInterface, Sequelize) {

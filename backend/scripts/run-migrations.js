@@ -4,6 +4,7 @@ import * as initial from '../migrations/20251031-create-initial-tables.js';
 import * as dropMedia from '../migrations/20251113-drop-media-table.js';
 import * as addUserCountry from '../migrations/20251117-add-user-country.js';
 import * as teamInvitesConstraints from '../migrations/20251117-team-invites-and-constraints.js';
+import * as addRegistrationDecisionReason from '../migrations/20251117-add-decision-reason-to-registrations.js';
 
 async function run() {
   try {
@@ -43,6 +44,12 @@ async function run() {
     if (typeof teamInvitesConstraints.up === 'function') {
       await teamInvitesConstraints.up(qi, Sequelize);
       console.log('Ensured team invites/requests tables and constraints');
+    }
+
+    // Add decision_reason to Registration if missing
+    if (typeof addRegistrationDecisionReason.up === 'function') {
+      await addRegistrationDecisionReason.up(qi, Sequelize);
+      console.log('Ensured Registration.decision_reason exists (if needed)');
     }
 
     console.log('Migrations applied successfully');

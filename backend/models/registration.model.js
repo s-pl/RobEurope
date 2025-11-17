@@ -30,6 +30,10 @@ export default async function defineRegistrationModel(sequelize, DataTypes) {
             allowNull: false,
             defaultValue: 'pending'
         },
+        decision_reason: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
         registration_date: {
             type: DataTypes.DATE,
             allowNull: false
