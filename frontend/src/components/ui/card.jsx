@@ -19,4 +19,8 @@ const CardDescription = ({ className, ...props }) => (
   <p className={cn('text-sm text-blue-600', className)} {...props} />
 );
 
-export { Card, CardDescription, CardHeader, CardTitle };
+const CardContent = ({ className, ...props }) => (
+  <div className={cn('', className)} {...props} />
+);
+
+export { Card, CardContent, CardDescription, CardHeader, CardTitle };

@@ -2,7 +2,8 @@
 
 ## Overview
 
-RobEurope follows a modular, layered architecture designed for scalability and maintainability. The system is built using modern web development practices with clear separation of concerns.
+RobEurope follows a modular, layered architecture de- Stream: id, title, platform (enum: twitch, youtube, kick), stream_url, is_live, host_team_id (fk Team), competition_id (fk Competition), created_at, updated_at
+- Media: id, filename, original_name, mime_type, size, url, thumbnail_url (optional), uploaded_by (fk User), created_at, updated_atigned for scalability and maintainability. The system is built using modern web development practices with clear separation of concerns.
 
 ## Architecture Layers
 

@@ -35,6 +35,8 @@ const resources = {
         home: 'Inicio',
         competitions: 'Competiciones',
         teams: 'Equipos',
+        sponsors: 'Patrocinadores',
+        streams: 'Streams',
         contact: 'Contacto',
         terms: 'Términos',
         profile: 'Perfil'
@@ -192,6 +194,8 @@ const resources = {
         home: 'Home',
         competitions: 'Competitions',
         teams: 'Teams',
+        sponsors: 'Sponsors',
+        streams: 'Streams',
         contact: 'Contact',
         terms: 'Terms',
         profile: 'Profile'
@@ -349,6 +353,8 @@ const resources = {
         home: 'Start',
         competitions: 'Wettkämpfe',
         teams: 'Teams',
+        sponsors: 'Sponsoren',
+        streams: 'Streams',
         contact: 'Kontakt',
         terms: 'Bedingungen',
         profile: 'Profil'

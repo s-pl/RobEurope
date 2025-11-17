@@ -297,6 +297,30 @@ Reject a pending registration (admin only).
 }
 ```
 
+## Media Management
+
+### GET /media
+Get all media files with pagination.
+
+**Query Parameters:**
+- `page`: number (default: 1)
+- `limit`: number (default: 10)
+- `uploaded_by`: string (optional, filter by user)
+
+### GET /media/:id
+Get specific media file details.
+
+### POST /media
+Upload a new media file.
+
+**Content-Type:** `multipart/form-data`
+
+**Form Data:**
+- `file`: File (image, document, etc.)
+
+### DELETE /media/:id
+Delete a media file (owner or admin only).
+
 ## Post Management
 
 ### GET /posts

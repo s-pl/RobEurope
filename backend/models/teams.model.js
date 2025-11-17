@@ -58,6 +58,10 @@ export default function defineTeamsModel(sequelize, DataTypes) {
 
     Team.associate = (models) => {
         // Removed Media association
+        Team.hasMany(models.Stream, {
+            foreignKey: 'team_id',
+            as: 'streams'
+        });
     };
 
     return Team;

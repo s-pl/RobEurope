@@ -5,6 +5,8 @@ import * as dropMedia from '../migrations/20251113-drop-media-table.js';
 import * as addUserCountry from '../migrations/20251117-add-user-country.js';
 import * as teamInvitesConstraints from '../migrations/20251117-team-invites-and-constraints.js';
 import * as addRegistrationDecisionReason from '../migrations/20251117-add-decision-reason-to-registrations.js';
+import * as createMediaTable from '../migrations/20251117-create-media-table.js';
+import * as createStreamsTable from '../migrations/20251117-create-streams-table.js';
 
 async function run() {
   try {
@@ -18,9 +20,12 @@ async function run() {
       ? tables.map(t => (typeof t === 'object' ? t.tableName || t.name : t))
       : [];
     const hasUser = tableNames.includes('User');
-    const hasStream = tableNames.includes('Stream');
+    const hasTeam = tableNames.includes('Team');
+    const hasCompetition = tableNames.includes('Competition');
+    const hasTeamMembers = tableNames.includes('TeamMembers');
 
-    if (!hasUser) {
+    if (!hasUser || !hasTeam || !hasCompetition || !hasTeamMembers) {
+      console.log('Some initial tables missing, running initial migration...');
       if (typeof initial.up !== 'function') {
         throw new Error('Initial migration does not export an up() function');
       }
@@ -28,36 +33,6 @@ async function run() {
       console.log('Initial tables created');
     } else {
       console.log('Initial tables already exist — skipping initial migration');
-    }
-
-    // Create Stream table if missing (added later to initial migration)
-    if (!hasStream) {
-      console.log('Stream table missing, creating it...');
-      await qi.createTable('Stream', {
-        id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
-        title: { type: Sequelize.STRING, allowNull: false },
-        description: { type: Sequelize.STRING, allowNull: true },
-        platform: { type: Sequelize.ENUM('twitch', 'youtube', 'kick'), allowNull: false, defaultValue: 'twitch' },
-        stream_url: { type: Sequelize.STRING, allowNull: true },
-        is_live: { type: Sequelize.BOOLEAN, defaultValue: false },
-        host_team_id: {
-          type: Sequelize.INTEGER,
-          allowNull: true,
-          references: { model: 'Team', key: 'id' },
-          onUpdate: 'CASCADE',
-          onDelete: 'SET NULL'
-        },
-        competition_id: {
-          type: Sequelize.INTEGER,
-          allowNull: true,
-          references: { model: 'Competition', key: 'id' },
-          onUpdate: 'CASCADE',
-          onDelete: 'SET NULL'
-        },
-        created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
-        updated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
-      });
-      console.log('Stream table created');
     }
 
     // Apply drop-media migration idempotently
@@ -82,6 +57,34 @@ async function run() {
     if (typeof addRegistrationDecisionReason.up === 'function') {
       await addRegistrationDecisionReason.up(qi, Sequelize);
       console.log('Ensured Registration.decision_reason exists (if needed)');
+    }
+
+    // Create Media table if missing
+    if (typeof createMediaTable.up === 'function') {
+      await createMediaTable.up(qi, Sequelize);
+      console.log('Ensured Media table exists');
+    }
+
+    // Create Stream table if missing (using migration)
+    const currentTables = await qi.showAllTables();
+    const currentTableNames = Array.isArray(currentTables)
+      ? currentTables.map(t => (typeof t === 'object' ? t.tableName || t.name : t))
+      : [];
+    console.log('Current tables:', currentTableNames);
+    const hasStreamNow = currentTableNames.includes('Stream');
+
+    if (!hasStreamNow) {
+      console.log('Stream table missing, creating it...');
+      if (typeof createStreamsTable.up === 'function') {
+        await createStreamsTable.up(qi, Sequelize);
+        console.log('Stream table created via migration');
+      }
+    } else {
+      console.log('Stream table exists, checking for updates...');
+      // Always try to run the streams migration to add missing columns
+      if (typeof createStreamsTable.up === 'function') {
+        await createStreamsTable.up(qi, Sequelize);
+      }
     }
 
     console.log('Migrations applied successfully');

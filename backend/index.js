@@ -7,6 +7,7 @@ import morgan from 'morgan';
 import logger from './utils/logger.js';
 import dotenv from 'dotenv';
 import streamRoutes from './routes/api/stream.route.js';
+import mediaRoutes from './routes/api/media.route.js';
 import swaggerRouter from './swagger.js';
 import cors from 'cors';
 import fs from 'fs';
@@ -51,10 +52,10 @@ app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 // Serve API documentation (Swagger UI)
 app.use('/api-docs', swaggerRouter);
-  // Apply rate limiting on API routes
-  app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
+// Apply rate limiting on API routes
+app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
 app.use('/api/streams', streamRoutes);
-export default app; 
+app.use('/api/media', mediaRoutes); 
 
 // error handler
 // centralized error handler

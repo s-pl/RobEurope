@@ -147,23 +147,22 @@ export async function up(queryInterface, Sequelize) {
   await queryInterface.createTable('Stream', {
     id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
     title: { type: Sequelize.STRING, allowNull: false },
-    description: { type: Sequelize.STRING, allowNull: true },
-    platform: { type: Sequelize.ENUM('twitch', 'youtube', 'kick'), allowNull: false, defaultValue: 'twitch' },
+    description: { type: Sequelize.TEXT, allowNull: true },
     stream_url: { type: Sequelize.STRING, allowNull: true },
-    is_live: { type: Sequelize.BOOLEAN, defaultValue: false },
-    host_team_id: {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      references: { model: 'Team', key: 'id' },
-      onUpdate: 'CASCADE',
-      onDelete: 'SET NULL'
-    },
+    status: { type: Sequelize.ENUM('offline', 'scheduled', 'live'), defaultValue: 'offline', allowNull: false },
     competition_id: {
       type: Sequelize.INTEGER,
       allowNull: true,
       references: { model: 'Competition', key: 'id' },
       onUpdate: 'CASCADE',
       onDelete: 'SET NULL'
+    },
+    team_id: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      references: { model: 'Team', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
     },
     created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
     updated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
