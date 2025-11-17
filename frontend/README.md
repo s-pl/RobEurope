@@ -72,14 +72,3 @@ The profile screen fetches `/countries` as soon as it mounts. If the request fai
 	- Crear equipo (usuario autenticado). El creador queda como owner y no puede pertenecer a más de un equipo.
 - Aceptar invitación: `/teams/accept?token=...` (requiere sesión iniciada). 
 
-### Notificaciones (campanita)
-
-- La campanita en la navbar muestra las últimas notificaciones del usuario.
-- Carga inicial por REST (`GET /notifications?user_id=<uuid>`).
-- Si el backend expone Socket.IO, el frontend se suscribe a `notification:{userId}` para recibirlas en tiempo real; si no, la UI seguirá mostrando la carga inicial.
-
-Instala el cliente si aún no está:
-
-```powershell
-npm i socket.io-client
-```
