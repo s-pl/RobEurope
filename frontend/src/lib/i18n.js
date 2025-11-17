@@ -34,6 +34,7 @@ const resources = {
       nav: {
         home: 'Inicio',
         competitions: 'Competiciones',
+        teams: 'Equipos',
         contact: 'Contacto',
         terms: 'Términos',
         profile: 'Perfil'
@@ -190,6 +191,7 @@ const resources = {
       nav: {
         home: 'Home',
         competitions: 'Competitions',
+        teams: 'Teams',
         contact: 'Contact',
         terms: 'Terms',
         profile: 'Profile'
@@ -346,6 +348,7 @@ const resources = {
       nav: {
         home: 'Start',
         competitions: 'Wettkämpfe',
+        teams: 'Teams',
         contact: 'Kontakt',
         terms: 'Bedingungen',
         profile: 'Profil'
