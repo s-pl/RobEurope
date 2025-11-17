@@ -9,11 +9,12 @@ import { Label } from '../components/ui/label';
 
 const Teams = () => {
   const { user, isAuthenticated } = useAuth();
-  const { list, create, requestJoin } = useTeams();
+  const { list, create, requestJoin, getMembers } = useTeams();
   const api = useApi();
   const { t } = useTranslation();
   const [q, setQ] = useState('');
   const [teams, setTeams] = useState([]);
+  const [membersMap, setMembersMap] = useState({});
   const [feedback, setFeedback] = useState('');
   const [status, setStatus] = useState({ ownsTeam: false, ownedTeamId: null, memberOfTeamId: null });
   const [creating, setCreating] = useState(false);
@@ -23,6 +24,11 @@ const Teams = () => {
     try {
       const data = await list(q);
       setTeams(Array.isArray(data) ? data : []);
+      // fetch members for each team in parallel
+      const memberPromises = (Array.isArray(data) ? data : []).map(t => getMembers(t.id).then(m => [t.id, m]).catch(() => [t.id, []]));
+      const results = await Promise.all(memberPromises);
+      const map = Object.fromEntries(results);
+      setMembersMap(map);
     } catch (e) {
       setTeams([]);
     }
@@ -110,6 +116,18 @@ const Teams = () => {
           <div key={t.id} className="rounded-xl border border-slate-200 bg-white p-4">
             <p className="text-lg font-semibold text-slate-900">{t.name}</p>
             <p className="text-xs text-slate-500">ID: {t.id}</p>
+            <div className="mt-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Miembros</p>
+              <ul className="mt-1 space-y-1">
+                {(membersMap[t.id] || []).length === 0 && <li className="text-xs text-slate-400">Sin miembros</li>}
+                {(membersMap[t.id] || []).map(m => (
+                  <li key={m.id} className="text-xs text-slate-600 flex items-center justify-between">
+                    <span>{m.user_username || m.user_email || m.user_id}</span>
+                    <span className="rounded bg-slate-100 px-1 py-0.5 text-[10px] uppercase tracking-wide text-slate-500">{m.role}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
             <div className="mt-3 flex gap-2">
               <Button size="sm" onClick={() => onRequestJoin(t.id)}>
                 Solicitar unirse

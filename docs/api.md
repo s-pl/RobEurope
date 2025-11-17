@@ -269,6 +269,34 @@ Register team for competition.
 ### PUT /registrations/:id
 Update registration status (admin only).
 
+**Request Body:**
+```json
+{
+  "status": "approved|rejected",
+  "decision_reason": "Optional reason for approval/rejection"
+}
+```
+
+### PUT /registrations/:id/approve
+Approve a pending registration (admin only).
+
+**Request Body:**
+```json
+{
+  "decision_reason": "Optional reason for approval"
+}
+```
+
+### PUT /registrations/:id/reject
+Reject a pending registration (admin only).
+
+**Request Body:**
+```json
+{
+  "decision_reason": "Required reason for rejection"
+}
+```
+
 ## Post Management
 
 ### GET /posts

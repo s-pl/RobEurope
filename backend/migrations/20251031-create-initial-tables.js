@@ -143,6 +143,32 @@ export async function up(queryInterface, Sequelize) {
     updated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
   });
 
+  // Stream table
+  await queryInterface.createTable('Stream', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    title: { type: Sequelize.STRING, allowNull: false },
+    description: { type: Sequelize.STRING, allowNull: true },
+    platform: { type: Sequelize.ENUM('twitch', 'youtube', 'kick'), allowNull: false, defaultValue: 'twitch' },
+    stream_url: { type: Sequelize.STRING, allowNull: true },
+    is_live: { type: Sequelize.BOOLEAN, defaultValue: false },
+    host_team_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: { model: 'Team', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
+    competition_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: { model: 'Competition', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
+    created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+    updated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
+  });
+
   // Notification table
   await queryInterface.createTable('Notification', {
     id: { type: Sequelize.UUID, defaultValue: Sequelize.UUIDV4, primaryKey: true },
@@ -222,6 +248,7 @@ export async function down(queryInterface, Sequelize) {
   // Drop in reverse order to satisfy foreign key constraints
   await queryInterface.dropTable('SystemLog');
   await queryInterface.dropTable('Notification');
+  await queryInterface.dropTable('Stream');
   await queryInterface.dropTable('Sponsor');
   await queryInterface.dropTable('Post');
   await queryInterface.dropTable('Registration');

@@ -100,6 +100,14 @@ const Navbar = () => {
         </nav>
 
         <div className="flex items-center gap-3">
+          {isAuthenticated && hasTeam && (
+            <Button asChild variant="outline" size="sm">
+              <Link to="/my-team">
+                <Bot className="mr-2 h-4 w-4" />
+                Mi equipo
+              </Link>
+            </Button>
+          )}
           {isAuthenticated && (
             <NotificationsBell />
           )}

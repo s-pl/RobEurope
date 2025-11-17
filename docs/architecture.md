@@ -89,7 +89,8 @@ graph TB
 - TeamInvite: id (uuid), team_id (fk), email (nullable), user_id (nullable fk), token (unique), status (enum), expires_at, created_at
 - TeamJoinRequest: id (pk), team_id (fk), user_id (fk), status (enum), created_at
 - Competition: id, title, slug, description, dates, rules_url, stream_url
-- Registration: id, team_id (fk), competition_id (fk), status, registration_date
+- Registration: id, team_id (fk), competition_id (fk), status, registration_date, decision_reason (optional string for admin decisions)
+- Stream: id, title, platform (enum: twitch, youtube, etc.), stream_url, is_live, host_team_id (fk Team), competition_id (fk Competition), created_at, updated_at
 - Notification: id (uuid), user_id (fk), title, message, type, is_read, created_at
 
 Constraint: unique index on TeamMembers.user_id (un usuario solo puede pertenecer a un equipo activo).

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTeams } from '../hooks/useTeams';
+import { useRegistrations } from '../hooks/useRegistrations';
 import { useApi } from '../hooks/useApi';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -18,6 +19,7 @@ const MyTeam = () => {
   const { t } = useTranslation();
   const api = useApi();
   const { mine, update, invite, remove, listRequests, approveRequest, getMembers, removeMember, leave } = useTeams();
+  const { list: listRegistrations, create: createRegistration } = useRegistrations();
 
   const [team, setTeam] = useState(null);
   const [feedback, setFeedback] = useState('');
@@ -26,6 +28,9 @@ const MyTeam = () => {
   const [requests, setRequests] = useState([]);
   const [members, setMembers] = useState([]);
   const [status, setStatus] = useState({ ownedTeamId: null, memberOfTeamId: null });
+  const [competitions, setCompetitions] = useState([]);
+  const [registrations, setRegistrations] = useState([]);
+  const [selectedCompetition, setSelectedCompetition] = useState('');
 
   // invite by username/email
   const [query, setQuery] = useState('');
@@ -52,10 +57,20 @@ const MyTeam = () => {
           setRequests(Array.isArray(reqs) ? reqs : []);
           const mem = await getMembers(tRes.id);
           setMembers(Array.isArray(mem) ? mem : []);
+          // registrations for this team
+          try {
+            const regs = await listRegistrations({ team_id: tRes.id });
+            setRegistrations(Array.isArray(regs) ? regs : []);
+          } catch {}
         }
       } catch (e) {
         setTeam(null);
       }
+      // competitions for selection
+      try {
+        const comps = await api('/competitions');
+        setCompetitions(Array.isArray(comps) ? comps : []);
+      } catch {}
     };
     load();
     // run once on mount
@@ -271,6 +286,53 @@ const MyTeam = () => {
               </div>
             ))
           )}
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-4">
+        <h3 className="font-semibold">Inscripción a competiciones</h3>
+        <div className="mt-2 grid gap-3 md:grid-cols-2">
+          <div>
+            <Label htmlFor="competition">Selecciona competición</Label>
+            <select id="competition" className="mt-2 w-full rounded-md border border-slate-300 p-2"
+              value={selectedCompetition}
+              onChange={(e) => setSelectedCompetition(e.target.value)}>
+              <option value="">— Seleccionar —</option>
+              {competitions.map((c) => (
+                <option key={c.id} value={c.id}>{c.title}</option>
+              ))}
+            </select>
+            <Button className="mt-3" disabled={!selectedCompetition} onClick={async () => {
+              if (!team || !selectedCompetition) return;
+              try {
+                const payload = { team_id: team.id, competition_id: Number(selectedCompetition) };
+                await createRegistration(payload);
+                setFeedback('Solicitud de registro enviada');
+                const regs = await listRegistrations({ team_id: team.id });
+                setRegistrations(Array.isArray(regs) ? regs : []);
+              } catch (err) {
+                setFeedback(err.message || 'No se pudo enviar la solicitud');
+              }
+            }}>Solicitar inscripción</Button>
+          </div>
+          <div>
+            <Label>Estados de inscripción</Label>
+            <div className="mt-2 divide-y rounded-md border">
+              {registrations.length === 0 ? (
+                <p className="p-3 text-sm text-slate-500">Sin inscripciones</p>
+              ) : (
+                registrations.map((r) => (
+                  <div key={r.id} className="p-3 text-sm">
+                    <p className="font-medium">Competición #{r.competition_id}</p>
+                    <p className="text-xs text-slate-600">Estado: {r.status}</p>
+                    {r.decision_reason && (
+                      <p className="text-xs text-slate-500">Motivo: {r.decision_reason}</p>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
       </section>
     </div>
