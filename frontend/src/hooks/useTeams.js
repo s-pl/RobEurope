@@ -11,5 +11,9 @@ export const useTeams = () => {
     requestJoin: (teamId) => api(`/teams/${teamId}/requests`, { method: 'POST' }),
     approveRequest: (requestId) => api(`/teams/requests/${requestId}/approve`, { method: 'POST' }),
     registerInCompetition: (teamId, competition_id) => api(`/teams/${teamId}/register-competition`, { method: 'POST', body: { competition_id } }),
+    mine: () => api('/teams/mine'),
+    update: (teamId, payload) => api(`/teams/${teamId}`, { method: 'PUT', body: payload }),
+    remove: (teamId) => api(`/teams/${teamId}`, { method: 'DELETE' }),
+    listRequests: (teamId) => api(`/teams/${teamId}/requests`),
   };
 };

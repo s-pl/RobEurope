@@ -70,12 +70,16 @@ export const searchUsers = async (req, res) => {
     const where = q ? {
       [Op.or]: [
         { email: { [Op.like]: `%${q}%` } },
+        { username: { [Op.like]: `%${q}%` } },
         { first_name: { [Op.like]: `%${q}%` } },
         { last_name: { [Op.like]: `%${q}%` } }
       ]
     } : {};
 
-    const users = await User.findAll({ where, attributes: { exclude: ['password_hash', 'phone', 'role', 'email'] } });
+    const users = await User.findAll({
+      where,
+      attributes: ['id', 'username', 'email', 'first_name', 'last_name', 'profile_photo_url']
+    });
     res.json(users);
   } catch (error) {
     res.status(500).json({ error: error.message });

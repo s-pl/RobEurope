@@ -13,6 +13,7 @@ const Teams = () => {
   const [q, setQ] = useState('');
   const [teams, setTeams] = useState([]);
   const [feedback, setFeedback] = useState('');
+  const [status, setStatus] = useState({ ownsTeam: false, ownedTeamId: null, memberOfTeamId: null });
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({ name: '', country_id: '' });
 
@@ -27,6 +28,8 @@ const Teams = () => {
 
   useEffect(() => {
     reload();
+    // load status to know whether we should hide the creation form
+    fetch('/api/teams/status', { headers: { } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -64,8 +67,16 @@ const Teams = () => {
     }
   };
 
+  // Owner dashboard moved to /my-team
+
   return (
     <div className="space-y-8">
+      {isAuthenticated && (status.ownedTeamId || status.memberOfTeamId) && (
+        <section className="rounded-xl border border-slate-200 bg-white p-4">
+          <h2 className="text-lg font-semibold">Ya perteneces a un equipo</h2>
+          <p className="mt-1 text-sm text-slate-600">No puedes crear otro equipo. Gestiona tu equipo en la sección "Mi equipo".</p>
+        </section>
+      )}
       <section>
         <form onSubmit={onSearch} className="flex items-end gap-3">
           <div className="flex-1">
@@ -92,7 +103,7 @@ const Teams = () => {
         ))}
       </section>
 
-      {isAuthenticated && (
+      {isAuthenticated && !(status.ownedTeamId || status.memberOfTeamId) && (
         <section className="rounded-xl border border-slate-200 bg-white p-4">
           <h2 className="mb-4 text-lg font-semibold">Crear equipo</h2>
           <form onSubmit={onCreate} className="grid gap-4 md:grid-cols-2">

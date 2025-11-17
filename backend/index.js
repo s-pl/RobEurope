@@ -23,7 +23,7 @@ const allowedOrigins = [
 ];
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 85;
 
 // registrar peticiones (access logs) vía winston
 app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }));

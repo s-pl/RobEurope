@@ -2,6 +2,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { Bot } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
+import { useApi } from '../../hooks/useApi';
 import { Button } from '../ui/button';
 import NotificationsBell from '../notifications/NotificationsBell';
 import { resolveMediaUrl } from '../../lib/apiClient';
@@ -23,7 +24,23 @@ const languages = [
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const { t, i18n } = useTranslation();
+  const api = useApi();
   const avatarUrl = resolveMediaUrl(user?.profile_photo_url);
+  const [hasTeam, setHasTeam] = React.useState(false);
+
+  React.useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      if (!isAuthenticated) { setHasTeam(false); return; }
+      try {
+        const st = await api('/teams/status');
+        if (!alive) return;
+        setHasTeam(Boolean(st?.ownedTeamId || st?.memberOfTeamId));
+      } catch {}
+    };
+    load();
+    return () => { alive = false; };
+  }, [api, isAuthenticated]);
 
   const handleLanguageChange = (event) => {
     const value = event.target.value;
@@ -64,6 +81,20 @@ const Navbar = () => {
               }
             >
               {t('nav.profile')}
+            </NavLink>
+          )}
+          {isAuthenticated && hasTeam && (
+            <NavLink
+              to="/my-team"
+              className={({ isActive }) =>
+                `rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] transition ${
+                  isActive
+                    ? 'border-slate-900 text-slate-900'
+                    : 'border-slate-200 text-slate-500 hover:border-slate-900 hover:text-slate-900'
+                }`
+              }
+            >
+              Mi equipo
             </NavLink>
           )}
         </nav>
