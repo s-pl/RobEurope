@@ -80,6 +80,24 @@ graph TB
     Controllers --> FileSystem
 ```
 
+## Database Schema (excerpt)
+
+- User: id (uuid), username, email, first_name, last_name, password_hash, country_id (fk Country), role, is_active, created_at
+- Country: id, name, code, flag_emoji
+- Team: id, name, country_id, city, institution, logo_url, social_links, created_by_user_id, created_at, updated_at
+- TeamMembers: id, team_id (fk), user_id (fk), role, joined_at, left_at
+- TeamInvite: id (uuid), team_id (fk), email (nullable), user_id (nullable fk), token (unique), status (enum), expires_at, created_at
+- TeamJoinRequest: id (pk), team_id (fk), user_id (fk), status (enum), created_at
+- Competition: id, title, slug, description, dates, rules_url, stream_url
+- Registration: id, team_id (fk), competition_id (fk), status, registration_date
+- Notification: id (uuid), user_id (fk), title, message, type, is_read, created_at
+
+Constraint: unique index on TeamMembers.user_id (un usuario solo puede pertenecer a un equipo activo).
+
+## Realtime / Notifications
+
+Las notificaciones se exponen vía REST (GET /notifications?user_id=...) y, cuando el backend emite eventos Socket.IO, el frontend se suscribe al canal `notification:{userId}`. Si el socket no está disponible, el frontend cae a carga inicial por REST.
+
 ## Data Flow
 
 ### User Request Flow
