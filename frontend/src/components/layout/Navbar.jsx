@@ -6,7 +6,7 @@ import { useApi } from '../../hooks/useApi';
 import { Button } from '../ui/button';
 import NotificationsBell from '../notifications/NotificationsBell';
 import { resolveMediaUrl } from '../../lib/apiClient';
-
+import React from 'react';
 const navLinks = [
   { to: '/', key: 'nav.home' },
   { to: '/competitions', key: 'nav.competitions' },

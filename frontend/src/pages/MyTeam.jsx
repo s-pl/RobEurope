@@ -17,13 +17,15 @@ const debounce = (fn, ms = 300) => {
 const MyTeam = () => {
   const { t } = useTranslation();
   const api = useApi();
-  const { mine, update, invite, remove, listRequests, approveRequest } = useTeams();
+  const { mine, update, invite, remove, listRequests, approveRequest, getMembers, removeMember, leave } = useTeams();
 
   const [team, setTeam] = useState(null);
   const [feedback, setFeedback] = useState('');
   const [form, setForm] = useState({ name: '', city: '', institution: '', country_id: '' });
 
   const [requests, setRequests] = useState([]);
+  const [members, setMembers] = useState([]);
+  const [status, setStatus] = useState({ ownedTeamId: null, memberOfTeamId: null });
 
   // invite by username/email
   const [query, setQuery] = useState('');
@@ -32,6 +34,10 @@ const MyTeam = () => {
 
   useEffect(() => {
     const load = async () => {
+      try {
+        const st = await api('/teams/status');
+        setStatus({ ownedTeamId: st?.ownedTeamId ?? null, memberOfTeamId: st?.memberOfTeamId ?? null });
+      } catch {}
       try {
         const tRes = await mine();
         setTeam(tRes);
@@ -44,13 +50,17 @@ const MyTeam = () => {
         if (tRes?.id) {
           const reqs = await listRequests(tRes.id);
           setRequests(Array.isArray(reqs) ? reqs : []);
+          const mem = await getMembers(tRes.id);
+          setMembers(Array.isArray(mem) ? mem : []);
         }
       } catch (e) {
         setTeam(null);
       }
     };
     load();
-  }, [listRequests, mine]);
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const doSearch = useMemo(() => debounce(async (text) => {
     if (!text) { setCandidates([]); return; }
@@ -110,6 +120,28 @@ const MyTeam = () => {
     }
   };
 
+  const onRemoveMember = async (memberId) => {
+    try {
+      await removeMember(memberId);
+      setMembers((prev) => prev.filter((m) => m.id !== memberId));
+      setFeedback('Miembro eliminado');
+    } catch (err) {
+      setFeedback(err.message || 'No se pudo eliminar al miembro');
+    }
+  };
+
+  const onLeave = async () => {
+    if (!confirm('¿Seguro que quieres salir del equipo?')) return;
+    try {
+      await leave();
+      setFeedback('Has salido del equipo');
+      setStatus({ ownedTeamId: null, memberOfTeamId: null });
+      setTeam(null);
+    } catch (err) {
+      setFeedback(err.message || 'No se pudo salir del equipo');
+    }
+  };
+
   const onDelete = async () => {
     if (!team) return;
     if (!confirm('¿Eliminar el equipo?')) return;
@@ -121,6 +153,20 @@ const MyTeam = () => {
       setFeedback(err.message || 'No se pudo eliminar');
     }
   };
+
+  // If user is member but not owner, show a minimal card to leave team
+  if (!team && status.memberOfTeamId && !status.ownedTeamId) {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white p-4">
+        <h2 className="text-lg font-semibold">Mi equipo</h2>
+        <p className="mt-1 text-sm text-slate-600">Perteneces al equipo ID: {status.memberOfTeamId}</p>
+        <div className="mt-3">
+          <Button variant="destructive" onClick={onLeave}>Salir del equipo</Button>
+        </div>
+        {feedback && <p className="mt-3 text-sm text-slate-700">{feedback}</p>}
+      </div>
+    );
+  }
 
   if (!team) {
     return <div className="rounded-xl border border-slate-200 bg-white p-4">No tienes equipo propio.</div>;
@@ -161,6 +207,27 @@ const MyTeam = () => {
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-4">
+        <h3 className="font-semibold">Miembros del equipo</h3>
+        <div className="mt-2 divide-y rounded-md border">
+          {members.length === 0 ? (
+            <p className="p-3 text-sm text-slate-500">Sin miembros</p>
+          ) : (
+            members.map((m) => (
+              <div key={m.id} className="flex items-center justify-between p-3 text-sm">
+                <div>
+                  <p className="font-medium text-slate-900">{m.user_id}</p>
+                  <p className="text-xs text-slate-500">Rol: {m.role}</p>
+                </div>
+                {m.role !== 'owner' && (
+                  <Button size="sm" variant="destructive" onClick={() => onRemoveMember(m.id)}>Eliminar</Button>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-4">
         <h3 className="font-semibold">Invitar por usuario</h3>
         <Input placeholder="Buscar por email o username" value={query} onChange={(e) => setQuery(e.target.value)} className="mt-2" />
         <div className="mt-2 divide-y rounded-md border">
@@ -195,7 +262,7 @@ const MyTeam = () => {
             requests.map((r) => (
               <div key={r.id} className="flex items-center justify-between p-3 text-sm">
                 <div>
-                  <p>Usuario: {r.user_id}</p>
+                  <p>Usuario: {r.user_username || r.user_email || r.user_id}</p>
                   <p className="text-xs text-slate-500">Estado: {r.status}</p>
                 </div>
                 {r.status === 'pending' && (
