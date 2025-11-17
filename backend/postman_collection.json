@@ -112,6 +112,8 @@
         { "name": "Request join team", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/teams/{{team_id}}/requests", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}","requests"] } } },
         { "name": "List join requests (owner)", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/teams/{{team_id}}/requests", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}","requests"] } } },
   { "name": "Approve join request (owner)", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/teams/requests/{{request_id}}/approve", "host": ["{{base_url}}"], "path": ["teams","requests","{{request_id}}","approve"] } } }
+      ,
+        { "name": "Leave team (me)", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/teams/leave", "host": ["{{base_url}}"], "path": ["teams","leave"] } } }
       ]
     },
     {
