@@ -64,3 +64,11 @@ location.reload();
 ### Profile page countries dropdown
 
 The profile screen fetches `/countries` as soon as it mounts. If the request fails because the API is unreachable you will see a red helper text under the select component explaining the issue. Ensure the API base URL points to a reachable server as described above.
+
+### Teams feature
+
+- Página Teams (`/teams`)
+	- Buscar equipos y solicitar unirse.
+	- Crear equipo (usuario autenticado). El creador queda como owner y no puede pertenecer a más de un equipo.
+- Aceptar invitación: `/teams/accept?token=...` (requiere sesión iniciada). 
+

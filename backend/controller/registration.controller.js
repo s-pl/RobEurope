@@ -1,5 +1,5 @@
 import db from '../models/index.js';
-const { Registration } = db;
+const { Registration, Team, Notification } = db;
 import { Op } from 'sequelize';
 
 export const createRegistration = async (req, res) => {
@@ -52,6 +52,60 @@ export const deleteRegistration = async (req, res) => {
     const deleted = await Registration.destroy({ where: { id: req.params.id } });
     if (!deleted) return res.status(404).json({ error: 'Registration not found' });
     res.json({ message: 'Registration deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Approve registration (admin only)
+export const approveRegistration = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { decision_reason } = req.body || {};
+    const reg = await Registration.findByPk(id);
+    if (!reg) return res.status(404).json({ error: 'Registration not found' });
+    if (reg.status !== 'pending') return res.status(400).json({ error: 'Registration is not pending' });
+    await reg.update({ status: 'approved', decision_reason: decision_reason || null });
+    // Notify team owner
+    try {
+      const team = await Team.findByPk(reg.team_id);
+      if (team) {
+        const notif = await Notification.create({
+          user_id: team.created_by_user_id,
+          title: 'Registro aprobado',
+          message: `Tu equipo ha sido aprobado para la competición ${reg.competition_id}`,
+          type: 'competition_registration'
+        });
+      }
+    } catch (_) {}
+    res.json(reg);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Reject registration (admin only)
+export const rejectRegistration = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { decision_reason } = req.body || {};
+    const reg = await Registration.findByPk(id);
+    if (!reg) return res.status(404).json({ error: 'Registration not found' });
+    if (reg.status !== 'pending') return res.status(400).json({ error: 'Registration is not pending' });
+    await reg.update({ status: 'rejected', decision_reason: decision_reason || null });
+    // Notify team owner
+    try {
+      const team = await Team.findByPk(reg.team_id);
+      if (team) {
+        const notif = await Notification.create({
+          user_id: team.created_by_user_id,
+          title: 'Registro rechazado',
+          message: `Tu equipo fue rechazado en la competición ${reg.competition_id}`,
+          type: 'competition_registration'
+        });
+      }
+    } catch (_) {}
+    res.json(reg);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

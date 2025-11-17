@@ -4,7 +4,7 @@ const stores = new Map();
 
 export default function rateLimit(options = {}) {
   const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes
-  const max = options.max || 100; // max requests per window per IP
+  const max = options.max || 1000; // max requests per window per IP
 
   return (req, res, next) => {
     try {

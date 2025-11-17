@@ -1,4 +1,5 @@
 import express from 'express';
+import http from 'http';
 import apiRoutes from './routes/api/index.js';
 import rateLimit from './middleware/rateLimit.middleware.js';
 import timeoutMiddleware from './middleware/timeout.middleware.js';
@@ -6,10 +7,13 @@ import morgan from 'morgan';
 import logger from './utils/logger.js';
 import dotenv from 'dotenv';
 import streamRoutes from './routes/api/stream.route.js';
+import mediaRoutes from './routes/api/media.route.js';
 import swaggerRouter from './swagger.js';
 import cors from 'cors';
 import fs from 'fs';
 import https from 'https';
+import { Server as SocketIOServer } from 'socket.io';
+import { setIO } from './utils/realtime.js';
 dotenv.config();
 // import userRoutes from './routes/userRoutes.js';
 const allowedOrigins = [
@@ -20,7 +24,7 @@ const allowedOrigins = [
 ];
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 85;
 
 // registrar peticiones (access logs) vía winston
 app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }));
@@ -48,10 +52,10 @@ app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 // Serve API documentation (Swagger UI)
 app.use('/api-docs', swaggerRouter);
-  // Apply rate limiting on API routes
-  app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
+// Apply rate limiting on API routes
+app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
 app.use('/api/streams', streamRoutes);
-export default app; 
+app.use('/api/media', mediaRoutes); 
 
 // error handler
 // centralized error handler
@@ -114,39 +118,40 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 
-// add ssl 
-// const options = {
-//   key: fs.readFileSync('/certs/key.pem'),
-//   cert: fs.readFileSync('cert.pem')
-// };
-
-
-// https.createServer(options, app).listen(PORT, () => {
-//   console.log(`Server running in https://localhost:${PORT}`);
-// });
-
-if(process.env.NODE_ENV === 'production') {
+// Create HTTP/HTTPS server and attach Socket.IO so ws://.../socket.io is available
+let server;
+if (process.env.NODE_ENV === 'production') {
   const sslOptions = {
-    key: fs.readFileSync(process.env.SSL_KEY_PATH || import.meta.dirname + '/certs/key.pem'),
-    cert: fs.readFileSync(process.env.SSL_CERT_PATH || import.meta.dirname +  '/certs/cert.pem')
+    key: fs.readFileSync(process.env.SSL_KEY_PATH || new URL('./certs/key.pem', import.meta.url)),
+    cert: fs.readFileSync(process.env.SSL_CERT_PATH || new URL('./certs/cert.pem', import.meta.url))
   };
-
-  https.createServer(sslOptions, app).listen(PORT, () => {
-    console.log(`Server running in https://localhost:${PORT}`);
-  });
+  server = https.createServer(sslOptions, app);
 } else {
-  // In development, ensure models are loaded and DB synced (creates missing tables)
-  // try {
-  //   const modelsModule = await import('./models/index.js');
-  //   const db = modelsModule.default;
-  //   console.log('Syncing database (development mode) — this may alter tables...');
-  //   await db.sequelize.sync({ alter: true });
-  //   console.log('Database sync complete');
-  // } catch (err) {
-  //   console.error('Database sync failed:', err && err.message ? err.message : err);
-  // }
-
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running at http://0.0.0.0:${PORT}`);
-  });
+  server = http.createServer(app);
 }
+
+// Socket.IO with CORS matching the same allowed origins as Express CORS
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const allowed = allowedOrigins.some((pattern) => (pattern instanceof RegExp ? pattern.test(origin) : pattern === origin));
+      if (allowed) return callback(null, true);
+      callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true
+  }
+});
+setIO(io);
+
+io.on('connection', (socket) => {
+  logger.info({ socket: 'connected', id: socket.id, ip: socket.handshake.address });
+  socket.on('disconnect', (reason) => {
+    logger.info({ socket: 'disconnected', id: socket.id, reason });
+  });
+});
+
+server.listen(PORT, '0.0.0.0', () => {
+  const scheme = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+  console.log(`Server running at ${scheme}://0.0.0.0:${PORT}`);
+});

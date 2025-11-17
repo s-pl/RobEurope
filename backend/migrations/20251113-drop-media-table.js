@@ -3,14 +3,16 @@
  * Exports up and down functions for use with QueryInterface
  */
 export async function up(queryInterface, Sequelize) {
-  // Check if table exists before dropping
-  const tableExists = await queryInterface.sequelize.query(
-    "SELECT name FROM sqlite_master WHERE type='table' AND name='Media';",
+  // Check if table exists before dropping (MySQL)
+  const rows = await queryInterface.sequelize.query(
+    "SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Media' LIMIT 1;",
     { type: Sequelize.QueryTypes.SELECT }
   );
 
-  if (tableExists.length > 0) {
+  if (rows.length > 0) {
     await queryInterface.dropTable('Media');
+  } else {
+    // no-op if table doesn't exist
   }
 }
 

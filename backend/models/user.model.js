@@ -6,6 +6,14 @@ export default async function defineUserModel(sequelize, DataTypes) {
       primaryKey: true,
       allowNull: false
     },
+    country_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'Country',
+        key: 'id'
+      }
+    },
     first_name: {
         type: DataTypes.STRING,
         allowNull: false
