@@ -171,6 +171,9 @@ const swaggerSpec = {
     '/teams/status': {
       get: { summary: 'Get membership status', security: [{ bearerAuth: [] }], responses: { '200': { description: 'Membership status', content: { 'application/json': { schema: { type: 'object', properties: { ownedTeamId: { type: 'integer', nullable: true }, memberOfTeamId: { type: 'integer', nullable: true } } } } } } } }
     },
+    '/teams/leave': {
+      post: { summary: 'Leave current team (non-owner)', security: [{ bearerAuth: [] }], responses: { '200': { description: 'Left team' }, '400': { description: 'Owner cannot leave or not a member' } } }
+    },
     '/teams/{id}/invite': {
       post: {
         summary: 'Invite a user to team',
@@ -190,7 +193,7 @@ const swaggerSpec = {
       }
     },
     '/teams/{id}/requests': {
-      get: { summary: 'List join requests (owner)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'List', content: { 'application/json': { schema: { type: 'array', items: { type: 'object' } } } } } } },
+      get: { summary: 'List join requests (owner)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'List', content: { 'application/json': { schema: { type: 'array', items: { type: 'object', properties: { id: { type: 'integer' }, user_id: { type: 'string' }, status: { type: 'string' }, user_username: { type: 'string', nullable: true }, user_email: { type: 'string', nullable: true }, user_name: { type: 'string', nullable: true } } } } } } } },
       post: { summary: 'Request to join a team', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '201': { description: 'Request created' } } }
     },
     '/teams/requests/{requestId}/approve': {

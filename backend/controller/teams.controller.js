@@ -312,7 +312,35 @@ export const listJoinRequests = async (req, res) => {
   try {
     const teamId = Number(req.params.id);
     const items = await TeamJoinRequest.findAll({ where: { team_id: teamId }, order: [['created_at', 'DESC']] });
-    return res.json(items);
+    const userIds = [...new Set(items.map(i => i.user_id))];
+    let usersById = {};
+    if (userIds.length) {
+      const users = await User.findAll({ where: { id: { [Op.in]: userIds } }, attributes: ['id', 'username', 'email', 'first_name', 'last_name'] });
+      usersById = Object.fromEntries(users.map(u => [u.id, u]));
+    }
+    const enriched = items.map(i => {
+      const u = usersById[i.user_id];
+      const plain = i.toJSON();
+      return { ...plain, user_username: u?.username || null, user_email: u?.email || null, user_name: u ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : null };
+    });
+    return res.json(enriched);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// Leave current team (non-owners only): sets left_at on membership
+export const leaveTeam = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'No autorizado' });
+    const membership = await TeamMembers.findOne({ where: { user_id: userId, left_at: null } });
+    if (!membership) return res.status(400).json({ error: 'No perteneces a ningún equipo' });
+    const team = await Team.findByPk(membership.team_id);
+    if (!team) return res.status(404).json({ error: 'Team not found' });
+    if (team.created_by_user_id === userId) return res.status(400).json({ error: 'El propietario no puede salir del equipo' });
+    await membership.update({ left_at: new Date() });
+    return res.json({ success: true });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
