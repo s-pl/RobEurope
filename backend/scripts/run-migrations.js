@@ -14,9 +14,11 @@ async function run() {
 
     // Run initial migration only if core tables are missing
     const tables = await qi.showAllTables();
-    const hasUser = Array.isArray(tables)
-      ? tables.map(t => (typeof t === 'object' ? t.tableName || t.name : t)).includes('User')
-      : false;
+    const tableNames = Array.isArray(tables)
+      ? tables.map(t => (typeof t === 'object' ? t.tableName || t.name : t))
+      : [];
+    const hasUser = tableNames.includes('User');
+    const hasStream = tableNames.includes('Stream');
 
     if (!hasUser) {
       if (typeof initial.up !== 'function') {
@@ -26,6 +28,36 @@ async function run() {
       console.log('Initial tables created');
     } else {
       console.log('Initial tables already exist — skipping initial migration');
+    }
+
+    // Create Stream table if missing (added later to initial migration)
+    if (!hasStream) {
+      console.log('Stream table missing, creating it...');
+      await qi.createTable('Stream', {
+        id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+        title: { type: Sequelize.STRING, allowNull: false },
+        description: { type: Sequelize.STRING, allowNull: true },
+        platform: { type: Sequelize.ENUM('twitch', 'youtube', 'kick'), allowNull: false, defaultValue: 'twitch' },
+        stream_url: { type: Sequelize.STRING, allowNull: true },
+        is_live: { type: Sequelize.BOOLEAN, defaultValue: false },
+        host_team_id: {
+          type: Sequelize.INTEGER,
+          allowNull: true,
+          references: { model: 'Team', key: 'id' },
+          onUpdate: 'CASCADE',
+          onDelete: 'SET NULL'
+        },
+        competition_id: {
+          type: Sequelize.INTEGER,
+          allowNull: true,
+          references: { model: 'Competition', key: 'id' },
+          onUpdate: 'CASCADE',
+          onDelete: 'SET NULL'
+        },
+        created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+        updated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
+      });
+      console.log('Stream table created');
     }
 
     // Apply drop-media migration idempotently
