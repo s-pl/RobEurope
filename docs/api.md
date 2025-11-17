@@ -158,7 +158,7 @@ Get all teams with pagination.
 ```
 
 ### POST /teams
-Create a new team.
+Create a new team. The authenticated user becomes the owner and cannot belong to more than one team.
 
 **Request Body:**
 ```json
@@ -182,6 +182,31 @@ Update team (team creator or admin only).
 
 ### DELETE /teams/:id
 Delete team (team creator or admin only).
+
+### POST /teams/:id/invite
+Create an invitation (owner). Body:
+```json
+{ "email": "optional", "user_id": "optional-uuid", "expires_in_hours": 168 }
+```
+Response includes a `token` used to accept the invitation.
+
+### POST /teams/invitations/accept
+Accept invitation. Body:
+```json
+{ "token": "string" }
+```
+
+### POST /teams/:id/requests
+Request to join a team (authenticated user). Returns the created request.
+
+### POST /teams/requests/:requestId/approve
+Approve a join request (team owner).
+
+### POST /teams/:id/register-competition
+Register a team in a competition. Body:
+```json
+{ "competition_id": 1 }
+```
 
 ## Competition Management
 
