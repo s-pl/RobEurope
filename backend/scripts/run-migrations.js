@@ -3,6 +3,7 @@ import sequelize from '../controller/db.controller.js';
 import * as initial from '../migrations/20251031-create-initial-tables.js';
 import * as dropMedia from '../migrations/20251113-drop-media-table.js';
 import * as addUserCountry from '../migrations/20251117-add-user-country.js';
+import * as teamInvitesConstraints from '../migrations/20251117-team-invites-and-constraints.js';
 
 async function run() {
   try {
@@ -36,6 +37,12 @@ async function run() {
     if (typeof addUserCountry.up === 'function') {
       await addUserCountry.up(qi, Sequelize);
       console.log('Ensured User.country_id exists (if needed)');
+    }
+
+    // Create invites/requests tables and single-team constraint
+    if (typeof teamInvitesConstraints.up === 'function') {
+      await teamInvitesConstraints.up(qi, Sequelize);
+      console.log('Ensured team invites/requests tables and constraints');
     }
 
     console.log('Migrations applied successfully');
