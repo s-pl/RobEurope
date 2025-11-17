@@ -3,11 +3,13 @@ import { Bot } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/button';
+import NotificationsBell from '../notifications/NotificationsBell';
 import { resolveMediaUrl } from '../../lib/apiClient';
 
 const navLinks = [
   { to: '/', key: 'nav.home' },
   { to: '/competitions', key: 'nav.competitions' },
+  { to: '/teams', key: 'nav.teams' },
   { to: '/contact', key: 'nav.contact' },
   { to: '/terms', key: 'nav.terms' }
 ];
@@ -67,6 +69,9 @@ const Navbar = () => {
         </nav>
 
         <div className="flex items-center gap-3">
+          {isAuthenticated && (
+            <NotificationsBell />
+          )}
           <select
             aria-label="Select language"
             value={i18n.language}
