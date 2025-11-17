@@ -237,7 +237,8 @@ const swaggerSpec = {
       TeamMemberCreate: { type: 'object', properties: { team_id: { type: 'string' }, user_id: { type: 'string' }, role: { type: 'string' } }, required: ['team_id','user_id','role'] }
     }
   }
-};
+}
+}
 
 // Serve the raw spec at /api-docs/swagger.json
 router.get('/swagger.json', (req, res) => {
