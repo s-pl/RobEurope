@@ -10,6 +10,7 @@ import Profile from './pages/Profile';
 import Register from './pages/Register';
 import Teams from './pages/Teams';
 import AcceptInvite from './pages/AcceptInvite';
+import MyTeam from './pages/MyTeam';
 
 
 const GuestRoute = ({ children }) => {
@@ -30,6 +31,7 @@ function App() {
           <Route path="contact" element={<Contact />} />
           <Route path="teams" element={<Teams />} />
           <Route path="teams/accept" element={<ProtectedRoute><AcceptInvite /></ProtectedRoute>} />
+          <Route path="my-team" element={<ProtectedRoute><MyTeam /></ProtectedRoute>} />
          
           <Route
             path="profile"

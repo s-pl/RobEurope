@@ -6,7 +6,7 @@
     "description": "Collection to test the RobEurope backend API. Set variable base_url (e.g. http://localhost:3000/api)"
   },
   "variable": [
-    { "key": "base_url", "value": "http://localhost:3000/api" },
+    { "key": "base_url", "value": "http://localhost:85/api" },
     { "key": "token", "value": "" },
     { "key": "user_id", "value": "" },
     { "key": "post_id", "value": "" },
@@ -15,7 +15,8 @@
     { "key": "registration_id", "value": "" },
     { "key": "sponsor_id", "value": "" },
     { "key": "stream_id", "value": "" },
-    { "key": "team_member_id", "value": "" },
+  { "key": "team_member_id", "value": "" },
+  { "key": "request_id", "value": "" },
     { "key": "notification_id", "value": "" },
     { "key": "country_id", "value": "" },
     { "key": "media_id", "value": "" },
@@ -102,7 +103,15 @@
         { "name": "Get /:id", "request": { "method": "GET", "url": { "raw": "{{base_url}}/teams/{{team_id}}", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}"] } } },
         { "name": "Create", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Team Alpha\"\n}" }, "url": { "raw": "{{base_url}}/teams", "host": ["{{base_url}}"], "path": ["teams"] } } },
         { "name": "Update", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Team Updated\"\n}" }, "url": { "raw": "{{base_url}}/teams/{{team_id}}", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}"] } } },
-        { "name": "Delete", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/teams/{{team_id}}", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}"] } } }
+        { "name": "Delete", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/teams/{{team_id}}", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}"] } } },
+        { "name": "Status (me)", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/teams/status", "host": ["{{base_url}}"], "path": ["teams","status"] } } },
+        { "name": "Mine (owner)", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/teams/mine", "host": ["{{base_url}}"], "path": ["teams","mine"] } } },
+        { "name": "Invite by username", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"username\": \"tester1\"\n}" }, "url": { "raw": "{{base_url}}/teams/{{team_id}}/invite", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}","invite"] } } },
+        { "name": "Invite by email", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"friend@example.com\"\n}" }, "url": { "raw": "{{base_url}}/teams/{{team_id}}/invite", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}","invite"] } } },
+        { "name": "Accept invitation", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }], "body": { "mode": "raw", "raw": "{\n  \"token\": \"<invitation-token>\"\n}" }, "url": { "raw": "{{base_url}}/teams/invitations/accept", "host": ["{{base_url}}"], "path": ["teams","invitations","accept"] } } },
+        { "name": "Request join team", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/teams/{{team_id}}/requests", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}","requests"] } } },
+        { "name": "List join requests (owner)", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/teams/{{team_id}}/requests", "host": ["{{base_url}}"], "path": ["teams","{{team_id}}","requests"] } } },
+  { "name": "Approve join request (owner)", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{base_url}}/teams/requests/{{request_id}}/approve", "host": ["{{base_url}}"], "path": ["teams","requests","{{request_id}}","approve"] } } }
       ]
     },
     {

@@ -165,6 +165,37 @@ const swaggerSpec = {
       put: { summary: 'Update team', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/TeamCreate' } } } }, responses: { '200': { description: 'Updated' } } },
       delete: { summary: 'Delete team', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Deleted' } } }
     },
+    '/teams/mine': {
+      get: { summary: 'Get my team (owner)', security: [{ bearerAuth: [] }], responses: { '200': { description: 'Owned team (if any)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Team' } } } }, '404': { description: 'No team owned' } } }
+    },
+    '/teams/status': {
+      get: { summary: 'Get membership status', security: [{ bearerAuth: [] }], responses: { '200': { description: 'Membership status', content: { 'application/json': { schema: { type: 'object', properties: { ownedTeamId: { type: 'integer', nullable: true }, memberOfTeamId: { type: 'integer', nullable: true } } } } } } } }
+    },
+    '/teams/{id}/invite': {
+      post: {
+        summary: 'Invite a user to team',
+        description: 'Invite by username or email. If the email does not correspond to a user, a token email can be sent if email service is configured.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { username: { type: 'string' }, email: { type: 'string', format: 'email' } } } } } },
+        responses: { '201': { description: 'Invitation created/sent' }, '400': { description: 'Validation error' }, '403': { description: 'Only owner can invite' } }
+      }
+    },
+    '/teams/invitations/accept': {
+      post: {
+        summary: 'Accept team invitation',
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { token: { type: 'string' } }, required: ['token'] } } } },
+        responses: { '200': { description: 'Joined team' }, '400': { description: 'Invalid token' } }
+      }
+    },
+    '/teams/{id}/requests': {
+      get: { summary: 'List join requests (owner)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'List', content: { 'application/json': { schema: { type: 'array', items: { type: 'object' } } } } } } },
+      post: { summary: 'Request to join a team', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '201': { description: 'Request created' } } }
+    },
+    '/teams/requests/{requestId}/approve': {
+      post: { summary: 'Approve a join request (owner)', security: [{ bearerAuth: [] }], parameters: [{ name: 'requestId', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Approved' }, '403': { description: 'Forbidden' } } }
+    },
     '/team-members': {
       get: { summary: 'List team members', responses: { '200': { description: 'List', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/TeamMember' } } } } } } },
       post: { summary: 'Create team member', requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/TeamMemberCreate' } } } }, responses: { '201': { description: 'Created' } } }

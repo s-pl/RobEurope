@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
+import { useApi } from '../hooks/useApi';
 import { useTeams } from '../hooks/useTeams';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -9,6 +10,7 @@ import { Label } from '../components/ui/label';
 const Teams = () => {
   const { user, isAuthenticated } = useAuth();
   const { list, create, requestJoin } = useTeams();
+  const api = useApi();
   const { t } = useTranslation();
   const [q, setQ] = useState('');
   const [teams, setTeams] = useState([]);
@@ -27,9 +29,23 @@ const Teams = () => {
   };
 
   useEffect(() => {
-    reload();
-    // load status to know whether we should hide the creation form
-    fetch('/api/teams/status', { headers: { } });
+    let alive = true;
+    const load = async () => {
+      await reload();
+      try {
+        const st = await api('/teams/status');
+        if (!alive) return;
+        setStatus({
+          ownsTeam: Boolean(st?.ownedTeamId),
+          ownedTeamId: st?.ownedTeamId ?? null,
+          memberOfTeamId: st?.memberOfTeamId ?? null
+        });
+      } catch {
+        // ignore status errors
+      }
+    };
+    load();
+    return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
