@@ -1,11 +1,12 @@
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.bulkInsert('Country', [
-       {
+    // Full list of countries. We'll insert only the ones missing to make this idempotent.
+   const countries = [
+     {
     "code": "AW",
     "name": "Aruba",
     "flag_emoji": "🇦🇼"
-  },
+      },
   {
     "code": "AF",
     "name": "Afghanistan",
@@ -1250,7 +1251,23 @@ export default {
     "code": "ZW",
     "name": "Zimbabwe",
     "flag_emoji": "🇿🇼"
-  }], {});
+  }
+  ];
+
+    // Fetch existing country codes to avoid duplicates on re-run
+    const rows = await queryInterface.sequelize.query(
+      'SELECT code FROM Country',
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+    const existingCodes = new Set(rows.map(r => r.code));
+    const toInsert = countries.filter(c => c && c.code && !existingCodes.has(c.code));
+
+    if (toInsert.length > 0) {
+      await queryInterface.bulkInsert('Country', toInsert, {});
+      console.log(`Inserted ${toInsert.length} new countries`);
+    } else {
+      console.log('All countries already present — no new inserts');
+    }
   },
 
   async down(queryInterface, Sequelize) {

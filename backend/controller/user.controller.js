@@ -1,5 +1,5 @@
 import db from '../models/index.js';
-const { User } = db;
+const { User, Country } = db;
 
 import bcrypt from 'bcryptjs';
 import { Op } from 'sequelize';
@@ -108,6 +108,16 @@ export const updateSelf = async (req, res) => {
       if (Object.prototype.hasOwnProperty.call(req.body, key)) updates[key] = req.body[key];
     }
 
+    // Validate country if requested
+    if (Object.prototype.hasOwnProperty.call(updates, 'country_id')) {
+      if (updates.country_id == null || updates.country_id === '') {
+        updates.country_id = null;
+      } else {
+        const exists = await Country.findByPk(updates.country_id);
+        if (!exists) return res.status(400).json({ error: 'Invalid country_id' });
+      }
+    }
+
     // Handle file upload
     const fileInfo = getFileInfo(req);
     if (fileInfo) {
@@ -115,8 +125,6 @@ export const updateSelf = async (req, res) => {
     }
 
     if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'No hay campos válidos para actualizar' });
-
-    updates.updated_at = new Date();
 
     const [updated] = await User.update(updates, { where: { id } });
     if (!updated) return res.status(404).json({ error: 'User not found' });
