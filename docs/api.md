@@ -158,7 +158,7 @@ Get all teams with pagination.
 ```
 
 ### POST /teams
-Create a new team.
+Create a new team. The authenticated user becomes the owner and cannot belong to more than one team.
 
 **Request Body:**
 ```json
@@ -182,6 +182,31 @@ Update team (team creator or admin only).
 
 ### DELETE /teams/:id
 Delete team (team creator or admin only).
+
+### POST /teams/:id/invite
+Create an invitation (owner). Body:
+```json
+{ "email": "optional", "user_id": "optional-uuid", "expires_in_hours": 168 }
+```
+Response includes a `token` used to accept the invitation.
+
+### POST /teams/invitations/accept
+Accept invitation. Body:
+```json
+{ "token": "string" }
+```
+
+### POST /teams/:id/requests
+Request to join a team (authenticated user). Returns the created request.
+
+### POST /teams/requests/:requestId/approve
+Approve a join request (team owner).
+
+### POST /teams/:id/register-competition
+Register a team in a competition. Body:
+```json
+{ "competition_id": 1 }
+```
 
 ## Competition Management
 
@@ -243,6 +268,58 @@ Register team for competition.
 
 ### PUT /registrations/:id
 Update registration status (admin only).
+
+**Request Body:**
+```json
+{
+  "status": "approved|rejected",
+  "decision_reason": "Optional reason for approval/rejection"
+}
+```
+
+### PUT /registrations/:id/approve
+Approve a pending registration (admin only).
+
+**Request Body:**
+```json
+{
+  "decision_reason": "Optional reason for approval"
+}
+```
+
+### PUT /registrations/:id/reject
+Reject a pending registration (admin only).
+
+**Request Body:**
+```json
+{
+  "decision_reason": "Required reason for rejection"
+}
+```
+
+## Media Management
+
+### GET /media
+Get all media files with pagination.
+
+**Query Parameters:**
+- `page`: number (default: 1)
+- `limit`: number (default: 10)
+- `uploaded_by`: string (optional, filter by user)
+
+### GET /media/:id
+Get specific media file details.
+
+### POST /media
+Upload a new media file.
+
+**Content-Type:** `multipart/form-data`
+
+**Form Data:**
+- `file`: File (image, document, etc.)
+
+### DELETE /media/:id
+Delete a media file (owner or admin only).
 
 ## Post Management
 

@@ -10,29 +10,25 @@ export default function defineStreamModel(sequelize, DataTypes) {
       allowNull: false
     },
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: true
-    },
-    platform: {
-      type: DataTypes.ENUM('twitch','youtube','kick'),
-      allowNull: false,
-      defaultValue: 'twitch'
     },
     stream_url: {
       type: DataTypes.STRING,
       allowNull: true
     },
-    is_live: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
-    host_team_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true
+    status: {
+      type: DataTypes.ENUM('offline', 'scheduled', 'live'),
+      defaultValue: 'offline',
+      allowNull: false
     },
     competition_id: {
       type: DataTypes.INTEGER,
       allowNull: true
+    },
+    team_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
     created_at: {
       type: DataTypes.DATE,
@@ -43,6 +39,17 @@ export default function defineStreamModel(sequelize, DataTypes) {
       defaultValue: DataTypes.NOW
     }
   });
+
+  Stream.associate = (models) => {
+    Stream.belongsTo(models.Competition, {
+      foreignKey: 'competition_id',
+      as: 'competition'
+    });
+    Stream.belongsTo(models.Team, {
+      foreignKey: 'team_id',
+      as: 'team'
+    });
+  };
 
   return Stream;
 }

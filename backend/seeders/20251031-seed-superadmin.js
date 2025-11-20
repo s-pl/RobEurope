@@ -1,17 +1,32 @@
 import bcrypt from 'bcryptjs';
 
-// Use a fixed UUID for the seeded superadmin so other seeders can reference it deterministically
-const SUPERADMIN_ID = '00000000-0000-0000-0000-000000000001';
+// Preferred fixed UUID for superadmin when creating it fresh
+const PREFERRED_SUPERADMIN_ID = '00000000-0000-0000-0000-000000000001';
 
 export async function up(queryInterface, Sequelize) {
-  // Create a super_admin user (no Country insert here as requested)
+  // 1) Ensure a super_admin user exists, idempotently
   const passwordPlain = process.env.SEED_SUPERADMIN_PASSWORD || 'ChangeMe123!';
   const passwordHash = await bcrypt.hash(passwordPlain, 10);
 
-  // Describe table to detect timestamp column names
   const userCols = await queryInterface.describeTable('User');
-  const userRow = {
-    id: SUPERADMIN_ID,
+
+  // Try to find by username first (unique in schema)
+  let superadminId = await queryInterface.rawSelect(
+    'User',
+    { where: { username: 'superadmin' } },
+    'id'
+  );
+
+  if (!superadminId) {
+    // If not found by username, try by preferred fixed id (in case an earlier run inserted it)
+    superadminId = await queryInterface.rawSelect(
+      'User',
+      { where: { id: PREFERRED_SUPERADMIN_ID } },
+      'id'
+    );
+  }
+
+  const baseUserRow = {
     first_name: 'Super',
     last_name: 'Admin',
     username: 'superadmin',
@@ -20,21 +35,45 @@ export async function up(queryInterface, Sequelize) {
     phone: null,
     profile_photo_url: null,
     role: 'super_admin',
-    is_active: true
+    is_active: true,
   };
-  if (userCols.createdAt) userRow.createdAt = new Date();
-  if (userCols.created_at) userRow.created_at = new Date();
-  if (userCols.updatedAt) userRow.updatedAt = new Date();
-  if (userCols.updated_at) userRow.updated_at = new Date();
+  if (userCols.createdAt) baseUserRow.createdAt = new Date();
+  if (userCols.created_at) baseUserRow.created_at = new Date();
+  if (userCols.updatedAt) baseUserRow.updatedAt = new Date();
+  if (userCols.updated_at) baseUserRow.updated_at = new Date();
 
-  const existingUser = await queryInterface.rawSelect('User', { where: { id: SUPERADMIN_ID } }, 'id');
-  if (!existingUser) {
-    await queryInterface.bulkInsert('User', [userRow], {});
+  if (!superadminId) {
+    // Create with preferred fixed id for deterministic references
+    const row = { id: PREFERRED_SUPERADMIN_ID, ...baseUserRow };
+    try {
+      await queryInterface.bulkInsert('User', [row], {});
+      superadminId = PREFERRED_SUPERADMIN_ID;
+    } catch (e) {
+      // Handle rare race/unique cases: if duplicate username/email, fetch id and continue
+      console.warn('Superadmin insert conflict, resolving by lookup. Error:', e?.parent?.sqlMessage || e?.message);
+      superadminId = await queryInterface.rawSelect(
+        'User',
+        { where: { username: 'superadmin' } },
+        'id'
+      );
+    }
   } else {
-    console.log('Superadmin already exists, skipping User insert');
+    // Ensure baseline fields are set (keep existing id and username)
+    await queryInterface.bulkUpdate(
+      'User',
+      {
+        first_name: baseUserRow.first_name,
+        last_name: baseUserRow.last_name,
+        email: baseUserRow.email,
+        role: baseUserRow.role,
+        is_active: baseUserRow.is_active,
+        // Do not overwrite password unless explicitly requested
+      },
+      { id: superadminId }
+    );
   }
 
-  // Insert a sample team for the super admin; country_id left null to avoid FK issues when Country is not seeded
+  // 2) Ensure an Admin Team exists (created_by_user_id can be null if not available)
   const teamCols = await queryInterface.describeTable('Team');
   const teamRow = {
     id: 1,
@@ -44,7 +83,7 @@ export async function up(queryInterface, Sequelize) {
     institution: null,
     logo_url: null,
     social_links: null,
-    created_by_user_id: SUPERADMIN_ID
+    created_by_user_id: superadminId || null,
   };
   if (teamCols.createdAt) teamRow.createdAt = new Date();
   if (teamCols.created_at) teamRow.created_at = new Date();
@@ -55,7 +94,11 @@ export async function up(queryInterface, Sequelize) {
   if (!existingTeam) {
     await queryInterface.bulkInsert('Team', [teamRow], {});
   } else {
-    console.log('Admin Team already exists, skipping Team insert');
+    // Optionally update created_by_user_id if it was null before
+    if (superadminId) {
+      await queryInterface.bulkUpdate('Team', { created_by_user_id: superadminId }, { id: 1 });
+    }
+    console.log('Admin Team already exists, ensured linkage');
   }
 }
 

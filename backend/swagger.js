@@ -147,6 +147,26 @@ const swaggerSpec = {
       put: { summary: 'Update registration', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/RegistrationCreate' } } } }, responses: { '200': { description: 'Updated' } } },
       delete: { summary: 'Delete registration', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Deleted' } } }
     },
+    '/registrations/{id}/approve': {
+      post: {
+        summary: 'Approve registration (admin)',
+        description: 'Marks a pending team competition registration as approved. Optionally include a decision_reason for audit/message.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { decision_reason: { type: 'string', nullable: true } } } } } },
+        responses: { '200': { description: 'Approved' }, '400': { description: 'Not pending / validation error' }, '403': { description: 'Forbidden (requires admin)' }, '404': { description: 'Registration not found' } }
+      }
+    },
+    '/registrations/{id}/reject': {
+      post: {
+        summary: 'Reject registration (admin)',
+        description: 'Marks a pending team competition registration as rejected with a mandatory decision_reason explaining why.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { decision_reason: { type: 'string' } }, required: ['decision_reason'] } } } },
+        responses: { '200': { description: 'Rejected' }, '400': { description: 'Not pending / validation error' }, '403': { description: 'Forbidden (requires admin)' }, '404': { description: 'Registration not found' } }
+      }
+    },
     '/sponsors': {
       get: { summary: 'List sponsors', responses: { '200': { description: 'List', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Sponsor' } } } } } } },
       post: { summary: 'Create sponsor', requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/SponsorCreate' } } } }, responses: { '201': { description: 'Created' } } }
@@ -164,6 +184,40 @@ const swaggerSpec = {
       get: { summary: 'Get team', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Team', content: { 'application/json': { schema: { $ref: '#/components/schemas/Team' } } } } } },
       put: { summary: 'Update team', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/TeamCreate' } } } }, responses: { '200': { description: 'Updated' } } },
       delete: { summary: 'Delete team', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Deleted' } } }
+    },
+    '/teams/mine': {
+      get: { summary: 'Get my team (owner)', security: [{ bearerAuth: [] }], responses: { '200': { description: 'Owned team (if any)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Team' } } } }, '404': { description: 'No team owned' } } }
+    },
+    '/teams/status': {
+      get: { summary: 'Get membership status', security: [{ bearerAuth: [] }], responses: { '200': { description: 'Membership status', content: { 'application/json': { schema: { type: 'object', properties: { ownedTeamId: { type: 'integer', nullable: true }, memberOfTeamId: { type: 'integer', nullable: true } } } } } } } }
+    },
+    '/teams/leave': {
+      post: { summary: 'Leave current team (non-owner)', security: [{ bearerAuth: [] }], responses: { '200': { description: 'Left team' }, '400': { description: 'Owner cannot leave or not a member' } } }
+    },
+    '/teams/{id}/invite': {
+      post: {
+        summary: 'Invite a user to team',
+        description: 'Invite by username or email. If the email does not correspond to a user, a token email can be sent if email service is configured.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { username: { type: 'string' }, email: { type: 'string', format: 'email' } } } } } },
+        responses: { '201': { description: 'Invitation created/sent' }, '400': { description: 'Validation error' }, '403': { description: 'Only owner can invite' } }
+      }
+    },
+    '/teams/invitations/accept': {
+      post: {
+        summary: 'Accept team invitation',
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { token: { type: 'string' } }, required: ['token'] } } } },
+        responses: { '200': { description: 'Joined team' }, '400': { description: 'Invalid token' } }
+      }
+    },
+    '/teams/{id}/requests': {
+      get: { summary: 'List join requests (owner)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'List', content: { 'application/json': { schema: { type: 'array', items: { type: 'object', properties: { id: { type: 'integer' }, user_id: { type: 'string' }, status: { type: 'string' }, user_username: { type: 'string', nullable: true }, user_email: { type: 'string', nullable: true }, user_name: { type: 'string', nullable: true } } } } } } } },
+      post: { summary: 'Request to join a team', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '201': { description: 'Request created' } } }
+    },
+    '/teams/requests/{requestId}/approve': {
+      post: { summary: 'Approve a join request (owner)', security: [{ bearerAuth: [] }], parameters: [{ name: 'requestId', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Approved' }, '403': { description: 'Forbidden' } } }
     },
     '/team-members': {
       get: { summary: 'List team members', responses: { '200': { description: 'List', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/TeamMember' } } } } } } },
@@ -193,8 +247,8 @@ const swaggerSpec = {
       PostCreate: { type: 'object', properties: { title: { type: 'string' }, content: { type: 'string' }, author_id: { type: 'string' } }, required: ['title','content'] },
       Notification: { type: 'object', properties: { id: { type: 'string' }, user_id: { type: 'string' }, title: { type: 'string' }, message: { type: 'string' }, type: { type: 'string' } } },
       NotificationCreate: { type: 'object', properties: { user_id: { type: 'string' }, title: { type: 'string' }, message: { type: 'string' }, type: { type: 'string' } }, required: ['user_id','title','message','type'] },
-      Registration: { type: 'object', properties: { id: { type: 'string' }, team_id: { type: 'string' }, competition_id: { type: 'string' }, status: { type: 'string' } } },
-      RegistrationCreate: { type: 'object', properties: { team_id: { type: 'string' }, competition_id: { type: 'string' }, status: { type: 'string' } }, required: ['team_id','competition_id'] },
+  Registration: { type: 'object', properties: { id: { type: 'string' }, team_id: { type: 'string' }, competition_id: { type: 'string' }, status: { type: 'string', enum: ['pending','approved','rejected'] }, decision_reason: { type: 'string', nullable: true } } },
+  RegistrationCreate: { type: 'object', properties: { team_id: { type: 'string' }, competition_id: { type: 'string' } }, required: ['team_id','competition_id'] },
       Sponsor: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' }, logo_url: { type: 'string' } } },
       SponsorCreate: { type: 'object', properties: { name: { type: 'string' }, logo_url: { type: 'string' }, website_url: { type: 'string' } }, required: ['name'] },
       Team: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' }, country_id: { type: 'string' } } },
@@ -203,7 +257,8 @@ const swaggerSpec = {
       TeamMemberCreate: { type: 'object', properties: { team_id: { type: 'string' }, user_id: { type: 'string' }, role: { type: 'string' } }, required: ['team_id','user_id','role'] }
     }
   }
-};
+}
+}
 
 // Serve the raw spec at /api-docs/swagger.json
 router.get('/swagger.json', (req, res) => {

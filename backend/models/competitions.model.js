@@ -44,5 +44,12 @@ export default async function defineCompetitionsModel(sequelize, DataTypes) {
 
     });
 
+    Competition.associate = (models) => {
+        Competition.hasMany(models.Stream, {
+            foreignKey: 'competition_id',
+            as: 'streams'
+        });
+    };
+
 return Competition;
 }

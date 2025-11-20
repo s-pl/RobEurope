@@ -67,6 +67,19 @@ npm run migrate
 npm run seed
 ```
 
+## Teams feature (backend quick reference)
+
+- Crear equipo: `POST /api/teams` (auth). El creador pasa a ser owner.
+- Invitar: `POST /api/teams/:id/invite` (owner).
+- Aceptar invitación: `POST /api/teams/invitations/accept` (auth), body `{ token }`.
+- Solicitar unirse: `POST /api/teams/:id/requests` (auth).
+- Aprobar solicitud: `POST /api/teams/requests/:requestId/approve` (owner).
+- Registrar equipo en competición: `POST /api/teams/:id/register-competition` (owner).
+
+## Notificaciones
+
+- REST: `GET /api/notifications?user_id=<uuid>`
+- Realtime opcional: canal Socket.IO `notification:{userId}`
 5. **Start development servers**
 ```bash
 # Terminal 1: Backend server

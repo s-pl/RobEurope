@@ -1,12 +1,19 @@
-const SUPERADMIN_ID = '00000000-0000-0000-0000-000000000001';
-
 export async function up(queryInterface, Sequelize) {
+  // Resolve author id dynamically (superadmin)
+  let superadminId = await queryInterface.rawSelect('User', { where: { username: 'superadmin' } }, 'id');
+  if (!superadminId) {
+    superadminId = await queryInterface.rawSelect(
+      'User',
+      { where: { id: '00000000-0000-0000-0000-000000000001' } },
+      'id'
+    );
+  }
   const cols = await queryInterface.describeTable('Post');
   const row = {
     id: 1,
     title: 'Welcome to RobEurope',
     content: 'This is an example seeded post by the super admin.',
-    author_id: SUPERADMIN_ID,
+    author_id: superadminId || null,
     media_urls: null,
     likes_count: 0,
     views_count: 0,
