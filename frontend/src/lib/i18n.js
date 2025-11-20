@@ -36,7 +36,7 @@ const resources = {
         competitions: 'Competiciones',
         teams: 'Equipos',
         sponsors: 'Patrocinadores',
-        streams: 'Streams',
+        streams: 'Streaming',
         contact: 'Contacto',
         terms: 'Términos',
         profile: 'Perfil'
@@ -63,6 +63,22 @@ const resources = {
         saving: 'Guardando…',
         creating: 'Creando…',
         entering: 'Entrando…'
+      },
+      footer: {
+        description:
+          'RobEurope ofrece la mejor experiencia en robótica. Trabajamos con verdaderos profesionales —los mejores en su campo— para llevar innovación y excelencia a cada proyecto.',
+        projects: 'PROYECTOS',
+        competitions: 'Competiciones',
+        teams: 'Equipos',
+        streaming: 'Streaming',
+        resources: 'RECURSOS',
+        gallery: 'Galería',
+        sponsors: 'Patrocinadores',
+        feedback: 'Feedback',
+        company: 'COMPAÑÍA',
+        about: 'Sobre nosotros',
+        contact: 'Contacto',
+        terms: 'Términos'
       },
       forms: {
         firstName: 'Nombre',
@@ -195,7 +211,7 @@ const resources = {
         competitions: 'Competitions',
         teams: 'Teams',
         sponsors: 'Sponsors',
-        streams: 'Streams',
+        streams: 'Streaming',
         contact: 'Contact',
         terms: 'Terms',
         profile: 'Profile'
@@ -212,7 +228,7 @@ const resources = {
         submitDemo: 'Send demo',
         createAccount: 'Create account',
         alreadyAccount: 'Already have an account?',
-  noAccount: 'Don\'t have an account?',
+        noAccount: 'Don\'t have an account?',
         goToLogin: 'Sign in',
         goToRegister: 'Register here',
         calendar: 'Calendar',
@@ -222,6 +238,22 @@ const resources = {
         saving: 'Saving…',
         creating: 'Creating…',
         entering: 'Logging in…'
+      },
+      footer: {
+        description:
+          'RobEurope offers the best experience in robotics. We work with true professionals —the best in their field— to bring innovation and excellence to every project.',
+        projects: 'PROJECTS',
+        competitions: 'Competitions',
+        teams: 'Teams',
+        streaming: 'Streaming',
+        resources: 'RESOURCES',
+        gallery: 'Gallery',
+        sponsors: 'Sponsors',
+        feedback: 'Feedback',
+        company: 'COMPANY',
+        about: 'About Us',
+        contact: 'Contact',
+        terms: 'Terms'
       },
       forms: {
         firstName: 'First name',
@@ -354,7 +386,7 @@ const resources = {
         competitions: 'Wettkämpfe',
         teams: 'Teams',
         sponsors: 'Sponsoren',
-        streams: 'Streams',
+        streams: 'Streaming',
         contact: 'Kontakt',
         terms: 'Bedingungen',
         profile: 'Profil'
@@ -381,6 +413,22 @@ const resources = {
         saving: 'Wird gespeichert…',
         creating: 'Wird erstellt…',
         entering: 'Anmeldung…'
+      },
+      footer: {
+        description:
+          'RobEurope bietet die beste Erfahrung in der Robotik. Wir arbeiten mit echten Fachleuten —den Besten auf ihrem Gebiet— um Innovation und Exzellenz in jedes Projekt zu bringen.',
+        projects: 'PROJEKTE',
+        competitions: 'Wettkämpfe',
+        teams: 'Teams',
+        streaming: 'Streaming',
+        resources: 'RESSOURCEN',
+        gallery: 'Galerie',
+        sponsors: 'Sponsoren',
+        feedback: 'Feedback',
+        company: 'UNTERNEHMEN',
+        about: 'Über uns',
+        contact: 'Kontakt',
+        terms: 'Bedingungen'
       },
       forms: {
         firstName: 'Vorname',
