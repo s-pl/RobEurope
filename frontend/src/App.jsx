@@ -14,6 +14,9 @@ import MyTeam from './pages/MyTeam';
 import Sponsors from './pages/Sponsors';
 import Streams from './pages/Streaming';
 import { Toaster } from './components/ui/toast';
+import Gallery from './pages/Gallery';
+import Feedback from './pages/Feedback';
+
 
 
 const GuestRoute = ({ children }) => {
@@ -65,6 +68,9 @@ function App() {
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/Gallery" element={<Gallery/>} />
+        <Route path="/Feedback" element={<Feedback/>} />
+
       </Routes>
       <Toaster />
     </BrowserRouter>
