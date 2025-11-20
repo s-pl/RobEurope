@@ -12,7 +12,7 @@ import Teams from './pages/Teams';
 import AcceptInvite from './pages/AcceptInvite';
 import MyTeam from './pages/MyTeam';
 import Sponsors from './pages/Sponsors';
-import Streams from './pages/Streams';
+import Streams from './pages/Streaming';
 import { Toaster } from './components/ui/toast';
 
 

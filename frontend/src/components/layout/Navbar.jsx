@@ -13,7 +13,7 @@ const navLinks = [
   { to: '/competitions', key: 'nav.competitions' },
   { to: '/teams', key: 'nav.teams' },
   { to: '/sponsors', key: 'nav.sponsors' },
-  { to: '/streams', key: 'nav.streams' },
+  { to: '/stream', key: 'nav.streams' },
   { to: '/contact', key: 'nav.contact' },
   { to: '/terms', key: 'nav.terms' }
 ];
@@ -39,7 +39,7 @@ const Navbar = () => {
         const st = await api('/teams/status');
         if (!alive) return;
         setHasTeam(Boolean(st?.ownedTeamId || st?.memberOfTeamId));
-      } catch {}
+      } catch {t}
     };
     load();
     return () => { alive = false; };
