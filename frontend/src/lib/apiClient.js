@@ -1,8 +1,8 @@
 const FALLBACK_BASES = [
   'http://localhost:85/api',
   'http://46.101.255.106:85/api',
-  'https://robeurope.samuelponce.es/api',
-  'http://robeurope.samuelponce.es/api'
+  'https://robeurope.samuelponce.es:85/api',
+  'http://robeurope.samuelponce.es:85/api'
 ];
 const STORAGE_KEY = 'robeurope:apiBaseUrl';
 
