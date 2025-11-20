@@ -25,13 +25,16 @@ const readStoredBase = () => {
 
 const resolveDefaultBase = () => {
   const envBase = normalizeBase(import.meta.env.VITE_API_BASE_URL || '');
+  console.log('VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL, 'envBase:', envBase);
   if (envBase) return envBase;
 
   const stored = normalizeBase(readStoredBase());
+  console.log('stored:', stored);
   if (stored) return stored;
 
   if (typeof window !== 'undefined') {
     const { origin } = window.location;
+    console.log('origin:', origin);
     if (origin.includes('46.101.255.106')) {
       return normalizeBase(origin);
     }
