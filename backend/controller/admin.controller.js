@@ -2,16 +2,34 @@ import db from '../models/index.js';
 import bcrypt from 'bcryptjs';
 const { User, Competition, Post } = db;
 
+// Helper reused (similar logic as auth.controller) to support base64 obfuscated inputs
+function isBase64(str) {
+  return typeof str === 'string' && /^[A-Za-z0-9+/=]+$/.test(str) && (str.length % 4 === 0);
+}
+function decodeIfBase64(value) {
+  try {
+    if (!value || typeof value !== 'string') return value;
+    if (!isBase64(value)) return value;
+    return Buffer.from(value, 'base64').toString('utf8');
+  } catch (e) {
+    return value;
+  }
+}
+
 export async function renderLogin(req, res) {
   return res.render('login', { title: 'Admin Login' });
 }
 
 export async function handleLogin(req, res) {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).render('login', { title: 'Admin Login', error: 'Email and password required' });
     }
+    // Normalize & decode
+    email = decodeIfBase64(email.trim()).toLowerCase();
+    password = decodeIfBase64(password.trim());
+
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(401).render('login', { title: 'Admin Login', error: 'Invalid credentials' });
