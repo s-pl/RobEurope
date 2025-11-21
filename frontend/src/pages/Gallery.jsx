@@ -1,18 +1,20 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from "react"
 
 const Gallery = () => {
 
     const [showMore, setShowMore] = useState(false)
+    const { t } = useTranslation();
 
     return (
         <div>
 
             <div>
                 <h1 className="text-8xl font-bold text-blue-800 mb-2 mt-10 text-center drop-shadow-md">
-                    Gallery
+                    {t("gallery.galleryTitle")}
                 </h1>
                 <p className="text-blue-600 text-lg mb-10 text-center">
-                    A collection of our robotics event moments
+                    {t('gallery.galleryDescription')}
                 </p>
             </div>
 

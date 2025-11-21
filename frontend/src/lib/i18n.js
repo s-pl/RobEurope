@@ -80,6 +80,10 @@ const resources = {
         contact: 'Contacto',
         terms: 'Términos'
       },
+      gallery: {
+        galleryTitle: "Galería",
+        galleryDescription: "Una colección de momentos de nuestro evento de robótica",
+      },
       forms: {
         firstName: 'Nombre',
         lastName: 'Apellidos',
@@ -255,6 +259,10 @@ const resources = {
         contact: 'Contact',
         terms: 'Terms'
       },
+      gallery: {
+        galleryTitle: "Gallery",
+        galleryDescription: "A collection of our robotics event moments",
+      },
       forms: {
         firstName: 'First name',
         lastName: 'Last name',
@@ -429,6 +437,10 @@ const resources = {
         about: 'Über uns',
         contact: 'Kontakt',
         terms: 'Bedingungen'
+      },
+      gallery: {
+        galleryTitle: "Galerie",
+        galleryDescription: "Eine Sammlung unserer Roboterveranstaltungsmomente",
       },
       forms: {
         firstName: 'Vorname',
