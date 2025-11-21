@@ -12,6 +12,7 @@ import mediaRoutes from './routes/api/media.route.js';
 import swaggerRouter from './swagger.js';
 import cors from 'cors';
 import helmet from 'helmet';
+import csrf from 'csurf';
 import session from 'express-session';
 import SequelizeStoreInit from 'connect-session-sequelize';
 import fs from 'fs';
@@ -20,6 +21,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import { setIO } from './utils/realtime.js';
 import db from './models/index.js';
 import adminRoutes from './routes/admin.route.js';
+import requestId from './middleware/requestId.middleware.js';
 dotenv.config();
 // import userRoutes from './routes/userRoutes.js';
 const allowedOrigins = [
@@ -31,6 +33,9 @@ const allowedOrigins = [
 ];
 
 const app = express();
+
+// --- Request ID ---
+app.use(requestId());
 
 // --- Security Headers (Helmet) ---
 app.use(helmet({
@@ -88,6 +93,7 @@ app.use(cors({
 
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(timeoutMiddleware);
 // Serve static files from backend/public so we can host a simple test UI
 app.use(express.static('public'));
@@ -100,8 +106,25 @@ app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
 app.use('/api/streams', streamRoutes);
 app.use('/api/media', mediaRoutes); 
 
-// Admin panel (session-based)
+// --- CSRF (only for admin panel forms) ---
+// Apply CSRF after session; limit to /admin paths
+app.use('/admin', csrf({ cookie: false }));
+app.use((req, res, next) => {
+  if (req.path.startsWith('/admin')) {
+    res.locals.csrfToken = req.csrfToken ? req.csrfToken() : null;
+  }
+  next();
+});
+// Admin panel (session-based) routes
 app.use('/admin', adminRoutes);
+
+// CSRF error handler
+app.use((err, req, res, next) => {
+  if (err.code === 'EBADCSRFTOKEN') {
+    return res.status(403).send('Invalid CSRF token');
+  }
+  next(err);
+});
 
 // error handler
 // centralized error handler
@@ -189,6 +212,10 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running at https://0.0.0.0:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running at https://0.0.0.0:${PORT}`);
+  });
+}
+
+export default app;

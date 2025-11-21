@@ -1,6 +1,7 @@
 <% const content = (function(){ %>
 <h2>Admin Login</h2>
-<form method="post" action="/admin/login" style="max-width:400px;">
+<form method="post" action="/admin/login" style="max-width:420px;" class="contrast">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
   <label>Email
     <input type="email" name="email" required />
   </label>

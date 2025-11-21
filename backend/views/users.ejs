@@ -1,6 +1,6 @@
 <% const content = (function(){ %>
 <h2>Users</h2>
-<table>
+<table role="grid">
   <thead>
     <tr>
       <th>ID</th>
@@ -24,6 +24,7 @@
         <td>
           <% if (u.role !== 'super_admin') { %>
             <form method="post" action="/admin/users/<%= u.id %>/promote" onsubmit="return confirm('Promote to super_admin?');">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
               <button type="submit">Promote</button>
             </form>
           <% } else { %>
