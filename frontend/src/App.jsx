@@ -16,7 +16,7 @@ import Streams from './pages/Streaming';
 import { Toaster } from './components/ui/toast';
 import Gallery from './pages/Gallery';
 import Feedback from './pages/Feedback';
-
+import Terms from './pages/Terms';
 
 
 const GuestRoute = ({ children }) => {
@@ -42,6 +42,7 @@ function App() {
           <Route path="streams" element={<ProtectedRoute><Streams /></ProtectedRoute>} />
           <Route path="/Feedback" element={<Feedback/>} />
           <Route path="/Gallery" element={<Gallery/>} />
+          <Route path="/Terms" element={<Terms/>} />
 
           <Route
             path="profile"
