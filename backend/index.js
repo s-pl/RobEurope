@@ -27,10 +27,10 @@ dotenv.config();
 // import userRoutes from './routes/userRoutes.js';
 const allowedOrigins = [
   /^https?:\/\/localhost(:\d+)?$/,
+  /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
   /^http:\/\/46\.101\.255\.106(?::85)?$/,
   /^http:\/\/46\.101\.255\.106:5173$/,
   /^https?:\/\/(?:[a-z0-9-]+\.)?robeurope\.samuelponce\.es(?::\d+)?$/
-
 ];
 
 const app = express();
@@ -85,15 +85,21 @@ app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }
 
 
 
-app.use(cors({
+// CORS only for API & real-time connections; admin panel (server-rendered) should not require CORS
+const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
+    if (!origin) return callback(null, true); // non-browser or same-origin requests
     const allowed = allowedOrigins.some((pattern) => (pattern instanceof RegExp ? pattern.test(origin) : pattern === origin));
     if (allowed) return callback(null, true);
-    callback(new Error('Not allowed by CORS'));
+    return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
-}));
+};
+
+app.use('/api', cors(corsOptions));
+app.use('/api/streams', cors(corsOptions));
+app.use('/api/media', cors(corsOptions));
+app.use('/api-docs', cors(corsOptions));
 
 
 app.use(express.json());
