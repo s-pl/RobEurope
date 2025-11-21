@@ -121,15 +121,7 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Create HTTP/HTTPS server and attach Socket.IO so ws://.../socket.io is available
 let server;
-if (process.env.NODE_ENV === 'production') {
-  const sslOptions = {
-    key: fs.readFileSync(process.env.SSL_KEY_PATH || new URL('./certs/key.pem', import.meta.url)),
-    cert: fs.readFileSync(process.env.SSL_CERT_PATH || new URL('./certs/cert.pem', import.meta.url))
-  };
-  server = https.createServer(sslOptions, app);
-} else {
-  server = http.createServer(app);
-}
+server = http.createServer(app); // simple HTTP server - https is already handled by a reverse proxy in production
 
 // Socket.IO with CORS matching the same allowed origins as Express CORS
 const io = new SocketIOServer(server, {
