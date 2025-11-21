@@ -1,3 +1,4 @@
+import { Description } from '@radix-ui/react-dialog';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
@@ -79,6 +80,18 @@ const resources = {
         about: 'Sobre nosotros',
         contact: 'Contacto',
         terms: 'Términos'
+      },
+      gallery: {
+        galleryTitle: "Galería",
+        galleryDescription: "Una colección de momentos de nuestro evento de robótica",
+      },
+      feedback: {
+        Title: "Opiniones",
+        Description: "Opiniones de nuestros usuarios",
+        roleSamuel: "Frontend Lead @ Google",
+        reviewSamuel: "Este organizador de eventos de robótica realmente eleva cada taller. Las sesiones están bien estructuradas, son interactivas e increíblemente inspiradoras. Es el lugar ideal para explorar la robótica y obtener experiencia práctica real.",
+        roleAngel: "Frontend Lead @ Google",
+        reviewAngel: "Encontré una solución para todas mis necesidades de diseño con Creative Tim. ¡Los uso como freelancer en mis proyectos de hobby por diversión! ¡Y es realmente asequible, gente muy humilde!"
       },
       forms: {
         firstName: 'Nombre',
@@ -255,6 +268,18 @@ const resources = {
         contact: 'Contact',
         terms: 'Terms'
       },
+      gallery: {
+        galleryTitle: "Gallery",
+        galleryDescription: "A collection of our robotics event moments",
+      },
+      feedback: {
+        Title: "Feedback",
+        Description: "Our users' opinions",
+        roleSamuel: "Frontend Lead @ Google",
+        reviewSamuel: "This robotics event organizer truly elevates every workshop. The sessions are well-structured, interactive, and incredibly inspiring. It’s the ideal place to explore robotics and gain real hands-on experience.",
+        roleAngel: "Frontend Lead @ Google",
+        reviewAngel: "I found a solution to all my design needs from Creative Tim. I use them as a freelancer in my hobby projects for fun! And it's really affordable, very humble guys!!!"
+      },
       forms: {
         firstName: 'First name',
         lastName: 'Last name',
@@ -429,6 +454,18 @@ const resources = {
         about: 'Über uns',
         contact: 'Kontakt',
         terms: 'Bedingungen'
+      },
+      gallery: {
+        galleryTitle: "Galerie",
+        galleryDescription: "Eine Sammlung unserer Roboterveranstaltungsmomente",
+      },
+      feedback: {
+        Title: "Feedback",
+        Description: "Meinungen unserer Nutzer",
+        roleSamuel: "Frontend Lead @ Google",
+        reviewSamuel: "Dieser Roboter-Event-Organisator hebt jeden Workshop wirklich auf ein neues Level. Die Sitzungen sind gut strukturiert, interaktiv und unglaublich inspirierend. Es ist der ideale Ort, um Robotik zu erkunden und praktische Erfahrungen zu sammeln.",
+        roleAngel: "Frontend Lead @ Google",
+        reviewAngel: "Ich habe eine Lösung für all meine Designbedürfnisse von Creative Tim gefunden. Ich nutze sie als Freelancer in meinen Hobbyprojekten zum Spaß! Und es ist wirklich erschwinglich, sehr bescheidene Leute!"
       },
       forms: {
         firstName: 'Vorname',
