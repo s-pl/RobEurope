@@ -40,7 +40,9 @@ function App() {
           <Route path="my-team" element={<ProtectedRoute><MyTeam /></ProtectedRoute>} />
           <Route path="sponsors" element={<ProtectedRoute><Sponsors /></ProtectedRoute>} />
           <Route path="streams" element={<ProtectedRoute><Streams /></ProtectedRoute>} />
-         
+          <Route path="/Feedback" element={<Feedback/>} />
+          <Route path="/Gallery" element={<Gallery/>} />
+
           <Route
             path="profile"
             element={
@@ -68,8 +70,7 @@ function App() {
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
-        <Route path="/Gallery" element={<Gallery/>} />
-        <Route path="/Feedback" element={<Feedback/>} />
+        
 
       </Routes>
       <Toaster />
