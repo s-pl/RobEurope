@@ -4,28 +4,46 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title %> | RobEurope Admin</title>
-  <link rel="stylesheet" href="/css/admin.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1.5.10/css/pico.min.css" />
+  <style>
+    body { background:#111; color:#eee; }
+    header { background:#181818; padding:.75rem 1rem; margin-bottom:1.5rem; }
+    header nav a { margin-right: .75rem; }
+    header nav strong { margin-right:1.5rem; }
+    table { width:100%; font-size:.85rem; }
+    table th { background:#222; }
+    table td, table th { padding:.45rem .6rem; }
+    table tr:nth-child(even){ background:#191919; }
+    .stats-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:1rem; }
+    .stat { padding:1rem; background:#1f1f1f; border:1px solid #2a2a2a; border-radius:8px; text-align:center; }
+    .stat h3 { margin:0 0 .5rem; font-size:.9rem; text-transform:uppercase; letter-spacing:.5px; }
+    button { background:#2563eb; border:none; color:#fff; padding:.5rem .75rem; border-radius:4px; cursor:pointer; }
+    button:hover { background:#1d4ed8; }
+    form.contrast input, form.contrast button { width:100%; }
+    input, select { background:#1d1d1d; border:1px solid #333; color:#eee; }
+    input:focus { outline:2px solid #2563eb; }
+    .container { max-width:1100px; margin:0 auto; }
+    .flash { padding:.75rem 1rem; border-radius:6px; margin-bottom:1rem; }
+    .flash.error { background:#4c1f1f; color:#fca5a5; }
+    .flash.success { background:#1f4c2a; color:#86efac; }
+  </style>
 </head>
 <body>
-  <header class="app-header">
-    <nav class="nav-bar">
-      <div class="brand">RobEurope Admin</div>
-      <div class="nav-links">
+  <header>
+    <nav>
+      <strong>RobEurope Admin</strong>
       <% if (currentUser) { %>
-        <a href="/admin" class="nav-link">Dashboard</a>
-        <a href="/admin/users" class="nav-link">Users</a>
-        <a href="/admin/logout" class="nav-link">Logout (<%= currentUser.username || currentUser.email %>)</a>
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/users">Users</a>
+        <a href="/admin/logout">Logout (<%= currentUser.username || currentUser.email %>)</a>
       <% } else { %>
-        <a href="/admin/login" class="nav-link">Login</a>
+        <a href="/admin/login">Login</a>
       <% } %>
-      </div>
     </nav>
   </header>
-  <main class="container page-container">
+  <main class="container">
     <%- body %>
   </main>
-  <footer class="footer">RobEurope Admin &copy; <%= new Date().getFullYear() %></footer>
-  <script src="/vendor/d3.min.js"></script>
-  <script src="/js/dashboard-chart.js" defer></script>
+  <footer style="margin-top:3rem; text-align:center; font-size:.8rem; opacity:.7">RobEurope Admin &copy; <%= new Date().getFullYear() %></footer>
 </body>
 </html>

@@ -5,9 +5,5 @@
   <div class="stat"><h3>Competitions</h3><p><%= stats.competitions %></p></div>
   <div class="stat"><h3>Posts</h3><p><%= stats.posts %></p></div>
 </div>
-<div class="card">
-  <h3 class="card-title">Activity Overview</h3>
-  <div id="stats-chart" data-stats='<%= JSON.stringify(stats) %>'></div>
-</div>
 <% })(); %>
 <%- include('partials/layout', { body: content, title }) %>
