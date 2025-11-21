@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'http';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import apiRoutes from './routes/api/index.js';
 import rateLimit from './middleware/rateLimit.middleware.js';
 import timeoutMiddleware from './middleware/timeout.middleware.js';
@@ -44,7 +45,10 @@ app.use(helmet({
 
 // --- View Engine (EJS) ---
 app.set('view engine', 'ejs');
-app.set('views', path.resolve(process.cwd(), 'backend', 'views'));
+// Resolve views relative to this file's directory to avoid double 'backend/backend' when cwd is already backend
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.set('views', path.join(__dirname, 'views'));
 
 // --- Sessions (Sequelize Store) ---
 const SequelizeStore = SequelizeStoreInit(session.Store);
