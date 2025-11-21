@@ -1,5 +1,8 @@
 # Domain Configuration: Vercel Frontend + VPS Node.js Backend (HTTPS with Nginx)
 
+
+![Vercel](https://img.shields.io/badge/Vercel-%23000000?style=flat&logo=vercel&logoColor=white) ![Node.js](https://img.shields.io/badge/Node.js-%2343853D?style=flat&logo=node.js&logoColor=white) ![Nginx](https://img.shields.io/badge/Nginx-%2329B073?style=flat&logo=nginx&logoColor=white) ![Let's Encrypt](https://img.shields.io/badge/Let's_Encrypt-%2335A068?style=flat&logo=letsencrypt&logoColor=white) ![DigitalOcean](https://img.shields.io/badge/DigitalOcean-%232056FF?style=flat&logo=digitalocean&logoColor=white)
+
 This document explains how to set up:
 
 - A custom domain for the frontend hosted on **Vercel**
