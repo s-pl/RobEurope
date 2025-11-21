@@ -59,7 +59,7 @@ Complete project documentation is available in the [`docs/`](docs/) directory:
 | 🎨 **Frontend** | React (In Progress) |
 | ⚙️ **Backend** | Node.js (ESM) + Express + Sequelize |
 | 💾 **Database** | MySQL (with Sequelize ORM) |
-| 🔐 **Auth** | JWT (jsonwebtoken) + bcryptjs - Admin Panel with sessions and EJS |
+| 🔐 **Auth** | JWT (public API) + Session (Admin Panel) |
 | 📄 **API Docs** | Swagger UI (via `/api-docs`) |
 
 ---
@@ -110,6 +110,56 @@ Swagger Docs:
 
 ---
 
+## 🛠 Admin Panel
+
+The project includes a minimal EJS-powered admin panel for privileged management tasks.
+
+| Feature | Description |
+|---------|-------------|
+| Session Auth | Uses `express-session` with Sequelize store to persist administrator sessions. |
+| CSRF Protection | Enabled via `csurf` for all admin POST forms. |
+| Request Tracking | Every request gets an `X-Request-Id` header (UUID) for log correlation. |
+| Role Gate | Only users with role `super_admin` may access admin routes. |
+| Views | Located under `backend/views/` (`login.ejs`, `dashboard.ejs`, `users.ejs`). |
+
+### Default Admin Credentials (Seeder)
+
+After running `npm run seed`, a default super administrator user is ensured:
+
+```
+Email: admin@example.com
+Password: ChangeMe123!
+Role: super_admin
+```
+
+Change the password in production by updating the user directly or setting `SEED_SUPERADMIN_PASSWORD` before running seeders the first time.
+
+### Panel Routes
+
+| Route | Purpose |
+|-------|---------|
+| `/admin/login` | Session-based login form (POST email/password) |
+| `/admin` | Dashboard with basic statistics |
+| `/admin/users` | User listing + promote action |
+| `/admin/users/:id/promote` | POST to elevate a user to `super_admin` |
+
+### Environment Variables (Admin Panel)
+
+Add to `.env`:
+```env
+SESSION_SECRET=change_this_in_prod
+SEED_SUPERADMIN_PASSWORD=ChangeMe123!
+```
+
+### Security Notes
+
+- Behind a reverse proxy (Nginx), set `app.set('trust proxy', 1)` and change session cookie `secure: true`.
+- CSRF tokens are already injected in forms via hidden `_csrf` fields.
+- Use HTTPS everywhere; see `docs/howToHttps.md`.
+- Consider adding content security policy (CSP) if panel grows.
+
+---
+
 
 ## 🔑 Authentication
 
@@ -121,8 +171,39 @@ Swagger Docs:
 - Tokens are returned after login or register.
 - Default expiration: **1 hour** (configurable).
 
+### Dual Auth Model
+
+- Public API: JWT (Bearer tokens) for SPA / external clients.
+- Admin Panel: Server-side sessions (no JWT needed once logged into panel).
+
+---
+
 ---
 
 ## Nginx Reverse Proxy Setup for HTTPS
 
 Documentation for setting up Nginx as a reverse proxy with HTTPS can be found in [docs/howToHttps.md](docs/howToHttps.md).
+
+---
+
+## 🧪 Testing
+
+Run backend tests:
+```bash
+cd backend
+npm test
+```
+Add new tests under `backend/__tests__/` (e.g. session login, protected admin access). Supertest + Vitest are configured.
+
+---
+
+## 📌 Roadmap (Next Improvements)
+
+- Input validation layer (`zod` or `express-validator`).
+- Pagination + filtering for large lists.
+- Service layer abstraction for controllers.
+- Index optimization and query performance profiling.
+- CSP & advanced security headers.
+- More comprehensive audit logging UI.
+
+---
