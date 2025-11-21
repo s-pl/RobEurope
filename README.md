@@ -121,6 +121,8 @@ The project includes a minimal EJS-powered admin panel for privileged management
 | Request Tracking | Every request gets an `X-Request-Id` header (UUID) for log correlation. |
 | Role Gate | Only users with role `super_admin` may access admin routes. |
 | Views | Located under `backend/views/` (`login.ejs`, `dashboard.ejs`, `users.ejs`). |
+| Styling | Custom dark theme CSS (`public/css/admin.css`) – no external CDN frameworks (CSP friendly). |
+| Charts | Local D3 served from `/vendor/d3.min.js` renders dashboard activity bar chart. |
 
 ### Default Admin Credentials (Seeder)
 
@@ -156,7 +158,7 @@ SEED_SUPERADMIN_PASSWORD=ChangeMe123!
 - Behind a reverse proxy (Nginx), set `app.set('trust proxy', 1)` and change session cookie `secure: true`.
 - CSRF tokens are already injected in forms via hidden `_csrf` fields.
 - Use HTTPS everywhere; see `docs/howToHttps.md`.
-- Consider adding content security policy (CSP) if panel grows.
+- Content Security Policy (CSP): Panel works with strict `script-src 'self'` because D3 is served locally.
 
 ---
 

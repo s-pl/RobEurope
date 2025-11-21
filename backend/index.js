@@ -23,6 +23,7 @@ import { setIO } from './utils/realtime.js';
 import db from './models/index.js';
 import adminRoutes from './routes/admin.route.js';
 import requestId from './middleware/requestId.middleware.js';
+import { createRequire } from 'module';
 dotenv.config();
 // import userRoutes from './routes/userRoutes.js';
 const allowedOrigins = [
@@ -111,6 +112,14 @@ app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 // Serve API documentation (Swagger UI)
 app.use('/api-docs', swaggerRouter);
+// Serve vendor assets under CSP 'self' (no external CDNs)
+app.get('/vendor/d3.min.js', (req, res) => {
+  // Resolve d3 dist file from installed package
+  const require = createRequire(import.meta.url);
+  const d3Path = require.resolve('d3/dist/d3.min.js');
+  res.type('application/javascript');
+  res.sendFile(d3Path);
+});
 // Apply rate limiting on API routes
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
 app.use('/api/streams', streamRoutes);

@@ -4,35 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title %> | RobEurope Admin</title>
-  <link rel="stylesheet" href="/css/build.css" />
-  <style>
-    /* Fallback body styling if Tailwind not yet built */
-    body { background-color:#0a0a0a; color:#e5e5e5; }
-  </style>
+  <link rel="stylesheet" href="/css/admin.css" />
 </head>
 <body>
-  <header class="border-b border-neutral-800 bg-neutral-900/80 backdrop-blur sticky top-0 z-40">
-    <nav class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6 text-sm">
-      <div class="flex items-center gap-2 font-semibold text-brand-300">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l4 4-4 4-4-4 4-4z"/><path d="M2 12l4-4 4 4-4 4-4-4z"/><path d="M12 22l-4-4 4-4 4 4-4 4z"/><path d="M22 12l-4 4-4-4 4-4 4 4z"/></svg>
-        RobEurope Admin
-      </div>
-      <div class="flex gap-4">
-        <% if (currentUser) { %>
-          <a class="hover:text-brand-400" href="/admin">Dashboard</a>
-          <a class="hover:text-brand-400" href="/admin/users">Users</a>
-          <a class="hover:text-brand-400" href="/admin/logout">Logout (<%= currentUser.username || currentUser.email %>)</a>
-        <% } else { %>
-          <a class="hover:text-brand-400" href="/admin/login">Login</a>
-        <% } %>
+  <header class="app-header">
+    <nav class="nav-bar">
+      <div class="brand">RobEurope Admin</div>
+      <div class="nav-links">
+      <% if (currentUser) { %>
+        <a href="/admin" class="nav-link">Dashboard</a>
+        <a href="/admin/users" class="nav-link">Users</a>
+        <a href="/admin/logout" class="nav-link">Logout (<%= currentUser.username || currentUser.email %>)</a>
+      <% } else { %>
+        <a href="/admin/login" class="nav-link">Login</a>
+      <% } %>
       </div>
     </nav>
   </header>
-  <main class="max-w-7xl mx-auto px-4 py-8 min-h-screen">
+  <main class="container page-container">
     <%- body %>
   </main>
-  <footer class="text-center text-xs text-neutral-500 py-6">RobEurope Admin &copy; <%= new Date().getFullYear() %></footer>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js" integrity="sha512-Qp3A6nDW0uR0w5Iyp7q3gJhjV+9RSlqKxMSZkYb0+IjM7Uy1qkX4RhDtJZr6f63+W5IvkT1crjXwGvXQBD2rZQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="/js/admin-dashboard.js" defer></script>
+  <footer class="footer">RobEurope Admin &copy; <%= new Date().getFullYear() %></footer>
+  <script src="/vendor/d3.min.js"></script>
+  <script src="/js/dashboard-chart.js" defer></script>
 </body>
 </html>

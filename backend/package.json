@@ -8,8 +8,7 @@
     "migrate": "node scripts/run-migrations.js",
     "seed": "node scripts/run-seeders.js",
     "reset-data": "node scripts/reset-data.js",
-    "drop-tables": "node scripts/drop-tables.js",
-    "tailwind:build": "tailwindcss -c tailwind.admin.config.cjs -i public/css/tailwind.css -o public/css/build.css --watch"
+    "drop-tables": "node scripts/drop-tables.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -34,11 +33,11 @@
     "csurf": "^1.11.0",
     "uuid": "^13.0.0",
     "winston": "^3.18.3",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "d3": "^7.9.0"
   },
   "devDependencies": {
     "supertest": "^7.1.4",
-    "vitest": "^4.0.8",
-    "tailwindcss": "^3.4.15"
+    "vitest": "^4.0.8"
   }
 }
