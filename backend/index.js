@@ -1,5 +1,6 @@
 import express from 'express';
 import http from 'http';
+import path from 'path';
 import apiRoutes from './routes/api/index.js';
 import rateLimit from './middleware/rateLimit.middleware.js';
 import timeoutMiddleware from './middleware/timeout.middleware.js';
@@ -10,10 +11,15 @@ import streamRoutes from './routes/api/stream.route.js';
 import mediaRoutes from './routes/api/media.route.js';
 import swaggerRouter from './swagger.js';
 import cors from 'cors';
+import helmet from 'helmet';
+import session from 'express-session';
+import SequelizeStoreInit from 'connect-session-sequelize';
 import fs from 'fs';
 import https from 'https';
 import { Server as SocketIOServer } from 'socket.io';
 import { setIO } from './utils/realtime.js';
+import db from './models/index.js';
+import adminRoutes from './routes/admin.route.js';
 dotenv.config();
 // import userRoutes from './routes/userRoutes.js';
 const allowedOrigins = [
@@ -25,6 +31,42 @@ const allowedOrigins = [
 ];
 
 const app = express();
+
+// --- Security Headers (Helmet) ---
+app.use(helmet({
+  crossOriginResourcePolicy: false // allow serving uploads/static to other origins if needed
+}));
+
+// --- View Engine (EJS) ---
+app.set('view engine', 'ejs');
+app.set('views', path.resolve(process.cwd(), 'backend', 'views'));
+
+// --- Sessions (Sequelize Store) ---
+const SequelizeStore = SequelizeStoreInit(session.Store);
+const sessionStore = new SequelizeStore({
+  db: db.sequelize,
+  tableName: 'Session'
+});
+// Ensure session table exists (non-blocking) - will create if absent
+sessionStore.sync();
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'change_me_in_env',
+  store: sessionStore,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // set true behind HTTPS reverse proxy with trust proxy
+    httpOnly: true,
+    sameSite: 'lax',
+    maxAge: 1000 * 60 * 60 // 1 hour
+  }
+}));
+
+// Simple helper to expose session user to templates
+app.use((req, res, next) => {
+  res.locals.currentUser = req.session?.user || null;
+  next();
+});
 const PORT = process.env.PORT || 85;
 
 // registrar peticiones (access logs) vía winston
@@ -57,6 +99,9 @@ app.use('/api-docs', swaggerRouter);
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
 app.use('/api/streams', streamRoutes);
 app.use('/api/media', mediaRoutes); 
+
+// Admin panel (session-based)
+app.use('/admin', adminRoutes);
 
 // error handler
 // centralized error handler

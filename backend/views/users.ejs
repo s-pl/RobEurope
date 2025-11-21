@@ -1,0 +1,38 @@
+<% const content = (function(){ %>
+<h2>Users</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Email</th>
+      <th>Username</th>
+      <th>Name</th>
+      <th>Role</th>
+      <th>Created</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% users.forEach(u => { %>
+      <tr>
+        <td style="font-size:.75rem"><%= u.id %></td>
+        <td><%= u.email %></td>
+        <td><%= u.username %></td>
+        <td><%= u.first_name %> <%= u.last_name %></td>
+        <td><%= u.role %></td>
+        <td><%= new Date(u.created_at).toLocaleDateString() %></td>
+        <td>
+          <% if (u.role !== 'super_admin') { %>
+            <form method="post" action="/admin/users/<%= u.id %>/promote" onsubmit="return confirm('Promote to super_admin?');">
+              <button type="submit">Promote</button>
+            </form>
+          <% } else { %>
+            —
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% })(); %>
+<%- include('partials/layout', { body: content, title }) %>

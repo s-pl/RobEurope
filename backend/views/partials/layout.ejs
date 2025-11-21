@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | RobEurope Admin</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1.5.10/css/pico.min.css" />
+  <style>
+    header nav a { margin-right: .75rem; }
+    .stats-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap:1rem; }
+    .stat { padding:1rem; background:#222; border-radius:8px; text-align:center; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <strong>RobEurope Admin</strong>
+      <% if (currentUser) { %>
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/users">Users</a>
+        <a href="/admin/logout">Logout (<%= currentUser.username || currentUser.email %>)</a>
+      <% } else { %>
+        <a href="/admin/login">Login</a>
+      <% } %>
+    </nav>
+  </header>
+  <main class="container">
+    <%- body %>
+  </main>
+  <footer style="margin-top:3rem; text-align:center; font-size:.8rem; opacity:.7">RobEurope Admin &copy; <%= new Date().getFullYear() %></footer>
+</body>
+</html>

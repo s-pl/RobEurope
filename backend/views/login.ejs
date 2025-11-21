@@ -1,0 +1,16 @@
+<% const content = (function(){ %>
+<h2>Admin Login</h2>
+<form method="post" action="/admin/login" style="max-width:400px;">
+  <label>Email
+    <input type="email" name="email" required />
+  </label>
+  <label>Password
+    <input type="password" name="password" required />
+  </label>
+  <button type="submit">Login</button>
+  <% if (typeof error !== 'undefined' && error) { %>
+    <p style="color:#c33"><strong><%= error %></strong></p>
+  <% } %>
+</form>
+<% })(); %>
+<%- include('partials/layout', { body: content, title }) %>

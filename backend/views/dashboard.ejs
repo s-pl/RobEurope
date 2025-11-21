@@ -1,0 +1,9 @@
+<% const content = (function(){ %>
+<h2>Dashboard</h2>
+<div class="stats-grid">
+  <div class="stat"><h3>Users</h3><p><%= stats.users %></p></div>
+  <div class="stat"><h3>Competitions</h3><p><%= stats.competitions %></p></div>
+  <div class="stat"><h3>Posts</h3><p><%= stats.posts %></p></div>
+</div>
+<% })(); %>
+<%- include('partials/layout', { body: content, title }) %>
