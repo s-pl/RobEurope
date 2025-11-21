@@ -20,7 +20,8 @@ const allowedOrigins = [
   /^https?:\/\/localhost(:\d+)?$/,
   /^http:\/\/46\.101\.255\.106(?::85)?$/,
   /^http:\/\/46\.101\.255\.106:5173$/,
-  /^https?:\/\/robeurope\.samuelponce\.es(?::\d+)?$/
+  /^https?:\/\/(?:[a-z0-9-]+\.)?robeurope\.samuelponce\.es(?::\d+)?$/
+
 ];
 
 const app = express();
