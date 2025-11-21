@@ -11,8 +11,7 @@ const swaggerSpec = {
   },
   servers: [
     { url: 'http://localhost:85/api', description: 'Local development server' },
-    { url: 'http://46.101.255.106:85/api', description: 'Remote test server' },
-    { url: 'http://robeurope.samuelponce.es:85/api', description: 'Remote test server' }
+    { url: 'https://robeurope.samuelponce.es:85/api', description: 'Remote test server' }
   ],
   paths: {
     '/auth/login': {
