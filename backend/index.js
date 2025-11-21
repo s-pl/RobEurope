@@ -145,6 +145,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  const scheme = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-  console.log(`Server running at ${scheme}://0.0.0.0:${PORT}`);
+  console.log(`Server running at https://0.0.0.0:${PORT}`);
 });
