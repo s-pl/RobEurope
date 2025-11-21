@@ -1,9 +1,28 @@
 <% const content = (function(){ %>
-<h2>Dashboard</h2>
-<div class="stats-grid">
-  <div class="stat"><h3>Users</h3><p><%= stats.users %></p></div>
-  <div class="stat"><h3>Competitions</h3><p><%= stats.competitions %></p></div>
-  <div class="stat"><h3>Posts</h3><p><%= stats.posts %></p></div>
+<div class="page-title">
+  <span class="text-brand-400">Dashboard</span>
+</div>
+<div class="grid gap-6 md:grid-cols-3 mb-10">
+  <div class="stat">
+    <span class="stat-title">Users</span>
+    <span class="stat-value"><%= stats.users %></span>
+  </div>
+  <div class="stat">
+    <span class="stat-title">Competitions</span>
+    <span class="stat-value"><%= stats.competitions %></span>
+  </div>
+  <div class="stat">
+    <span class="stat-title">Posts</span>
+    <span class="stat-value"><%= stats.posts %></span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="flex items-center justify-between mb-3">
+    <h3 class="text-sm font-semibold tracking-wide text-neutral-300">Platform Overview</h3>
+    <span class="text-xs text-neutral-500">Realtime snapshot</span>
+  </div>
+  <div id="stats-chart" data-stats='<%= JSON.stringify(stats) %>' class="w-full"></div>
 </div>
 <% })(); %>
 <%- include('partials/layout', { body: content, title }) %>
