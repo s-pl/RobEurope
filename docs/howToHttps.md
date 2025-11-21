@@ -46,6 +46,7 @@ sudo apt update
 sudo apt install nginx -y
 ```
 
+
 ## 4. Configure Nginx as a Reverse Proxy for Node.js
 
 ```bash
