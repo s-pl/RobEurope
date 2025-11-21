@@ -1,14 +1,17 @@
+import { useTranslation } from "react-i18next";
+
 const Feedback = () => {
+    const { t } = useTranslation();
 
     return (
 
         <div>
             <div class="">
                 <h1 className="text-8xl font-bold text-blue-800 mb-2 mt-10 text-center drop-shadow-md">
-                    Feedback
+                    {t('feedback.Title')}
                 </h1>
                 <p className="text-blue-600 text-lg mb-10 text-center">
-                    Opiniones de nuestros usuarios
+                    {t('feedback.Description')}
                 </p>
             </div>
 
@@ -38,13 +41,11 @@ const Feedback = () => {
                                             ))}
                                         </div>
                                     </div>
-                                    <p class="text-base font-light text-blue-gray-900">Frontend Lead @ Google</p>
+                                    <p class="text-base font-light text-blue-gray-900">{t('feedback.roleSamuel')}</p>
                                 </div>
                             </div>
                             <p class="text-base font-light text-blue-gray-900">
-                                "This robotics event organizer truly elevates every workshop.
-                                The sessions are well-structured, interactive, and incredibly inspiring.
-                                It’s the ideal place to explore robotics and gain real hands-on experience."
+                                {t('feedback.reviewSamuel')}
                             </p>
                         </div>
                     </div>
@@ -72,12 +73,11 @@ const Feedback = () => {
                                             ))}
                                         </div>
                                     </div>
-                                    <p class="text-base font-light text-blue-gray-900">Frontend Lead @ Google</p>
+                                    <p class="text-base font-light text-blue-gray-900">{t('feedback.roleSamuel')}</p>
                                 </div>
                             </div>
                             <p class="text-base font-light text-blue-gray-900">
-                                "I found a solution to all my design needs from Creative Tim. I use them as a freelancer in my
-                                hobby projects for fun! And it's really affordable, very humble guys!!!"
+                                {t('feedback.reviewAngel')}
                             </p>
                         </div>
                     </div>
