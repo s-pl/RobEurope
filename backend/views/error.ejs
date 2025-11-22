@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Error <%= status %></title>
+  <title>Error <%= (typeof status !== 'undefined' ? status : 500) %></title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
@@ -57,8 +57,8 @@
 </head>
 <body>
   <div class="error-container">
-    <h1><%= status %></h1>
-    <h2><%= message %></h2>
+    <h1><%= (typeof status !== 'undefined' ? status : 500) %></h1>
+    <h2><%= (typeof message !== 'undefined' ? message : 'An error occurred') %></h2>
     <p>Algo salió mal. Por favor, intenta de nuevo.</p>
     <% if (error && error.message) { %>
       <p><strong>Detalles del error:</strong></p>
