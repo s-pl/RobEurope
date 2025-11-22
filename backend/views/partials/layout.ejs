@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title %> | RobEurope Admin</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1.5.10/css/pico.min.css" />
-  <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -454,7 +453,9 @@
   </main>
   <footer>RobEurope Admin &copy; <%= new Date().getFullYear() %> | Sistema de Administración Avanzado</footer>
 
-  <!-- Scripts externos -->
+  <!-- D3.js Library (must be before chart utilities) -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- Chart utilities (must be before specific chart scripts) -->
   <script src="/js/chart-utils.js"></script>
 </body>
 </html>

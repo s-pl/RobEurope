@@ -1,4 +1,12 @@
 // System Logs Page - Charts and Filters
+function waitForDependencies(callback) {
+  if (typeof d3 !== 'undefined' && typeof window.chartUtils !== 'undefined') {
+    callback();
+  } else {
+    setTimeout(() => waitForDependencies(callback), 100);
+  }
+}
+
 async function loadLogsCharts() {
   try {
     const response = await fetch('/admin/api/logs-stats');
@@ -137,5 +145,5 @@ document.addEventListener('DOMContentLoaded', () => {
   if (searchLog) searchLog.addEventListener('keyup', applyLogFilters);
   if (actionFilter) actionFilter.addEventListener('change', applyLogFilters);
 
-  loadLogsCharts();
+  waitForDependencies(loadLogsCharts);
 });

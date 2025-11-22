@@ -1,4 +1,12 @@
 // Competitions Page - Charts
+function waitForDependencies(callback) {
+  if (typeof d3 !== 'undefined' && typeof window.chartUtils !== 'undefined') {
+    callback();
+  } else {
+    setTimeout(() => waitForDependencies(callback), 100);
+  }
+}
+
 async function loadCompetitionChart() {
   try {
     const response = await fetch('/admin/api/competitions-stats');
@@ -115,5 +123,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  loadCompetitionChart();
+  waitForDependencies(loadCompetitionChart);
 });

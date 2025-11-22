@@ -1,8 +1,21 @@
 // Utilidades globales para gráficas D3
+// Esperar a que D3.js esté disponible
+function ensureD3Loaded(callback) {
+  if (typeof d3 !== 'undefined') {
+    callback();
+  } else {
+    setTimeout(() => ensureD3Loaded(callback), 50);
+  }
+}
+
 window.chartUtils = {
   colors: ['#0ea5e9', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'],
   
   createTooltip() {
+    if (typeof d3 === 'undefined') {
+      console.error('D3.js not loaded yet');
+      return null;
+    }
     return d3.select('body')
       .append('div')
       .attr('class', 'd3-tooltip')
@@ -23,6 +36,10 @@ window.chartUtils = {
   },
 
   createGradient(svg, id, color1, color2) {
+    if (typeof d3 === 'undefined') {
+      console.error('D3.js not loaded yet');
+      return;
+    }
     svg.append('defs').append('linearGradient')
       .attr('id', id)
       .attr('x1', '0%')
@@ -40,3 +57,4 @@ window.chartUtils = {
       .attr('stop-color', d => d.color);
   }
 };
+

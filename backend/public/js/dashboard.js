@@ -1,4 +1,12 @@
 // Dashboard Charts
+function waitForDependencies(callback) {
+  if (typeof d3 !== 'undefined' && typeof window.chartUtils !== 'undefined') {
+    callback();
+  } else {
+    setTimeout(() => waitForDependencies(callback), 100);
+  }
+}
+
 async function loadCharts() {
   try {
     // Cargar datos de usuarios por rol
@@ -260,9 +268,11 @@ function renderTimelineChart(data) {
     .text('Usuarios');
 }
 
-// Cargar gráficas cuando el DOM esté listo
+// Cargar gráficas cuando el DOM y las dependencias estén listos
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadCharts);
+  document.addEventListener('DOMContentLoaded', () => {
+    waitForDependencies(loadCharts);
+  });
 } else {
-  loadCharts();
+  waitForDependencies(loadCharts);
 }

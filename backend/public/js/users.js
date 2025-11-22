@@ -1,5 +1,18 @@
 // Users Page - Charts and Filters
+function waitForDependencies(callback) {
+  if (typeof d3 !== 'undefined' && typeof window.chartUtils !== 'undefined') {
+    callback();
+  } else {
+    setTimeout(() => waitForDependencies(callback), 100);
+  }
+}
+
 const usersData = window.usersDataGlobal || [];
+
+function initCharts() {
+  renderRoleDistribution();
+  renderStatusChart();
+}
 
 // Calcular estadísticas
 function calculateStats() {
@@ -180,6 +193,5 @@ document.addEventListener('DOMContentLoaded', () => {
   if (roleFilter) roleFilter.addEventListener('change', applyFilters);
   if (statusFilter) statusFilter.addEventListener('change', applyFilters);
 
-  renderRoleDistribution();
-  renderStatusChart();
+  waitForDependencies(initCharts);
 });
