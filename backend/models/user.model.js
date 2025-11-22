@@ -40,6 +40,10 @@ export default async function defineUserModel(sequelize, DataTypes) {
         type: DataTypes.STRING,
         allowNull: true
     },
+    bio: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
     profile_photo_url: {
         type: DataTypes.STRING,
         allowNull: true

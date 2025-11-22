@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | RobEurope Admin</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1.5.10/css/pico.min.css" />
+  <style>
+    :root {
+      --primary: #0ea5e9;
+      --primary-hover: #0284c7;
+      --background: #0f172a;
+      --surface: #1e293b;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--background);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      margin: 0;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(to right, var(--surface), #0f172a);
+    }
+
+    .sidebar-brand {
+      font-size: 1.25rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sidebar-nav {
+      padding: 1rem;
+      flex: 1;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 0.75rem 1rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 6px;
+      margin-bottom: 0.25rem;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: rgba(14, 165, 233, 0.1);
+      color: var(--primary);
+    }
+
+    .nav-item i {
+      margin-right: 0.75rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    .sidebar-footer {
+      padding: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 0.85rem;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 2rem;
+      width: calc(100% - 260px);
+    }
+
+    /* Mobile Toggle */
+    .menu-toggle {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 200;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.5rem;
+      border-radius: 6px;
+      color: var(--text);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 1rem;
+        padding-top: 4rem;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+    }
+
+    /* Common Components */
+    h2 {
+      color: var(--text);
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+      border-left: 4px solid var(--primary);
+      padding-left: 1rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Dashboard Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat {
+      padding: 1.5rem;
+      background: linear-gradient(135deg, var(--surface), #0f172a);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+    }
+
+    .stat h3 {
+      margin: 0 0 0.75rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .stat p {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, var(--primary), #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Charts */
+    .charts-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .chart-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0;
+    }
+
+    table th {
+      background: rgba(15, 23, 42, 0.5);
+      color: var(--primary);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table tr:hover {
+      background: rgba(14, 165, 233, 0.05);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #06b6d4);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+    }
+
+    /* Forms */
+    input, select, textarea {
+      background: #0f172a !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text) !important;
+      border-radius: 6px !important;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary) !important;
+      box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2) !important;
+    }
+
+    /* Badges */
+    .badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .badge-warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .badge-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .badge-info { background: rgba(14, 165, 233, 0.2); color: #38bdf8; }
+
+    /* D3 Tooltip */
+    .d3-tooltip {
+      position: absolute;
+      padding: 0.5rem 0.75rem;
+      background: rgba(15, 23, 42, 0.95);
+      color: #e2e8f0;
+      border: 1px solid #0ea5e9;
+      border-radius: 6px;
+      pointer-events: none;
+      font-size: 0.85rem;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <% if (currentUser) { %>
+    <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+      ☰
+    </button>
+
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          ⚙️ RobEurope Admin
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="/admin" class="nav-item <%= title === 'Admin Dashboard' ? 'active' : '' %>">
+          📊 Dashboard
+        </a>
+        <a href="/admin/users" class="nav-item <%= title === 'Users' || title === 'Editar Usuario' ? 'active' : '' %>">
+          👥 Usuarios
+        </a>
+        <a href="/admin/competitions" class="nav-item <%= title === 'Competiciones' ? 'active' : '' %>">
+          🏆 Competiciones
+        </a>
+        <a href="/admin/teams" class="nav-item <%= title === 'Equipos' ? 'active' : '' %>">
+          🛡️ Equipos
+        </a>
+        <a href="/admin/posts" class="nav-item <%= title === 'Posts' ? 'active' : '' %>">
+          📝 Posts
+        </a>
+        <a href="/admin/sponsors" class="nav-item <%= title === 'Patrocinadores' ? 'active' : '' %>">
+          🤝 Patrocinadores
+        </a>
+        <a href="/admin/countries" class="nav-item <%= title === 'Países' ? 'active' : '' %>">
+          🌍 Países
+        </a>
+        <a href="/admin/logs" class="nav-item <%= title === 'Logs del Sistema' ? 'active' : '' %>">
+          📋 Logs
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar">
+            <%= currentUser.username.charAt(0).toUpperCase() %>
+          </div>
+          <div style="flex: 1; overflow: hidden;">
+            <div style="font-weight: bold; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              <%= currentUser.username %>
+            </div>
+            <a href="/admin/logout" style="color: var(--text-muted); font-size: 0.8rem; text-decoration: none;">
+              Cerrar Sesión
+            </a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+  <% } else { %>
+    <main style="width: 100%; padding: 2rem; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+  <% } %>

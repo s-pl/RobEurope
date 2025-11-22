@@ -236,12 +236,12 @@ const swaggerSpec = {
     schemas: {
       Country: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' }, code: { type: 'string' }, flag_emoji: { type: 'string' } } },
       CountryCreate: { type: 'object', properties: { name: { type: 'string' }, code: { type: 'string' }, flag_emoji: { type: 'string' } }, required: ['name','code'] },
-      User: { type: 'object', properties: { id: { type: 'string' }, username: { type: 'string' }, email: { type: 'string' } } },
-      UserCreate: { type: 'object', properties: { username: { type: 'string' }, email: { type: 'string' }, password: { type: 'string' } }, required: ['username','email','password'] },
+      User: { type: 'object', properties: { id: { type: 'string' }, username: { type: 'string' }, email: { type: 'string' }, bio: { type: 'string' } } },
+      UserCreate: { type: 'object', properties: { username: { type: 'string' }, email: { type: 'string' }, password: { type: 'string' }, bio: { type: 'string' } }, required: ['username','email','password'] },
       Stream: { type: 'object', properties: { id: { type: 'string' }, title: { type: 'string' }, platform: { type: 'string' } } },
       StreamCreate: { type: 'object', properties: { title: { type: 'string' }, platform: { type: 'string' }, stream_url: { type: 'string' } }, required: ['title'] },
-      Competition: { type: 'object', properties: { id: { type: 'string' }, title: { type: 'string' }, slug: { type: 'string' } } },
-      CompetitionCreate: { type: 'object', properties: { title: { type: 'string' }, slug: { type: 'string' }, description: { type: 'string' } }, required: ['title','slug'] },
+      Competition: { type: 'object', properties: { id: { type: 'string' }, title: { type: 'string' }, slug: { type: 'string' }, description: { type: 'string' }, status: { type: 'string', enum: ['draft', 'published', 'archived'] }, location: { type: 'string' }, max_teams: { type: 'integer' } } },
+      CompetitionCreate: { type: 'object', properties: { title: { type: 'string' }, slug: { type: 'string' }, description: { type: 'string' }, status: { type: 'string' }, location: { type: 'string' }, max_teams: { type: 'integer' } }, required: ['title','slug'] },
       Post: { type: 'object', properties: { id: { type: 'string' }, title: { type: 'string' }, content: { type: 'string' } } },
       PostCreate: { type: 'object', properties: { title: { type: 'string' }, content: { type: 'string' }, author_id: { type: 'string' } }, required: ['title','content'] },
       Notification: { type: 'object', properties: { id: { type: 'string' }, user_id: { type: 'string' }, title: { type: 'string' }, message: { type: 'string' }, type: { type: 'string' } } },
@@ -250,8 +250,8 @@ const swaggerSpec = {
   RegistrationCreate: { type: 'object', properties: { team_id: { type: 'string' }, competition_id: { type: 'string' } }, required: ['team_id','competition_id'] },
       Sponsor: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' }, logo_url: { type: 'string' } } },
       SponsorCreate: { type: 'object', properties: { name: { type: 'string' }, logo_url: { type: 'string' }, website_url: { type: 'string' } }, required: ['name'] },
-      Team: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' }, country_id: { type: 'string' } } },
-      TeamCreate: { type: 'object', properties: { name: { type: 'string' }, country_id: { type: 'string' }, created_by_user_id: { type: 'string' } }, required: ['name'] },
+      Team: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' }, country_id: { type: 'string' }, description: { type: 'string' }, website_url: { type: 'string' }, stream_url: { type: 'string' } } },
+      TeamCreate: { type: 'object', properties: { name: { type: 'string' }, country_id: { type: 'string' }, created_by_user_id: { type: 'string' }, description: { type: 'string' }, website_url: { type: 'string' }, stream_url: { type: 'string' } }, required: ['name'] },
       TeamMember: { type: 'object', properties: { id: { type: 'string' }, team_id: { type: 'string' }, user_id: { type: 'string' }, role: { type: 'string' } } },
       TeamMemberCreate: { type: 'object', properties: { team_id: { type: 'string' }, user_id: { type: 'string' }, role: { type: 'string' } }, required: ['team_id','user_id','role'] }
     }

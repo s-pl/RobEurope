@@ -24,11 +24,13 @@ const CompetitionCard = ({ competition, t }) => (
       </div>
       <div>
         <dt className="uppercase tracking-[0.3em]">{t('competitions.card.venue')}</dt>
-        <dd className="text-base text-slate-900">{competition.city || t('competitions.card.venueFallback')}</dd>
+        <dd className="text-base text-slate-900">{competition.location || competition.city || t('competitions.card.venueFallback')}</dd>
       </div>
       <div>
         <dt className="uppercase tracking-[0.3em]">{t('competitions.card.teams')}</dt>
-        <dd className="text-base text-slate-900">{competition.teams_registered ?? '—'}</dd>
+        <dd className="text-base text-slate-900">
+          {competition.teams_registered ?? 0} / {competition.max_teams ?? '∞'}
+        </dd>
       </div>
     </dl>
   </Card>

@@ -68,8 +68,10 @@ const Teams = () => {
     try {
       const payload = { name: form.name.trim() };
       if (form.country_id) payload.country_id = Number(form.country_id);
+      if (form.description) payload.description = form.description.trim();
+      if (form.website_url) payload.website_url = form.website_url.trim();
       await create(payload);
-      setForm({ name: '', country_id: '' });
+      setForm({ name: '', country_id: '', description: '', website_url: '' });
       await reload();
       setFeedback('Equipo creado');
     } catch (err) {
@@ -114,8 +116,18 @@ const Teams = () => {
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {teams.map((t) => (
           <div key={t.id} className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-lg font-semibold text-slate-900">{t.name}</p>
-            <p className="text-xs text-slate-500">ID: {t.id}</p>
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-lg font-semibold text-slate-900">{t.name}</p>
+                <p className="text-xs text-slate-500">ID: {t.id}</p>
+              </div>
+              {t.website_url && (
+                <a href={t.website_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">
+                  Website
+                </a>
+              )}
+            </div>
+            {t.description && <p className="mt-2 text-sm text-slate-600">{t.description}</p>}
             <div className="mt-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Miembros</p>
               <ul className="mt-1 space-y-1">
@@ -148,6 +160,14 @@ const Teams = () => {
             <div>
               <Label htmlFor="team_country">País (opcional, id)</Label>
               <Input id="team_country" value={form.country_id} onChange={(e) => setForm((p) => ({ ...p, country_id: e.target.value }))} className="mt-2" />
+            </div>
+            <div className="md:col-span-2">
+              <Label htmlFor="team_description">Descripción</Label>
+              <Input id="team_description" value={form.description || ''} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} className="mt-2" />
+            </div>
+            <div className="md:col-span-2">
+              <Label htmlFor="team_website">Sitio Web</Label>
+              <Input id="team_website" value={form.website_url || ''} onChange={(e) => setForm((p) => ({ ...p, website_url: e.target.value }))} className="mt-2" placeholder="https://..." />
             </div>
             <div className="md:col-span-2">
               <Button type="submit" disabled={creating}>{creating ? 'Creando…' : 'Crear equipo'}</Button>

@@ -1,4 +1,5 @@
-<% const content = (function(){ %>
+<%- include('partials/header') %>
+
 <h2>✏️ Editar Usuario</h2>
 
 <div class="chart-wrapper" style="max-width: 600px; margin: 0 auto;">
@@ -50,5 +51,4 @@
   </form>
 </div>
 
-<% })(); %>
-<%- include('partials/layout', { body: content, title }) %>
+<%- include('partials/footer') %>

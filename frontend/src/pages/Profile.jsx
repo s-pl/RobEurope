@@ -13,7 +13,7 @@ import { resolveMediaUrl } from '../lib/apiClient';
 const Profile = () => {
   const { user, updateProfile, uploadProfilePhoto } = useAuth();
   const api = useApi();
-  const [form, setForm] = useState({ first_name: '', last_name: '', phone: '', country_id: '' });
+  const [form, setForm] = useState({ first_name: '', last_name: '', phone: '', country_id: '', bio: '' });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
@@ -27,7 +27,8 @@ const Profile = () => {
         first_name: user.first_name || '',
         last_name: user.last_name || '',
         phone: user.phone || '',
-        country_id: user.country_id?.toString() || ''
+        country_id: user.country_id?.toString() || '',
+        bio: user.bio || ''
       });
     }
   }, [user]);
@@ -185,6 +186,17 @@ const Profile = () => {
                 ))}
               </Select>
               {countriesStatus.error && <p className="mt-2 text-xs text-red-500">{t('profile.countriesError')}</p>}
+            </div>
+            <div className="md:col-span-2">
+              <Label htmlFor="bio">Bio</Label>
+              <textarea
+                id="bio"
+                name="bio"
+                value={form.bio}
+                onChange={handleChange}
+                className="mt-2 flex min-h-[80px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                rows={4}
+              />
             </div>
           </div>
 

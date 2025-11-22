@@ -1,4 +1,5 @@
-<% const content = (function(){ %>
+<%- include('partials/header') %>
+
 <h2>👥 Gestión de Usuarios</h2>
 
 <div class="charts-container">
@@ -31,7 +32,7 @@
   </div>
 </div>
 
-<div style="overflow-x: auto;">
+<div class="table-container">
   <table role="grid">
     <thead>
       <tr>
@@ -48,43 +49,34 @@
     <tbody id="usersTableBody">
       <% users.forEach(u => { %>
         <tr class="user-row" data-id="<%= u.id %>" data-role="<%= u.role %>" data-active="<%= u.is_active ? 'active' : 'inactive' %>" data-search="<%= (u.email + ' ' + u.username + ' ' + u.first_name + ' ' + u.last_name).toLowerCase() %>">
-          <td style="font-size:.75rem; font-family: monospace;"><%= u.id.substring(0, 8) %>...</td>
+          <td><%= u.id %></td>
           <td><%= u.email %></td>
-          <td><strong><%= u.username %></strong></td>
+          <td><%= u.username %></td>
           <td><%= u.first_name %> <%= u.last_name %></td>
           <td>
-            <% if (u.role === 'super_admin') { %>
-              <span style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">
-                👑 ADMIN
-              </span>
-            <% } else { %>
-              <span style="color: #94a3b8; font-size: 0.85rem;">User</span>
-            <% } %>
+            <span class="badge <%= u.role === 'super_admin' ? 'badge-danger' : 'badge-info' %>">
+              <%= u.role %>
+            </span>
           </td>
           <td>
-            <% if (u.is_active) { %>
-              <span style="background: rgba(16, 185, 129, 0.2); color: #86efac; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">
-                ✓ Activo
-              </span>
-            <% } else { %>
-              <span style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">
-                ✗ Inactivo
-              </span>
-            <% } %>
+            <span class="badge <%= u.is_active ? 'badge-success' : 'badge-warning' %>">
+              <%= u.is_active ? 'Activo' : 'Inactivo' %>
+            </span>
           </td>
-          <td><%= new Date(u.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
+          <td><%= new Date(u.created_at).toLocaleDateString() %></td>
           <td>
-            <a href="/admin/users/<%= u.id %>/edit" role="button" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; background: linear-gradient(135deg, #0ea5e9, #0284c7); text-decoration: none; color: white; border: none; margin-right: 0.5rem;">
-              Editar
-            </a>
-            <% if (u.role !== 'super_admin') { %>
-              <form method="post" action="/admin/users/<%= u.id %>/promote" onsubmit="return confirm('¿Promover a super_admin?');" style="display: inline;">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <button type="submit" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
-                  Promover
-                </button>
-              </form>
-            <% } %>
+            <div style="display: flex; gap: 0.5rem;">
+              <a href="/admin/users/<%= u.id %>/edit" class="btn btn-sm btn-primary">
+                ✏️ Editar
+              </a>
+              <% if (u.role !== 'super_admin') { %>
+                <form action="/admin/users/<%= u.id %>/promote" method="POST" onsubmit="return confirm('¿Hacer admin a este usuario?');" style="margin: 0;">
+                  <button type="submit" class="btn btn-sm btn-warning" style="background: #f59e0b; border: none;">
+                    ⬆️ Admin
+                  </button>
+                </form>
+              <% } %>
+            </div>
           </td>
         </tr>
       <% }) %>
@@ -92,11 +84,4 @@
   </table>
 </div>
 
-<script type="application/json" id="usersData"><%- JSON.stringify(users) %></script>
-
-<script>
-  // Pasar datos a la variable global para que el script externo pueda acceder
-  window.usersDataGlobal = JSON.parse(document.getElementById('usersData').textContent);
-</script>
-<% })(); %>
-<%- include('partials/layout', { body: content, title }) %>
+<%- include('partials/footer') %>

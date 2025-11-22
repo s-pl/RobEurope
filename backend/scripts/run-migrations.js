@@ -7,6 +7,8 @@ import * as teamInvitesConstraints from '../migrations/20251117-team-invites-and
 import * as addRegistrationDecisionReason from '../migrations/20251117-add-decision-reason-to-registrations.js';
 import * as createMediaTable from '../migrations/20251117-create-media-table.js';
 import * as createStreamsTable from '../migrations/20251117-create-streams-table.js';
+import * as addStreamUrlToTeams from '../migrations/20251122-add-stream-url-to-teams.js';
+import * as enhanceModels from '../migrations/20251122-enhance-models.js';
 
 async function run() {
   try {
@@ -85,6 +87,22 @@ async function run() {
       if (typeof createStreamsTable.up === 'function') {
         await createStreamsTable.up(qi, Sequelize);
       }
+    }
+
+    // Add stream_url to Teams
+    try {
+      await addStreamUrlToTeams.up(qi, Sequelize);
+      console.log('Added stream_url to Teams');
+    } catch (e) {
+      console.log('Skipping addStreamUrlToTeams (probably already exists):', e.message);
+    }
+
+    // Enhance models (Competitions, Teams, Users)
+    try {
+      await enhanceModels.up(qi, Sequelize);
+      console.log('Enhanced models (Competitions, Teams, Users)');
+    } catch (e) {
+      console.log('Skipping enhanceModels (probably already exists):', e.message);
     }
 
     console.log('Migrations applied successfully');

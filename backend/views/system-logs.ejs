@@ -1,4 +1,5 @@
-<% const content = (function(){ %>
+<%- include('partials/header') %>
+
 <h2>📋 Logs del Sistema</h2>
 
 <div class="charts-container">
@@ -30,7 +31,7 @@
   </div>
 </div>
 
-<div style="overflow-x: auto;">
+<div class="table-container">
   <table role="grid">
     <thead>
       <tr>
@@ -110,5 +111,4 @@
   <% } %>
 </div>
 
-<% })(); %>
-<%- include('partials/layout', { body: content, title }) %>
+<%- include('partials/footer') %>

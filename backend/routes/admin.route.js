@@ -12,13 +12,14 @@ import {
   getUsersTimeline,
   getRegistrationStats,
   getDetailedUsers,
-  listCompetitions,
+  // listCompetitions, // Replaced by generic CRUD
   getCompetitionStats,
   listSystemLogs,
   getLogsStats,
   renderEditUser,
   updateUser
 } from '../controller/admin.controller.js';
+import * as crudController from '../controller/admin.crud.controller.js';
 
 const router = Router();
 
@@ -33,7 +34,7 @@ router.get('/users', requireAdminSession, listUsers);
 router.post('/users/:id/promote', requireAdminSession, promoteUser);
 router.get('/users/:id/edit', requireAdminSession, renderEditUser);
 router.post('/users/:id/edit', requireAdminSession, updateUser);
-router.get('/competitions', requireAdminSession, listCompetitions);
+// router.get('/competitions', requireAdminSession, listCompetitions); // Handled by generic CRUD
 router.get('/logs', requireAdminSession, listSystemLogs);
 
 // API endpoints for charts (JSON)
@@ -44,5 +45,13 @@ router.get('/api/registrations-stats', requireAdminSession, getRegistrationStats
 router.get('/api/users-detailed', requireAdminSession, getDetailedUsers);
 router.get('/api/competitions-stats', requireAdminSession, getCompetitionStats);
 router.get('/api/logs-stats', requireAdminSession, getLogsStats);
+
+// Generic CRUD routes (Must be last to avoid conflicts)
+router.get('/:model', requireAdminSession, crudController.list);
+router.get('/:model/create', requireAdminSession, crudController.form);
+router.get('/:model/edit/:id', requireAdminSession, crudController.form);
+router.post('/:model/save', requireAdminSession, crudController.save);
+router.post('/:model/save/:id', requireAdminSession, crudController.save);
+router.post('/:model/delete/:id', requireAdminSession, crudController.remove);
 
 export default router;
