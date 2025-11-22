@@ -15,7 +15,9 @@ import {
   listCompetitions,
   getCompetitionStats,
   listSystemLogs,
-  getLogsStats
+  getLogsStats,
+  renderEditUser,
+  updateUser
 } from '../controller/admin.controller.js';
 
 const router = Router();
@@ -29,6 +31,8 @@ router.get('/logout', handleLogout);
 router.get('/', requireAdminSession, renderDashboard);
 router.get('/users', requireAdminSession, listUsers);
 router.post('/users/:id/promote', requireAdminSession, promoteUser);
+router.get('/users/:id/edit', requireAdminSession, renderEditUser);
+router.post('/users/:id/edit', requireAdminSession, updateUser);
 router.get('/competitions', requireAdminSession, listCompetitions);
 router.get('/logs', requireAdminSession, listSystemLogs);
 

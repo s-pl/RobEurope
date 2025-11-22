@@ -460,7 +460,7 @@
   <!-- Page-specific scripts load here based on page title -->
   <% if (title && title.includes('Dashboard')) { %>
     <script src="/js/dashboard.js"></script>
-  <% } else if (title && title.includes('Usuarios')) { %>
+  <% } else if (title && (title.includes('Usuarios') || title.includes('Users'))) { %>
     <script src="/js/users.js"></script>
   <% } else if (title && title.includes('Competiciones')) { %>
     <script src="/js/competitions.js"></script>

@@ -1,0 +1,54 @@
+<% const content = (function(){ %>
+<h2>✏️ Editar Usuario</h2>
+
+<div class="chart-wrapper" style="max-width: 600px; margin: 0 auto;">
+  <form action="/admin/users/<%= user.id %>/edit" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    
+    <div style="margin-bottom: 1rem;">
+      <label for="username">Usuario</label>
+      <input type="text" id="username" name="username" value="<%= user.username %>" required>
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" value="<%= user.email %>" required>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div style="margin-bottom: 1rem;">
+        <label for="first_name">Nombre</label>
+        <input type="text" id="first_name" name="first_name" value="<%= user.first_name %>">
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <label for="last_name">Apellido</label>
+        <input type="text" id="last_name" name="last_name" value="<%= user.last_name %>">
+      </div>
+    </div>
+
+    <div style="margin-bottom: 1rem;">
+      <label for="role">Rol</label>
+      <select id="role" name="role">
+        <option value="user" <%= user.role === 'user' ? 'selected' : '' %>>Usuario</option>
+        <option value="super_admin" <%= user.role === 'super_admin' ? 'selected' : '' %>>Administrador</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom: 1.5rem;">
+      <label for="is_active">Estado</label>
+      <select id="is_active" name="is_active">
+        <option value="true" <%= user.is_active ? 'selected' : '' %>>Activo</option>
+        <option value="false" <%= !user.is_active ? 'selected' : '' %>>Inactivo</option>
+      </select>
+    </div>
+
+    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+      <a href="/admin/users" role="button" style="background: #64748b; border-color: #64748b; text-decoration: none; padding: 0.5rem 1rem; border-radius: 6px; color: white;">Cancelar</a>
+      <button type="submit">Guardar Cambios</button>
+    </div>
+  </form>
+</div>
+
+<% })(); %>
+<%- include('partials/layout', { body: content, title }) %>

@@ -74,6 +74,9 @@
           </td>
           <td><%= new Date(u.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
           <td>
+            <a href="/admin/users/<%= u.id %>/edit" role="button" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; background: linear-gradient(135deg, #0ea5e9, #0284c7); text-decoration: none; color: white; border: none; margin-right: 0.5rem;">
+              Editar
+            </a>
             <% if (u.role !== 'super_admin') { %>
               <form method="post" action="/admin/users/<%= u.id %>/promote" onsubmit="return confirm('¿Promover a super_admin?');" style="display: inline;">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -81,8 +84,6 @@
                   Promover
                 </button>
               </form>
-            <% } else { %>
-              <span style="color: #64748b; font-size: 0.85rem;">—</span>
             <% } %>
           </td>
         </tr>
