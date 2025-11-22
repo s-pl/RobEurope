@@ -47,7 +47,7 @@
     </thead>
     <tbody id="usersTableBody">
       <% users.forEach(u => { %>
-        <tr class="user-row" data-id="<%= u.id %>" data-role="<%= u.role %>" data-active="<%= u.is_active ? 'active' : 'inactive' %>" data-search="<%= u.email %> <%= u.username %> <%= u.first_name %> <%= u.last_name %>".toLowerCase()>
+        <tr class="user-row" data-id="<%= u.id %>" data-role="<%= u.role %>" data-active="<%= u.is_active ? 'active' : 'inactive' %>" data-search="<%= (u.email + ' ' + u.username + ' ' + u.first_name + ' ' + u.last_name).toLowerCase() %>">
           <td style="font-size:.75rem; font-family: monospace;"><%= u.id.substring(0, 8) %>...</td>
           <td><%= u.email %></td>
           <td><strong><%= u.username %></strong></td>

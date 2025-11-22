@@ -28,7 +28,7 @@
     </thead>
     <tbody id="competitionsTableBody">
       <% competitions.forEach(c => { %>
-        <tr class="competition-row" data-search="<%= c.title %> <%= c.slug %>".toLowerCase()>
+        <tr class="competition-row" data-search="<%= (c.title + ' ' + c.slug).toLowerCase() %>">
           <td><%= c.id %></td>
           <td><strong><%= c.title %></strong></td>
           <td><code><%= c.slug %></code></td>

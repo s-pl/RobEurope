@@ -45,7 +45,7 @@
     </thead>
     <tbody id="logsTableBody">
       <% logs.forEach(log => { %>
-        <tr class="log-row" data-action="<%= log.action %>" data-search="<%= log.user ? log.user.username + ' ' + log.user.email : 'system' %>".toLowerCase()>
+        <tr class="log-row" data-action="<%= log.action %>" data-search="<%= (log.user ? log.user.username + ' ' + log.user.email : 'system').toLowerCase() %>">
           <td style="font-size: 0.8rem;">
             <%= new Date(log.created_at).toLocaleString('es-ES') %>
           </td>
@@ -75,7 +75,7 @@
           <td style="font-size: 0.8rem; max-width: 150px; overflow: hidden; text-overflow: ellipsis;">
             <% if (log.details) { %>
               <%= log.details.substring(0, 50) %>...
-            <% } else %>
+            <% } else { %>
               —
             <% } %>
           </td>
