@@ -177,7 +177,7 @@ export async function getDetailedUsers(req, res) {
 export async function listCompetitions(req, res) {
   try {
     const competitions = await Competition.findAll({
-      attributes: ['id', 'title', 'slug', 'description', 'start_date', 'end_date', 'created_at']
+      attributes: ['id', 'title', 'slug', 'description', 'start_date', 'end_date']
     });
     res.render('competitions', { title: 'Competiciones', competitions });
   } catch (error) {
@@ -278,5 +278,55 @@ export async function getLogsStats(req, res) {
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+}
+
+export async function renderEditUser(req, res) {
+  try {
+    const { id } = req.params;
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).render('error', { status: 404, message: 'User not found' });
+    }
+    res.render('edit-user', { title: 'Editar Usuario', user });
+  } catch (error) {
+    res.status(500).render('error', { status: 500, message: error.message });
+  }
+}
+
+export async function updateUser(req, res) {
+  try {
+    const { id } = req.params;
+    const { username, email, first_name, last_name, role, is_active } = req.body;
+    
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).render('error', { status: 404, message: 'User not found' });
+    }
+
+    const oldData = { ...user.toJSON() };
+    
+    await user.update({
+      username,
+      email,
+      first_name,
+      last_name,
+      role,
+      is_active: is_active === 'true'
+    });
+
+    // Log action
+    await SystemLog.create({
+      action: 'UPDATE',
+      entity_type: 'User',
+      entity_id: user.id,
+      user_id: req.session.user.id,
+      ip_address: req.ip,
+      details: `Updated user ${user.username} (ID: ${user.id})`
+    });
+
+    res.redirect('/admin/users');
+  } catch (error) {
+    res.status(500).render('error', { status: 500, message: error.message });
   }
 }

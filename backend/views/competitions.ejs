@@ -23,7 +23,6 @@
         <th>Descripción</th>
         <th>Inicio</th>
         <th>Fin</th>
-        <th>Creada</th>
       </tr>
     </thead>
     <tbody id="competitionsTableBody">
@@ -35,7 +34,6 @@
           <td><%= c.description || '—' %></td>
           <td><%= c.start_date ? new Date(c.start_date).toLocaleDateString('es-ES') : '—' %></td>
           <td><%= c.end_date ? new Date(c.end_date).toLocaleDateString('es-ES') : '—' %></td>
-          <td><%= new Date(c.created_at).toLocaleDateString('es-ES') %></td>
         </tr>
       <% }) %>
     </tbody>
