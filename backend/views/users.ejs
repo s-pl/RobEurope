@@ -97,6 +97,5 @@
   // Pasar datos a la variable global para que el script externo pueda acceder
   window.usersDataGlobal = JSON.parse(document.getElementById('usersData').textContent);
 </script>
-<script src="/js/users.js"></script>
 <% })(); %>
 <%- include('partials/layout', { body: content, title }) %>

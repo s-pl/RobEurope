@@ -181,7 +181,7 @@ export async function listCompetitions(req, res) {
     });
     res.render('competitions', { title: 'Competiciones', competitions });
   } catch (error) {
-    res.status(500).render('error', { error: error.message });
+    res.status(500).render('error', { status: 500, message: 'Error loading competitions', error });
   }
 }
 
