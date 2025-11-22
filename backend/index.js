@@ -40,7 +40,19 @@ app.use(requestId());
 
 // --- Security Headers (Helmet) ---
 app.use(helmet({
-  crossOriginResourcePolicy: false // allow serving uploads/static to other origins if needed
+  crossOriginResourcePolicy: false, // allow serving uploads/static to other origins if needed
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://d3js.org", "'unsafe-inline'"],
+      styleSrc: ["'self'", "https://cdn.jsdelivr.net", "'unsafe-inline'"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'", "https://cdn.jsdelivr.net"],
+      imgSrc: ["'self'", "data:"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"]
+    }
+  }
 }));
 
 // --- View Engine (EJS) ---

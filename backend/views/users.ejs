@@ -1,39 +1,102 @@
 <% const content = (function(){ %>
-<h2>Users</h2>
-<table role="grid">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Email</th>
-      <th>Username</th>
-      <th>Name</th>
-      <th>Role</th>
-      <th>Created</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% users.forEach(u => { %>
+<h2>👥 Gestión de Usuarios</h2>
+
+<div class="charts-container">
+  <div class="chart-wrapper">
+    <h3>📊 Distribución de Roles</h3>
+    <svg id="userRoleDistribution"></svg>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>🔄 Estados de Usuarios</h3>
+    <svg id="userStatusChart"></svg>
+  </div>
+</div>
+
+<div style="margin: 2rem 0;">
+  <h3>🔍 Filtros y Búsqueda</h3>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+    <input type="text" id="searchInput" placeholder="Buscar por email, username o nombre..." style="grid-column: 1 / -1;">
+    <select id="roleFilter">
+      <option value="">Todos los roles</option>
+      <option value="user">Usuario</option>
+      <option value="super_admin">Admin</option>
+    </select>
+    <select id="statusFilter">
+      <option value="">Todos los estados</option>
+      <option value="active">Activo</option>
+      <option value="inactive">Inactivo</option>
+    </select>
+    <button onclick="resetFilters()" style="background: linear-gradient(135deg, #f59e0b, #d97706);">Limpiar Filtros</button>
+  </div>
+</div>
+
+<div style="overflow-x: auto;">
+  <table role="grid">
+    <thead>
       <tr>
-        <td style="font-size:.75rem"><%= u.id %></td>
-        <td><%= u.email %></td>
-        <td><%= u.username %></td>
-        <td><%= u.first_name %> <%= u.last_name %></td>
-        <td><%= u.role %></td>
-        <td><%= new Date(u.created_at).toLocaleDateString() %></td>
-        <td>
-          <% if (u.role !== 'super_admin') { %>
-            <form method="post" action="/admin/users/<%= u.id %>/promote" onsubmit="return confirm('Promote to super_admin?');">
-              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-              <button type="submit">Promote</button>
-            </form>
-          <% } else { %>
-            —
-          <% } %>
-        </td>
+        <th>ID</th>
+        <th>Email</th>
+        <th>Usuario</th>
+        <th>Nombre</th>
+        <th>Rol</th>
+        <th>Estado</th>
+        <th>Creado</th>
+        <th>Acciones</th>
       </tr>
-    <% }) %>
-  </tbody>
-</table>
+    </thead>
+    <tbody id="usersTableBody">
+      <% users.forEach(u => { %>
+        <tr class="user-row" data-id="<%= u.id %>" data-role="<%= u.role %>" data-active="<%= u.is_active ? 'active' : 'inactive' %>" data-search="<%= u.email %> <%= u.username %> <%= u.first_name %> <%= u.last_name %>".toLowerCase()>
+          <td style="font-size:.75rem; font-family: monospace;"><%= u.id.substring(0, 8) %>...</td>
+          <td><%= u.email %></td>
+          <td><strong><%= u.username %></strong></td>
+          <td><%= u.first_name %> <%= u.last_name %></td>
+          <td>
+            <% if (u.role === 'super_admin') { %>
+              <span style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">
+                👑 ADMIN
+              </span>
+            <% } else { %>
+              <span style="color: #94a3b8; font-size: 0.85rem;">User</span>
+            <% } %>
+          </td>
+          <td>
+            <% if (u.is_active) { %>
+              <span style="background: rgba(16, 185, 129, 0.2); color: #86efac; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">
+                ✓ Activo
+              </span>
+            <% } else { %>
+              <span style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">
+                ✗ Inactivo
+              </span>
+            <% } %>
+          </td>
+          <td><%= new Date(u.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
+          <td>
+            <% if (u.role !== 'super_admin') { %>
+              <form method="post" action="/admin/users/<%= u.id %>/promote" onsubmit="return confirm('¿Promover a super_admin?');" style="display: inline;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                  Promover
+                </button>
+              </form>
+            <% } else { %>
+              <span style="color: #64748b; font-size: 0.85rem;">—</span>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<script type="application/json" id="usersData"><%= JSON.stringify(users) %></script>
+
+<script>
+  // Pasar datos a la variable global para que el script externo pueda acceder
+  window.usersDataGlobal = JSON.parse(document.getElementById('usersData').textContent);
+</script>
+<script src="/js/users.js"></script>
 <% })(); %>
 <%- include('partials/layout', { body: content, title }) %>

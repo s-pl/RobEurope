@@ -1,0 +1,115 @@
+<% const content = (function(){ %>
+<h2>📋 Logs del Sistema</h2>
+
+<div class="charts-container">
+  <div class="chart-wrapper">
+    <h3>🔧 Acciones Registradas</h3>
+    <svg id="actionsChart"></svg>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>📦 Entidades Modificadas</h3>
+    <svg id="entitiesChart"></svg>
+  </div>
+</div>
+
+<div style="margin: 2rem 0;">
+  <h3>🔍 Filtros</h3>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+    <input type="text" id="searchLog" placeholder="Buscar por usuario o acción..." style="grid-column: 1 / -1;">
+    <select id="actionFilter">
+      <option value="">Todas las acciones</option>
+      <option value="CREATE">Crear</option>
+      <option value="UPDATE">Actualizar</option>
+      <option value="DELETE">Eliminar</option>
+      <option value="LOGIN">Iniciar sesión</option>
+      <option value="LOGOUT">Cerrar sesión</option>
+      <option value="REGISTER">Registrarse</option>
+    </select>
+    <button onclick="resetLogFilters()" style="background: linear-gradient(135deg, #f59e0b, #d97706);">Limpiar Filtros</button>
+  </div>
+</div>
+
+<div style="overflow-x: auto;">
+  <table role="grid">
+    <thead>
+      <tr>
+        <th>Hora</th>
+        <th>Usuario</th>
+        <th>Acción</th>
+        <th>Entidad</th>
+        <th>ID Entidad</th>
+        <th>IP Address</th>
+        <th>Detalles</th>
+      </tr>
+    </thead>
+    <tbody id="logsTableBody">
+      <% logs.forEach(log => { %>
+        <tr class="log-row" data-action="<%= log.action %>" data-search="<%= log.user ? log.user.username + ' ' + log.user.email : 'system' %>".toLowerCase()>
+          <td style="font-size: 0.8rem;">
+            <%= new Date(log.created_at).toLocaleString('es-ES') %>
+          </td>
+          <td>
+            <% if (log.user) { %>
+              <strong><%= log.user.username %></strong><br/>
+              <span style="font-size: 0.8rem; color: #94a3b8;"><%= log.user.email %></span>
+            <% } else { %>
+              <span style="color: #94a3b8;">Sistema</span>
+            <% } %>
+          </td>
+          <td>
+            <% 
+              let actionClass = 'action-badge-create';
+              if (log.action === 'UPDATE') actionClass = 'action-badge-update';
+              else if (log.action === 'DELETE') actionClass = 'action-badge-delete';
+              else if (log.action === 'LOGIN') actionClass = 'action-badge-login';
+              else if (log.action === 'LOGOUT') actionClass = 'action-badge-logout';
+            %>
+            <span class="<%= actionClass %>">
+              <%= log.action %>
+            </span>
+          </td>
+          <td><%= log.entity_type %></td>
+          <td style="font-size: 0.8rem; font-family: monospace;"><%= log.entity_id || '—' %></td>
+          <td style="font-size: 0.8rem;"><%= log.ip_address || '—' %></td>
+          <td style="font-size: 0.8rem; max-width: 150px; overflow: hidden; text-overflow: ellipsis;">
+            <% if (log.details) { %>
+              <%= log.details.substring(0, 50) %>...
+            <% } else %>
+              —
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<!-- Paginación -->
+<div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem; flex-wrap: wrap;">
+  <% if (currentPage > 1) { %>
+    <a href="/admin/logs?page=1" style="padding: 0.5rem 0.75rem; background: #0ea5e9; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;">
+      ⏮ Primera
+    </a>
+    <a href="/admin/logs?page=<%= currentPage - 1 %>" style="padding: 0.5rem 0.75rem; background: #0ea5e9; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;">
+      ◀ Anterior
+    </a>
+  <% } %>
+
+  <span style="padding: 0.5rem 0.75rem; color: #cbd5e1; font-weight: bold;">
+    Página <%= currentPage %> de <%= totalPages %> (<%= totalLogs %> registros)
+  </span>
+
+  <% if (currentPage < totalPages) { %>
+    <a href="/admin/logs?page=<%= currentPage + 1 %>" style="padding: 0.5rem 0.75rem; background: #0ea5e9; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;">
+      Siguiente ▶
+    </a>
+    <a href="/admin/logs?page=<%= totalPages %>" style="padding: 0.5rem 0.75rem; background: #0ea5e9; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem;">
+      Última ⏭
+    </a>
+  <% } %>
+</div>
+
+<script src="/js/system-logs.js"></script>
+<% })(); %>
+<%- include('partials/layout', { body: content, title }) %>

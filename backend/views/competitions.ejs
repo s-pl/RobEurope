@@ -1,0 +1,47 @@
+<% const content = (function(){ %>
+<h2>🏆 Gestión de Competiciones</h2>
+
+<div class="charts-container">
+  <div class="chart-wrapper" style="grid-column: 1 / -1;">
+    <h3>📊 Registraciones por Competición</h3>
+    <svg id="competitionChart"></svg>
+  </div>
+</div>
+
+<div style="margin: 2rem 0;">
+  <h3>📋 Lista de Competiciones</h3>
+  <input type="text" id="searchCompetition" placeholder="Buscar competición..." style="margin-bottom: 1rem;">
+</div>
+
+<div style="overflow-x: auto;">
+  <table role="grid">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Slug</th>
+        <th>Descripción</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Creada</th>
+      </tr>
+    </thead>
+    <tbody id="competitionsTableBody">
+      <% competitions.forEach(c => { %>
+        <tr class="competition-row" data-search="<%= c.title %> <%= c.slug %>".toLowerCase()>
+          <td><%= c.id %></td>
+          <td><strong><%= c.title %></strong></td>
+          <td><code><%= c.slug %></code></td>
+          <td><%= c.description || '—' %></td>
+          <td><%= c.start_date ? new Date(c.start_date).toLocaleDateString('es-ES') : '—' %></td>
+          <td><%= c.end_date ? new Date(c.end_date).toLocaleDateString('es-ES') : '—' %></td>
+          <td><%= new Date(c.created_at).toLocaleDateString('es-ES') %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<script src="/js/competitions.js"></script>
+<% })(); %>
+<%- include('partials/layout', { body: content, title }) %>
