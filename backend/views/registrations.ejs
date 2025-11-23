@@ -1,0 +1,63 @@
+<%- include('partials/header') %>
+
+<h2>📝 Solicitudes de Registro</h2>
+
+<div class="table-container">
+  <table role="grid">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Equipo</th>
+        <th>Competición</th>
+        <th>Fecha</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (registrations && registrations.length > 0) { %>
+        <% registrations.forEach(reg => { %>
+          <tr>
+            <td><%= reg.id %></td>
+            <td><%= reg.Team ? reg.Team.name : 'N/A' %></td>
+            <td><%= reg.Competition ? reg.Competition.title : 'N/A' %></td>
+            <td><%= new Date(reg.registration_date).toLocaleDateString() %></td>
+            <td>
+              <% if (reg.status === 'pending') { %>
+                <span class="badge badge-warning">Pendiente</span>
+              <% } else if (reg.status === 'approved') { %>
+                <span class="badge badge-success">Aprobado</span>
+              <% } else { %>
+                <span class="badge badge-danger">Rechazado</span>
+              <% } %>
+            </td>
+            <td>
+              <% if (reg.status === 'pending') { %>
+                <div style="display: flex; gap: 0.5rem;">
+                  <form action="/admin/registrations/<%= reg.id %>/status" method="POST" style="margin:0;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="status" value="approved">
+                    <button type="submit" class="btn-sm" style="background: var(--primary); border: none;">Aprobar</button>
+                  </form>
+                  <form action="/admin/registrations/<%= reg.id %>/status" method="POST" style="margin:0;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="status" value="rejected">
+                    <button type="submit" class="btn-sm btn-danger" style="border: none;">Rechazar</button>
+                  </form>
+                </div>
+              <% } else { %>
+                <span style="color: var(--text-muted); font-size: 0.8rem;">Procesado</span>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 2rem;">No hay solicitudes de registro.</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('partials/footer') %>

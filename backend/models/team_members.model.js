@@ -39,5 +39,16 @@ export default async function defineTeamMembersModel(sequelize, DataTypes) {
         }
     });
 
+    TeamMembers.associate = (models) => {
+        TeamMembers.belongsTo(models.Team, {
+            foreignKey: 'team_id',
+            as: 'team'
+        });
+        TeamMembers.belongsTo(models.User, {
+            foreignKey: 'user_id',
+            as: 'user'
+        });
+    };
+
     return TeamMembers;
 }

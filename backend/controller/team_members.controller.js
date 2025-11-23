@@ -1,5 +1,5 @@
 import db from '../models/index.js';
-const { TeamMembers, User } = db;
+const { TeamMembers, User, Team } = db;
 import { Op } from 'sequelize';
 
 export const createTeamMember = async (req, res) => {
@@ -18,7 +18,15 @@ export const getTeamMembers = async (req, res) => {
     if (team_id) where.team_id = team_id;
     if (user_id) where.user_id = user_id;
 
-    const items = await TeamMembers.findAll({ where, limit: Number(limit), offset: Number(offset), order: [['joined_at', 'DESC']] });
+    const items = await TeamMembers.findAll({ 
+      where, 
+      limit: Number(limit), 
+      offset: Number(offset), 
+      order: [['joined_at', 'DESC']],
+      include: [
+        { model: Team, as: 'team', attributes: ['id', 'name', 'logo_url'] }
+      ]
+    });
     // Enrich with user basic info
     const userIds = [...new Set(items.map(i => i.user_id))];
     let usersById = {};

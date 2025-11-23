@@ -1,5 +1,5 @@
 import db from '../models/index.js';
-const { Post, User } = db;
+const { Post, User, PostLike, Comment } = db;
 import { Op } from 'sequelize';
 import { getFileInfo } from '../middleware/upload.middleware.js';
 import SystemLogger from '../utils/systemLogger.js';
@@ -40,7 +40,29 @@ export const getPosts = async (req, res) => {
     ];
     if (author_id) where.author_id = author_id;
 
-    const items = await Post.findAll({ where, limit: Number(limit), offset: Number(offset), order: [['created_at', 'DESC']] });
+    const items = await Post.findAll({ 
+      where, 
+      limit: Number(limit), 
+      offset: Number(offset), 
+      order: [
+        ['is_pinned', 'DESC'],
+        ['created_at', 'DESC']
+      ],
+      include: [
+        {
+            model: User,
+            attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url']
+        },
+        {
+            model: PostLike,
+            attributes: ['user_id']
+        },
+        {
+            model: Comment,
+            attributes: ['id']
+        }
+      ]
+    });
     res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -49,7 +71,25 @@ export const getPosts = async (req, res) => {
 
 export const getPostById = async (req, res) => {
   try {
-    const item = await Post.findByPk(req.params.id);
+    const item = await Post.findByPk(req.params.id, {
+      include: [
+        {
+            model: User,
+            attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url']
+        },
+        {
+            model: PostLike,
+            attributes: ['user_id']
+        },
+        {
+            model: Comment,
+            include: [{
+                model: User,
+                attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url']
+            }]
+        }
+      ]
+    });
     if (!item) return res.status(404).json({ error: 'Post not found' });
     res.json(item);
   } catch (err) {
@@ -112,4 +152,82 @@ export const deletePost = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+};
+
+export const toggleLike = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user_id = req.user.id;
+
+        const existingLike = await PostLike.findOne({
+            where: { post_id: id, user_id }
+        });
+
+        if (existingLike) {
+            await existingLike.destroy();
+            res.json({ liked: false });
+        } else {
+            await PostLike.create({ post_id: id, user_id });
+            res.json({ liked: true });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+export const addComment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { content } = req.body;
+        const author_id = req.user.id;
+
+        const comment = await Comment.create({
+            post_id: id,
+            author_id,
+            content
+        });
+        
+        const commentWithUser = await Comment.findByPk(comment.id, {
+             include: [{
+                model: User,
+                attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url']
+            }]
+        });
+
+        res.status(201).json(commentWithUser);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+export const getComments = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const comments = await Comment.findAll({
+            where: { post_id: id },
+            include: [{
+                model: User,
+                attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url']
+            }],
+            order: [['created_at', 'ASC']]
+        });
+        res.json(comments);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+export const togglePin = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const post = await Post.findByPk(id);
+        if (!post) return res.status(404).json({ error: 'Post not found' });
+
+        post.is_pinned = !post.is_pinned;
+        await post.save();
+
+        res.json({ is_pinned: post.is_pinned });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 };

@@ -35,6 +35,10 @@ export default function definePostsModel(sequelize, DataTypes) {
             type: DataTypes.INTEGER,
             defaultValue: 0
         },
+        is_pinned: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        },
         created_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW
@@ -46,7 +50,9 @@ export default function definePostsModel(sequelize, DataTypes) {
     });
 
     Post.associate = (models) => {
-        // Removed Media association
+        Post.belongsTo(models.User, { foreignKey: 'author_id' });
+        Post.hasMany(models.PostLike, { foreignKey: 'post_id' });
+        Post.hasMany(models.Comment, { foreignKey: 'post_id' });
     };
 
     return Post;

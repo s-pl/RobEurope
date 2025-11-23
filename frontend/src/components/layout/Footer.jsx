@@ -1,14 +1,14 @@
 import { useTranslation } from "react-i18next";
 
-export default function Footer() {
-    const { t } = useTranslation()
+const Footer = () => {
+    const { t } = useTranslation();
     return (
         <footer className="px-6 md:px-16 lg:px-24 xl:px-32 w-full">
             <div className="flex flex-col md:flex-row items-start justify-center gap-10 py-10 border-b border-gray-500/30">
 
                 <div className="max-w-96">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" color="blue" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bot h-5 w-5"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
-                    <p className="mt-6 text-sm text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" color="blue" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bot h-5 w-5"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
+                    <p className="mt-6 text-sm text-gray-500 dark:text-slate-400">
                         {t("footer.description")}
                     </p>
                     <div className="flex items-center gap-2 mt-3">
@@ -32,25 +32,23 @@ export default function Footer() {
 
                 <div className="w-1/2 flex flex-wrap md:flex-nowrap justify-between">
                     <div>
-                        <h2 className="font-semibold text-gray-900 mb-5">{t("footer.projects")}
+                        <h2 className="font-semibold text-gray-900 dark:text-slate-50 mb-5">{t("footer.projects")}
                         </h2>
-                        <ul className="text-sm text-gray-500 space-y-2 list-none">
+                        <ul className="text-sm text-gray-500 dark:text-slate-400 space-y-2 list-none">
                             <li><a href="#">{t("footer.competitions")}</a></li>
                             <li><a href="#">{t("footer.teams")}</a></li>
                             <li><a href="#">{t("footer.streaming")}</a></li>
                         </ul>
                     </div>
                     <div>
-                        <h2 className="font-semibold text-gray-900 mb-5">{t("footer.resources")}</h2>
-                        <div className="text-sm text-gray-500 space-y-2 list-none">
-                            <li><a href="#">{t("footer.gallery")}</a></li>
-                            <li><a href="#">{t("footer.sponsors")}</a></li>
-                            <li><a href="#">{t("footer.feedback")}</a></li>
+                        <h2 className="font-semibold text-gray-900 dark:text-slate-50 mb-5">{t("footer.resources")}</h2>
+                        <div className="text-sm text-gray-500 dark:text-slate-400 space-y-2 list-none">
+                            <li><a href="/sponsors">{t("footer.sponsors")}</a></li>
                         </div>
                     </div>
                     <div>
-                        <h2 className="font-semibold text-gray-900 mb-5">{t("footer.company")}</h2>
-                        <div className="text-sm text-gray-500 space-y-2 list-none">
+                        <h2 className="font-semibold text-gray-900 dark:text-slate-50 mb-5">{t("footer.company")}</h2>
+                        <div className="text-sm text-gray-500 dark:text-slate-400 space-y-2 list-none">
                             <li><a href="#">{t("footer.about")}</a></li>
                             <li><a href="#">{t("footer.contact")}</a></li>
                             <li><a href="#">{t("footer.terms")}</a></li>
@@ -59,9 +57,11 @@ export default function Footer() {
                 </div>
 
             </div>
-            <p className="py-4 text-center text-xs md:text-sm text-gray-500">
+            <p className="py-4 text-center text-xs md:text-sm text-gray-500 dark:text-slate-400">
                 Copyright {new Date().getFullYear()} © <a href="https://prebuiltui.com">PrebuiltUI</a>. All Right Reserved.
             </p>
         </footer>
     );
 };
+
+export default Footer;

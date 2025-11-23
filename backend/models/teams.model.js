@@ -27,7 +27,19 @@ export default function defineTeamsModel(sequelize, DataTypes) {
             type: DataTypes.STRING,
             allowNull: true
         },
+        description: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        website_url: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
         logo_url: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        stream_url: {
             type: DataTypes.STRING,
             allowNull: true
         },

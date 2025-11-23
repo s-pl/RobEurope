@@ -6,7 +6,7 @@ const buttonVariants = {
   default:
     'inline-flex items-center justify-center rounded-full border border-transparent bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600',
   ghost:
-    'inline-flex items-center justify-center rounded-full border border-blue-200 bg-transparent px-4 py-2 text-sm font-semibold text-blue-900 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600',
+    'inline-flex items-center justify-center rounded-full border border-blue-200 bg-transparent px-4 py-2 text-sm font-semibold text-blue-900 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600 dark:border-slate-700 dark:text-blue-100 dark:hover:bg-slate-800',
   link: 'inline-flex items-center gap-2 text-sm font-semibold text-blue-600 underline-offset-4 hover:underline'
 };
 

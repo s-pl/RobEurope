@@ -1,0 +1,22 @@
+<%- include('partials/header') %>
+
+<article style="width:100%; max-width:480px;">
+  <header><strong>Admin Login</strong></header>
+  <form method="post" action="/admin/login">
+    <% if (typeof csrfToken !== 'undefined') { %>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <% } %>
+    <label>Email
+      <input type="email" name="email" required />
+    </label>
+    <label>Password
+      <input type="password" name="password" required />
+    </label>
+    <button type="submit">Login</button>
+    <% if (typeof error !== 'undefined' && error) { %>
+      <p style="color:#ef4444; margin-top:1rem;"><strong><%= error %></strong></p>
+    <% } %>
+  </form>
+</article>
+
+<%- include('partials/footer') %>

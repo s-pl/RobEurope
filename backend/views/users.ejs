@@ -1,0 +1,87 @@
+<%- include('partials/header') %>
+
+<h2>👥 Gestión de Usuarios</h2>
+
+<div class="charts-container">
+  <div class="chart-wrapper">
+    <h3>📊 Distribución de Roles</h3>
+    <svg id="userRoleDistribution"></svg>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>🔄 Estados de Usuarios</h3>
+    <svg id="userStatusChart"></svg>
+  </div>
+</div>
+
+<div style="margin: 2rem 0;">
+  <h3>🔍 Filtros y Búsqueda</h3>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+    <input type="text" id="searchInput" placeholder="Buscar por email, username o nombre..." style="grid-column: 1 / -1;">
+    <select id="roleFilter">
+      <option value="">Todos los roles</option>
+      <option value="user">Usuario</option>
+      <option value="super_admin">Admin</option>
+    </select>
+    <select id="statusFilter">
+      <option value="">Todos los estados</option>
+      <option value="active">Activo</option>
+      <option value="inactive">Inactivo</option>
+    </select>
+    <button onclick="resetFilters()" style="background: linear-gradient(135deg, #f59e0b, #d97706);">Limpiar Filtros</button>
+  </div>
+</div>
+
+<div class="table-container">
+  <table role="grid">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Email</th>
+        <th>Usuario</th>
+        <th>Nombre</th>
+        <th>Rol</th>
+        <th>Estado</th>
+        <th>Creado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="usersTableBody">
+      <% users.forEach(u => { %>
+        <tr class="user-row" data-id="<%= u.id %>" data-role="<%= u.role %>" data-active="<%= u.is_active ? 'active' : 'inactive' %>" data-search="<%= (u.email + ' ' + u.username + ' ' + u.first_name + ' ' + u.last_name).toLowerCase() %>">
+          <td><%= u.id %></td>
+          <td><%= u.email %></td>
+          <td><%= u.username %></td>
+          <td><%= u.first_name %> <%= u.last_name %></td>
+          <td>
+            <span class="badge <%= u.role === 'super_admin' ? 'badge-danger' : 'badge-info' %>">
+              <%= u.role %>
+            </span>
+          </td>
+          <td>
+            <span class="badge <%= u.is_active ? 'badge-success' : 'badge-warning' %>">
+              <%= u.is_active ? 'Activo' : 'Inactivo' %>
+            </span>
+          </td>
+          <td><%= new Date(u.created_at).toLocaleDateString() %></td>
+          <td>
+            <div style="display: flex; gap: 0.5rem;">
+              <a href="/admin/users/<%= u.id %>/edit" class="btn btn-sm btn-primary">
+                ✏️ Editar
+              </a>
+              <% if (u.role !== 'super_admin') { %>
+                <form action="/admin/users/<%= u.id %>/promote" method="POST" onsubmit="return confirm('¿Hacer admin a este usuario?');" style="margin: 0;">
+                  <button type="submit" class="btn btn-sm btn-warning" style="background: #f59e0b; border: none;">
+                    ⬆️ Admin
+                  </button>
+                </form>
+              <% } %>
+            </div>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('partials/footer') %>

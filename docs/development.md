@@ -80,6 +80,32 @@ npm run seed
 
 - REST: `GET /api/notifications?user_id=<uuid>`
 - Realtime opcional: canal Socket.IO `notification:{userId}`
+- Marcar como leída: `PUT /api/notifications/:id` body `{ is_read: true }`
+
+## Dark Mode
+
+The application supports Dark Mode.
+- It uses `tailwind` with `darkMode: 'class'`.
+- The theme is managed by `ThemeContext` and persisted in `localStorage` (`vite-ui-theme`).
+- Toggle button is available in the Navbar.
+
+## Testing
+
+### Backend
+The backend uses `vitest` for testing.
+```bash
+cd backend
+npm test
+```
+
+### Frontend
+The frontend is set up for testing but requires dependencies to be installed (`vitest`, `@testing-library/react`, `jsdom`).
+```bash
+cd frontend
+npm install -D vitest @testing-library/react jsdom @testing-library/jest-dom
+npm test
+```
+
 5. **Start development servers**
 ```bash
 # Terminal 1: Backend server

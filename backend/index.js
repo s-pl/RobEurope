@@ -1,5 +1,7 @@
 import express from 'express';
 import http from 'http';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import apiRoutes from './routes/api/index.js';
 import rateLimit from './middleware/rateLimit.middleware.js';
 import timeoutMiddleware from './middleware/timeout.middleware.js';
@@ -10,20 +12,82 @@ import streamRoutes from './routes/api/stream.route.js';
 import mediaRoutes from './routes/api/media.route.js';
 import swaggerRouter from './swagger.js';
 import cors from 'cors';
+import helmet from 'helmet';
+import csrf from 'csurf';
+import session from 'express-session';
+import SequelizeStoreInit from 'connect-session-sequelize';
 import fs from 'fs';
 import https from 'https';
 import { Server as SocketIOServer } from 'socket.io';
 import { setIO } from './utils/realtime.js';
+import db from './models/index.js';
+import adminRoutes from './routes/admin.route.js';
+import requestId from './middleware/requestId.middleware.js';
 dotenv.config();
 // import userRoutes from './routes/userRoutes.js';
 const allowedOrigins = [
   /^https?:\/\/localhost(:\d+)?$/,
+  /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
   /^http:\/\/46\.101\.255\.106(?::85)?$/,
   /^http:\/\/46\.101\.255\.106:5173$/,
-  /^https?:\/\/robeurope\.samuelponce\.es(?::\d+)?$/
+  /^https?:\/\/(?:[a-z0-9-]+\.)?robeurope\.samuelponce\.es(?::\d+)?$/
 ];
 
 const app = express();
+
+// --- Request ID ---
+app.use(requestId());
+
+// --- Security Headers (Helmet) ---
+app.use(helmet({
+  crossOriginResourcePolicy: false, // allow serving uploads/static to other origins if needed
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://d3js.org", "'unsafe-inline'"],
+      styleSrc: ["'self'", "https://cdn.jsdelivr.net", "'unsafe-inline'"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'", "https://cdn.jsdelivr.net"],
+      imgSrc: ["'self'", "data:"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"]
+    }
+  }
+}));
+
+// --- View Engine (EJS) ---
+app.set('view engine', 'ejs');
+// Resolve views relative to this file's directory to avoid double 'backend/backend' when cwd is already backend
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.set('views', path.join(__dirname, 'views'));
+
+// --- Sessions (Sequelize Store) ---
+const SequelizeStore = SequelizeStoreInit(session.Store);
+const sessionStore = new SequelizeStore({
+  db: db.sequelize,
+  tableName: 'Session'
+});
+// Ensure session table exists (non-blocking) - will create if absent
+sessionStore.sync();
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'change_me_in_env',
+  store: sessionStore,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // set true behind HTTPS reverse proxy with trust proxy
+    httpOnly: true,
+    sameSite: 'lax',
+    maxAge: 1000 * 60 * 60 // 1 hour
+  }
+}));
+
+// Simple helper to expose session user to templates
+app.use((req, res, next) => {
+  res.locals.currentUser = req.session?.user || null;
+  next();
+});
 const PORT = process.env.PORT || 85;
 
 // registrar peticiones (access logs) vía winston
@@ -33,18 +97,25 @@ app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }
 
 
 
-app.use(cors({
+// CORS only for API & real-time connections; admin panel (server-rendered) should not require CORS
+const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
+    if (!origin) return callback(null, true); // non-browser or same-origin requests
     const allowed = allowedOrigins.some((pattern) => (pattern instanceof RegExp ? pattern.test(origin) : pattern === origin));
     if (allowed) return callback(null, true);
-    callback(new Error('Not allowed by CORS'));
+    return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
-}));
+};
+
+app.use('/api', cors(corsOptions));
+app.use('/api/streams', cors(corsOptions));
+app.use('/api/media', cors(corsOptions));
+app.use('/api-docs', cors(corsOptions));
 
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(timeoutMiddleware);
 // Serve static files from backend/public so we can host a simple test UI
 app.use(express.static('public'));
@@ -56,6 +127,26 @@ app.use('/api-docs', swaggerRouter);
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
 app.use('/api/streams', streamRoutes);
 app.use('/api/media', mediaRoutes); 
+
+// --- CSRF (only for admin panel forms) ---
+// Apply CSRF after session; limit to /admin paths
+app.use('/admin', csrf({ cookie: false }));
+app.use((req, res, next) => {
+  if (req.path.startsWith('/admin')) {
+    res.locals.csrfToken = req.csrfToken ? req.csrfToken() : null;
+  }
+  next();
+});
+// Admin panel (session-based) routes
+app.use('/admin', adminRoutes);
+
+// CSRF error handler
+app.use((err, req, res, next) => {
+  if (err.code === 'EBADCSRFTOKEN') {
+    return res.status(403).send('Invalid CSRF token');
+  }
+  next(err);
+});
 
 // error handler
 // centralized error handler
@@ -120,15 +211,7 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Create HTTP/HTTPS server and attach Socket.IO so ws://.../socket.io is available
 let server;
-if (process.env.NODE_ENV === 'production') {
-  const sslOptions = {
-    key: fs.readFileSync(process.env.SSL_KEY_PATH || new URL('./certs/key.pem', import.meta.url)),
-    cert: fs.readFileSync(process.env.SSL_CERT_PATH || new URL('./certs/cert.pem', import.meta.url))
-  };
-  server = https.createServer(sslOptions, app);
-} else {
-  server = http.createServer(app);
-}
+server = http.createServer(app); // simple HTTP server - https is already handled by a reverse proxy in production
 
 // Socket.IO with CORS matching the same allowed origins as Express CORS
 const io = new SocketIOServer(server, {
@@ -151,7 +234,10 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  const scheme = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-  console.log(`Server running at ${scheme}://0.0.0.0:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running at https://0.0.0.0:${PORT}`);
+  });
+}
+
+export default app;

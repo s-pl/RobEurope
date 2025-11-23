@@ -1,0 +1,61 @@
+<%- include('../partials/header') %>
+
+<h2><%= title %></h2>
+
+<div style="margin-bottom: 1rem; display: flex; justify-content: flex-end;">
+  <a href="/admin/<%= modelName %>/create" class="btn btn-primary">
+    ➕ Crear Nuevo
+  </a>
+</div>
+
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <% config.fields.filter(f => f.list).forEach(field => { %>
+          <th><%= field.label %></th>
+        <% }) %>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (items.length === 0) { %>
+        <tr>
+          <td colspan="<%= config.fields.filter(f => f.list).length + 1 %>" style="text-align: center;">
+            No hay registros encontrados.
+          </td>
+        </tr>
+      <% } else { %>
+        <% items.forEach(item => { %>
+          <tr>
+            <% config.fields.filter(f => f.list).forEach(field => { %>
+              <td>
+                <% if (field.type === 'datetime') { %>
+                  <%= item[field.name] ? new Date(item[field.name]).toLocaleString() : '-' %>
+                <% } else if (field.name.includes('url') && item[field.name]) { %>
+                  <a href="<%= item[field.name] %>" target="_blank">Link</a>
+                <% } else { %>
+                  <%= item[field.name] %>
+                <% } %>
+              </td>
+            <% }) %>
+            <td>
+              <div style="display: flex; gap: 0.5rem;">
+                <a href="/admin/<%= modelName %>/edit/<%= item[config.pk] %>" class="btn btn-sm btn-primary">
+                  ✏️ Editar
+                </a>
+                <form action="/admin/<%= modelName %>/delete/<%= item[config.pk] %>" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar este registro?');" style="margin: 0;">
+                  <button type="submit" class="btn btn-sm btn-danger">
+                    🗑️ Eliminar
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

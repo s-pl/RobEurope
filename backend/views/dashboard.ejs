@@ -1,0 +1,41 @@
+<%- include('partials/header') %>
+
+<h2>📊 Dashboard de Administración</h2>
+
+<div class="stats-grid">
+  <div class="stat">
+    <h3>Usuarios</h3>
+    <p><%= stats.users %></p>
+  </div>
+  <div class="stat">
+    <h3>Competiciones</h3>
+    <p><%= stats.competitions %></p>
+  </div>
+  <div class="stat">
+    <h3>Posts</h3>
+    <p><%= stats.posts %></p>
+  </div>
+  <div class="stat">
+    <h3>Registraciones</h3>
+    <p><%= stats.registrations %></p>
+  </div>
+</div>
+
+<div class="charts-container">
+  <div class="chart-wrapper">
+    <h3>👥 Distribución de Usuarios por Rol</h3>
+    <svg id="userRoleChart"></svg>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>📈 Estado de Registraciones</h3>
+    <svg id="registrationChart"></svg>
+  </div>
+
+  <div class="chart-wrapper" style="grid-column: 1 / -1;">
+    <h3>📅 Usuarios Registrados (Línea Temporal)</h3>
+    <svg id="timelineChart"></svg>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

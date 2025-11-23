@@ -40,5 +40,10 @@ export default async function defineRegistrationModel(sequelize, DataTypes) {
         }
     });
 
+    Registration.associate = (models) => {
+        Registration.belongsTo(models.Team, { foreignKey: 'team_id' });
+        Registration.belongsTo(models.Competition, { foreignKey: 'competition_id' });
+    };
+
     return Registration;
 }

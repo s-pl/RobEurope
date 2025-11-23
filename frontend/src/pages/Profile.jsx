@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Camera } from 'lucide-react';
+import { Camera, Users, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
-import { Card } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Select } from '../components/ui/select';
@@ -13,12 +14,13 @@ import { resolveMediaUrl } from '../lib/apiClient';
 const Profile = () => {
   const { user, updateProfile, uploadProfilePhoto } = useAuth();
   const api = useApi();
-  const [form, setForm] = useState({ first_name: '', last_name: '', phone: '', country_id: '' });
+  const [form, setForm] = useState({ first_name: '', last_name: '', phone: '', country_id: '', bio: '' });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   const [countries, setCountries] = useState([]);
   const [countriesStatus, setCountriesStatus] = useState({ loading: false, error: '' });
+  const [userTeams, setUserTeams] = useState([]);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -27,7 +29,8 @@ const Profile = () => {
         first_name: user.first_name || '',
         last_name: user.last_name || '',
         phone: user.phone || '',
-        country_id: user.country_id?.toString() || ''
+        country_id: user.country_id?.toString() || '',
+        bio: user.bio || ''
       });
     }
   }, [user]);
@@ -47,14 +50,24 @@ const Profile = () => {
           console.error('No se pudieron cargar los países', err);
           setCountriesStatus({ loading: false, error: 'countries-error' });
         }
-        return;
       }
     };
     fetchCountries();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [api]);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchTeams = async () => {
+      try {
+        const members = await api(`/team-members?user_id=${user.id}`);
+        setUserTeams(members.filter(m => !m.left_at));
+      } catch (err) {
+        console.error('Error fetching teams', err);
+      }
+    };
+    fetchTeams();
+  }, [api, user]);
 
   const profileInitials = useMemo(() => {
     const first = user?.first_name?.[0] || '';
@@ -109,90 +122,164 @@ const Profile = () => {
   const photoUrl = resolveMediaUrl(user.profile_photo_url);
 
   return (
-    <div className="space-y-8">
-      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-r from-slate-900 via-slate-800 to-blue-900 text-white">
-        <div className="flex flex-col gap-6 p-6 md:flex-row md:items-center">
-          <div className="relative">
-            {photoUrl ? (
-              <img
-                src={photoUrl}
-                alt={user.first_name}
-                className="h-24 w-24 rounded-3xl border border-white/20 object-cover shadow-xl"
-              />
-            ) : (
-              <div className="flex h-24 w-24 items-center justify-center rounded-3xl border border-white/20 bg-white/10 text-2xl font-semibold">
-                {profileInitials}
-              </div>
-            )}
-            <label className="absolute -bottom-2 -right-2 inline-flex cursor-pointer items-center gap-1 rounded-2xl border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
-              <Camera className="h-3.5 w-3.5" />
-              {uploading ? t('buttons.uploading') : t('buttons.changePhoto')}
+    <div className="container mx-auto px-4 py-8 max-w-5xl space-y-8">
+      {/* Header Section */}
+      <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-r from-slate-900 via-slate-800 to-blue-900 text-white shadow-xl">
+        <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]"></div>
+        <div className="relative flex flex-col gap-6 p-8 md:flex-row md:items-center z-10">
+          <div className="relative group">
+            <div className="h-28 w-28 rounded-full border-4 border-white/20 shadow-2xl overflow-hidden bg-slate-800 flex items-center justify-center">
+              {photoUrl ? (
+                <img
+                  src={photoUrl}
+                  alt={user.first_name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-3xl font-bold text-white">{profileInitials}</span>
+              )}
+            </div>
+            <label className="absolute bottom-0 right-0 p-2 bg-blue-600 rounded-full cursor-pointer hover:bg-blue-500 transition-colors shadow-lg border-2 border-slate-900">
+              <Camera className="h-4 w-4 text-white" />
               <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} disabled={uploading} />
             </label>
           </div>
-          <div className="space-y-1">
-            <p className="text-[0.65rem] uppercase tracking-[0.6em] text-white/60">{t('profile.heroTagline')}</p>
-            <h1 className="text-3xl font-semibold">
-              {user.first_name} {user.last_name}
-            </h1>
-            <p className="text-sm text-white/80">{user.email}</p>
-            <p className="text-xs text-white/60">{t('profile.heroNote')}</p>
+          
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold tracking-tight">
+                {user.first_name} {user.last_name}
+              </h1>
+              <span className="px-3 py-1 rounded-full bg-white/10 text-xs font-medium border border-white/20 uppercase tracking-wider">
+                {user.role}
+              </span>
+            </div>
+            <p className="text-blue-100 flex items-center gap-2">
+              <span className="opacity-60">@{user.username}</span>
+              <span className="w-1 h-1 rounded-full bg-blue-400"></span>
+              <span className="opacity-80">{user.email}</span>
+            </p>
+            <p className="text-sm text-white/50 max-w-xl">
+              {t('profile.heroNote')}
+            </p>
           </div>
         </div>
       </section>
 
-      {feedback.message && (
-        <Card
-          className={`border ${
-            feedback.type === 'error' ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'
-          }`}
-        >
-          {feedback.message}
-        </Card>
-      )}
+      <div className="grid gap-8 md:grid-cols-3">
+        {/* Left Column: Teams & Stats */}
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Users className="h-5 w-5 text-blue-600" />
+                {t('teams.title')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {userTeams.length > 0 ? (
+                userTeams.map(member => (
+                  <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
+                    <div className="h-10 w-10 rounded bg-white border border-slate-200 flex items-center justify-center overflow-hidden">
+                      {member.team?.logo_url ? (
+                        <img src={resolveMediaUrl(member.team.logo_url)} alt={member.team.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <Users className="h-5 w-5 text-slate-300" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-slate-900 truncate">{member.team?.name || 'Team'}</p>
+                      <p className="text-xs text-slate-500 capitalize">{member.role}</p>
+                    </div>
+                    <Button variant="ghost" size="icon" asChild>
+                      <Link to={`/teams/${member.team_id}`}>
+                        <ExternalLink className="h-4 w-4 text-slate-400" />
+                      </Link>
+                    </Button>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6 text-slate-500">
+                  <p className="text-sm mb-3">{t('myTeam.createDesc')}</p>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/teams/create">{t('teams.create')}</Link>
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-      <Card className="border-slate-200 bg-white">
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="grid gap-6 md:grid-cols-2">
-            <div>
-              <Label htmlFor="first_name">{t('forms.firstName')}</Label>
-              <Input id="first_name" name="first_name" value={form.first_name} onChange={handleChange} required className="mt-2" />
-            </div>
-            <div>
-              <Label htmlFor="last_name">{t('forms.lastName')}</Label>
-              <Input id="last_name" name="last_name" value={form.last_name} onChange={handleChange} required className="mt-2" />
-            </div>
-            <div>
-              <Label htmlFor="phone">{t('forms.phone')}</Label>
-              <Input id="phone" name="phone" value={form.phone} onChange={handleChange} className="mt-2" />
-            </div>
-            <div>
-              <Label htmlFor="country_id">{t('forms.country')}</Label>
-              <Select
-                id="country_id"
-                name="country_id"
-                value={form.country_id}
-                onChange={handleChange}
-                className="mt-2"
-                disabled={countriesStatus.loading}
-              >
-                <option value="">{countriesStatus.loading ? t('general.countriesLoading') : '—'}</option>
-                {countries.map((country) => (
-                  <option key={country.id} value={country.id}>
-                    {country.flag_emoji ? `${country.flag_emoji} ` : ''}
-                    {country.name}
-                  </option>
-                ))}
-              </Select>
-              {countriesStatus.error && <p className="mt-2 text-xs text-red-500">{t('profile.countriesError')}</p>}
-            </div>
-          </div>
+        {/* Right Column: Edit Profile Form */}
+        <div className="md:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('profile.personalInfo')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {feedback.message && (
+                <div className={`p-4 rounded-lg mb-6 text-sm font-medium ${
+                  feedback.type === 'error' ? 'bg-red-50 text-red-700 border border-red-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                }`}>
+                  {feedback.message}
+                </div>
+              )}
 
-          <Button type="submit" disabled={saving} className="w-full sm:w-auto">
-            {saving ? t('buttons.saving') : t('buttons.saveChanges')}
-          </Button>
-        </form>
-      </Card>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="first_name">{t('forms.firstName')}</Label>
+                    <Input id="first_name" name="first_name" value={form.first_name} onChange={handleChange} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="last_name">{t('forms.lastName')}</Label>
+                    <Input id="last_name" name="last_name" value={form.last_name} onChange={handleChange} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">{t('forms.phone')}</Label>
+                    <Input id="phone" name="phone" value={form.phone} onChange={handleChange} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="country_id">{t('profile.country')}</Label>
+                    <Select
+                      id="country_id"
+                      name="country_id"
+                      value={form.country_id}
+                      onChange={handleChange}
+                      disabled={countriesStatus.loading}
+                    >
+                      <option value="">{countriesStatus.loading ? t('general.countriesLoading') : '—'}</option>
+                      {countries.map((country) => (
+                        <option key={country.id} value={country.id}>
+                          {country.flag_emoji ? `${country.flag_emoji} ` : ''}
+                          {country.name}
+                        </option>
+                      ))}
+                    </Select>
+                    {countriesStatus.error && <p className="text-xs text-red-500 mt-1">{t('profile.countriesError')}</p>}
+                  </div>
+                  <div className="md:col-span-2 space-y-2">
+                    <Label htmlFor="bio">{t('profile.bio')}</Label>
+                    <textarea
+                      id="bio"
+                      name="bio"
+                      value={form.bio}
+                      onChange={handleChange}
+                      className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <Button type="submit" disabled={saving} className="min-w-[120px]">
+                    {saving ? t('buttons.saving') : t('buttons.saveChanges')}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };

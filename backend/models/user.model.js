@@ -40,6 +40,10 @@ export default async function defineUserModel(sequelize, DataTypes) {
         type: DataTypes.STRING,
         allowNull: true
     },
+    bio: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
     profile_photo_url: {
         type: DataTypes.STRING,
         allowNull: true
@@ -59,7 +63,10 @@ export default async function defineUserModel(sequelize, DataTypes) {
   });
 
   User.associate = (models) => {
-    // Removed Media association
+    User.hasMany(models.Post, { foreignKey: 'author_id' });
+    User.belongsTo(models.Country, { foreignKey: 'country_id' });
+    User.hasMany(models.PostLike, { foreignKey: 'user_id' });
+    User.hasMany(models.Comment, { foreignKey: 'author_id' });
   };
 
   return User;

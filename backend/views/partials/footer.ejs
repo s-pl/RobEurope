@@ -1,0 +1,18 @@
+    </main>
+
+  <!-- D3.js Library (must be before chart utilities) -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- Chart utilities (must be before specific chart scripts) -->
+  <script src="/js/chart-utils.js"></script>
+  <!-- Page-specific scripts load here based on page title -->
+  <% if (title && title.includes('Dashboard')) { %>
+    <script src="/js/dashboard.js"></script>
+  <% } else if (title && (title.includes('Usuarios') || title.includes('Users'))) { %>
+    <script src="/js/users.js"></script>
+  <% } else if (title && title.includes('Competiciones')) { %>
+    <script src="/js/competitions.js"></script>
+  <% } else if (title && title.includes('Logs')) { %>
+    <script src="/js/system-logs.js"></script>
+  <% } %>
+</body>
+</html>

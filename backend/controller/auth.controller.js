@@ -1,6 +1,5 @@
 import db from '../models/index.js';
 import bcrypt from 'bcryptjs';
-import signToken from '../utils/signToken.js';
 import SystemLogger from '../utils/systemLogger.js';
 
 const { User } = db;
@@ -58,7 +57,9 @@ export const register = async (req, res) => {
       created_at: now
     });
 
-    const token = signToken({ id: user.id, email: user.email, role: user.role });
+    // Set session user
+    const userSession = { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, username: user.username, role: user.role };
+    req.session.user = userSession;
 
     // Log user registration
     await SystemLogger.logCreate('User', user.id, {
@@ -70,8 +71,7 @@ export const register = async (req, res) => {
     }, req, 'User registration');
 
     return res.status(201).json({
-      token,
-      user: { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, username: user.username, role: user.role }
+      user: userSession
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -101,16 +101,32 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
-    const token = signToken({ id: user.id, email: user.email, role: user.role });
+    // Set session user
+    const userSession = { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, role: user.role };
+    req.session.user = userSession;
 
     // Log successful login
     await SystemLogger.logAuth('LOGIN', user.id, req, 'User login successful');
 
     return res.json({
-      token,
-      user: { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, role: user.role }
+      user: userSession
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
+};
+
+export const logout = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) return res.status(500).json({ error: 'Could not log out' });
+    res.clearCookie('connect.sid');
+    return res.json({ message: 'Logged out successfully' });
+  });
+};
+
+export const me = (req, res) => {
+  if (req.session && req.session.user) {
+    return res.json(req.session.user);
+  }
+  return res.status(401).json({ error: 'Not authenticated' });
 };

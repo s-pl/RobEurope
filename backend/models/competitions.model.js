@@ -14,7 +14,19 @@ export default async function defineCompetitionsModel(sequelize, DataTypes) {
             allowNull: false
         },
         description: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        status: {
+            type: DataTypes.ENUM('draft', 'published', 'archived'),
+            defaultValue: 'draft'
+        },
+        location: {
             type: DataTypes.STRING,
+            allowNull: true
+        },
+        max_teams: {
+            type: DataTypes.INTEGER,
             allowNull: true
         },
         registration_start: {
@@ -36,6 +48,11 @@ export default async function defineCompetitionsModel(sequelize, DataTypes) {
         rules_url: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+        is_active: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
     },
         stream_url: {
         type: DataTypes.JSON,

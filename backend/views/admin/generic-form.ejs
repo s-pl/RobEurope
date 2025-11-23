@@ -1,0 +1,79 @@
+<%- include('../partials/header') %>
+
+<h2><%= title %></h2>
+
+<div class="card" style="max-width: 800px;">
+  <form action="/admin/<%= modelName %>/save<%= item ? '/' + item[config.pk] : '' %>" method="POST">
+    
+    <% config.fields.filter(f => f.form).forEach(field => { %>
+      <div style="margin-bottom: 1rem;">
+        <label for="<%= field.name %>" style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">
+          <%= field.label %>
+          <% if (field.required) { %><span style="color: #ef4444;">*</span><% } %>
+        </label>
+
+        <% if (field.type === 'textarea') { %>
+          <textarea 
+            id="<%= field.name %>" 
+            name="<%= field.name %>" 
+            rows="5"
+            <%= field.required ? 'required' : '' %>
+          ><%= item && item[field.name] ? (typeof item[field.name] === 'object' ? JSON.stringify(item[field.name], null, 2) : item[field.name]) : '' %></textarea>
+          <% if (field.name.includes('JSON')) { %>
+            <small style="color: var(--text-muted);">Formato JSON válido requerido.</small>
+          <% } %>
+
+        <% } else if (field.type === 'number') { %>
+          <input 
+            type="number" 
+            id="<%= field.name %>" 
+            name="<%= field.name %>" 
+            value="<%= item ? item[field.name] : '' %>"
+            <%= field.required ? 'required' : '' %>
+          >
+
+        <% } else if (field.type === 'datetime') { %>
+          <input 
+            type="datetime-local" 
+            id="<%= field.name %>" 
+            name="<%= field.name %>" 
+            value="<%= item && item[field.name] ? new Date(item[field.name]).toISOString().slice(0, 16) : '' %>"
+            <%= field.required ? 'required' : '' %>
+          >
+
+        <% } else if (field.type === 'select') { %>
+          <select 
+            id="<%= field.name %>" 
+            name="<%= field.name %>" 
+            <%= field.required ? 'required' : '' %>
+          >
+            <% field.options.forEach(opt => { %>
+              <option value="<%= opt %>" <%= item && item[field.name] === opt ? 'selected' : '' %>><%= opt %></option>
+            <% }) %>
+          </select>
+
+        <% } else { %>
+          <input 
+            type="text" 
+            id="<%= field.name %>" 
+            name="<%= field.name %>" 
+            value="<%= item ? item[field.name] : '' %>"
+            <%= field.required ? 'required' : '' %>
+          >
+        <% } %>
+      </div>
+    <% }) %>
+
+    <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+      <button type="submit" class="btn btn-primary">
+        💾 Guardar
+      </button>
+      <a href="/admin/<%= modelName %>" class="btn" style="background: var(--surface); border: 1px solid var(--border);">
+        Cancelar
+      </a>
+    </div>
+
+  </form>
+</div>
+
+<%- include('../partials/footer') %>

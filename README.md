@@ -18,18 +18,24 @@ seeders, minimal test UI, and Swagger API documentation.
 
 ---
 
+## 🌟 Key Features
+
+- **Single Active Competition**: The system enforces a single active competition at a time. Activating one automatically deactivates others.
+- **Access Control**: Sensitive competition details (like stream URLs) are only visible to approved participants.
+- **Team Management**: Users can create teams, invite members, and manage their roster.
+- **Live Streaming**: Integrated stream management with access restrictions based on registration status.
+- **Internationalization**: Full support for English, Spanish, and German.
+
 ## 📚 Documentation
 
 Complete project documentation is available in the [`docs/`](docs/) directory:
 
-- **[📖 Documentation Index](docs/index.md)** - Main documentation hub
 - **[🏗️ Architecture](docs/architecture.md)** - System architecture and design
 - **[🔌 API Reference](docs/api.md)** - Complete API documentation
-- **[💾 Database Schema](docs/database.md)** - Database models and relationships
 - **[🛠️ Development Guide](docs/development.md)** - Setup and development workflow
 - **[🔒 Security Guide](docs/security.md)** - Security measures and best practices
-- **[🤝 Contributing](docs/contributing.md)** - Contribution guidelines
 - **[📊 System Diagrams](docs/diagrams/diagrams.md)** - ERD, use cases, and architecture diagrams
+- **[⚙️ HTTPS Setup Guide](docs/howToHttps.md)** - Setting up HTTPS with Nginx and Let's Encrypt
 
 ---
 
@@ -37,7 +43,7 @@ Complete project documentation is available in the [`docs/`](docs/) directory:
 
 | Name | Role | Institution |
 |------|------|--------------|
-| Samuel Ponce Luna | Full-Stack Developer / Architect | IES El Rincón |
+| Samuel Ponce Luna | Full-Stack Developer | IES El Rincón |
 | Ángel Lallave Herrera | Frontend & UI/UX Designer | IES El Rincón |
 | Néstor García Santos | Backend & Frontend | IES El Rincón |
 
@@ -47,8 +53,8 @@ Complete project documentation is available in the [`docs/`](docs/) directory:
 
 | Resource | Link |
 |-----------|------|
-| 🖥️ **Frontend (Main URL)** | [http://46.101.255.106:5173/](http://46.101.255.106:5173/) |
-| 🌐 **Live Swagger Docs** | [http://46.101.255.106:85/api-docs/](http://46.101.255.106:85/api-docs/) |
+| 🖥️ **Frontend (Main URL)**  | [https://robeurope.samuelponce.es](https://robeurope.samuelponce.es) | 
+| 🌐 **Live Swagger Docs** | [https://api.robeurope.samuelponce.es/api-docs/](https://api.robeurope.samuelponce.es/api-docs/) |
 | 🧩 **Postman Collection** | [View on Postman](https://solar-crater-87778.postman.co/workspace/Team-Workspace~863e014b-231f-4611-84da-6746814f344e/collection/15303917-8ce87247-fb50-4d0f-8770-de9131768fd1) |
 | 🎨 **Figma UI Design** | [View on Figma](https://www.figma.com/design/UptdKH6RgmLhRwNIkr5qpU/Sin-t%C3%ADtulo?node-id=0-1&t=WDyHv57bP0Kiux3v-1) |
 
@@ -58,15 +64,15 @@ Complete project documentation is available in the [`docs/`](docs/) directory:
 
 | Layer | Technologies |
 |--------|---------------|
-| 🎨 **Frontend** | React (not yet.... YET) |
+| 🎨 **Frontend** | React (In Progress) |
 | ⚙️ **Backend** | Node.js (ESM) + Express + Sequelize |
 | 💾 **Database** | MySQL (with Sequelize ORM) |
-| 🔐 **Auth** | JWT (jsonwebtoken) + bcryptjs |
+| 🔐 **Auth** | JWT (public API) + Session (Admin Panel) |
 | 📄 **API Docs** | Swagger UI (via `/api-docs`) |
 
 ---
 ## 📘 Diagrams
-Diagrams can be seen in ![Docs](https://github.com/s-pl/RobEurope/tree/change-upload-schema/docs)
+Diagrams can be seen in ![Docs](https://github.com/s-pl/RobEurope/docs/diagrams/diagrams.md)
 
 ## 🚀 Quickstart (Developer Setup)
 
@@ -95,13 +101,13 @@ JWT_SECRET=your_secret_key_for_jwt
 ### 3️⃣ Seed minimal data (example: countries)
 
 ```bash
-node seeders/run-seed-countries.js
+npm run seed (in backend/)
 ```
 
 ### 4️⃣ Start the backend
 
 ```bash
-npm start
+node index.js (or npm start) 
 ```
 
 👉 API runs at:  
@@ -112,38 +118,56 @@ Swagger Docs:
 
 ---
 
-## 📂 Folder Structure
+## 🛠 Admin Panel
+
+The project includes a minimal EJS-powered admin panel for privileged management tasks.
+
+| Feature | Description |
+|---------|-------------|
+| Session Auth | Uses `express-session` with Sequelize store to persist administrator sessions. |
+| CSRF Protection | Enabled via `csurf` for all admin POST forms. |
+| Request Tracking | Every request gets an `X-Request-Id` header (UUID) for log correlation. |
+| Role Gate | Only users with role `super_admin` may access admin routes. |
+| Views | Located under `backend/views/` (`login.ejs`, `dashboard.ejs`, `users.ejs`). |
+
+### Default Admin Credentials (Seeder)
+
+After running `npm run seed`, a default super administrator user is ensured:
 
 ```
-backend/
-├─ controller/        # Express controllers
-├─ middleware/        # Auth, rate-limit, etc.
-├─ models/            # Sequelize model definitions
-├─ routes/api/        # Route definitions mounted at /api
-├─ seeders/           # Seed scripts for initial data
-├─ public/            # Minimal test UI files
-├─ config/            # DB and app configuration
-└─ index.js           # Application entry point
+Email: admin@example.com
+Password: ChangeMe123!
+Role: super_admin
 ```
+
+Change the password in production by updating the user directly or setting `SEED_SUPERADMIN_PASSWORD` before running seeders the first time.
+
+### Panel Routes
+
+| Route | Purpose |
+|-------|---------|
+| `/admin/login` | Session-based login form (POST email/password) |
+| `/admin` | Dashboard with basic statistics |
+| `/admin/users` | User listing + promote action |
+| `/admin/users/:id/promote` | POST to elevate a user to `super_admin` |
+
+### Environment Variables (Admin Panel)
+
+Add to `.env`:
+```env
+SESSION_SECRET=change_this_in_prod
+SEED_SUPERADMIN_PASSWORD=ChangeMe123!
+```
+
+### Security Notes
+
+- Behind a reverse proxy (Nginx), set `app.set('trust proxy', 1)` and change session cookie `secure: true`.
+- CSRF tokens are already injected in forms via hidden `_csrf` fields.
+- Use HTTPS everywhere; see `docs/howToHttps.md`.
+- Consider adding content security policy (CSP) if panel grows.
 
 ---
 
-## 📡 API Overview
-
-| Feature | Endpoint | Description |
-|----------|-----------|-------------|
-| 🩺 **Health Check** | `GET /api/health` | Verifies service & DB connection |
-| 🔐 **Auth** | `POST /api/auth/register` / `POST /api/auth/login` | Register or log in (returns `{ token, user }`) |
-| 🌍 **Countries** | CRUD `/api/countries` | Manage country data |
-| 👤 **Users** | `/api/users`, `/api/users/:id`, `/api/users/me` | User management (some routes require auth) |
-| 👥 **Teams & Members** | `/api/teams`, `/api/team-members` | Create & manage teams |
-| 🏆 **Competitions** | `/api/competitions` | Manage tournaments & events |
-| 🧾 **Registrations** | `/api/registrations` | Handle team signups |
-| 📰 **Posts** | `/api/posts` | Publish and view posts |
-| 🔔 **Notifications** | `/api/notifications` | User alerts |
-| 💰 **Sponsors** | `/api/sponsors` | Manage sponsor tiers and visibility |
-
----
 
 ## 🔑 Authentication
 
@@ -155,14 +179,39 @@ backend/
 - Tokens are returned after login or register.
 - Default expiration: **1 hour** (configurable).
 
+### Dual Auth Model
+
+- Public API: JWT (Bearer tokens) for SPA / external clients.
+- Admin Panel: Server-side sessions (no JWT needed once logged into panel).
+
 ---
 
-## 🧭 Swagger API Docs
+---
 
-Swagger UI is served at `/api-docs` and automatically:
-- Displays available routes
-- Lets you **authorize** with your JWT token
-- Supports testing API endpoints interactively
+## Nginx Reverse Proxy Setup for HTTPS
 
-> Example:  
-> `POST /auth/login` → copy token → click “Authorize”
+Documentation for setting up Nginx as a reverse proxy with HTTPS can be found in [docs/howToHttps.md](docs/howToHttps.md).
+
+---
+
+## 🧪 Testing
+
+Run backend tests:
+```bash
+cd backend
+npm test
+```
+Add new tests under `backend/__tests__/` (e.g. session login, protected admin access). Supertest + Vitest are configured.
+
+---
+
+## 📌 Roadmap (Next Improvements)
+
+- Input validation layer (`zod` or `express-validator`).
+- Pagination + filtering for large lists.
+- Service layer abstraction for controllers.
+- Index optimization and query performance profiling.
+- CSP & advanced security headers.
+- More comprehensive audit logging UI.
+
+---

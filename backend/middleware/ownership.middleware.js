@@ -3,7 +3,7 @@ export function requireOwnership(modelName) {
     const user = req.user;
     if (!user) return res.status(401).json({ error: 'No autorizado' });
 
-    // Super admin can do anything
+    // Super admin can do all actions
     if (user.role === 'super_admin') {
       return next();
     }

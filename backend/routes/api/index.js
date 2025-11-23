@@ -17,6 +17,7 @@ const router = express.Router();
 
 // Public routes: auth (register/login) should be available without token
 router.use('/auth', authRouter);
+router.use('/posts', postsRouter); // Posts are public (read-only)
 
 // Protect all routes after this middleware: only authenticated users can access
 router.use(authenticateToken);
@@ -25,7 +26,7 @@ router.use('/countries', countriesRouter);
 router.use('/users', usersRouter);
 router.use('/streams', streamsRouter);
 router.use('/competitions', competitionsRouter);
-router.use('/posts', postsRouter);
+// router.use('/posts', postsRouter); // Moved up
 router.use('/notifications', notificationsRouter);
 router.use('/registrations', registrationRouter);
 router.use('/sponsors', sponsorsRouter);
