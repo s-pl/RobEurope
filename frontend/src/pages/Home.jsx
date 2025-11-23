@@ -170,7 +170,7 @@ const Home = () => {
               <Card key={post.id} className="overflow-hidden hover:shadow-md transition-shadow dark:border-slate-800 dark:bg-slate-900">
                 {post.media_urls && post.media_urls.length > 0 && (
                   <div className="h-40 w-full bg-slate-100 dark:bg-slate-800">
-                    <img src={post.media_urls[0]} alt={post.title} className="h-full w-full object-cover" />
+                    <img src={"https://api.robeurope.samuelponce.es" + post.media_urls[0]} alt={post.title} className="h-full w-full object-cover" />
                   </div>
                 )}
                 <CardHeader className="p-4">

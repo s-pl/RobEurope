@@ -302,8 +302,8 @@ const Posts = () => {
                             <MoreVertical className="h-4 w-4" />
                         </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(post.id)}>
+                        <DropdownMenuContent align="end" className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                        <DropdownMenuItem className="text-red-600 dark:text-red-400 cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20 focus:bg-red-50 dark:focus:bg-red-900/20" onClick={() => handleDelete(post.id)}>
                             <Trash2 className="mr-2 h-4 w-4" /> {t('common.delete')}
                         </DropdownMenuItem>
                         </DropdownMenuContent>
