@@ -184,7 +184,7 @@ const Home = () => {
                     </Link>
                   </CardTitle>
                   <CardDescription className="line-clamp-3 mt-2 text-sm">
-                    {post.content}
+                    {post.content.replace(/<[^>]*>?/gm, '')}
                   </CardDescription>
                 </CardHeader>
               </Card>

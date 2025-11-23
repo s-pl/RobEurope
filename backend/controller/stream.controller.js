@@ -20,12 +20,12 @@ export const getStreams = async (req, res) => {
     if (status) where.status = status;
     if (competition_id) where.competition_id = competition_id;
 
-    // If filtering by competition, check access
+    // Check access permissions
+    let isApproved = false;
     if (competition_id && req.user) {
       const userTeams = await TeamMembers.findAll({ where: { user_id: req.user.id, left_at: null } });
       const teamIds = userTeams.map(tm => tm.team_id);
       
-      let isApproved = false;
       if (teamIds.length > 0) {
         const registration = await Registration.findOne({
           where: {
@@ -35,14 +35,6 @@ export const getStreams = async (req, res) => {
           }
         });
         if (registration) isApproved = true;
-      }
-
-      if (!isApproved) {
-        // If not approved, only return streams that are NOT associated with this competition (or handle as forbidden)
-        // But usually, if asking for competition streams, we should return empty or error.
-        // However, if the user is just browsing "all streams", we might want to hide private ones.
-        // For now, if competition_id is explicitly requested and user is not approved, return empty.
-        return res.json([]);
       }
     }
 
@@ -61,6 +53,17 @@ export const getStreams = async (req, res) => {
         required: true
       }]
     });
+
+    // If not approved (guest or unapproved user), sanitize stream_url
+    if (!isApproved) {
+      const sanitized = items.map(s => {
+        const json = s.toJSON();
+        delete json.stream_url;
+        return json;
+      });
+      return res.json(sanitized);
+    }
+
     res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });

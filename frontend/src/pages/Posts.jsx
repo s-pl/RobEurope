@@ -12,6 +12,8 @@ import { Label } from '../components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
 import { resolveMediaUrl } from '../lib/apiClient';
 import { useToast } from '../hooks/useToast';
+import { RichTextEditor } from '../components/ui/RichTextEditor';
+import DOMPurify from 'dompurify';
 
 const Posts = () => {
   const { t } = useTranslation();
@@ -221,13 +223,13 @@ const Posts = () => {
                   </div>
                   <div>
                     <Label htmlFor="content">{t('posts.form.content')}</Label>
-                    <Textarea 
-                      id="content" 
-                      value={newPost.content} 
-                      onChange={e => setNewPost({...newPost, content: e.target.value})}
-                      required 
-                      className="mt-1 min-h-[100px]"
-                    />
+                    <div className="mt-1">
+                      <RichTextEditor 
+                        value={newPost.content} 
+                        onChange={val => setNewPost({...newPost, content: val})}
+                        placeholder={t('posts.form.content')}
+                      />
+                    </div>
                   </div>
                   <div>
                     <Label htmlFor="image">{t('posts.form.image')}</Label>
@@ -312,7 +314,10 @@ const Posts = () => {
               
               <CardContent className="space-y-4 pt-4">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">{post.title}</h3>
-                <p className="text-slate-600 dark:text-slate-300 whitespace-pre-wrap">{post.content}</p>
+                <div 
+                  className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 [&_img]:rounded-lg [&_img]:max-h-[500px] [&_img]:w-auto [&_img]:mx-auto"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
+                />
                 
                 {post.media_urls && post.media_urls.length > 0 && (
                   <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800">
