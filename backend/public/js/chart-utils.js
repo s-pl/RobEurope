@@ -1,5 +1,3 @@
-// Utilidades globales para gráficas D3
-// Esperar a que D3.js esté disponible
 function ensureD3Loaded(callback) {
   if (typeof d3 !== 'undefined') {
     callback();

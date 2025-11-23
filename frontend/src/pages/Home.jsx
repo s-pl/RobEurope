@@ -113,8 +113,8 @@ const Home = () => {
               <Bot className="h-3 w-3" />
               {t('home.hero.tagline')}
             </div>
-            <CardTitle className="text-4xl leading-tight text-blue-900 dark:text-blue-100">{t('home.hero.title')}</CardTitle>
-            <CardDescription className="text-blue-700 text-lg dark:text-blue-300">{t('home.hero.description')}</CardDescription>
+            <CardTitle className="text-3xl md:text-4xl lg:text-5xl leading-tight text-blue-900 dark:text-blue-100">{t('home.hero.title')}</CardTitle>
+            <CardDescription className="text-base md:text-lg text-blue-700 dark:text-blue-300">{t('home.hero.description')}</CardDescription>
             <div className="flex flex-wrap gap-3">
               <Button asChild className="shadow-md hover:shadow-lg transition-shadow">
                 <Link to="/competitions" className="flex items-center gap-2">
@@ -170,7 +170,7 @@ const Home = () => {
               <Card key={post.id} className="overflow-hidden hover:shadow-md transition-shadow dark:border-slate-800 dark:bg-slate-900">
                 {post.media_urls && post.media_urls.length > 0 && (
                   <div className="h-40 w-full bg-slate-100 dark:bg-slate-800">
-                    <img src={post.media_urls[0]} alt={post.title} className="h-full w-full object-cover" />
+                    <img src={"https://api.robeurope.samuelponce.es" + post.media_urls[0]} alt={post.title} className="h-full w-full object-cover" />
                   </div>
                 )}
                 <CardHeader className="p-4">
@@ -184,7 +184,7 @@ const Home = () => {
                     </Link>
                   </CardTitle>
                   <CardDescription className="line-clamp-3 mt-2 text-sm">
-                    {post.content}
+                    {post.content.replace(/<[^>]*>?/gm, '')}
                   </CardDescription>
                 </CardHeader>
               </Card>

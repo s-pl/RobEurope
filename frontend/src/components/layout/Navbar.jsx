@@ -5,6 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useApi } from '../../hooks/useApi';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '../ui/sheet';
 import NotificationsBell from '../notifications/NotificationsBell';
 import { ThemeToggle } from '../ui/theme-toggle';
 import { resolveMediaUrl } from '../../lib/apiClient';
@@ -105,15 +106,85 @@ const Navbar = () => {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 lg:px-0">
         <div className="flex items-center gap-4">
           {/* Mobile Menu Trigger */}
-          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <X className="h-6 w-6 text-blue-900 dark:text-blue-400" /> : <Menu className="h-6 w-6 text-blue-900 dark:text-blue-400" />}
-          </Button>
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="lg:hidden">
+                <Menu className="h-6 w-6 text-blue-900 dark:text-blue-400" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0 flex flex-col">
+              <SheetHeader className="p-4 border-b border-slate-100 dark:border-slate-800">
+                <SheetTitle className="flex items-center gap-2">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-white text-blue-700 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-800 dark:text-blue-400">
+                    <Bot className="h-5 w-5" />
+                  </span>
+                  <span>RobEurope</span>
+                </SheetTitle>
+              </SheetHeader>
+              
+              <nav className="flex-1 overflow-y-auto p-6 flex flex-col gap-2">
+                <NavItems mobile />
+                {!isAuthenticated && (
+                  <div className="flex flex-col gap-2 mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
+                    <Link to="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start text-blue-600 dark:text-blue-400">
+                        {t('nav.login')}
+                      </Button>
+                    </Link>
+                    <Link to="/register" onClick={() => setIsOpen(false)}>
+                      <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                        {t('nav.register')}
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+                {isAuthenticated && (
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 mt-2"
+                    onClick={() => {
+                      logout();
+                      setIsOpen(false);
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    {t('nav.logout')}
+                  </Button>
+                )}
+              </nav>
+
+              <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 mt-auto">
+                <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Language</span>
+                    <div className="flex gap-2">
+                      {languages.map((lang) => (
+                        <button
+                          key={lang.code}
+                          onClick={() => i18n.changeLanguage(lang.code)}
+                          className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                            i18n.language === lang.code
+                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+                          }`}
+                        >
+                          {lang.label}
+                        </button>
+                      ))}
+                    </div>
+                </div>
+                <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Theme</span>
+                    <ThemeToggle />
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
 
           <Link to="/" className="flex items-center gap-2 text-lg font-semibold text-blue-900 hover:text-blue-700 transition-colors dark:text-blue-100 dark:hover:text-blue-300">
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white text-blue-700 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-800 dark:text-blue-400">
               <Bot className="h-5 w-5" />
             </span>
-            <span className="hidden sm:inline">RobEurope</span>
+            <span>RobEurope</span>
           </Link>
         </div>
 
@@ -122,7 +193,7 @@ const Navbar = () => {
           <NavItems />
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -191,14 +262,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isOpen && (
-        <div className="lg:hidden border-t border-blue-100 bg-white px-4 py-4 shadow-lg dark:bg-slate-950 dark:border-slate-800">
-          <nav className="flex flex-col gap-2">
-            <NavItems mobile />
-          </nav>
-        </div>
-      )}
+      {/* Mobile Menu Overlay - Removed as we use Sheet now */}
     </header>
   );
 };
