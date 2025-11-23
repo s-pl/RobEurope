@@ -1,4 +1,4 @@
-// Dashboard Charts
+
 function waitForDependencies(callback) {
   if (typeof d3 !== 'undefined' && typeof window.chartUtils !== 'undefined') {
     callback();
@@ -9,19 +9,19 @@ function waitForDependencies(callback) {
 
 async function loadCharts() {
   try {
-    // Cargar datos de usuarios por rol
+    
     const userRoleResponse = await fetch('/admin/api/users-by-role');
     const userRoleData = await userRoleResponse.json();
 
-    // Cargar datos de registraciones
+  
     const registrationResponse = await fetch('/admin/api/registrations-stats');
     const registrationData = await registrationResponse.json();
 
-    // Cargar datos de línea temporal
+   
     const timelineResponse = await fetch('/admin/api/users-timeline');
     const timelineData = await timelineResponse.json();
 
-    // Renderizar gráficas
+   
     renderUserRoleChart(userRoleData);
     renderRegistrationChart(registrationData);
     renderTimelineChart(timelineData);
@@ -30,7 +30,7 @@ async function loadCharts() {
   }
 }
 
-// Gráfica de barras: Usuarios por Rol
+
 function renderUserRoleChart(data) {
   const margin = { top: 20, right: 30, bottom: 40, left: 60 };
   const width = 400 - margin.left - margin.right;
@@ -55,7 +55,6 @@ function renderUserRoleChart(data) {
   const tooltip = window.chartUtils.createTooltip();
   const colors = window.chartUtils.colors;
 
-  // Barras
   g.selectAll('.bar')
     .data(data)
     .enter()
@@ -78,7 +77,7 @@ function renderUserRoleChart(data) {
       tooltip.style('opacity', 0);
     });
 
-  // Eje X
+
   g.append('g')
     .attr('transform', `translate(0,${height})`)
     .call(d3.axisBottom(xScale))
@@ -103,7 +102,7 @@ function renderUserRoleChart(data) {
     .text('Cantidad');
 }
 
-// Gráfica de pastel: Estado de Registraciones
+
 function renderRegistrationChart(data) {
   const width = 400;
   const height = 300;
