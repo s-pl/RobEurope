@@ -115,15 +115,22 @@ const parseResponse = async (response) => {
 export async function apiRequest(path, { method = 'GET', body, token, headers = {}, formData = false } = {}) {
   const finalHeaders = { ...headers };
 
-  if (token) {
-    finalHeaders.Authorization = `Bearer ${token}`;
-  }
+  // Session based auth - no token needed
+  // if (token) {
+  //   finalHeaders.Authorization = `Bearer ${token}`;
+  // }
 
-  const options = { method, headers: finalHeaders };
+  const options = { 
+    method, 
+    headers: finalHeaders,
+    credentials: 'include'
+  };
 
   if (body) {
-    if (formData) {
+    if (formData || (typeof FormData !== 'undefined' && body instanceof FormData)) {
       options.body = body;
+      // Let browser set Content-Type with boundary
+      delete finalHeaders['Content-Type'];
     } else {
       finalHeaders['Content-Type'] = finalHeaders['Content-Type'] || 'application/json';
       options.body = JSON.stringify(body);

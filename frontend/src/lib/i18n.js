@@ -105,6 +105,61 @@ const resources = {
         country: 'País',
         name: 'Nombre'
       },
+      common: {
+        save: 'Guardar',
+        saving: 'Guardando...',
+        delete: 'Eliminar',
+        cancel: 'Cancelar',
+        edit: 'Editar'
+      },
+      posts: {
+        title: 'Noticias',
+        subtitle: 'Mantente al día con las últimas actualizaciones',
+        search: 'Buscar noticias...',
+        create: 'Crear Post',
+        createTitle: 'Crear Nuevo Post',
+        form: {
+          title: 'Título',
+          content: 'Contenido',
+          image: 'Imagen'
+        },
+        empty: 'No hay noticias todavía.',
+        created: 'Post creado exitosamente',
+        error: 'Error al procesar la solicitud',
+        confirmDelete: '¿Estás seguro de que quieres eliminar este post?',
+        deleted: 'Post eliminado',
+        pinned: 'Fijado',
+        unpinned: 'Desfijado',
+        comments: 'Comentarios',
+        noComments: 'No hay comentarios todavía.',
+        writeComment: 'Escribe un comentario...'
+      },
+      teams: {
+        title: 'Equipos',
+        subtitle: 'Descubre y únete a los mejores equipos de robótica',
+        create: 'Crear Equipo',
+        createTitle: 'Crear nuevo equipo',
+        form: {
+          name: 'Nombre del equipo',
+          description: 'Descripción',
+          website: 'Sitio Web',
+          country: 'País'
+        },
+        searchPlaceholder: 'Buscar equipos...',
+        searchButton: 'Buscar',
+        allCountries: 'Todos los países',
+        members: 'Miembros',
+        manage: 'Gestionar mi equipo',
+        requestJoin: 'Solicitar Unirse',
+        loginToJoin: 'Inicia sesión para unirte',
+        noTeams: 'No se encontraron equipos.',
+        feedback: {
+          created: 'Equipo creado exitosamente',
+          createError: 'No se pudo crear el equipo',
+          requestSent: 'Solicitud enviada',
+          requestError: 'No se pudo enviar la solicitud'
+        }
+      },
       home: {
         hero: {
           tagline: 'Robótica educativa europea',
@@ -163,7 +218,27 @@ const resources = {
           teams: 'Equipos',
           tbd: 'Por definir',
           venueFallback: 'Multi-sede'
-        }
+        },
+        noDescription: 'Sin descripción disponible.',
+        viewDetails: 'Ver Detalles',
+        create: 'Crear Competición',
+        createTitle: 'Nueva Competición',
+        form: {
+          title: 'Título',
+          description: 'Descripción',
+          location: 'Ubicación',
+          startDate: 'Fecha Inicio',
+          endDate: 'Fecha Fin',
+          maxTeams: 'Máx. Equipos',
+          isActive: 'Marcar como competición activa (desactivará otras)'
+        },
+        activeBadge: 'Activa',
+        restrictedBadge: 'Acceso Restringido',
+        restrictedMessage: 'Debes ser un participante aprobado en esta competición para ver los streams y detalles adicionales.',
+        noStreams: 'No hay streams activos para esta competición.',
+        loadError: 'Error al cargar competiciones.',
+        createError: 'Error al crear competición',
+        noActive: 'No hay competiciones activas en este momento.'
       },
       contact: {
         hero: {
@@ -185,6 +260,11 @@ const resources = {
         }
       },
       profile: {
+        title: 'Mi Perfil',
+        personalInfo: 'Información Personal',
+        bio: 'Biografía',
+        country: 'País',
+        photo: 'Foto de Perfil',
         heroTagline: 'Cuenta vinculada',
         heroNote: 'Los cambios sincronizan con /users/me.',
         feedback: {
@@ -212,6 +292,107 @@ const resources = {
       },
       general: {
         countriesLoading: 'Cargando países…'
+      },
+      myTeam: {
+        title: "Mi Equipo",
+        createTitle: "Crear un Equipo",
+        createDesc: "No perteneces a ningún equipo. Crea uno nuevo para empezar.",
+        form: {
+          name: "Nombre del Equipo",
+          city: "Ciudad",
+          country: "País (ID)",
+          institution: "Institución / Centro",
+          description: "Descripción",
+          website: "Sitio Web",
+          streamUrl: "URL del Stream (Twitch/YouTube)",
+          submitCreate: "Crear Equipo",
+          submitSave: "Guardar Cambios",
+          saveUrl: "Guardar URL"
+        },
+        tabs: {
+          overview: "Resumen",
+          members: "Miembros",
+          competitions: "Competiciones",
+          settings: "Ajustes"
+        },
+        roles: {
+          owner: "Propietario",
+          member: "Miembro"
+        },
+        actions: {
+          leave: "Salir del Equipo",
+          delete: "Eliminar Equipo",
+          removeMember: "Eliminar",
+          invite: "Invitar",
+          approve: "Aprobar",
+          startStream: "Iniciar LIVE",
+          register: "Solicitar Inscripción"
+        },
+        overview: {
+          about: "Sobre el equipo",
+          noDesc: "Sin descripción",
+          teamId: "ID de Equipo",
+          stats: "Estadísticas",
+          membersCount: "Miembros",
+          compsCount: "Competiciones"
+        },
+        members: {
+          title: "Miembros del Equipo",
+          desc: "Lista de usuarios que forman parte de este equipo.",
+          userPrefix: "Usuario #",
+          noMembers: "No hay miembros.",
+          inviteTitle: "Invitar Miembros",
+          inviteDesc: "Busca usuarios o invita por email.",
+          searchUser: "Buscar usuario",
+          inviteEmail: "Invitar por Email",
+          requestsTitle: "Solicitudes de Acceso",
+          requestsDesc: "Usuarios que quieren unirse.",
+          noRequests: "No hay solicitudes pendientes."
+        },
+        competitions: {
+          registerTitle: "Inscribirse en Competición",
+          selectLabel: "Seleccionar Competición",
+          selectPlaceholder: "-- Seleccionar --",
+          activeTitle: "Inscripciones Activas",
+          noRegistrations: "No hay inscripciones registradas.",
+          compPrefix: "Competición #",
+          reason: "Motivo:"
+        },
+        settings: {
+          editTitle: "Editar Información",
+          editDesc: "Actualiza los datos públicos de tu equipo.",
+          streamTitle: "Configuración de Streaming",
+          streamDesc: "Gestiona la emisión en directo de tu equipo.",
+          streamStatus: "Estado de Emisión",
+          streamStatusDesc: "Inicia la emisión para aparecer en vivo.",
+          dangerZone: "Zona de Peligro",
+          deleteWarning: "Eliminar el equipo borrará todos los datos, miembros y registros asociados. Esta acción no se puede deshacer."
+        },
+        feedback: {
+          created: "Equipo creado exitosamente",
+          createError: "Error al crear equipo",
+          saved: "Cambios guardados",
+          saveError: "No se pudo guardar",
+          invited: "Invitación enviada a {{username}}",
+          inviteError: "No se pudo invitar",
+          emailInvited: "Invitación enviada por email",
+          approved: "Solicitud aprobada",
+          approveError: "No se pudo aprobar",
+          confirmRemoveMember: "¿Eliminar a este miembro?",
+          memberRemoved: "Miembro eliminado",
+          removeMemberError: "No se pudo eliminar al miembro",
+          confirmLeave: "¿Seguro que quieres salir del equipo?",
+          left: "Has salido del equipo",
+          leaveError: "No se pudo salir del equipo",
+          confirmDelete: "¿ESTÁS SEGURO? Esta acción no se puede deshacer.",
+          deleted: "Equipo eliminado",
+          deleteError: "No se pudo eliminar",
+          registrationSent: "Solicitud de registro enviada",
+          registrationError: "No se pudo enviar la solicitud",
+          streamUrlMissing: "Debes guardar una URL de stream primero",
+          streamStarted: "¡Emisión iniciada!",
+          streamError: "Error al iniciar stream"
+        }
       }
     }
   },
@@ -292,6 +473,61 @@ const resources = {
         country: 'Country',
         name: 'Name'
       },
+      common: {
+        save: 'Save',
+        saving: 'Saving...',
+        delete: 'Delete',
+        cancel: 'Cancel',
+        edit: 'Edit'
+      },
+      posts: {
+        title: 'News',
+        subtitle: 'Stay up to date with the latest updates',
+        search: 'Search news...',
+        create: 'Create Post',
+        createTitle: 'Create New Post',
+        form: {
+          title: 'Title',
+          content: 'Content',
+          image: 'Image'
+        },
+        empty: 'No news yet.',
+        created: 'Post created successfully',
+        error: 'Error processing request',
+        confirmDelete: 'Are you sure you want to delete this post?',
+        deleted: 'Post deleted',
+        pinned: 'Pinned',
+        unpinned: 'Unpinned',
+        comments: 'Comments',
+        noComments: 'No comments yet.',
+        writeComment: 'Write a comment...'
+      },
+      teams: {
+        title: 'Teams',
+        subtitle: 'Discover and join the best robotics teams',
+        create: 'Create Team',
+        createTitle: 'Create new team',
+        form: {
+          name: 'Team Name',
+          description: 'Description',
+          website: 'Website',
+          country: 'Country'
+        },
+        searchPlaceholder: 'Search teams...',
+        searchButton: 'Search',
+        allCountries: 'All countries',
+        members: 'Members',
+        manage: 'Manage my team',
+        requestJoin: 'Request to Join',
+        loginToJoin: 'Log in to join',
+        noTeams: 'No teams found.',
+        feedback: {
+          created: 'Team created successfully',
+          createError: 'Could not create team',
+          requestSent: 'Request sent',
+          requestError: 'Could not send request'
+        }
+      },
       home: {
         hero: {
           tagline: 'European educational robotics',
@@ -350,7 +586,27 @@ const resources = {
           teams: 'Teams',
           tbd: 'TBD',
           venueFallback: 'Multi-site'
-        }
+        },
+        noDescription: 'No description available.',
+        viewDetails: 'View Details',
+        create: 'Create Competition',
+        createTitle: 'New Competition',
+        form: {
+          title: 'Title',
+          description: 'Description',
+          location: 'Location',
+          startDate: 'Start Date',
+          endDate: 'End Date',
+          maxTeams: 'Max. Teams',
+          isActive: 'Mark as active competition (will deactivate others)'
+        },
+        activeBadge: 'Active',
+        restrictedBadge: 'Restricted Access',
+        restrictedMessage: 'You must be an approved participant in this competition to view streams and additional details.',
+        noStreams: 'No active streams for this competition.',
+        loadError: 'Error loading competitions.',
+        createError: 'Error creating competition',
+        noActive: 'No active competitions at the moment.'
       },
       contact: {
         hero: {
@@ -372,6 +628,11 @@ const resources = {
         }
       },
       profile: {
+        title: 'My Profile',
+        personalInfo: 'Personal Information',
+        bio: 'Biography',
+        country: 'Country',
+        photo: 'Profile Photo',
         heroTagline: 'Linked account',
         heroNote: 'Changes sync with /users/me.',
         feedback: {
@@ -399,6 +660,107 @@ const resources = {
       },
       general: {
         countriesLoading: 'Loading countries…'
+      },
+      myTeam: {
+        title: "My Team",
+        createTitle: "Create a Team",
+        createDesc: "You don't belong to any team. Create a new one to start.",
+        form: {
+          name: "Team Name",
+          city: "City",
+          country: "Country (ID)",
+          institution: "Institution / Center",
+          description: "Description",
+          website: "Website",
+          streamUrl: "Stream URL (Twitch/YouTube)",
+          submitCreate: "Create Team",
+          submitSave: "Save Changes",
+          saveUrl: "Save URL"
+        },
+        tabs: {
+          overview: "Overview",
+          members: "Members",
+          competitions: "Competitions",
+          settings: "Settings"
+        },
+        roles: {
+          owner: "Owner",
+          member: "Member"
+        },
+        actions: {
+          leave: "Leave Team",
+          delete: "Delete Team",
+          removeMember: "Remove",
+          invite: "Invite",
+          approve: "Approve",
+          startStream: "Start LIVE",
+          register: "Request Registration"
+        },
+        overview: {
+          about: "About the team",
+          noDesc: "No description",
+          teamId: "Team ID",
+          stats: "Statistics",
+          membersCount: "Members",
+          compsCount: "Competitions"
+        },
+        members: {
+          title: "Team Members",
+          desc: "List of users who are part of this team.",
+          userPrefix: "User #",
+          noMembers: "No members.",
+          inviteTitle: "Invite Members",
+          inviteDesc: "Search users or invite by email.",
+          searchUser: "Search user",
+          inviteEmail: "Invite by Email",
+          requestsTitle: "Access Requests",
+          requestsDesc: "Users who want to join.",
+          noRequests: "No pending requests."
+        },
+        competitions: {
+          registerTitle: "Register for Competition",
+          selectLabel: "Select Competition",
+          selectPlaceholder: "-- Select --",
+          activeTitle: "Active Registrations",
+          noRegistrations: "No registrations found.",
+          compPrefix: "Competition #",
+          reason: "Reason:"
+        },
+        settings: {
+          editTitle: "Edit Information",
+          editDesc: "Update your team's public data.",
+          streamTitle: "Streaming Configuration",
+          streamDesc: "Manage your team's live broadcast.",
+          streamStatus: "Broadcast Status",
+          streamStatusDesc: "Start the broadcast to appear live.",
+          dangerZone: "Danger Zone",
+          deleteWarning: "Deleting the team will erase all data, members, and associated registrations. This action cannot be undone."
+        },
+        feedback: {
+          created: "Team created successfully",
+          createError: "Error creating team",
+          saved: "Changes saved",
+          saveError: "Could not save",
+          invited: "Invitation sent to {{username}}",
+          inviteError: "Could not invite",
+          emailInvited: "Invitation sent by email",
+          approved: "Request approved",
+          approveError: "Could not approve",
+          confirmRemoveMember: "Remove this member?",
+          memberRemoved: "Member removed",
+          removeMemberError: "Could not remove member",
+          confirmLeave: "Are you sure you want to leave the team?",
+          left: "You have left the team",
+          leaveError: "Could not leave the team",
+          confirmDelete: "ARE YOU SURE? This action cannot be undone.",
+          deleted: "Team deleted",
+          deleteError: "Could not delete",
+          registrationSent: "Registration request sent",
+          registrationError: "Could not send request",
+          streamUrlMissing: "You must save a stream URL first",
+          streamStarted: "Broadcast started!",
+          streamError: "Error starting stream"
+        }
       }
     }
   },
@@ -479,6 +841,61 @@ const resources = {
         country: 'Land',
         name: 'Name'
       },
+      common: {
+        save: 'Speichern',
+        saving: 'Speichert...',
+        delete: 'Löschen',
+        cancel: 'Abbrechen',
+        edit: 'Bearbeiten'
+      },
+      posts: {
+        title: 'Nachrichten',
+        subtitle: 'Bleiben Sie auf dem Laufenden mit den neuesten Updates',
+        search: 'Nachrichten suchen...',
+        create: 'Beitrag erstellen',
+        createTitle: 'Neuen Beitrag erstellen',
+        form: {
+          title: 'Titel',
+          content: 'Inhalt',
+          image: 'Bild'
+        },
+        empty: 'Noch keine Nachrichten.',
+        created: 'Beitrag erfolgreich erstellt',
+        error: 'Fehler bei der Verarbeitung der Anfrage',
+        confirmDelete: 'Sind Sie sicher, dass Sie diesen Beitrag löschen möchten?',
+        deleted: 'Beitrag gelöscht',
+        pinned: 'Angeheftet',
+        unpinned: 'Nicht mehr angeheftet',
+        comments: 'Kommentare',
+        noComments: 'Noch keine Kommentare.',
+        writeComment: 'Schreibe einen Kommentar...'
+      },
+      teams: {
+        title: 'Teams',
+        subtitle: 'Entdecke und trete den besten Robotik-Teams bei',
+        create: 'Team erstellen',
+        createTitle: 'Neues Team erstellen',
+        form: {
+          name: 'Teamname',
+          description: 'Beschreibung',
+          website: 'Webseite',
+          country: 'Land'
+        },
+        searchPlaceholder: 'Teams suchen...',
+        searchButton: 'Suchen',
+        allCountries: 'Alle Länder',
+        members: 'Mitglieder',
+        manage: 'Mein Team verwalten',
+        requestJoin: 'Beitritt anfragen',
+        loginToJoin: 'Anmelden zum Beitreten',
+        noTeams: 'Keine Teams gefunden.',
+        feedback: {
+          created: 'Team erfolgreich erstellt',
+          createError: 'Team konnte nicht erstellt werden',
+          requestSent: 'Anfrage gesendet',
+          requestError: 'Anfrage konnte nicht gesendet werden'
+        }
+      },
       home: {
         hero: {
           tagline: 'Europäische Bildungsrobotik',
@@ -537,7 +954,22 @@ const resources = {
           teams: 'Teams',
           tbd: 'Noch offen',
           venueFallback: 'Multi-Standort'
-        }
+        },
+        noDescription: 'Keine Beschreibung verfügbar.',
+        viewDetails: 'Details anzeigen',
+        create: 'Wettbewerb erstellen',
+        createTitle: 'Neuer Wettbewerb',
+        form: {
+          title: 'Titel',
+          description: 'Beschreibung',
+          location: 'Ort',
+          startDate: 'Startdatum',
+          endDate: 'Enddatum',
+          maxTeams: 'Max. Teams'
+        },
+        loadError: 'Fehler beim Laden der Wettbewerbe.',
+        createError: 'Fehler beim Erstellen des Wettbewerbs',
+        noActive: 'Derzeit keine aktiven Wettbewerbe.'
       },
       contact: {
         hero: {
@@ -586,6 +1018,107 @@ const resources = {
       },
       general: {
         countriesLoading: 'Länder werden geladen…'
+      },
+      myTeam: {
+        title: "Mein Team",
+        createTitle: "Team erstellen",
+        createDesc: "Du gehörst keinem Team an. Erstelle ein neues, um zu beginnen.",
+        form: {
+          name: "Teamname",
+          city: "Stadt",
+          country: "Land (ID)",
+          institution: "Institution / Zentrum",
+          description: "Beschreibung",
+          website: "Webseite",
+          streamUrl: "Stream-URL (Twitch/YouTube)",
+          submitCreate: "Team erstellen",
+          submitSave: "Änderungen speichern",
+          saveUrl: "URL speichern"
+        },
+        tabs: {
+          overview: "Übersicht",
+          members: "Mitglieder",
+          competitions: "Wettbewerbe",
+          settings: "Einstellungen"
+        },
+        roles: {
+          owner: "Eigentümer",
+          member: "Mitglied"
+        },
+        actions: {
+          leave: "Team verlassen",
+          delete: "Team löschen",
+          removeMember: "Entfernen",
+          invite: "Einladen",
+          approve: "Genehmigen",
+          startStream: "LIVE starten",
+          register: "Anmeldung anfordern"
+        },
+        overview: {
+          about: "Über das Team",
+          noDesc: "Keine Beschreibung",
+          teamId: "Team-ID",
+          stats: "Statistiken",
+          membersCount: "Mitglieder",
+          compsCount: "Wettbewerbe"
+        },
+        members: {
+          title: "Teammitglieder",
+          desc: "Liste der Benutzer, die Teil dieses Teams sind.",
+          userPrefix: "Benutzer #",
+          noMembers: "Keine Mitglieder.",
+          inviteTitle: "Mitglieder einladen",
+          inviteDesc: "Benutzer suchen oder per E-Mail einladen.",
+          searchUser: "Benutzer suchen",
+          inviteEmail: "Per E-Mail einladen",
+          requestsTitle: "Zugangsanfragen",
+          requestsDesc: "Benutzer, die beitreten möchten.",
+          noRequests: "Keine ausstehenden Anfragen."
+        },
+        competitions: {
+          registerTitle: "Für Wettbewerb anmelden",
+          selectLabel: "Wettbewerb auswählen",
+          selectPlaceholder: "-- Auswählen --",
+          activeTitle: "Aktive Anmeldungen",
+          noRegistrations: "Keine Anmeldungen gefunden.",
+          compPrefix: "Wettbewerb #",
+          reason: "Grund:"
+        },
+        settings: {
+          editTitle: "Informationen bearbeiten",
+          editDesc: "Aktualisiere die öffentlichen Daten deines Teams.",
+          streamTitle: "Streaming-Konfiguration",
+          streamDesc: "Verwalte die Live-Übertragung deines Teams.",
+          streamStatus: "Sendestatus",
+          streamStatusDesc: "Starte die Übertragung, um live zu erscheinen.",
+          dangerZone: "Gefahrenzone",
+          deleteWarning: "Das Löschen des Teams löscht alle Daten, Mitglieder und zugehörigen Anmeldungen. Diese Aktion kann nicht rückgängig gemacht werden."
+        },
+        feedback: {
+          created: "Team erfolgreich erstellt",
+          createError: "Fehler beim Erstellen des Teams",
+          saved: "Änderungen gespeichert",
+          saveError: "Konnte nicht speichern",
+          invited: "Einladung an {{username}} gesendet",
+          inviteError: "Konnte nicht einladen",
+          emailInvited: "Einladung per E-Mail gesendet",
+          approved: "Anfrage genehmigt",
+          approveError: "Konnte nicht genehmigen",
+          confirmRemoveMember: "Dieses Mitglied entfernen?",
+          memberRemoved: "Mitglied entfernt",
+          removeMemberError: "Konnte Mitglied nicht entfernen",
+          confirmLeave: "Bist du sicher, dass du das Team verlassen möchtest?",
+          left: "Du hast das Team verlassen",
+          leaveError: "Konnte das Team nicht verlassen",
+          confirmDelete: "BIST DU SICHER? Diese Aktion kann nicht rückgängig gemacht werden.",
+          deleted: "Team gelöscht",
+          deleteError: "Konnte nicht löschen",
+          registrationSent: "Anmeldeanfrage gesendet",
+          registrationError: "Konnte Anfrage nicht senden",
+          streamUrlMissing: "Du musst zuerst eine Stream-URL speichern",
+          streamStarted: "Übertragung gestartet!",
+          streamError: "Fehler beim Starten des Streams"
+        }
       }
     }
   }

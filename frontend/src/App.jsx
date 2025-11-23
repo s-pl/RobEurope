@@ -3,6 +3,7 @@ import AppLayout from './components/layout/AppLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
 import Competitions from './pages/Competitions';
+import CompetitionDetail from './pages/CompetitionDetail';
 import Contact from './pages/Contact';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -11,11 +12,10 @@ import Register from './pages/Register';
 import Teams from './pages/Teams';
 import AcceptInvite from './pages/AcceptInvite';
 import MyTeam from './pages/MyTeam';
+import Posts from './pages/Posts';
 import Sponsors from './pages/Sponsors';
 import Streams from './pages/Streaming';
 import { Toaster } from './components/ui/toast';
-import Gallery from './pages/Gallery';
-import Feedback from './pages/Feedback';
 
 
 
@@ -34,14 +34,14 @@ function App() {
         <Route element={<AppLayout />}>
           <Route index element={<Home />} />
           <Route path="competitions" element={<Competitions />} />
+          <Route path="competitions/:id" element={<CompetitionDetail />} />
           <Route path="contact" element={<Contact />} />
           <Route path="teams" element={<Teams />} />
           <Route path="teams/accept" element={<ProtectedRoute><AcceptInvite /></ProtectedRoute>} />
           <Route path="my-team" element={<ProtectedRoute><MyTeam /></ProtectedRoute>} />
-          <Route path="sponsors" element={<ProtectedRoute><Sponsors /></ProtectedRoute>} />
-          <Route path="streams" element={<ProtectedRoute><Streams /></ProtectedRoute>} />
-          <Route path="/Feedback" element={<Feedback/>} />
-          <Route path="/Gallery" element={<Gallery/>} />
+          <Route path="posts" element={<Posts />} />
+          <Route path="sponsors" element={<Sponsors />} />
+          <Route path="streams" element={<Streams />} />
 
           <Route
             path="profile"

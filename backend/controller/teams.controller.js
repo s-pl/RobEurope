@@ -49,7 +49,7 @@ export const createTeam = async (req, res) => {
     res.status(201).json(team);
   } catch (err) {
     // Map common DB constraint errors to 400 for better client experience
-    if (err && err.name === 'SequelizeForeignKeyConstraintError') {
+    if (err && (err.name === 'SequelizeForeignKeyConstraintError' || err.name === 'SequelizeUniqueConstraintError')) {
       return res.status(400).json({ error: err.message });
     }
     res.status(500).json({ error: err.message });
@@ -294,14 +294,26 @@ export const registerTeamInCompetition = async (req, res) => {
   }
 };
 
-// Return the team owned by the current user
+// Return the team the current user belongs to (owner or member)
 export const getMyTeam = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'No autorizado' });
-    const team = await Team.findOne({ where: { created_by_user_id: userId } });
-    if (!team) return res.json(null);
-    return res.json(team);
+
+    // Find active membership
+    const membership = await TeamMembers.findOne({ 
+      where: { user_id: userId, left_at: null } 
+    });
+
+    if (!membership) {
+      // Fallback: check if they own a team (legacy/safety check)
+      const owned = await Team.findOne({ where: { created_by_user_id: userId } });
+      if (owned) return res.json(owned);
+      return res.json(null);
+    }
+
+    const team = await Team.findByPk(membership.team_id);
+    return res.json(team || null);
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

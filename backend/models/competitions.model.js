@@ -49,6 +49,11 @@ export default async function defineCompetitionsModel(sequelize, DataTypes) {
         type: DataTypes.STRING,
         allowNull: true
     },
+        is_active: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+    },
         stream_url: {
         type: DataTypes.JSON,
         allowNull: true

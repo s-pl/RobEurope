@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../hooks/useAuth';
 import { useSponsors } from '../hooks/useSponsors';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -11,6 +12,8 @@ import { Plus, Edit, Trash2, ExternalLink } from 'lucide-react';
 
 const Sponsors = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
   const { list, create, update, remove } = useSponsors();
   const [sponsors, setSponsors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -101,10 +104,12 @@ const Sponsors = () => {
           <h1 className="text-3xl font-bold text-blue-900">Sponsors</h1>
           <p className="text-blue-600 mt-1">Gestiona los sponsors del evento</p>
         </div>
-        <Button onClick={openCreateDialog} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Nuevo Sponsor
-        </Button>
+        {isAdmin && (
+          <Button onClick={openCreateDialog} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Nuevo Sponsor
+          </Button>
+        )}
       </div>
 
       {error && (
@@ -124,24 +129,26 @@ const Sponsors = () => {
                     ID: {sponsor.id}
                   </CardDescription>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(sponsor)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(sponsor.id)}
-                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                {isAdmin && (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(sponsor)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(sponsor.id)}
+                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -189,10 +196,12 @@ const Sponsors = () => {
           </div>
           <h3 className="text-lg font-medium text-blue-900 mb-2">No hay sponsors</h3>
           <p className="text-blue-600 mb-4">Comienza añadiendo tu primer sponsor</p>
-          <Button onClick={openCreateDialog}>
-            <Plus className="h-4 w-4 mr-2" />
-            Añadir Sponsor
-          </Button>
+          {isAdmin && (
+            <Button onClick={openCreateDialog}>
+              <Plus className="h-4 w-4 mr-2" />
+              Añadir Sponsor
+            </Button>
+          )}
         </div>
       )}
 

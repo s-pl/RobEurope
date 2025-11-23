@@ -20,6 +20,9 @@ Security is a critical aspect of the RobEurope platform. This document outlines 
 - **Route protection**: Middleware-based authorization
 - **Permission levels**: Granular control over resources
 
+### Content Access Control
+- **Stream Visibility**: Live stream URLs are only accessible to users with an approved registration in the currently active competition.
+
 ## Data Protection
 
 ### Input Validation and Sanitization

@@ -215,40 +215,97 @@ Get all competitions.
 
 **Response:**
 ```json
-{
-  "competitions": [
-    {
+[
+  {
+    "id": 1,
+    "title": "string",
+    "slug": "string",
+    "description": "string",
+    "is_active": true,
+    "country": {
       "id": 1,
-      "title": "string",
-      "slug": "string",
-      "description": "string",
-      "country": {
-        "id": 1,
-        "name": "string",
-        "code": "string"
-      },
-      "registration_start": "datetime",
-      "registration_end": "datetime",
-      "start_date": "datetime",
-      "end_date": "datetime",
-      "rules_url": "string",
-      "stream_url": {}
-    }
-  ]
-}
+      "name": "string",
+      "code": "string"
+    },
+    "registration_start": "datetime",
+    "registration_end": "datetime",
+    "start_date": "datetime",
+    "end_date": "datetime",
+    "rules_url": "string",
+    "stream_url": {}
+  }
+]
 ```
 
 ### POST /competitions
 Create competition (admin only).
 
+**Request Body:**
+```json
+{
+  "title": "string (required)",
+  "slug": "string (optional, auto-generated from title)",
+  "description": "string",
+  "is_active": "boolean (optional, defaults to false. If true, deactivates others)",
+  "start_date": "date",
+  "end_date": "date"
+}
+```
+
 ### GET /competitions/:id
 Get competition details.
+
+**Note:** If the user is not an approved participant (via Team Registration), sensitive fields like `stream_url` will be hidden.
+
+**Response:**
+```json
+{
+  "id": 1,
+  "title": "string",
+  "is_active": true,
+  "is_approved": true,
+  "stream_url": "string (hidden if !is_approved)",
+  ...
+}
+```
 
 ### PUT /competitions/:id
 Update competition (admin only).
 
+**Request Body:**
+```json
+{
+  "title": "string",
+  "is_active": "boolean (setting to true deactivates others)",
+  ...
+}
+```
+
 ### DELETE /competitions/:id
 Delete competition (admin only).
+
+## Stream Management
+
+### GET /streams
+Get streams.
+
+**Query Parameters:**
+- `competition_id`: number (optional)
+- `status`: string (optional)
+
+**Note:** If `competition_id` is provided, the API checks if the user is an approved participant. If not, it returns an empty list or filtered results.
+
+### POST /streams
+Create a stream (admin only).
+
+### GET /streams/:id
+Get stream details.
+
+### PUT /streams/:id
+Update stream (admin only).
+
+### DELETE /streams/:id
+Delete stream (admin only).
 
 ## Registration Management
 

@@ -9,6 +9,9 @@ import * as createMediaTable from '../migrations/20251117-create-media-table.js'
 import * as createStreamsTable from '../migrations/20251117-create-streams-table.js';
 import * as addStreamUrlToTeams from '../migrations/20251122-add-stream-url-to-teams.js';
 import * as enhanceModels from '../migrations/20251122-enhance-models.js';
+import * as addPostFeatures from '../migrations/20251122-add-post-features.js';
+import * as fixTeamMembersConstraint from '../migrations/20251122-fix-team-members-constraint.js';
+import * as addIsActiveToCompetitions from '../migrations/20251123-add-is-active-to-competitions.js';
 
 async function run() {
   try {
@@ -103,6 +106,30 @@ async function run() {
       console.log('Enhanced models (Competitions, Teams, Users)');
     } catch (e) {
       console.log('Skipping enhanceModels (probably already exists):', e.message);
+    }
+
+    // Add post features (is_pinned, PostLike, Comment)
+    try {
+      await addPostFeatures.up(qi, Sequelize);
+      console.log('Added post features (is_pinned, PostLike, Comment)');
+    } catch (e) {
+      console.log('Skipping addPostFeatures (probably already exists):', e.message);
+    }
+
+    // Fix TeamMembers constraint
+    try {
+      await fixTeamMembersConstraint.up(qi, Sequelize);
+      console.log('Fixed TeamMembers constraint');
+    } catch (e) {
+      console.log('Skipping fixTeamMembersConstraint:', e.message);
+    }
+
+    // Add is_active to Competitions
+    try {
+      await addIsActiveToCompetitions.up(qi, Sequelize);
+      console.log('Added is_active to Competitions');
+    } catch (e) {
+      console.log('Skipping addIsActiveToCompetitions:', e.message);
     }
 
     console.log('Migrations applied successfully');

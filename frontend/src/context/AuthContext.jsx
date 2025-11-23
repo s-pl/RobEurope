@@ -3,26 +3,16 @@ import { apiRequest } from '../lib/apiClient';
 
 const AuthContext = createContext(null);
 
-const TOKEN_KEY = 'robeurope_token';
 const USER_KEY = 'robeurope_user';
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY));
   const [user, setUser] = useState(() => {
     const cached = localStorage.getItem(USER_KEY);
     return cached ? JSON.parse(cached) : null;
   });
   const [loading, setLoading] = useState(true);
 
-  const persistSession = (nextToken, nextUser) => {
-    if (nextToken) {
-      localStorage.setItem(TOKEN_KEY, nextToken);
-      setToken(nextToken);
-    } else {
-      localStorage.removeItem(TOKEN_KEY);
-      setToken(null);
-    }
-
+  const persistSession = (nextUser) => {
     if (nextUser) {
       localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
       setUser(nextUser);
@@ -32,29 +22,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = useCallback(() => {
-    persistSession(null, null);
+  const logout = useCallback(async () => {
+    try {
+      await apiRequest('/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('Logout failed', e);
+    }
+    persistSession(null);
   }, []);
 
   const refreshProfile = useCallback(async () => {
-    if (!token) {
-      setUser(null);
-      setLoading(false);
-      return null;
-    }
-
     try {
-      const profile = await apiRequest('/users/me', { token });
-      persistSession(token, profile);
+      const profile = await apiRequest('/users/me');
+      persistSession(profile);
       return profile;
     } catch (error) {
-      console.error('Failed to refresh profile', error);
-      logout();
+      persistSession(null);
       return null;
     } finally {
       setLoading(false);
     }
-  }, [token, logout]);
+  }, []);
 
   useEffect(() => {
     refreshProfile();
@@ -66,7 +54,7 @@ export const AuthProvider = ({ children }) => {
       body: { email, password }
     });
 
-    persistSession(data.token, data.user);
+    persistSession(data.user);
     return data.user;
   }, []);
 
@@ -76,42 +64,37 @@ export const AuthProvider = ({ children }) => {
       body: payload
     });
 
-    persistSession(data.token, data.user);
+    persistSession(data.user);
     return data.user;
   }, []);
 
   const updateProfile = useCallback(async (updates) => {
-    if (!token) throw new Error('Not authenticated');
     const updatedUser = await apiRequest('/users/me', {
       method: 'PATCH',
-      body: updates,
-      token
+      body: updates
     });
-    persistSession(token, updatedUser);
+    persistSession(updatedUser);
     return updatedUser;
-  }, [token]);
+  }, []);
 
   const uploadProfilePhoto = useCallback(async (file) => {
-    if (!token) throw new Error('Not authenticated');
     const formData = new FormData();
     formData.append('profile_photo', file);
 
     const updatedUser = await apiRequest('/users/me', {
       method: 'PATCH',
       body: formData,
-      token,
       formData: true
     });
 
-    persistSession(token, updatedUser);
+    persistSession(updatedUser);
     return updatedUser;
-  }, [token]);
+  }, []);
 
   const value = useMemo(
     () => ({
       user,
-      token,
-      isAuthenticated: Boolean(token),
+      isAuthenticated: Boolean(user),
       loading,
       login,
       register,
@@ -120,7 +103,7 @@ export const AuthProvider = ({ children }) => {
       updateProfile,
       uploadProfilePhoto
     }),
-    [user, token, loading, login, register, logout, refreshProfile, updateProfile, uploadProfilePhoto]
+    [user, loading, login, register, logout, refreshProfile, updateProfile, uploadProfilePhoto]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

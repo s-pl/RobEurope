@@ -1,7 +1,7 @@
 import db from '../models/index.js';
 import bcrypt from 'bcryptjs';
 import { Sequelize } from 'sequelize';
-const { User, Competition, Post, Registration, SystemLog } = db;
+const { User, Competition, Post, Registration, SystemLog, Team } = db;
 
 // Helper reused (similar logic as auth.controller) to support base64 obfuscated inputs
 function isBase64(str) {
@@ -326,6 +326,49 @@ export async function updateUser(req, res) {
     });
 
     res.redirect('/admin/users');
+  } catch (error) {
+    res.status(500).render('error', { status: 500, message: error.message });
+  }
+}
+
+export async function listRegistrations(req, res) {
+  try {
+    const registrations = await Registration.findAll({
+      include: [
+        { model: Team, attributes: ['name'] },
+        { model: Competition, attributes: ['title'] }
+      ],
+      order: [['registration_date', 'DESC']]
+    });
+    res.render('registrations', { title: 'Registrations', registrations });
+  } catch (error) {
+    res.status(500).render('error', { status: 500, message: error.message });
+  }
+}
+
+export async function updateRegistrationStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { status, reason } = req.body;
+
+    const registration = await Registration.findByPk(id);
+    if (!registration) {
+      return res.status(404).send('Registration not found');
+    }
+
+    await registration.update({ status, decision_reason: reason });
+
+    // Log action
+    await SystemLog.create({
+      action: 'UPDATE',
+      entity_type: 'Registration',
+      entity_id: registration.id,
+      user_id: req.session.user.id,
+      ip_address: req.ip,
+      details: `Updated registration ${id} status to ${status}`
+    });
+
+    res.redirect('/admin/registrations');
   } catch (error) {
     res.status(500).render('error', { status: 500, message: error.message });
   }

@@ -4,7 +4,12 @@ import { useCallback } from 'react';
 export const useTeams = () => {
   const api = useApi();
 
-  const list = useCallback((q = '') => api(`/teams${q ? `?q=${encodeURIComponent(q)}` : ''}`), [api]);
+  const list = useCallback((q = '', country_id = '') => {
+    const params = new URLSearchParams();
+    if (q) params.append('q', q);
+    if (country_id) params.append('country_id', country_id);
+    return api(`/teams?${params.toString()}`);
+  }, [api]);
   const create = useCallback((payload) => api('/teams', { method: 'POST', body: payload }), [api]);
   const invite = useCallback((teamId, payload) => api(`/teams/${teamId}/invite`, { method: 'POST', body: payload }), [api]);
   const acceptInvite = useCallback((token) => api('/teams/invitations/accept', { method: 'POST', body: { token } }), [api]);

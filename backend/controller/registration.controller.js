@@ -4,7 +4,12 @@ import { Op } from 'sequelize';
 
 export const createRegistration = async (req, res) => {
   try {
-    const item = await Registration.create(req.body);
+    const payload = {
+      ...req.body,
+      registration_date: new Date(),
+      status: 'pending' // Ensure status is pending for new registrations
+    };
+    const item = await Registration.create(payload);
     res.status(201).json(item);
   } catch (err) {
     res.status(500).json({ error: err.message });

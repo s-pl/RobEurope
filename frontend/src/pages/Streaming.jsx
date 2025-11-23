@@ -61,9 +61,9 @@ const Streams = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-blue-900">{stream.title}</CardTitle>
-                  <CardDescription className="mt-2">
+                  <div className="mt-2">
                     {getStatusBadge(stream.status)}
-                  </CardDescription>
+                  </div>
                 </div>
               </div>
             </CardHeader>

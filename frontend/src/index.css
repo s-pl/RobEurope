@@ -9,7 +9,7 @@
 }
 
 body {
-  @apply min-h-screen bg-neutral-50 text-slate-900 antialiased;
+  @apply min-h-screen bg-neutral-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-50;
   font-family: var(--font-display);
 }
 

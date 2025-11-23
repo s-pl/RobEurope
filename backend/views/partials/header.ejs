@@ -373,6 +373,9 @@
         <a href="/admin/competitions" class="nav-item <%= title === 'Competiciones' ? 'active' : '' %>">
           🏆 Competiciones
         </a>
+        <a href="/admin/registrations" class="nav-item <%= title === 'Registrations' ? 'active' : '' %>">
+          📝 Solicitudes
+        </a>
         <a href="/admin/teams" class="nav-item <%= title === 'Equipos' ? 'active' : '' %>">
           🛡️ Equipos
         </a>
@@ -393,11 +396,11 @@
       <div class="sidebar-footer">
         <div class="user-info">
           <div class="user-avatar">
-            <%= currentUser.username.charAt(0).toUpperCase() %>
+            <%= (currentUser && currentUser.username) ? currentUser.username.charAt(0).toUpperCase() : 'A' %>
           </div>
           <div style="flex: 1; overflow: hidden;">
             <div style="font-weight: bold; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-              <%= currentUser.username %>
+              <%= (currentUser && currentUser.username) ? currentUser.username : 'Admin' %>
             </div>
             <a href="/admin/logout" style="color: var(--text-muted); font-size: 0.8rem; text-decoration: none;">
               Cerrar Sesión

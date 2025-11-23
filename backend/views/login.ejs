@@ -1,17 +1,22 @@
-<% const content = (function(){ %>
-<h2>Admin Login</h2>
-<form method="post" action="/admin/login" style="max-width:420px;" class="contrast">
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-  <label>Email
-    <input type="email" name="email" required />
-  </label>
-  <label>Password
-    <input type="password" name="password" required />
-  </label>
-  <button type="submit">Login</button>
-  <% if (typeof error !== 'undefined' && error) { %>
-    <p style="color:#c33"><strong><%= error %></strong></p>
-  <% } %>
-</form>
-<% })(); %>
-<%- include('partials/layout', { body: content, title }) %>
+<%- include('partials/header') %>
+
+<article style="width:100%; max-width:480px;">
+  <header><strong>Admin Login</strong></header>
+  <form method="post" action="/admin/login">
+    <% if (typeof csrfToken !== 'undefined') { %>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <% } %>
+    <label>Email
+      <input type="email" name="email" required />
+    </label>
+    <label>Password
+      <input type="password" name="password" required />
+    </label>
+    <button type="submit">Login</button>
+    <% if (typeof error !== 'undefined' && error) { %>
+      <p style="color:#ef4444; margin-top:1rem;"><strong><%= error %></strong></p>
+    <% } %>
+  </form>
+</article>
+
+<%- include('partials/footer') %>

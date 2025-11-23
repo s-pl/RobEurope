@@ -8,8 +8,8 @@ const router = express.Router();
 
 router.get('/', getStreams);
 router.get('/:id', getStreamById);
-router.post('/', authenticateToken, requireRole('admin'), createStream);
-router.put('/:id', authenticateToken, requireRole('admin'), updateStream);
+router.post('/', authenticateToken, createStream);
+router.put('/:id', authenticateToken, updateStream);
 router.delete('/:id', authenticateToken, requireRole('admin'), deleteStream);
 
 export default router;

@@ -1,5 +1,5 @@
 import db from '../models/index.js';
-const { Stream } = db;
+const { Stream, Registration, TeamMembers } = db;
 import { Op } from 'sequelize';
 
 export const createStream = async (req, res) => {
@@ -14,10 +14,38 @@ export const createStream = async (req, res) => {
 
 export const getStreams = async (req, res) => {
   try {
-    const { q, limit = 50, offset = 0, status } = req.query;
+    const { q, limit = 50, offset = 0, status, competition_id } = req.query;
     const where = {};
     if (q) where.title = { [Op.like]: `%${q}%` };
     if (status) where.status = status;
+    if (competition_id) where.competition_id = competition_id;
+
+    // If filtering by competition, check access
+    if (competition_id && req.user) {
+      const userTeams = await TeamMembers.findAll({ where: { user_id: req.user.id, left_at: null } });
+      const teamIds = userTeams.map(tm => tm.team_id);
+      
+      let isApproved = false;
+      if (teamIds.length > 0) {
+        const registration = await Registration.findOne({
+          where: {
+            competition_id,
+            team_id: { [Op.in]: teamIds },
+            status: 'approved'
+          }
+        });
+        if (registration) isApproved = true;
+      }
+
+      if (!isApproved) {
+        // If not approved, only return streams that are NOT associated with this competition (or handle as forbidden)
+        // But usually, if asking for competition streams, we should return empty or error.
+        // However, if the user is just browsing "all streams", we might want to hide private ones.
+        // For now, if competition_id is explicitly requested and user is not approved, return empty.
+        return res.json([]);
+      }
+    }
+
     const items = await Stream.findAll({
       where,
       limit: Number(limit),

@@ -24,7 +24,7 @@ export const useStreams = () => {
     try {
       const newStream = await api('/streams', {
         method: 'POST',
-        body: JSON.stringify(streamData),
+        body: streamData,
       });
       setStreams(prev => [...prev, newStream]);
       return newStream;
@@ -38,7 +38,7 @@ export const useStreams = () => {
     try {
       const updatedStream = await api(`/streams/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(streamData),
+        body: streamData,
       });
       setStreams(prev => prev.map(stream =>
         stream.id === id ? updatedStream : stream

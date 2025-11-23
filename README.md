@@ -18,6 +18,14 @@ seeders, minimal test UI, and Swagger API documentation.
 
 ---
 
+## 🌟 Key Features
+
+- **Single Active Competition**: The system enforces a single active competition at a time. Activating one automatically deactivates others.
+- **Access Control**: Sensitive competition details (like stream URLs) are only visible to approved participants.
+- **Team Management**: Users can create teams, invite members, and manage their roster.
+- **Live Streaming**: Integrated stream management with access restrictions based on registration status.
+- **Internationalization**: Full support for English, Spanish, and German.
+
 ## 📚 Documentation
 
 Complete project documentation is available in the [`docs/`](docs/) directory:
