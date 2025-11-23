@@ -191,12 +191,47 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay */}
       {isOpen && (
-        <div className="lg:hidden border-t border-blue-100 bg-white px-4 py-4 shadow-lg dark:bg-slate-950 dark:border-slate-800">
-          <nav className="flex flex-col gap-2">
+        <div className="fixed inset-0 z-50 bg-white dark:bg-slate-950 lg:hidden flex flex-col animate-in slide-in-from-left-full duration-200">
+          <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white text-blue-700 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-800 dark:text-blue-400">
+                <Bot className="h-6 w-6" />
+              </span>
+              <span className="font-bold text-xl text-slate-900 dark:text-white">RobEurope</span>
+            </div>
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+              <X className="h-6 w-6" />
+            </Button>
+          </div>
+          <nav className="flex-1 overflow-y-auto p-6 flex flex-col gap-2">
             <NavItems mobile />
           </nav>
+          <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+             <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Language</span>
+                <div className="flex gap-2">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => i18n.changeLanguage(lang.code)}
+                      className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                        i18n.language === lang.code
+                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                          : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+             </div>
+             <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Theme</span>
+                <ThemeToggle />
+             </div>
+          </div>
         </div>
       )}
     </header>

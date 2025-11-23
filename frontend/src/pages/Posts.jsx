@@ -88,7 +88,10 @@ const Posts = () => {
   };
 
   const handleLike = async (post) => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+        toast({ title: t('auth.required') || 'Login required', description: t('auth.loginToInteract') || 'Please login to interact', variant: 'default' });
+        return;
+    }
     try {
       const res = await api(`/posts/${post.id}/like`, { method: 'POST' });
       setPosts(posts.map(p => {
