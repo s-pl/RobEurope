@@ -124,6 +124,33 @@ const Navbar = () => {
               
               <nav className="flex-1 overflow-y-auto p-6 flex flex-col gap-2">
                 <NavItems mobile />
+                {!isAuthenticated && (
+                  <div className="flex flex-col gap-2 mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
+                    <Link to="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start text-blue-600 dark:text-blue-400">
+                        {t('nav.login')}
+                      </Button>
+                    </Link>
+                    <Link to="/register" onClick={() => setIsOpen(false)}>
+                      <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                        {t('nav.register')}
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+                {isAuthenticated && (
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 mt-2"
+                    onClick={() => {
+                      logout();
+                      setIsOpen(false);
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    {t('nav.logout')}
+                  </Button>
+                )}
               </nav>
 
               <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 mt-auto">
@@ -157,7 +184,7 @@ const Navbar = () => {
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white text-blue-700 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-800 dark:text-blue-400">
               <Bot className="h-5 w-5" />
             </span>
-            <span className="hidden sm:inline">RobEurope</span>
+            <span>RobEurope</span>
           </Link>
         </div>
 
@@ -166,7 +193,7 @@ const Navbar = () => {
           <NavItems />
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
