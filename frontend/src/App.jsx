@@ -34,7 +34,7 @@ function App() {
         <Route element={<AppLayout />}>
           <Route index element={<Home />} />
           <Route path="competitions" element={<Competitions />} />
-          <Route path="contact" element={<Contact />} />
+          <Route path="/Contact" element={<Contact />} />
           <Route path="teams" element={<Teams />} />
           <Route path="teams/accept" element={<ProtectedRoute><AcceptInvite /></ProtectedRoute>} />
           <Route path="my-team" element={<ProtectedRoute><MyTeam /></ProtectedRoute>} />
