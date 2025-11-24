@@ -29,7 +29,7 @@ const Feedback = () => {
                                     class="h-[58px] w-[58px] rounded-full object-cover" />
                                 <div class="flex flex-col gap-1 w-full">
                                     <div class="flex justify-between items-center">
-                                        <h5 class="text-xl font-semibold text-blue-gray-900">Samuel Ponce</h5>
+                                        <h5 class="text-xl font-semibold text-blue-gray-900">Samuelillo Ponce</h5>
                                         <div class="flex gap-1">
                                             {[...Array(5)].map((_, i) => (
                                                 <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
