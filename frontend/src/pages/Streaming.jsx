@@ -17,14 +17,14 @@ const Streams = () => {
     };
 
     const labels = {
-      live: 'En vivo',
-      offline: 'Offline',
-      scheduled: 'Programado',
+      live: t('streaming.status.live'),
+      offline: t('streaming.status.offline'),
+      scheduled: t('streaming.status.scheduled'),
     };
 
     return (
       <Badge variant="outline" className={variants[status] || variants.offline}>
-        {labels[status] || 'Offline'}
+        {labels[status] || t('streaming.status.offline')}
       </Badge>
     );
   };
@@ -32,7 +32,8 @@ const Streams = () => {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Cargando streams...</div>
+        <div className="text-center">{t('streaming.loadingStreams')}
+</div>
       </div>
     );
   }
@@ -40,7 +41,7 @@ const Streams = () => {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-red-600">Error: {error}</div>
+        <div className="text-center text-red-600">{t('streaming.error')} {error}</div>
       </div>
     );
   }
@@ -49,8 +50,8 @@ const Streams = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-blue-900">Streams</h1>
-          <p className="text-gray-600 mt-2">Visualiza todos los streams de las competiciones</p>
+          <h1 className="text-3xl font-bold text-blue-900">{t('streaming.streams')}</h1>
+          <p className="text-gray-600 mt-2">{t('streaming.streamsSubtitle')}</p>
         </div>
       </div>
 
@@ -74,11 +75,11 @@ const Streams = () => {
 
               <div className="mb-4">
                 <p className="text-sm font-medium text-gray-700">
-                  <span className="font-semibold">Equipo:</span> {stream.team?.name || 'N/A'}
+                  <span className="font-semibold">{t('streaming.team')}</span> {stream.team?.name || 'N/A'}
                 </p>
                 {stream.competition && (
                   <p className="text-sm font-medium text-gray-700">
-                    <span className="font-semibold">Competición:</span> {stream.competition.title}
+                    <span className="font-semibold">{t('streaming.competition')}</span> {stream.competition.title}
                   </p>
                 )}
               </div>
@@ -92,13 +93,13 @@ const Streams = () => {
                     className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
                   >
                     <Eye className="w-4 h-4" />
-                    Ver Stream
+                    {t('streaming.viewStream')}
                   </a>
                 </div>
               )}
 
               <div className="text-sm text-gray-500">
-                <p>Creado: {new Date(stream.created_at).toLocaleDateString()}</p>
+                <p>{t('streaming.created')} {new Date(stream.created_at).toLocaleDateString()}</p>
               </div>
             </CardContent>
           </Card>
@@ -107,7 +108,7 @@ const Streams = () => {
 
       {streams.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No hay streams disponibles.</p>
+          <p className="text-gray-500">{t('streaming.noStreams')}</p>
         </div>
       )}
     </div>

@@ -114,6 +114,22 @@ const resources = {
         "createBtn": "Crear Sponsor",
         "id": "ID"
       },
+      streaming: {
+        "streams": "Streams",
+        "streamsSubtitle": "Visualiza todos los streams de las competiciones",
+        "loadingStreams": "Cargando streams...",
+        "error": "Error",
+        "status": {
+          "live": "En vivo",
+          "offline": "Offline",
+          "scheduled": "Programado"
+        },
+        "team": "Equipo",
+        "competition": "Competición",
+        "viewStream": "Ver Stream",
+        "created": "Creado",
+        "noStreams": "No hay streams disponibles."
+      },
       forms: {
         firstName: 'Nombre',
         lastName: 'Apellidos',
@@ -504,6 +520,22 @@ const resources = {
         "createBtn": "Create Sponsor",
         "id": "ID"
       },
+      streaming: {
+        "streams": "Streams",
+        "streamsSubtitle": "View all competition streams",
+        "loadingStreams": "Loading streams...",
+        "error": "Error",
+        "status": {
+          "live": "Live",
+          "offline": "Offline",
+          "scheduled": "Scheduled"
+        },
+        "team": "Team",
+        "competition": "Competition",
+        "viewStream": "Watch Stream",
+        "created": "Created",
+        "noStreams": "No streams available."
+      },
       forms: {
         firstName: 'First name',
         lastName: 'Last name',
@@ -892,6 +924,22 @@ const resources = {
         "update": "Aktualisieren",
         "createBtn": "Sponsor erstellen",
         "id": "ID"
+      },
+      streaming: {
+        "streams": "Streams",
+        "streamsSubtitle": "Alle Streams der Wettbewerbe ansehen",
+        "loadingStreams": "Streams werden geladen...",
+        "error": "Fehler",
+        "status": {
+          "live": "Live",
+          "offline": "Offline",
+          "scheduled": "Geplant"
+        },
+        "team": "Team",
+        "competition": "Wettbewerb",
+        "viewStream": "Stream ansehen",
+        "created": "Erstellt",
+        "noStreams": "Keine Streams verfügbar."
       },
       forms: {
         firstName: 'Vorname',
