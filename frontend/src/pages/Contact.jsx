@@ -32,12 +32,12 @@ const Contact = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <Card className="border-slate-200 bg-white shadow-sm rounded-2xl">
+        <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm rounded-2xl">
           <CardHeader>
             <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
               {t("contact.hero.tagline")}
             </p>
-            <CardTitle className="text-4xl font-bold text-slate-900">
+            <CardTitle className="text-4xl font-bold text-slate-900 dark:text-slate-100">
               {t("contact.hero.title")}
             </CardTitle>
             <CardDescription className="text-slate-600 text-sm">
@@ -55,11 +55,11 @@ const Contact = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
           >
-            <Card className="border-slate-200 bg-white shadow-sm p-4 rounded-2xl hover:shadow-md transition">
+            <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm p-4 rounded-2xl hover:shadow-md transition">
               <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400">
                 {channel.note}
               </p>
-              <h3 className="mt-2 text-xl font-semibold text-slate-900">
+              <h3 className="mt-2 text-xl font-semibold text-slate-900 dark:text-slate-100">
                 {channel.title}
               </h3>
               <p className="text-sm text-slate-600">{channel.detail}</p>
@@ -68,20 +68,20 @@ const Contact = () => {
         ))}
       </section>
 
-      <Card className="border-slate-200 bg-white shadow-sm rounded-2xl p-6">
+      <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm rounded-2xl p-6">
         <div className="flex flex-col gap-6 md:flex-row md:items-start">
           <motion.span
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.3 }}
-            className="flex h-16 w-16 items-center justify-center rounded-3xl border border-slate-200 bg-slate-50 text-slate-900"
+            className="flex h-16 w-16 items-center justify-center rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100"
           >
             {submitted ? <Users className="h-7 w-7" /> : <Mail className="h-7 w-7" />}
           </motion.span>
 
           <div className="flex-1 space-y-4">
             <div>
-              <h2 className="text-3xl font-semibold text-slate-900">
+              <h2 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
                 {t("contact.form.title")}
               </h2>
               <p className="text-sm text-slate-500">

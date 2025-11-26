@@ -11,9 +11,9 @@ const Streams = () => {
 
   const getStatusBadge = (status) => {
     const variants = {
-      live: 'bg-red-100 text-red-800 border-red-200',
-      offline: 'bg-gray-100 text-gray-800 border-gray-200',
-      scheduled: 'bg-blue-100 text-blue-800 border-blue-200',
+      live: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800',
+      offline: 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700',
+      scheduled: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800',
     };
 
     const labels = {

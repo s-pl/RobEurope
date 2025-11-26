@@ -179,8 +179,8 @@ const Profile = () => {
             <CardContent className="space-y-4">
               {userTeams.length > 0 ? (
                 userTeams.map(member => (
-                  <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
-                    <div className="h-10 w-10 rounded bg-white border border-slate-200 flex items-center justify-center overflow-hidden">
+                  <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                    <div className="h-10 w-10 rounded bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-center overflow-hidden">
                       {member.team?.logo_url ? (
                         <img src={resolveMediaUrl(member.team.logo_url)} alt={member.team.name} className="h-full w-full object-cover" />
                       ) : (
@@ -188,7 +188,7 @@ const Profile = () => {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-900 truncate">{member.team?.name || 'Team'}</p>
+                      <p className="font-medium text-slate-900 dark:text-slate-100 truncate">{member.team?.name || 'Team'}</p>
                       <p className="text-xs text-slate-500 capitalize">{member.role}</p>
                     </div>
                     <Button variant="ghost" size="icon" asChild>

@@ -249,7 +249,7 @@ const Competitions = () => {
         ))}
         
         {!loading && competitions.length === 0 && (
-          <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+          <div className="text-center py-12 text-slate-500 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
             {t('competitions.noActive')}
           </div>
         )}

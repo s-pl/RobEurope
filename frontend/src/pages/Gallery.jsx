@@ -26,7 +26,7 @@ const Gallery = () => {
                         {[...Array(8)].map((_, i) => (
                             <div 
                                 key={i} 
-                                className="w-44 h-44 bg-white rounded-xl shadow-md border border-slate-200 hover:scale-105 transition-all duration-300"
+                                className="w-44 h-44 bg-white dark:bg-slate-950 rounded-xl shadow-md border border-slate-200 dark:border-slate-800 hover:scale-105 transition-all duration-300"
                             />
                         ))}
                     </div>
@@ -54,7 +54,7 @@ const Gallery = () => {
                             {[...Array(8)].map((_, i) => (
                                 <div 
                                     key={i} 
-                                    className="w-44 h-44 bg-white rounded-xl shadow-md border border-slate-200 hover:scale-105 transition-all duration-300"
+                                    className="w-44 h-44 bg-white dark:bg-slate-950 rounded-xl shadow-md border border-slate-200 dark:border-slate-800 hover:scale-105 transition-all duration-300"
                                 />
                             ))}
                         </div>
