@@ -17,6 +17,8 @@ import Sponsors from './pages/Sponsors';
 import Streams from './pages/Streaming';
 import { Toaster } from './components/ui/toast';
 import Terms from './pages/Terms';
+import Gallery from './pages/Gallery';
+import Feedback from './pages/Feedback';
 
 
 
@@ -45,6 +47,9 @@ function App() {
           <Route path="sponsors" element={<Sponsors />} />
           <Route path="streams" element={<Streams />} />
           <Route path="terms" element={<Terms />} />
+          <Route path="gallery" element={<Gallery />} />
+          <Route path="feedback" element={<Feedback />} />
+
 
           <Route
             path="profile"
