@@ -36,9 +36,9 @@ const Footer = () => {
                         <h2 className="font-semibold text-gray-900 dark:text-slate-50 mb-5">{t("footer.projects")}
                         </h2>
                         <ul className="text-sm text-gray-500 dark:text-slate-400 space-y-2 list-none">
-                            <li><a href="#">{t("footer.competitions")}</a></li>
-                            <li><a href="#">{t("footer.teams")}</a></li>
-                            <li><a href="#">{t("footer.streaming")}</a></li>
+                            <li><a href="/competitions">{t("footer.competitions")}</a></li>
+                            <li><a href="/teams">{t("footer.teams")}</a></li>
+                            <li><a href="/streaming">{t("footer.streaming")}</a></li>
                         </ul>
                     </div>
                     <div>
@@ -51,7 +51,7 @@ const Footer = () => {
                         <h2 className="font-semibold text-gray-900 dark:text-slate-50 mb-5">{t("footer.company")}</h2>
                         <div className="text-sm text-gray-500 dark:text-slate-400 space-y-2 list-none">
                             <li><a href="#">{t("footer.about")}</a></li>
-                            <li><a href="#">{t("footer.contact")}</a></li>
+                            <li><a href="/contact">{t("footer.contact")}</a></li>
                             <li><Link to="/terms">{t("footer.terms")}</Link></li>
                         </div>
                     </div>
