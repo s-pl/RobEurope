@@ -112,9 +112,7 @@ const NotificationsBell = () => {
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       {item.message}
                     </p>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500">
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </p>
+                    
                   </div>
                   {!item.is_read && (
                     <div className="h-2 w-2 rounded-full bg-blue-500" />
