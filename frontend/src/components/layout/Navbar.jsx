@@ -19,6 +19,7 @@ const navLinks = [
   { to: '/sponsors', key: 'nav.sponsors' },
   { to: '/streams', key: 'nav.streams' },
   { to: '/contact', key: 'nav.contact' }
+
 ];
 
 const languages = [

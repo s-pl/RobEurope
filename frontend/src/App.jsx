@@ -16,6 +16,8 @@ import Posts from './pages/Posts';
 import Sponsors from './pages/Sponsors';
 import Streams from './pages/Streaming';
 import { Toaster } from './components/ui/toast';
+import Terms from './pages/Terms';
+
 
 
 
@@ -42,6 +44,7 @@ function App() {
           <Route path="posts" element={<Posts />} />
           <Route path="sponsors" element={<Sponsors />} />
           <Route path="streams" element={<Streams />} />
+          <Route path="terms" element={<Terms />} />
 
           <Route
             path="profile"
