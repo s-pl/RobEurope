@@ -12,8 +12,10 @@ import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
 import { 
   Users, Settings, Trophy, Info, Plus, 
-  LogOut, Trash2, Check, X, Video, UserPlus 
+  LogOut, Trash2, Check, X, Video, UserPlus, MessageCircle 
 } from 'lucide-react';
+import TeamChat from '../components/teams/TeamChat';
+import { resolveMediaUrl } from '../lib/apiClient';
 
 const debounce = (fn, ms = 300) => {
   let t;
@@ -28,7 +30,7 @@ const MyTeam = () => {
   const api = useApi();
   const { mine, update, invite, remove, listRequests, approveRequest, getMembers, removeMember, leave, create } = useTeams();
   const { list: listRegistrations, create: createRegistration } = useRegistrations();
-  const { createStream } = useStreams();
+  const { streams, createStream, deleteStream } = useStreams();
 
   const [team, setTeam] = useState(null);
   const [feedback, setFeedback] = useState('');
@@ -67,8 +69,14 @@ const MyTeam = () => {
           });
           
           // Load related data
-          const reqs = await listRequests(tRes.id);
-          setRequests(Array.isArray(reqs) ? reqs : []);
+          try {
+            const reqs = await listRequests(tRes.id);
+            setRequests(Array.isArray(reqs) ? reqs : []);
+          } catch (err) {
+            // Ignore permission errors for non-owners
+            console.log('Could not load requests (likely not owner)', err);
+            setRequests([]);
+          }
           
           const mem = await getMembers(tRes.id);
           setMembers(Array.isArray(mem) ? mem : []);
@@ -109,6 +117,7 @@ const MyTeam = () => {
   useEffect(() => { doSearch(query); }, [query, doSearch]);
 
   const isOwner = team && status.ownedTeamId === team.id;
+  const activeStream = streams.find(s => s.team_id === team?.id && s.status === 'live');
 
   const onCreateTeam = async (e) => {
     e.preventDefault();
@@ -229,17 +238,24 @@ const MyTeam = () => {
 
   const onStartStream = async () => {
     try {
-      if (!form.stream_url) {
-        setFeedback(t('myTeam.feedback.streamUrlMissing'));
-        return;
+      if (activeStream) {
+        // Stop stream
+        await deleteStream(activeStream.id);
+        setFeedback(t('myTeam.feedback.streamStopped') || 'Stream detenido correctamente');
+      } else {
+        // Start stream
+        if (!form.stream_url) {
+          setFeedback(t('myTeam.feedback.streamUrlMissing'));
+          return;
+        }
+        await createStream({
+          title: `${t('myTeam.overview.about')} ${team.name}`,
+          team_id: team.id,
+          stream_url: form.stream_url,
+          status: 'live'
+        });
+        setFeedback(t('myTeam.feedback.streamStarted'));
       }
-      await createStream({
-        title: `${t('myTeam.overview.about')} ${team.name}`,
-        team_id: team.id,
-        stream_url: form.stream_url,
-        status: 'live'
-      });
-      setFeedback(t('myTeam.feedback.streamStarted'));
     } catch (e) {
       setFeedback(e.message || t('myTeam.feedback.streamError'));
     }
@@ -332,6 +348,7 @@ const MyTeam = () => {
       {/* Tabs Navigation */}
       <div className="border-b border-slate-200 flex gap-2 overflow-x-auto">
         <TabButton id="overview" label={t('myTeam.tabs.overview')} icon={Info} />
+        <TabButton id="chat" label={t('team.chat.tab')} icon={MessageCircle} />
         <TabButton id="members" label={t('myTeam.tabs.members')} icon={Users} />
         <TabButton id="competitions" label={t('myTeam.tabs.competitions')} icon={Trophy} />
         {isOwner && <TabButton id="settings" label={t('myTeam.tabs.settings')} icon={Settings} />}
@@ -339,6 +356,11 @@ const MyTeam = () => {
 
       {/* Tab Content */}
       <div className="space-y-6">
+
+        {/* CHAT TAB */}
+        {activeTab === 'chat' && (
+          <TeamChat teamId={team.id} />
+        )}
         
         {/* OVERVIEW TAB */}
         {activeTab === 'overview' && (
@@ -398,11 +420,17 @@ const MyTeam = () => {
                   {members.map((m) => (
                     <div key={m.id} className="flex items-center justify-between py-3">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold">
-                          {m.user_id}
+                        <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold overflow-hidden">
+                          {m.user_photo ? (
+                            <img src={resolveMediaUrl(m.user_photo)} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            (m.user_username || m.user_id).substring(0, 2).toUpperCase()
+                          )}
                         </div>
                         <div>
-                          <p className="font-medium text-slate-900">{t('myTeam.members.userPrefix')} {m.user_id}</p>
+                          <p className="font-medium text-slate-900">
+                            {m.user_username || `${t('myTeam.members.userPrefix')} ${m.user_id}`}
+                          </p>
                           <p className="text-xs text-slate-500 capitalize">{m.role}</p>
                         </div>
                       </div>
@@ -610,9 +638,31 @@ const MyTeam = () => {
                     <h4 className="font-medium text-slate-900">{t('myTeam.settings.streamStatus')}</h4>
                     <p className="text-sm text-slate-500">{t('myTeam.settings.streamStatusDesc')}</p>
                   </div>
-                  <Button onClick={onStartStream} className="gap-2 bg-red-600 hover:bg-red-700 text-white">
-                    <Video className="h-4 w-4" /> {t('myTeam.actions.startStream')}
-                  </Button>
+                  <div className="flex items-center gap-4">
+                    {activeStream && (
+                      <div className="flex items-center gap-2 px-3 py-1 bg-red-100 text-red-600 rounded-full animate-pulse">
+                        <span className="relative flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                        </span>
+                        <span className="text-xs font-bold tracking-wider">LIVE</span>
+                      </div>
+                    )}
+                    <Button 
+                      onClick={onStartStream} 
+                      className={`gap-2 ${activeStream ? 'bg-slate-900 hover:bg-slate-800' : 'bg-red-600 hover:bg-red-700'} text-white transition-all duration-300`}
+                    >
+                      {activeStream ? (
+                        <>
+                          <X className="h-4 w-4" /> {t('myTeam.actions.stopStream') || 'Detener Live'}
+                        </>
+                      ) : (
+                        <>
+                          <Video className="h-4 w-4" /> {t('myTeam.actions.startStream')}
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

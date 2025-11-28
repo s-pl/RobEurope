@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 const Teams = () => {
   const { user, isAuthenticated } = useAuth();
   const { list, create, requestJoin, getMembers } = useTeams();
-  const { countries } = useCountries();
+  const { countries, status: countriesStatus } = useCountries();
   const api = useApi();
   const { t } = useTranslation();
   const [q, setQ] = useState('');
@@ -141,9 +141,13 @@ const Teams = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="country">{t('teams.form.country')}</Label>
-                  <Select onValueChange={(val) => setForm({...form, country_id: val})}>
+                  <Select 
+                    value={form.country_id} 
+                    onValueChange={(val) => setForm({...form, country_id: val})}
+                    disabled={countriesStatus?.loading}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder={t('teams.form.country')} />
+                      <SelectValue placeholder={countriesStatus?.loading ? t('general.countriesLoading') : t('teams.form.country')} />
                     </SelectTrigger>
                     <SelectContent>
                       {countries.map((c) => (
@@ -200,9 +204,13 @@ const Teams = () => {
           />
         </div>
         <div className="w-[200px]">
-          <Select value={countryFilter} onValueChange={setCountryFilter}>
+          <Select 
+            value={countryFilter} 
+            onValueChange={setCountryFilter}
+            disabled={countriesStatus?.loading}
+          >
             <SelectTrigger>
-              <SelectValue placeholder={t('teams.form.country')} />
+              <SelectValue placeholder={countriesStatus?.loading ? t('general.countriesLoading') : t('teams.form.country')} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t('teams.allCountries')}</SelectItem>

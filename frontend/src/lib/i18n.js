@@ -93,6 +93,43 @@ const resources = {
         roleAngel: "Frontend Lead @ Google",
         reviewAngel: "Encontré una solución para todas mis necesidades de diseño con Creative Tim. ¡Los uso como freelancer en mis proyectos de hobby por diversión! ¡Y es realmente asequible, gente muy humilde!"
       },
+      sponsors: {
+        "title": "Sponsors",
+        "subtitle": "Gestiona los sponsors del evento",
+        "new": "Nuevo Sponsor",
+        "edit": "Editar Sponsor",
+        "create": "Nuevo Sponsor",
+        "editDescription": "Modifica los datos del sponsor",
+        "createDescription": "Añade un nuevo sponsor al evento",
+        "name": "Nombre",
+        "logo": "Logo",
+        "website": "Sitio Web",
+        "created": "Creado",
+        "emptyTitle": "No hay sponsors",
+        "emptySubtitle": "Comienza añadiendo tu primer sponsor",
+        "addSponsor": "Añadir Sponsor",
+        "confirmDelete": "¿Estás seguro de que quieres eliminar este sponsor?",
+        "cancel": "Cancelar",
+        "update": "Actualizar",
+        "createBtn": "Crear Sponsor",
+        "id": "ID"
+      },
+      streaming: {
+        "streams": "Streams",
+        "streamsSubtitle": "Visualiza todos los streams de las competiciones",
+        "loadingStreams": "Cargando streams...",
+        "error": "Error",
+        "status": {
+          "live": "En vivo",
+          "offline": "Offline",
+          "scheduled": "Programado"
+        },
+        "team": "Equipo",
+        "competition": "Competición",
+        "viewStream": "Ver Stream",
+        "created": "Creado",
+        "noStreams": "No hay streams disponibles."
+      },
       forms: {
         firstName: 'Nombre',
         lastName: 'Apellidos',
@@ -461,6 +498,44 @@ const resources = {
         roleAngel: "Frontend Lead @ Google",
         reviewAngel: "I found a solution to all my design needs from Creative Tim. I use them as a freelancer in my hobby projects for fun! And it's really affordable, very humble guys!!!"
       },
+      sponsors: {
+
+        "title": "Sponsors",
+        "subtitle": "Manage the event sponsors",
+        "new": "New Sponsor",
+        "edit": "Edit Sponsor",
+        "create": "New Sponsor",
+        "editDescription": "Edit the sponsor information",
+        "createDescription": "Add a new sponsor to the event",
+        "name": "Name",
+        "logo": "Logo",
+        "website": "Website",
+        "created": "Created",
+        "emptyTitle": "No sponsors",
+        "emptySubtitle": "Start by adding your first sponsor",
+        "addSponsor": "Add Sponsor",
+        "confirmDelete": "Are you sure you want to delete this sponsor?",
+        "cancel": "Cancel",
+        "update": "Update",
+        "createBtn": "Create Sponsor",
+        "id": "ID"
+      },
+      streaming: {
+        "streams": "Streams",
+        "streamsSubtitle": "View all competition streams",
+        "loadingStreams": "Loading streams...",
+        "error": "Error",
+        "status": {
+          "live": "Live",
+          "offline": "Offline",
+          "scheduled": "Scheduled"
+        },
+        "team": "Team",
+        "competition": "Competition",
+        "viewStream": "Watch Stream",
+        "created": "Created",
+        "noStreams": "No streams available."
+      },
       forms: {
         firstName: 'First name',
         lastName: 'Last name',
@@ -828,6 +903,43 @@ const resources = {
         reviewSamuel: "Dieser Roboter-Event-Organisator hebt jeden Workshop wirklich auf ein neues Level. Die Sitzungen sind gut strukturiert, interaktiv und unglaublich inspirierend. Es ist der ideale Ort, um Robotik zu erkunden und praktische Erfahrungen zu sammeln.",
         roleAngel: "Frontend Lead @ Google",
         reviewAngel: "Ich habe eine Lösung für all meine Designbedürfnisse von Creative Tim gefunden. Ich nutze sie als Freelancer in meinen Hobbyprojekten zum Spaß! Und es ist wirklich erschwinglich, sehr bescheidene Leute!"
+      },
+      sponsors: {
+        "title": "Sponsoren",
+        "subtitle": "Verwalte die Sponsoren der Veranstaltung",
+        "new": "Neuer Sponsor",
+        "edit": "Sponsor bearbeiten",
+        "create": "Neuer Sponsor",
+        "editDescription": "Bearbeite die Sponsorinformationen",
+        "createDescription": "Füge einen neuen Sponsor hinzu",
+        "name": "Name",
+        "logo": "Logo",
+        "website": "Webseite",
+        "created": "Erstellt",
+        "emptyTitle": "Keine Sponsoren",
+        "emptySubtitle": "Beginne mit dem Hinzufügen deines ersten Sponsors",
+        "addSponsor": "Sponsor hinzufügen",
+        "confirmDelete": "Bist du sicher, dass du diesen Sponsor löschen möchtest?",
+        "cancel": "Abbrechen",
+        "update": "Aktualisieren",
+        "createBtn": "Sponsor erstellen",
+        "id": "ID"
+      },
+      streaming: {
+        "streams": "Streams",
+        "streamsSubtitle": "Alle Streams der Wettbewerbe ansehen",
+        "loadingStreams": "Streams werden geladen...",
+        "error": "Fehler",
+        "status": {
+          "live": "Live",
+          "offline": "Offline",
+          "scheduled": "Geplant"
+        },
+        "team": "Team",
+        "competition": "Wettbewerb",
+        "viewStream": "Stream ansehen",
+        "created": "Erstellt",
+        "noStreams": "Keine Streams verfügbar."
       },
       forms: {
         firstName: 'Vorname',
