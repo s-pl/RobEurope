@@ -21,13 +21,15 @@ const CompetitionDetail = () => {
     const load = async () => {
       try {
         setLoading(true);
-        const [comp, competitionStreams] = await Promise.all([
+        const [comp, competitionStreams, regs] = await Promise.all([
           api(`/competitions/${id}`),
-          api(`/streams?competition_id=${id}`)
+          api(`/streams?competition_id=${id}`),
+          api(`/registrations?competition_id=${id}&status=approved`)
         ]);
         setCompetition(comp);
         
         // Load teams registered for this competition
+        setTeams(regs.map(r => r.Team).filter(Boolean));
      
         setStreams(competitionStreams);
 
@@ -129,6 +131,35 @@ const CompetitionDetail = () => {
               </div>
             ) : (
               <p className="text-slate-500 italic">{t('competitions.noStreams')}</p>
+            )}
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-blue-900 mb-4 flex items-center gap-2">
+              <Users className="h-6 w-6" /> Equipos Participantes
+            </h2>
+            {teams.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {teams.map(team => (
+                  <Link key={team.id} to={`/teams/${team.id}`}>
+                    <Card className="p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
+                      <div className="h-12 w-12 bg-slate-100 rounded-full flex items-center justify-center overflow-hidden border border-slate-200">
+                        {team.logo_url ? (
+                          <img src={team.logo_url} alt={team.name} className="h-full w-full object-cover" />
+                        ) : (
+                          <Users className="h-6 w-6 text-slate-400" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-900">{team.name}</h3>
+                        <p className="text-sm text-slate-500">{team.city || 'Sin ubicación'}</p>
+                      </div>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <p className="text-slate-500 italic">No hay equipos registrados aún.</p>
             )}
           </section>
         </div>
