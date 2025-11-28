@@ -17,7 +17,10 @@ const navLinks = [
   { to: '/teams', key: 'nav.teams' },
   { to: '/sponsors', key: 'nav.sponsors' },
   { to: '/streams', key: 'nav.streams' },
-  { to: '/contact', key: 'nav.contact' }
+  { to: '/contact', key: 'nav.contact' },
+  { to: '/gallery', key: 'nav.gallery' },
+  { to: '/feedback', key: 'nav.feedback' },
+  { to: '/terms', key: 'nav.terms' }
 ];
 
 const languages = [

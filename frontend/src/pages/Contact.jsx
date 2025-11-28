@@ -1,118 +1,160 @@
-import { useState } from 'react';
-import { Mail, Users, MessageSquare, Send } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
+import { useState } from "react";
+import { Mail, Users, Send } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Button } from "../components/ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
+import { motion } from "framer-motion";
+
 
 const Contact = () => {
-  const [form, setForm] = useState({ name: '', email: '', organization: '', message: '' });
+  const [form, setForm] = useState({ name: "", email: "", organization: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const { t } = useTranslation();
-  const contactChannels = t('contact.channels', { returnObjects: true });
+  const contactChannels = t("contact.channels", { returnObjects: true });
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // Simulate API call
-    setTimeout(() => {
-      setSubmitted(true);
-    }, 500);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSubmitted(true);
   };
 
   return (
-    <div className="space-y-8 container mx-auto px-4 py-8">
-      <div className="text-center max-w-2xl mx-auto mb-12">
-        <h1 className="text-4xl font-bold text-blue-900 mb-4">{t('contact.hero.title')}</h1>
-        <p className="text-slate-600 text-lg">{t('contact.hero.description')}</p>
-      </div>
+    <div className="space-y-10">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Card className="border-slate-200 bg-white shadow-sm rounded-2xl">
+          <CardHeader>
+            <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
+              {t("contact.hero.tagline")}
+            </p>
+            <CardTitle className="text-4xl font-bold text-slate-900">
+              {t("contact.hero.title")}
+            </CardTitle>
+            <CardDescription className="text-slate-600 text-sm">
+              {t("contact.hero.description")}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </motion.div>
 
-      <div className="grid gap-6 md:grid-cols-3 mb-12">
-        {Array.isArray(contactChannels) && contactChannels.map((channel, index) => (
-          <Card key={index} className="border-slate-200 bg-white hover:shadow-md transition-shadow">
-            <CardHeader>
-              <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center mb-2 text-blue-600">
-                <MessageSquare className="h-5 w-5" />
-              </div>
-              <CardTitle className="text-xl text-slate-900">{channel.title}</CardTitle>
-              <CardDescription className="text-xs uppercase tracking-wider font-semibold text-blue-600 mt-1">
+      <section className="grid gap-4 md:grid-cols-3">
+        {contactChannels.map((channel, i) => (
+          <motion.div
+            key={channel.title}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+          >
+            <Card className="border-slate-200 bg-white shadow-sm p-4 rounded-2xl hover:shadow-md transition">
+              <p className="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400">
                 {channel.note}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-600">{channel.detail}</p>
-            </CardContent>
-          </Card>
+              </p>
+              <h3 className="mt-2 text-xl font-semibold text-slate-900">
+                {channel.title}
+              </h3>
+              <p className="text-sm text-slate-600">{channel.detail}</p>
+            </Card>
+          </motion.div>
         ))}
-      </div>
+      </section>
 
-      <Card className="max-w-4xl mx-auto border-slate-200 bg-white shadow-lg overflow-hidden">
-        <div className="grid md:grid-cols-5">
-          <div className="bg-blue-900 p-8 text-white md:col-span-2 flex flex-col justify-between">
+      <Card className="border-slate-200 bg-white shadow-sm rounded-2xl p-6">
+        <div className="flex flex-col gap-6 md:flex-row md:items-start">
+          <motion.span
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="flex h-16 w-16 items-center justify-center rounded-3xl border border-slate-200 bg-slate-50 text-slate-900"
+          >
+            {submitted ? <Users className="h-7 w-7" /> : <Mail className="h-7 w-7" />}
+          </motion.span>
+
+          <div className="flex-1 space-y-4">
             <div>
-              <h3 className="text-2xl font-bold mb-4">Ponte en contacto</h3>
-              <p className="text-blue-100 mb-8">
-                Estamos aquí para ayudarte. Rellena el formulario y nos pondremos en contacto contigo lo antes posible.
+              <h2 className="text-3xl font-semibold text-slate-900">
+                {t("contact.form.title")}
+              </h2>
+              <p className="text-sm text-slate-500">
+                {t("contact.form.description")}
               </p>
             </div>
-            <div className="space-y-4 text-blue-200 text-sm">
-              <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4" />
-                <span>contact@robeurope.eu</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Users className="h-4 w-4" />
-                <span>Soporte 24/7 para equipos</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="p-8 md:col-span-3">
+
             {submitted ? (
-              <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-12">
-                <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
-                  <Send className="h-8 w-8" />
-                </div>
-                <h3 className="text-2xl font-bold text-slate-900">¡Mensaje Enviado!</h3>
-                <p className="text-slate-600 max-w-xs mx-auto">
-                  Gracias por contactarnos. Te responderemos a la brevedad posible.
-                </p>
-                <Button variant="outline" onClick={() => setSubmitted(false)}>
-                  Enviar otro mensaje
-                </Button>
-              </div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="p-4 border border-blue-200 bg-blue-50 text-sm text-blue-700 rounded-xl"
+              >
+                {t("contact.form.success")}
+              </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">{t('forms.name')}</Label>
-                    <Input id="name" name="name" value={form.name} onChange={handleChange} required placeholder="Tu nombre" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">{t('forms.email')}</Label>
-                    <Input id="email" name="email" type="email" value={form.email} onChange={handleChange} required placeholder="tu@email.com" />
-                  </div>
+              <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label htmlFor="name">{t("forms.name")}</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    required
+                    className="mt-2"
+                  />
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="organization">{t('forms.organization')}</Label>
-                  <Input id="organization" name="organization" value={form.organization} onChange={handleChange} placeholder="Nombre de tu equipo o empresa" />
+
+                <div>
+                  <Label htmlFor="email">{t("forms.email")}</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                    className="mt-2"
+                  />
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="message">{t('forms.message')}</Label>
-                  <Textarea id="message" name="message" rows={4} value={form.message} onChange={handleChange} required placeholder="¿En qué podemos ayudarte?" />
+
+                <div>
+                  <Label htmlFor="organization">{t("forms.organization")}</Label>
+                  <Input
+                    id="organization"
+                    name="organization"
+                    value={form.organization}
+                    onChange={handleChange}
+                    className="mt-2"
+                  />
                 </div>
-                
-                <Button type="submit" className="w-full gap-2">
-                  <Send className="h-4 w-4" /> Enviar Mensaje
-                </Button>
+
+                <div className="md:col-span-2">
+                  <Label htmlFor="message">{t("forms.message")}</Label>
+                  <Textarea
+                    id="message"
+                    name="message"
+                    rows={4}
+                    value={form.message}
+                    onChange={handleChange}
+                    className="mt-2"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <Button
+                    type="submit"
+                    className="w-full md:w-auto flex items-center gap-2"
+                  >
+                    <Send className="h-4 w-4" /> {t("contact.form.submit")}
+                  </Button>
+                </div>
               </form>
             )}
           </div>

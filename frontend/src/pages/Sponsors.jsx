@@ -69,7 +69,7 @@ const Sponsors = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este sponsor?')) {
+    if (window.confirm(t('sponsors.confirmDelete'))) {
       try {
         await remove(id);
         await loadSponsors();
@@ -101,13 +101,13 @@ const Sponsors = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-blue-900">Sponsors</h1>
-          <p className="text-blue-600 mt-1">Gestiona los sponsors del evento</p>
+          <h1 className="text-3xl font-bold text-blue-900">{t('sponsors.title')}</h1>
+          <p className="text-blue-600 mt-1">{t('sponsors.subtitle')}</p>
         </div>
         {isAdmin && (
           <Button onClick={openCreateDialog} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            Nuevo Sponsor
+            {t('sponsors.new')}
           </Button>
         )}
       </div>
@@ -126,7 +126,7 @@ const Sponsors = () => {
                 <div className="flex-1">
                   <CardTitle className="text-lg text-blue-900">{sponsor.name}</CardTitle>
                   <CardDescription className="text-blue-600">
-                    ID: {sponsor.id}
+                    {t('sponsors.id')}: {sponsor.id}
                   </CardDescription>
                 </div>
                 {isAdmin && (
@@ -154,7 +154,7 @@ const Sponsors = () => {
             <CardContent className="space-y-3">
               {sponsor.logo_url && (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-blue-700">Logo:</span>
+                  <span className="text-sm font-medium text-blue-700">{t('sponsors.logo')}:</span>
                   <img
                     src={sponsor.logo_url}
                     alt={`${sponsor.name} logo`}
@@ -165,7 +165,7 @@ const Sponsors = () => {
 
               {sponsor.website_url && (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-blue-700">Website:</span>
+                  <span className="text-sm font-medium text-blue-700">{t('sponsors.website')}:</span>
                   <a
                     href={sponsor.website_url}
                     target="_blank"
@@ -179,7 +179,7 @@ const Sponsors = () => {
               )}
 
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-blue-700">Creado:</span>
+                <span className="text-sm font-medium text-blue-700">{t('sponsors.created')}:</span>
                 <Badge variant="outline">
                   {new Date(sponsor.created_at).toLocaleDateString()}
                 </Badge>
@@ -194,12 +194,12 @@ const Sponsors = () => {
           <div className="text-blue-400 mb-4">
             <Plus className="h-12 w-12 mx-auto" />
           </div>
-          <h3 className="text-lg font-medium text-blue-900 mb-2">No hay sponsors</h3>
-          <p className="text-blue-600 mb-4">Comienza añadiendo tu primer sponsor</p>
+          <h3 className="text-lg font-medium text-blue-900 mb-2">{t('sponsors.emptyTitle')}</h3>
+          <p className="text-blue-600 mb-4">{t('sponsors.emptySubtitle')}</p>
           {isAdmin && (
             <Button onClick={openCreateDialog}>
               <Plus className="h-4 w-4 mr-2" />
-              Añadir Sponsor
+              {t('sponsors.addSponsor')}
             </Button>
           )}
         </div>
@@ -209,19 +209,19 @@ const Sponsors = () => {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="text-blue-900">
-              {editingSponsor ? 'Editar Sponsor' : 'Nuevo Sponsor'}
+              {editingSponsor ? t('sponsors.edit') : t('sponsors.create')}
             </DialogTitle>
             <DialogDescription className="text-blue-600">
               {editingSponsor
-                ? 'Modifica los datos del sponsor'
-                : 'Añade un nuevo sponsor al evento'
+                ? t('sponsors.editDescription')
+                : t('sponsors.createDescription')
               }
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-blue-900">Nombre *</Label>
+              <Label htmlFor="name" className="text-blue-900">{t('sponsors.name')} *</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -233,7 +233,7 @@ const Sponsors = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="logo_url" className="text-blue-900">URL del Logo</Label>
+              <Label htmlFor="logo_url" className="text-blue-900">{t('sponsors.logo')}</Label>
               <Input
                 id="logo_url"
                 type="url"
@@ -245,7 +245,7 @@ const Sponsors = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="website_url" className="text-blue-900">Sitio Web</Label>
+              <Label htmlFor="website_url" className="text-blue-900">{t('sponsors.website')}</Label>
               <Input
                 id="website_url"
                 type="url"
@@ -262,10 +262,10 @@ const Sponsors = () => {
                 variant="outline"
                 onClick={() => setDialogOpen(false)}
               >
-                Cancelar
+                {t('sponsors.cancel')}
               </Button>
               <Button type="submit">
-                {editingSponsor ? 'Actualizar' : 'Crear'} Sponsor
+                {editingSponsor ? `${t('sponsors.update')} Sponsor` : t('sponsors.createBtn')}
               </Button>
             </DialogFooter>
           </form>
