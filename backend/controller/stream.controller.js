@@ -110,8 +110,31 @@ export const updateStream = async (req, res) => {
 
 export const deleteStream = async (req, res) => {
   try {
-    const deleted = await Stream.destroy({ where: { id: req.params.id } });
-    if (!deleted) return res.status(404).json({ error: 'Stream not found' });
+    const stream = await Stream.findByPk(req.params.id);
+    if (!stream) return res.status(404).json({ error: 'Stream not found' });
+
+    // Check permissions
+    if (req.user.role !== 'admin') {
+      // If not admin, check if user is owner of the team associated with the stream
+      if (!stream.team_id) {
+        return res.status(403).json({ error: 'Permission denied' });
+      }
+
+      const membership = await TeamMembers.findOne({
+        where: {
+          team_id: stream.team_id,
+          user_id: req.user.id,
+          role: 'owner',
+          left_at: null
+        }
+      });
+
+      if (!membership) {
+        return res.status(403).json({ error: 'Permission denied: You must be the team owner' });
+      }
+    }
+
+    await stream.destroy();
     res.json({ message: 'Stream deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });

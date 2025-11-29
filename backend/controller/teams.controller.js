@@ -91,8 +91,10 @@ export const updateTeam = async (req, res) => {
     }
 
     const [updated] = await Team.update(updates, { where: { id: req.params.id } });
-    if (!updated) return res.status(404).json({ error: 'Team not found' });
+    // Note: updated might be 0 if no changes were made, so we don't return 404 here.
+    
     const updatedItem = await Team.findByPk(req.params.id);
+    if (!updatedItem) return res.status(404).json({ error: 'Team not found' });
     res.json(updatedItem);
   } catch (err) {
     res.status(500).json({ error: err.message });

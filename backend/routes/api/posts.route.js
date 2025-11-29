@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get('/', getPosts);
 router.get('/:id', getPostById);
-router.post('/', authenticateToken, uploadMiddleware({ fieldName: 'image' }), createPost);
+router.post('/', authenticateToken, requireRole('admin'), uploadMiddleware({ fieldName: 'image' }), createPost);
 router.put('/:id', authenticateToken, requireOwnership('Post'), uploadMiddleware({ fieldName: 'image' }), updatePost);
 router.delete('/:id', authenticateToken, requireOwnership('Post'), deletePost);
 

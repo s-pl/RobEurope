@@ -24,7 +24,7 @@ export default async function defineNotificationModel(sequelize, DataTypes) {
             allowNull: false
         },
         type: {
-            type: DataTypes.ENUM('registration_team_status', 'team_invite', 'mention'),
+            type: DataTypes.ENUM('registration_team_status', 'team_invite', 'mention', 'team_message'),
             allowNull: false
         },
 

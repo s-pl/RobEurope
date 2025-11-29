@@ -6,7 +6,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Select } from '../components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { useAuth } from '../hooks/useAuth';
 import { useApi } from '../hooks/useApi';
 import { resolveMediaUrl } from '../lib/apiClient';
@@ -242,19 +242,21 @@ const Profile = () => {
                   <div className="space-y-2">
                     <Label htmlFor="country_id">{t('profile.country')}</Label>
                     <Select
-                      id="country_id"
-                      name="country_id"
                       value={form.country_id}
-                      onChange={handleChange}
+                      onValueChange={(value) => handleChange({ target: { name: 'country_id', value } })}
                       disabled={countriesStatus.loading}
                     >
-                      <option value="">{countriesStatus.loading ? t('general.countriesLoading') : '—'}</option>
-                      {countries.map((country) => (
-                        <option key={country.id} value={country.id}>
-                          {country.flag_emoji ? `${country.flag_emoji} ` : ''}
-                          {country.name}
-                        </option>
-                      ))}
+                      <SelectTrigger id="country_id">
+                        <SelectValue placeholder={countriesStatus.loading ? t('general.countriesLoading') : '—'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {countries.map((country) => (
+                          <SelectItem key={country.id} value={country.id.toString()}>
+                            {country.flag_emoji ? `${country.flag_emoji} ` : ''}
+                            {country.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
                     {countriesStatus.error && <p className="text-xs text-red-500 mt-1">{t('profile.countriesError')}</p>}
                   </div>

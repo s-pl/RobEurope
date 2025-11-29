@@ -326,6 +326,7 @@ const resources = {
           invite: "Invitar",
           approve: "Aprobar",
           startStream: "Iniciar LIVE",
+          stopStream: "Detener LIVE",
           register: "Solicitar Inscripción"
         },
         overview: {
@@ -391,6 +392,7 @@ const resources = {
           registrationError: "No se pudo enviar la solicitud",
           streamUrlMissing: "Debes guardar una URL de stream primero",
           streamStarted: "¡Emisión iniciada!",
+          streamStopped: "Emisión detenida",
           streamError: "Error al iniciar stream"
         }
       }

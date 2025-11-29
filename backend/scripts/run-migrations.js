@@ -12,6 +12,8 @@ import * as enhanceModels from '../migrations/20251122-enhance-models.js';
 import * as addPostFeatures from '../migrations/20251122-add-post-features.js';
 import * as fixTeamMembersConstraint from '../migrations/20251122-fix-team-members-constraint.js';
 import * as addIsActiveToCompetitions from '../migrations/20251123-add-is-active-to-competitions.js';
+import * as createTeamMessages from '../migrations/20251123-create-team-messages.js';
+import * as updateNotificationTypeEnum from '../migrations/20251123-update-notification-type-enum.js';
 
 async function run() {
   try {
@@ -130,6 +132,22 @@ async function run() {
       console.log('Added is_active to Competitions');
     } catch (e) {
       console.log('Skipping addIsActiveToCompetitions:', e.message);
+    }
+
+    // Create TeamMessages table
+    try {
+      await createTeamMessages.up(qi, Sequelize);
+      console.log('Created TeamMessages table');
+    } catch (e) {
+      console.log('Skipping createTeamMessages (probably already exists):', e.message);
+    }
+
+    // Update Notification type ENUM
+    try {
+      await updateNotificationTypeEnum.up(qi, Sequelize);
+      console.log('Updated Notification type ENUM');
+    } catch (e) {
+      console.log('Skipping updateNotificationTypeEnum:', e.message);
     }
 
     console.log('Migrations applied successfully');

@@ -1,5 +1,6 @@
 import express from 'express';
 import { createTeam, getTeams, getTeamById, updateTeam, deleteTeam, inviteToTeam, acceptInvite, requestJoinTeam, approveJoinRequest, registerTeamInCompetition, getMyTeam, listJoinRequests, getMembershipStatus, leaveTeam } from '../../controller/teams.controller.js';
+import { getMessages, sendMessage } from '../../controller/team_chat.controller.js';
 import authenticateToken from '../../middleware/auth.middleware.js';
 import { requireOwnership } from '../../middleware/ownership.middleware.js';
 import { uploadMiddleware } from '../../middleware/upload.middleware.js';
@@ -25,5 +26,13 @@ router.get('/:id/requests', authenticateToken, requireOwnership('Team'), listJoi
 
 // team -> competition registration
 router.post('/:id/register-competition', authenticateToken, requireOwnership('Team'), registerTeamInCompetition);
+
+// Chat routes
+router.get('/:teamId/messages', authenticateToken, getMessages);
+router.post('/:teamId/messages', authenticateToken, uploadMiddleware({ 
+    fieldName: 'file',
+    allowedTypes: /.*/, // Allow any file type
+    maxSize: 50 * 1024 * 1024 // 50MB limit
+}), sendMessage);
 
 export default router;
