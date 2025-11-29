@@ -1,0 +1,163 @@
+@startuml Data Flow Diagram
+
+title RobEurope Platform - Data Flow Diagram
+
+' External Entities
+actor "User" as User
+actor "Administrator" as Admin
+actor "LDAP System" as LDAP
+actor "Email Service" as EmailSvc
+actor "File Storage" as FileStorage
+
+' Processes
+process "Authentication\nProcess" as Auth
+process "User Management\nProcess" as UserMgmt
+process "Team Management\nProcess" as TeamMgmt
+process "Competition\nManagement\nProcess" as CompMgmt
+process "Content Management\nProcess" as ContentMgmt
+process "Admin Panel\nProcess" as AdminPanel
+process "Notification\nProcess" as Notification
+process "File Upload\nProcess" as FileUpload
+
+' Data Stores
+database "User Database" as UserDB
+database "Team Database" as TeamDB
+database "Competition\nDatabase" as CompDB
+database "Content\nDatabase" as ContentDB
+database "Session Store" as SessionDB
+database "LDAP Directory" as LDAPDB
+database "File Metadata\nDatabase" as FileDB
+
+' Trust Boundaries
+note as TrustBoundary
+    **Trust Boundaries:**
+    - User Input Validation
+    - Authentication Checks
+    - Authorization Controls
+    - Data Sanitization
+end note
+
+' Data Flows - User Authentication
+User --> Auth : Login Credentials
+Auth --> UserDB : Validate User
+UserDB --> Auth : User Data
+Auth --> SessionDB : Create Session
+Auth --> User : JWT Token + Session
+
+' Data Flows - User Management
+User --> UserMgmt : Profile Updates
+UserMgmt --> UserDB : Update User Data
+UserMgmt --> LDAP : Sync User Data
+LDAP --> LDAPDB : Store User Info
+
+Admin --> UserMgmt : User Administration
+UserMgmt --> UserDB : CRUD Operations
+UserMgmt --> LDAP : LDAP User Management
+
+' Data Flows - Team Management
+User --> TeamMgmt : Team Operations
+TeamMgmt --> TeamDB : Team Data
+TeamMgmt --> UserDB : User References
+TeamMgmt --> Notification : Team Events
+Notification --> EmailSvc : Email Notifications
+
+' Data Flows - Competition Management
+Admin --> CompMgmt : Competition Setup
+CompMgmt --> CompDB : Competition Data
+CompMgmt --> TeamDB : Team Registrations
+CompMgmt --> Notification : Competition Events
+
+User --> CompMgmt : Competition Registration
+CompMgmt --> TeamDB : Update Team Status
+
+' Data Flows - Content Management
+User --> ContentMgmt : Posts/Comments
+ContentMgmt --> ContentDB : Store Content
+ContentMgmt --> Notification : Content Events
+ContentMgmt --> UserDB : Author Info
+
+' Data Flows - File Management
+User --> FileUpload : File Upload
+FileUpload --> FileStorage : Store File
+FileUpload --> FileDB : Store Metadata
+FileUpload --> ContentDB : Link to Content
+
+' Data Flows - Admin Panel
+Admin --> AdminPanel : Admin Operations
+AdminPanel --> UserDB : User Data Access
+AdminPanel --> TeamDB : Team Data Access
+AdminPanel --> CompDB : Competition Data Access
+AdminPanel --> ContentDB : Content Moderation
+AdminPanel --> SessionDB : Session Management
+
+' Data Flows - Notifications
+Notification --> UserDB : User Preferences
+Notification --> EmailSvc : Send Emails
+Notification --> ContentDB : Notification Data
+
+' Data Flows - System Integration
+Auth --> LDAP : LDAP Authentication
+LDAP --> LDAPDB : Directory Queries
+FileUpload --> FileStorage : File Operations
+
+' Data Flow Notes
+note right of Auth
+    **Authentication Process:**
+    - JWT token generation
+    - Session management
+    - Password validation
+    - Role assignment
+end note
+
+note right of UserMgmt
+    **User Management:**
+    - Profile updates
+    - Account creation
+    - LDAP synchronization
+    - Permission management
+end note
+
+note right of TeamMgmt
+    **Team Operations:**
+    - Team creation/joining
+    - Member management
+    - Competition registration
+    - Team communication
+end note
+
+note right of ContentMgmt
+    **Content Management:**
+    - Post creation
+    - Comment system
+    - Like functionality
+    - Content moderation
+end note
+
+note right of FileUpload
+    **File Management:**
+    - Upload validation
+    - Storage management
+    - Metadata tracking
+    - Access control
+end note
+
+' Security Controls
+note as SecurityControls
+    **Security Controls:**
+    - Input validation on all processes
+    - Authentication required for sensitive operations
+    - Authorization checks for data access
+    - Data encryption in transit and at rest
+    - Audit logging for admin operations
+end note
+
+' Data Classification
+note as DataClassification
+    **Data Classification:**
+    - Public: Competition info, public posts
+    - Internal: Team data, user profiles
+    - Confidential: Admin data, system logs
+    - Restricted: Passwords, PII data
+end note
+
+@enduml

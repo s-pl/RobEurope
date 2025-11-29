@@ -1,0 +1,41 @@
+<%- include('../partials/header', { title: (action === 'add' ? 'Añadir' : 'Editar') + ' Usuario LDAP' }) %>
+
+<h2><%= action === 'add' ? 'Añadir' : 'Editar' %> Usuario LDAP</h2>
+
+<div class="card" style="max-width: 600px;">
+    <form action="<%= action === 'add' ? '/admin/ldap-users/add' : `/admin/ldap-users/edit/${user ? user.uid : ''}` %>" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        
+        <div class="form-group">
+            <label for="uid">UID</label>
+            <input type="text" id="uid" name="uid" value="<%= user ? (Array.isArray(user.uid) ? user.uid[0] : user.uid) : '' %>" class="form-control" <%= action === 'edit' ? 'readonly' : '' %> required>
+        </div>
+
+        <div class="form-group">
+            <label for="cn">Nombre</label>
+            <input type="text" id="cn" name="cn" value="<%= user ? (Array.isArray(user.cn) ? user.cn[0] : user.cn) : '' %>" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="sn">Apellido</label>
+            <input type="text" id="sn" name="sn" value="<%= user ? (Array.isArray(user.sn) ? user.sn[0] : user.sn) : '' %>" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="mail">Email</label>
+            <input type="email" id="mail" name="mail" value="<%= user ? (Array.isArray(user.mail) ? user.mail[0] : user.mail) : '' %>" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Contraseña <%= action === 'edit' ? '(Dejar en blanco para no cambiar)' : '' %></label>
+            <input type="password" id="password" name="password" class="form-control" <%= action === 'add' ? 'required' : '' %>>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem; align-items: center;">
+            <button type="submit" class="btn btn-primary"><%= action === 'add' ? 'Añadir Usuario' : 'Actualizar Usuario' %></button>
+            <a href="/admin/ldap-users" style="color: var(--text-muted); text-decoration: none;">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<%- include('../partials/footer') %>
