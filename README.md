@@ -34,7 +34,29 @@ Comprehensive platform for managing robotics competitions in Europe. This system
    ```
 
 2. **Configure Environment Variables**
-   Create a `.env` file in the `backend` folder based on the example provided in the documentation.
+   Create a `.env` file in the `backend` with the following content:
+
+   PORT=
+DB_HOST=
+DB_PORT=
+DB_NAME=
+DB_USER=
+DB_PASS=
+JWT_SECRET=
+NODE_ENV=
+LDAP_URL=
+LDAP_BIND_DN=cn=
+LDAP_BIND_PASSWORD=
+LDAP_BASE_DN=
+LDAP_USER_DN=
+
+
+
+
+
+
+
+
 
 3. **Start Infrastructure Services**
    ```bash
@@ -65,7 +87,7 @@ Detailed documentation is located in the `/docs` folder:
 - [Diagrams (ERD, Classes, Use Cases)](docs/diagrams.md)
 - [LDAP and Bind9 Setup](docs/ldap-bind9-setup.md)
 - [Admin Panel Manual](docs/admin-panel.md)
-- [API Documentation](docs/api.md) (Swagger/OpenAPI)
+- [API Documentation](api.robeurope.samuelponce.es/api-docs) (Swagger/OpenAPI)
 
 ## Contributing
 
