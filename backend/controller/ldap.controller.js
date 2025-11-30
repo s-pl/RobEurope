@@ -6,6 +6,11 @@ const client = ldap.createClient({
   url: process.env.LDAP_URL,
 });
 
+// Handle connection errors globally to prevent crashes
+client.on('error', (err) => {
+  console.error('LDAP Client Error:', err.message);
+});
+
 const baseDN = process.env.LDAP_BASE_DN;
 const userDN = process.env.LDAP_USER_DN;
 
