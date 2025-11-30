@@ -70,8 +70,15 @@ export const register = async (req, res) => {
       role: user.role
     }, req, 'User registration');
 
-    return res.status(201).json({
-      user: userSession
+    // Explicitly save session
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ error: 'Session save failed' });
+      }
+      return res.status(201).json({
+        user: userSession
+      });
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -108,8 +115,15 @@ export const login = async (req, res) => {
     // Log successful login
     await SystemLogger.logAuth('LOGIN', user.id, req, 'User login successful');
 
-    return res.json({
-      user: userSession
+    // Explicitly save session before responding
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ error: 'Session save failed' });
+      }
+      return res.json({
+        user: userSession
+      });
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
