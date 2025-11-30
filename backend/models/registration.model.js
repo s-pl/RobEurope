@@ -34,6 +34,7 @@ export default async function defineRegistrationModel(sequelize, DataTypes) {
             type: DataTypes.STRING,
             allowNull: true
         },
+       
         registration_date: {
             type: DataTypes.DATE,
             allowNull: false

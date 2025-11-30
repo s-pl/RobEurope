@@ -2,17 +2,21 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useApi } from '../hooks/useApi';
+import { useAuthContext } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Calendar, MapPin, Users, Video, ArrowLeft } from 'lucide-react';
+import TeamCompetitionDashboard from '../components/teams/TeamCompetitionDashboard';
 
 const CompetitionDetail = () => {
   const { id } = useParams();
   const api = useApi();
+  const { user } = useAuthContext();
   const [competition, setCompetition] = useState(null);
   const [teams, setTeams] = useState([]);
   const [streams, setStreams] = useState([]);
+  const [myTeamId, setMyTeamId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { t } = useTranslation();
@@ -29,9 +33,22 @@ const CompetitionDetail = () => {
         setCompetition(comp);
         
         // Load teams registered for this competition
-        setTeams(regs.map(r => r.Team).filter(Boolean));
+        const registeredTeams = regs.map(r => r.Team).filter(Boolean);
+        setTeams(registeredTeams);
      
         setStreams(competitionStreams);
+
+        // Check if current user is in one of these teams
+        if (user) {
+          const myMemberships = await api(`/team-members?user_id=${user.id}`);
+          const myTeamIds = myMemberships.map(m => m.team_id);
+          
+          // Find a team that is both in my teams AND registered for this competition
+          const participatingTeam = registeredTeams.find(t => myTeamIds.includes(t.id));
+          if (participatingTeam) {
+            setMyTeamId(participatingTeam.id);
+          }
+        }
 
       } catch (err) {
         setError(err.message);
@@ -40,7 +57,7 @@ const CompetitionDetail = () => {
       }
     };
     load();
-  }, [api, id]);
+  }, [api, id, user]);
 
   if (loading) return <div className="p-8 text-center">Cargando...</div>;
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
@@ -87,6 +104,11 @@ const CompetitionDetail = () => {
         </div>
         
       </div>
+
+      {/* Team Dashboard for Participants */}
+      {myTeamId && competition.is_active && (
+        <TeamCompetitionDashboard competitionId={competition.id} teamId={myTeamId} />
+      )}
 
       <div className="grid gap-8 md:grid-cols-3">
         <div className="md:col-span-2 space-y-8">

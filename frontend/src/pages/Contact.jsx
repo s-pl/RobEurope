@@ -56,9 +56,9 @@ const Contact = () => {
         <div className="grid md:grid-cols-5">
           <div className="bg-blue-900 p-8 text-white md:col-span-2 flex flex-col justify-between">
             <div>
-              <h3 className="text-2xl font-bold mb-4">Ponte en contacto</h3>
+              <h3 className="text-2xl font-bold mb-4">{t('contact.contactUs')}</h3>
               <p className="text-blue-100 mb-8">
-                Estamos aquí para ayudarte. Rellena el formulario y nos pondremos en contacto contigo lo antes posible.
+                {t('contact.contactUsDesc')}
               </p>
             </div>
             <div className="space-y-4 text-blue-200 text-sm">
@@ -79,12 +79,12 @@ const Contact = () => {
                 <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
                   <Send className="h-8 w-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900">¡Mensaje Enviado!</h3>
+                <h3 className="text-2xl font-bold text-slate-900">{t('contact.sentTitle')}</h3>
                 <p className="text-slate-600 max-w-xs mx-auto">
-                  Gracias por contactarnos. Te responderemos a la brevedad posible.
+                  {t('contact.sentDesc')}
                 </p>
                 <Button variant="outline" onClick={() => setSubmitted(false)}>
-                  Enviar otro mensaje
+                  {t('contact.sendAnother')}
                 </Button>
               </div>
             ) : (

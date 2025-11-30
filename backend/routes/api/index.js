@@ -12,6 +12,8 @@ import sponsorsRouter from './sponsors.route.js';
 import teamsRouter from './teams.route.js';
 import teamMembersRouter from './team_members.route.js';
 import systemLogRouter from './system_log.route.js';
+import robotFilesRouter from './robot_file.route.js';
+import teamLogsRouter from './team_log.route.js';
 import authenticateToken from '../../middleware/auth.middleware.js';
 const router = express.Router();
 
@@ -32,6 +34,8 @@ router.use(authenticateToken);
 router.use('/notifications', notificationsRouter);
 router.use('/registrations', registrationRouter);
 router.use('/system-logs', systemLogRouter);
+router.use('/robot-files', robotFilesRouter);
+router.use('/team-logs', teamLogsRouter);
 
 
 export default router;

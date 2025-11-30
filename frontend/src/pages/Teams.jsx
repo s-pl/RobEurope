@@ -255,7 +255,7 @@ const Teams = () => {
             <CardFooter className="pt-4 border-t border-slate-100">
               {isAuthenticated ? (
                 status.ownedTeamId === team.id || status.memberOfTeamId === team.id ? (
-                  <Button variant="outline" className="w-full" asChild>
+                  <Button variant="outline" className="w-full flex items-center justify-center" asChild>
                     <Link to="/my-team">{t('teams.manage')}</Link>
                   </Button>
                 ) : (

@@ -68,10 +68,11 @@ const sessionStore = new SequelizeStore({
   db: db.sequelize,
   tableName: 'Session'
 });
-// Ensure session table exists (non-blocking) - will create if absent
+
+
 sessionStore.sync();
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'change_me_in_env',
+  secret: process.env.SESSION_SECRET || 'Session123456789100000',
   store: sessionStore,
   resave: false,
   saveUninitialized: false,

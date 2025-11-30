@@ -14,6 +14,8 @@ import * as fixTeamMembersConstraint from '../migrations/20251122-fix-team-membe
 import * as addIsActiveToCompetitions from '../migrations/20251123-add-is-active-to-competitions.js';
 import * as createTeamMessages from '../migrations/20251123-create-team-messages.js';
 import * as updateNotificationTypeEnum from '../migrations/20251123-update-notification-type-enum.js';
+import * as createRobotFiles from '../migrations/20251130-create-robot-files.js';
+import * as createTeamLogs from '../migrations/20251130-create-team-logs.js';
 
 async function run() {
   try {
@@ -148,6 +150,22 @@ async function run() {
       console.log('Updated Notification type ENUM');
     } catch (e) {
       console.log('Skipping updateNotificationTypeEnum:', e.message);
+    }
+
+    // Create RobotFiles table
+    try {
+      await createRobotFiles.up(qi, Sequelize);
+      console.log('Created RobotFiles table');
+    } catch (e) {
+      console.log('Skipping createRobotFiles (probably already exists):', e.message);
+    }
+
+    // Create TeamLogs table
+    try {
+      await createTeamLogs.up(qi, Sequelize);
+      console.log('Created TeamLogs table');
+    } catch (e) {
+      console.log('Skipping createTeamLogs (probably already exists):', e.message);
     }
 
     console.log('Migrations applied successfully');

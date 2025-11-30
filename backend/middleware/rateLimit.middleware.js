@@ -1,5 +1,4 @@
-// Simple in-memory fixed window rate limiter
-// Not distributed; suitable for development/small deployments
+
 const stores = new Map();
 
 export default function rateLimit(options = {}) {

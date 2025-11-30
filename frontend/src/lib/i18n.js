@@ -192,7 +192,48 @@ const resources = {
         },
         pillarLabel: 'Pilar',
         loading: 'Sincronizando con la API...',
-        error: 'No se pudo cargar la información'
+        error: 'No se pudo cargar la información',
+        howItWorks: {
+          title: "Cómo Funciona",
+          description: "Participar en RobEurope es muy sencillo. Sigue estos pasos para comenzar tu viaje en la competición.",
+          steps: {
+            register: {
+              title: "Regístrate",
+              description: "Crea tu cuenta en RobEurope para acceder a todas las funcionalidades."
+            },
+            team: {
+              title: "Forma un Equipo",
+              description: "Únete a un equipo existente o crea uno nuevo con tus compañeros."
+            },
+            enroll: {
+              title: "Inscríbete",
+              description: "Busca competiciones activas y registra a tu equipo para participar."
+            },
+            compete: {
+              title: "Compite y Gana",
+              description: "Demuestra tus habilidades, sube en el ranking y gana premios."
+            }
+          }
+        },
+        stats: {
+          teams: "Equipos Activos",
+          competitions: "Competiciones Anuales",
+          viewers: "Espectadores",
+          countries: "Países"
+        },
+        latest: {
+          title: "Últimas Novedades",
+          description: "Mantente al día con las últimas noticias y competiciones de la liga.",
+          news: "Noticias",
+          viewAll: "Ver todas",
+          competitions: "Competiciones",
+          viewCalendar: "Ver calendario"
+        },
+        cta: {
+          title: "¿Listo para competir?",
+          description: "Únete a la comunidad de robótica más grande de Europa y demuestra tus habilidades.",
+          button: "Registrarse Ahora"
+        }
       },
       competitions: {
         hero: {
@@ -257,7 +298,12 @@ const resources = {
           description: 'No envía datos reales; es un mockup para validar el diseño y explicar cómo el backend recibe la información.',
           success: 'Gracias, nos pondremos en contacto muy pronto.',
           submit: 'Enviar demo'
-        }
+        },
+        contactUs: "Ponte en contacto",
+        contactUsDesc: "Estamos aquí para ayudarte. Rellena el formulario y nos pondremos en contacto contigo lo antes posible.",
+        sentTitle: "¡Mensaje Enviado!",
+        sentDesc: "Gracias por contactarnos. Te responderemos a la brevedad posible.",
+        sendAnother: "Enviar otro mensaje"
       },
       profile: {
         title: 'Mi Perfil',
@@ -562,7 +608,48 @@ const resources = {
         },
         pillarLabel: 'Pillar',
         loading: 'Syncing with the API...',
-        error: 'We could not load the information.'
+        error: 'We could not load the information.',
+        howItWorks: {
+          title: "How it Works",
+          description: "Participating in RobEurope is very simple. Follow these steps to start your journey in the competition.",
+          steps: {
+            register: {
+              title: "Register",
+              description: "Create your RobEurope account to access all features."
+            },
+            team: {
+              title: "Form a Team",
+              description: "Join an existing team or create a new one with your teammates."
+            },
+            enroll: {
+              title: "Enroll",
+              description: "Find active competitions and register your team to participate."
+            },
+            compete: {
+              title: "Compete and Win",
+              description: "Show off your skills, climb the ranking and win prizes."
+            }
+          }
+        },
+        stats: {
+          teams: "Active Teams",
+          competitions: "Annual Competitions",
+          viewers: "Viewers",
+          countries: "Countries"
+        },
+        latest: {
+          title: "Latest News",
+          description: "Stay up to date with the latest news and league competitions.",
+          news: "News",
+          viewAll: "View all",
+          competitions: "Competitions",
+          viewCalendar: "View calendar"
+        },
+        cta: {
+          title: "Ready to compete?",
+          description: "Join the largest robotics community in Europe and show your skills.",
+          button: "Register Now"
+        }
       },
       competitions: {
         hero: {
@@ -627,7 +714,12 @@ const resources = {
           description: 'This does not send real data; it is a mockup to explain how the backend receives info.',
           success: 'Thanks! We will get back to you shortly.',
           submit: 'Send demo'
-        }
+        },
+        contactUs: "Get in touch",
+        contactUsDesc: "We are here to help. Fill out the form and we will get back to you as soon as possible.",
+        sentTitle: "Message Sent!",
+        sentDesc: "Thank you for contacting us. We will respond shortly.",
+        sendAnother: "Send another message"
       },
       profile: {
         title: 'My Profile',
@@ -930,7 +1022,48 @@ const resources = {
         },
         pillarLabel: 'Säule',
         loading: 'Synchronisiere mit der API...',
-        error: 'Informationen konnten nicht geladen werden.'
+        error: 'Informationen konnten nicht geladen werden.',
+        howItWorks: {
+          title: "Wie es funktioniert",
+          description: "Die Teilnahme an RobEurope ist ganz einfach. Folgen Sie diesen Schritten, um Ihre Reise im Wettbewerb zu beginnen.",
+          steps: {
+            register: {
+              title: "Registrieren",
+              description: "Erstellen Sie Ihr RobEurope-Konto, um auf alle Funktionen zuzugreifen."
+            },
+            team: {
+              title: "Team bilden",
+              description: "Treten Sie einem bestehenden Team bei oder gründen Sie ein neues mit Ihren Teamkollegen."
+            },
+            enroll: {
+              title: "Anmelden",
+              description: "Finden Sie aktive Wettbewerbe und melden Sie Ihr Team zur Teilnahme an."
+            },
+            compete: {
+              title: "Wettbewerb und Gewinn",
+              description: "Zeigen Sie Ihre Fähigkeiten, steigen Sie im Ranking auf und gewinnen Sie Preise."
+            }
+          }
+        },
+        stats: {
+          teams: "Aktive Teams",
+          competitions: "Jährliche Wettbewerbe",
+          viewers: "Zuschauer",
+          countries: "Länder"
+        },
+        latest: {
+          title: "Neueste Nachrichten",
+          description: "Bleiben Sie auf dem Laufenden mit den neuesten Nachrichten und Ligawettbewerben.",
+          news: "Nachrichten",
+          viewAll: "Alle anzeigen",
+          competitions: "Wettbewerbe",
+          viewCalendar: "Kalender anzeigen"
+        },
+        cta: {
+          title: "Bereit zum Wettbewerb?",
+          description: "Treten Sie der größten Robotik-Community in Europa bei und zeigen Sie Ihre Fähigkeiten.",
+          button: "Jetzt registrieren"
+        }
       },
       competitions: {
         hero: {
@@ -967,7 +1100,8 @@ const resources = {
           location: 'Ort',
           startDate: 'Startdatum',
           endDate: 'Enddatum',
-          maxTeams: 'Max. Teams'
+          maxTeams: 'Max. Teams',
+          isActive: 'Als aktiven Wettbewerb markieren (deaktiviert andere)'
         },
         loadError: 'Fehler beim Laden der Wettbewerbe.',
         createError: 'Fehler beim Erstellen des Wettbewerbs',
@@ -990,7 +1124,12 @@ const resources = {
           description: 'Dies sendet keine echten Daten; es ist ein Mockup zur Illustration der Backend-Flows.',
           success: 'Danke! Wir melden uns in Kürze.',
           submit: 'Demo senden'
-        }
+        },
+        contactUs: "Kontaktieren Sie uns",
+        contactUsDesc: "Wir sind hier, um zu helfen. Füllen Sie das Formular aus und wir werden uns so schnell wie möglich bei Ihnen melden.",
+        sentTitle: "Nachricht gesendet!",
+        sentDesc: "Danke für Ihre Nachricht. Wir werden uns in Kürze melden.",
+        sendAnother: "Eine weitere Nachricht senden"
       },
       profile: {
         heroTagline: 'Verknüpftes Konto',

@@ -78,26 +78,26 @@ const Home = () => {
 
   const steps = [
     { 
-      title: "Regístrate", 
-      description: "Crea tu cuenta en RobEurope para acceder a todas las funcionalidades.",
+      title: t('home.howItWorks.steps.register.title'), 
+      description: t('home.howItWorks.steps.register.description'),
       icon: UserPlus,
       color: "bg-blue-100 text-blue-600"
     },
     { 
-      title: "Forma un Equipo", 
-      description: "Únete a un equipo existente o crea uno nuevo con tus compañeros.",
+      title: t('home.howItWorks.steps.team.title'), 
+      description: t('home.howItWorks.steps.team.description'),
       icon: Users,
       color: "bg-indigo-100 text-indigo-600"
     },
     { 
-      title: "Inscríbete", 
-      description: "Busca competiciones activas y registra a tu equipo para participar.",
+      title: t('home.howItWorks.steps.enroll.title'), 
+      description: t('home.howItWorks.steps.enroll.description'),
       icon: Trophy,
       color: "bg-purple-100 text-purple-600"
     },
     { 
-      title: "Compite y Gana", 
-      description: "Demuestra tus habilidades, sube en el ranking y gana premios.",
+      title: t('home.howItWorks.steps.compete.title'), 
+      description: t('home.howItWorks.steps.compete.description'),
       icon: Medal,
       color: "bg-amber-100 text-amber-600"
     }
@@ -157,19 +157,19 @@ const Home = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="space-y-2">
                 <h3 className="text-4xl font-bold text-blue-600 dark:text-blue-400">50+</h3>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Equipos Activos</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('home.stats.teams')}</p>
             </div>
             <div className="space-y-2">
                 <h3 className="text-4xl font-bold text-blue-600 dark:text-blue-400">12</h3>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Competiciones Anuales</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('home.stats.competitions')}</p>
             </div>
             <div className="space-y-2">
                 <h3 className="text-4xl font-bold text-blue-600 dark:text-blue-400">10k+</h3>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Espectadores</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('home.stats.viewers')}</p>
             </div>
             <div className="space-y-2">
                 <h3 className="text-4xl font-bold text-blue-600 dark:text-blue-400">3</h3>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Países</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('home.stats.countries')}</p>
             </div>
         </div>
       </section>
@@ -177,9 +177,9 @@ const Home = () => {
     
       <section className="space-y-16">
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">Cómo Funciona</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">{t('home.howItWorks.title')}</h2>
           <p className="text-lg text-slate-600 dark:text-slate-400">
-            Participar en RobEurope es muy sencillo. Sigue estos pasos para comenzar tu viaje en la competición.
+            {t('home.howItWorks.description')}
           </p>
         </div>
 
@@ -205,8 +205,8 @@ const Home = () => {
    
       <section className="space-y-10">
         <div className="text-center max-w-2xl mx-auto space-y-4">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Últimas Novedades</h2>
-            <p className="text-slate-600 dark:text-slate-400">Mantente al día con las últimas noticias y competiciones de la liga.</p>
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{t('home.latest.title')}</h2>
+            <p className="text-slate-600 dark:text-slate-400">{t('home.latest.description')}</p>
         </div>
         
         <div className="grid md:grid-cols-2 gap-8">
@@ -214,9 +214,9 @@ const Home = () => {
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold flex items-center gap-2">
-                        <Newspaper className="h-5 w-5 text-blue-600" /> Noticias
+                        <Newspaper className="h-5 w-5 text-blue-600" /> {t('home.latest.news')}
                     </h3>
-                    <Link to="/posts" className="text-sm text-blue-600 hover:underline">Ver todas</Link>
+                    <Link to="/posts" className="text-sm text-blue-600 hover:underline">{t('home.latest.viewAll')}</Link>
                 </div>
                 <div className="space-y-4">
                     {highlights.posts.slice(0, 3).map(post => (
@@ -234,9 +234,9 @@ const Home = () => {
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold flex items-center gap-2">
-                        <Trophy className="h-5 w-5 text-blue-600" /> Competiciones
+                        <Trophy className="h-5 w-5 text-blue-600" /> {t('home.latest.competitions')}
                     </h3>
-                    <Link to="/competitions" className="text-sm text-blue-600 hover:underline">Ver calendario</Link>
+                    <Link to="/competitions" className="text-sm text-blue-600 hover:underline">{t('home.latest.viewCalendar')}</Link>
                 </div>
                 <div className="space-y-4">
                     {highlights.competitions.slice(0, 3).map(comp => (
@@ -261,10 +261,10 @@ const Home = () => {
       <section className="relative rounded-3xl overflow-hidden bg-blue-600 text-white py-20 px-6 text-center">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?q=80&w=2069&auto=format&fit=crop')] bg-cover bg-center opacity-10 mix-blend-overlay"></div>
         <div className="relative z-10 max-w-3xl mx-auto space-y-8">
-            <h2 className="text-4xl font-bold">¿Listo para competir?</h2>
-            <p className="text-blue-100 text-lg">Únete a la comunidad de robótica más grande de Europa y demuestra tus habilidades.</p>
+            <h2 className="text-4xl font-bold">{t('home.cta.title')}</h2>
+            <p className="text-blue-100 text-lg">{t('home.cta.description')}</p>
             <Button asChild size="lg" className="h-14 px-8 text-lg bg-white text-blue-600 hover:bg-blue-50 border-none shadow-lg">
-                <Link to="/register">Registrarse Ahora</Link>
+                <Link to="/register">{t('home.cta.button')}</Link>
             </Button>
         </div>
       </section>

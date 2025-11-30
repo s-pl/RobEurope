@@ -8,10 +8,10 @@ export function requireAdminSession(req, res, next) {
     // If user is logged in but not admin, allow them to see a "Forbidden" page with a logout link
     // or redirect to a specific error page. For now, we'll render a simple error with a link.
     return res.status(403).send(`
-      <h1>Acceso Denegado</h1>
-      <p>Tu usuario actual (${user.email}) no tiene permisos de administrador.</p>
-      <p><a href="/admin/logout">Cerrar sesión</a> para entrar con otra cuenta.</p>
-      <p><a href="/">Volver al inicio</a></p>
+      <h1>Forbidden access</h1>
+      <p>Your current user (${user.email}) does not have administrator permissions.</p>
+      <p><a href="/admin/logout">Log out</a> to sign in with a different account.</p>
+      <p><a href="/">Return to home</a></p>
     `);
   }
   next();
