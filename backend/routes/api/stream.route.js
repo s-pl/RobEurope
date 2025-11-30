@@ -10,6 +10,6 @@ router.get('/', getStreams);
 router.get('/:id', getStreamById);
 router.post('/', authenticateToken, createStream);
 router.put('/:id', authenticateToken, updateStream);
-router.delete('/:id', authenticateToken, requireRole('admin'), deleteStream);
+router.delete('/:id', authenticateToken, deleteStream);
 
 export default router;

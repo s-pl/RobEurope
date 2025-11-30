@@ -24,7 +24,13 @@ export const getRegistrations = async (req, res) => {
     if (team_id) where.team_id = team_id;
     if (status) where.status = status;
 
-    const items = await Registration.findAll({ where, limit: Number(limit), offset: Number(offset), order: [['registration_date', 'DESC']] });
+    const items = await Registration.findAll({ 
+      where, 
+      limit: Number(limit), 
+      offset: Number(offset), 
+      order: [['registration_date', 'DESC']],
+      include: [{ model: Team }]
+    });
     res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });

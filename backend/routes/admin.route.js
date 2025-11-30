@@ -22,6 +22,7 @@ import {
   updateRegistrationStatus
 } from '../controller/admin.controller.js';
 import * as crudController from '../controller/admin.crud.controller.js';
+import * as ldapController from '../controller/ldap.controller.js';
 
 const router = Router();
 
@@ -48,6 +49,14 @@ router.get('/api/registrations-stats', requireAdminSession, getRegistrationStats
 router.get('/api/users-detailed', requireAdminSession, getDetailedUsers);
 router.get('/api/competitions-stats', requireAdminSession, getCompetitionStats);
 router.get('/api/logs-stats', requireAdminSession, getLogsStats);
+
+// LDAP routes
+router.get('/ldap-users', requireAdminSession, ldapController.listLdapUsers);
+router.get('/ldap-users/add', requireAdminSession, ldapController.renderAddLdapUser);
+router.post('/ldap-users/add', requireAdminSession, ldapController.addLdapUser);
+router.get('/ldap-users/edit/:uid', requireAdminSession, ldapController.renderEditLdapUser);
+router.post('/ldap-users/edit/:uid', requireAdminSession, ldapController.updateLdapUser);
+router.post('/ldap-users/delete/:uid', requireAdminSession, ldapController.deleteLdapUser);
 
 // Generic CRUD routes (Must be last to avoid conflicts)
 router.get('/:model', requireAdminSession, crudController.list);

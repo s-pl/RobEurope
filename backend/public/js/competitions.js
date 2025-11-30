@@ -1,4 +1,3 @@
-// Competitions Page - Charts
 function waitForDependencies(callback) {
   if (typeof d3 !== 'undefined' && typeof window.chartUtils !== 'undefined') {
     callback();

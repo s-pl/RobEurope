@@ -1,0 +1,56 @@
+<%- include('../partials/header', { title: 'Usuarios LDAP' }) %>
+
+<h2>Usuarios LDAP</h2>
+
+<div class="card">
+    <div style="margin-bottom: 1.5rem;">
+        <a href="/admin/ldap-users/add" class="btn btn-primary">
+            <span>+</span> Añadir Usuario
+        </a>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>UID</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (users && users.length > 0) { %>
+                    <% users.forEach(user => { %>
+                        <% if (user && user.uid) { %>
+                        <tr>
+                            <td><%= Array.isArray(user.uid) ? user.uid[0] : user.uid %></td>
+                            <td><%= Array.isArray(user.cn) ? user.cn[0] : user.cn %></td>
+                            <td><%= Array.isArray(user.sn) ? user.sn[0] : user.sn %></td>
+                            <td><%= Array.isArray(user.mail) ? user.mail[0] : user.mail %></td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <a href="/admin/ldap-users/edit/<%= Array.isArray(user.uid) ? user.uid[0] : user.uid %>" class="btn btn-sm btn-primary" style="background: transparent; color: var(--primary); border: 1px solid var(--border);">Editar</a>
+                                    <form action="/admin/ldap-users/delete/<%= Array.isArray(user.uid) ? user.uid[0] : user.uid %>" method="POST" style="display: inline;">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar usuario?')">Eliminar</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <% } %>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                            No se encontraron usuarios LDAP.
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

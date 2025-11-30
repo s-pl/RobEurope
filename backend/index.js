@@ -229,10 +229,62 @@ setIO(io);
 
 io.on('connection', (socket) => {
   logger.info({ socket: 'connected', id: socket.id, ip: socket.handshake.address });
+  
+  socket.on('join_team', (data) => {
+    // Support both legacy (teamId only) and new ({ teamId, user }) formats
+    const teamId = typeof data === 'object' ? data.teamId : data;
+    const user = typeof data === 'object' ? data.user : null;
+
+    if (teamId) {
+      const room = `team_${teamId}`;
+      socket.join(room);
+      
+      if (user) {
+        socket.data.user = user;
+        socket.data.teamId = teamId;
+        broadcastTeamUsers(room);
+      }
+      
+      logger.info({ socket: 'joined_team', id: socket.id, teamId, userId: user?.id });
+    }
+  });
+
+  socket.on('typing', (data) => {
+    if (data.teamId && data.user) {
+      socket.to(`team_${data.teamId}`).emit('user_typing', data.user);
+    }
+  });
+
+  socket.on('stop_typing', (data) => {
+    if (data.teamId && data.user) {
+      socket.to(`team_${data.teamId}`).emit('user_stop_typing', data.user);
+    }
+  });
+
   socket.on('disconnect', (reason) => {
     logger.info({ socket: 'disconnected', id: socket.id, reason });
+    if (socket.data.teamId) {
+      broadcastTeamUsers(`team_${socket.data.teamId}`);
+    }
   });
 });
+
+function broadcastTeamUsers(room) {
+  const clients = io.sockets.adapter.rooms.get(room);
+  if (clients) {
+    const users = [];
+    for (const clientId of clients) {
+      const clientSocket = io.sockets.sockets.get(clientId);
+      if (clientSocket && clientSocket.data.user) {
+        // Avoid duplicates if same user has multiple tabs open
+        if (!users.find(u => u.id === clientSocket.data.user.id)) {
+          users.push(clientSocket.data.user);
+        }
+      }
+    }
+    io.to(room).emit('team_users_update', users);
+  }
+}
 
 if (process.env.NODE_ENV !== 'test') {
   server.listen(PORT, '0.0.0.0', () => {

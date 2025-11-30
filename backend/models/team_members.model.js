@@ -37,6 +37,9 @@ export default async function defineTeamMembersModel(sequelize, DataTypes) {
             type: DataTypes.DATE,
             allowNull: true
         }
+    }, {
+        tableName: 'TeamMembers', // Explicitly set table name to match migration
+        timestamps: false // Migration didn't create createdAt/updatedAt for this table (only joined_at)
     });
 
     TeamMembers.associate = (models) => {

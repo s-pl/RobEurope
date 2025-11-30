@@ -1,0 +1,223 @@
+@startuml Class Diagram
+!define Controller(name) class name <<Controller>> #LightBlue
+!define Model(name) class name <<Model>> #LightGreen
+!define Service(name) class name <<Service>> #LightYellow
+!define Middleware(name) class name <<Middleware>> #LightCoral
+
+' Controllers
+Controller(AuthController) {
+    +login(req, res)
+    +register(req, res)
+    +logout(req, res)
+    +refreshToken(req, res)
+}
+
+Controller(UserController) {
+    +getProfile(req, res)
+    +updateProfile(req, res)
+    +getUsers(req, res)
+    +deleteUser(req, res)
+}
+
+Controller(TeamController) {
+    +createTeam(req, res)
+    +getTeams(req, res)
+    +updateTeam(req, res)
+    +deleteTeam(req, res)
+    +addMember(req, res)
+    +removeMember(req, res)
+}
+
+Controller(CompetitionController) {
+    +createCompetition(req, res)
+    +getCompetitions(req, res)
+    +updateCompetition(req, res)
+    +registerTeam(req, res)
+}
+
+Controller(PostController) {
+    +createPost(req, res)
+    +getPosts(req, res)
+    +updatePost(req, res)
+    +deletePost(req, res)
+    +likePost(req, res)
+}
+
+Controller(AdminController) {
+    +getDashboard(req, res)
+    +manageUsers(req, res)
+    +manageCompetitions(req, res)
+    +systemLogs(req, res)
+}
+
+Controller(LdapController) {
+    +listLdapUsers(req, res)
+    +createLdapUser(req, res)
+    +updateLdapUser(req, res)
+    +deleteLdapUser(req, res)
+}
+
+' Models
+Model(User) {
+    -id: UUID
+    -username: String
+    -email: String
+    -password: String
+    -role: String
+    -is_active: Boolean
+    +hashPassword()
+    +validatePassword(password)
+    +toJSON()
+}
+
+Model(Team) {
+    -id: Integer
+    -name: String
+    -description: String
+    -captain_id: UUID
+    -competition_id: Integer
+    +addMember(user, role)
+    +removeMember(user)
+    +isFull()
+}
+
+Model(Competition) {
+    -id: Integer
+    -title: String
+    -description: String
+    -status: String
+    -start_date: Date
+    -end_date: Date
+    +isActive()
+    +canRegister()
+    +getRegisteredTeams()
+}
+
+Model(Post) {
+    -id: Integer
+    -title: String
+    -content: String
+    -user_id: UUID
+    -is_pinned: Boolean
+    +getComments()
+    +getLikesCount()
+}
+
+Model(Comment) {
+    -id: Integer
+    -content: String
+    -post_id: Integer
+    -user_id: UUID
+    +getAuthor()
+}
+
+Model(Notification) {
+    -id: Integer
+    -type: String
+    -title: String
+    -message: String
+    -user_id: UUID
+    -is_read: Boolean
+    +markAsRead()
+}
+
+' Services
+Service(AuthService) {
+    +generateToken(payload)
+    +verifyToken(token)
+    +hashPassword(password)
+    +validatePassword(password, hash)
+}
+
+Service(EmailService) {
+    +sendWelcomeEmail(user)
+    +sendNotificationEmail(user, notification)
+    +sendTeamInviteEmail(email, team, token)
+}
+
+Service(LdapService) {
+    +connect()
+    +search(baseDN, filter)
+    +add(dn, entry)
+    +modify(dn, changes)
+    +delete(dn)
+}
+
+Service(FileService) {
+    +uploadFile(file, userId)
+    +deleteFile(fileId)
+    +getFileUrl(fileId)
+    +validateFile(file)
+}
+
+' Middleware
+Middleware(AuthMiddleware) {
+    +authenticate(req, res, next)
+    +requireRole(role)
+    +requireOwnership(resource)
+}
+
+Middleware(ValidationMiddleware) {
+    +validateRegistration(req, res, next)
+    +validateTeamCreation(req, res, next)
+    +validatePostCreation(req, res, next)
+}
+
+Middleware(RateLimitMiddleware) {
+    +checkLimit(req, res, next)
+    +getRemainingRequests(ip)
+}
+
+Middleware(SessionMiddleware) {
+    +createSession(user)
+    +destroySession(sessionId)
+    +validateSession(sessionId)
+}
+
+' Relationships
+AuthController --> AuthService : uses
+AuthController --> User : manages
+
+UserController --> User : manages
+UserController --> AuthMiddleware : protected by
+
+TeamController --> Team : manages
+TeamController --> User : references
+TeamController --> AuthMiddleware : protected by
+
+CompetitionController --> Competition : manages
+CompetitionController --> Team : references
+
+PostController --> Post : manages
+PostController --> Comment : manages
+PostController --> AuthMiddleware : protected by
+
+AdminController --> User : manages
+AdminController --> Competition : manages
+AdminController --> SystemLog : reads
+
+LdapController --> LdapService : uses
+LdapController --> User : syncs with
+
+' Model Relationships
+User --> TeamMembers : has many
+User --> Post : has many
+User --> Comment : has many
+User --> Notification : has many
+
+Team --> TeamMembers : has many
+Team --> Competition : belongs to
+
+Competition --> Registration : has many
+Competition --> Stream : has many
+
+Post --> Comment : has many
+Post --> PostLike : has many
+
+' Service Relationships
+AuthService --> User : validates
+EmailService --> User : sends to
+LdapService --> User : syncs
+FileService --> Media : manages
+
+@enduml

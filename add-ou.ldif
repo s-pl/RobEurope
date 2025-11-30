@@ -1,0 +1,3 @@
+dn: ou=users,dc=robeurope,dc=samuelponce,dc=es
+objectClass: organizationalUnit
+ou: users

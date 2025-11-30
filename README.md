@@ -1,217 +1,102 @@
+﻿# RobEurope Platform
 
+Comprehensive platform for managing robotics competitions in Europe. This system allows users to register, form teams, sign up for competitions, and follow live events.
 
-# ⚙️ **RobEurope**
+## Features
 
-> **Redesign of [robeurope.com](https://robeurope.com)** by  
-> **Samuel Ponce Luna**, **Ángel Lallave Herrera**, and **Néstor García Santos**  
-> from **IES El Rincón**
+- **User Management**: Registration, authentication, and user profiles.
+- **Teams**: Team creation, member invitations, and role management.
+- **Competitions**: Event calendar, registrations, and status tracking.
+- **Admin Panel**: Complete interface for platform management.
+- **LDAP Integration**: Centralized identity management with OpenLDAP.
+- **Docker Infrastructure**: Containerized deployment of auxiliary services (LDAP, DNS).
 
----
+## Technologies
 
-## 🌍 Overview
+- **Backend**: Node.js, Express.js
+- **Database**: MySQL (Sequelize ORM)
+- **Frontend**: EJS (Server-Side Rendering for Admin), React (Client - *in development*)
+- **Infrastructure**: Docker, Docker Compose
+- **Services**: OpenLDAP, Bind9
 
-**RobEurope** is an open-source backend for a **competitive gaming & events platform**.  
-It enables management of **users, teams, competitions, registrations, posts, notifications, and sponsors**.  
+## Prerequisites
 
-This repository contains the **Node.js API** (Express + Sequelize) and all developer tools:  
-seeders, minimal test UI, and Swagger API documentation.
+- Node.js (v18 or higher)
+- Docker and Docker Compose
+- MySQL (or use managed service)
 
----
+## Installation and Setup
 
-## 🌟 Key Features
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/s-pl/RobEurope.git
+   cd RobEurope
+   ```
 
-- **Single Active Competition**: The system enforces a single active competition at a time. Activating one automatically deactivates others.
-- **Access Control**: Sensitive competition details (like stream URLs) are only visible to approved participants.
-- **Team Management**: Users can create teams, invite members, and manage their roster.
-- **Live Streaming**: Integrated stream management with access restrictions based on registration status.
-- **Internationalization**: Full support for English, Spanish, and German.
+2. **Configure Environment Variables**
+   Create a `.env` file in the `backend` with the following content:
 
-## 📚 Documentation
+   PORT=
+DB_HOST=
+DB_PORT=
+DB_NAME=
+DB_USER=
+DB_PASS=
+JWT_SECRET=
+NODE_ENV=
+LDAP_URL=
+LDAP_BIND_DN=cn=
+LDAP_BIND_PASSWORD=
+LDAP_BASE_DN=
+LDAP_USER_DN=
 
-Complete project documentation is available in the [`docs/`](docs/) directory:
 
-- **[🏗️ Architecture](docs/architecture.md)** - System architecture and design
-- **[🔌 API Reference](docs/api.md)** - Complete API documentation
-- **[🛠️ Development Guide](docs/development.md)** - Setup and development workflow
-- **[🔒 Security Guide](docs/security.md)** - Security measures and best practices
-- **[📊 System Diagrams](docs/diagrams/diagrams.md)** - ERD, use cases, and architecture diagrams
-- **[⚙️ HTTPS Setup Guide](docs/howToHttps.md)** - Setting up HTTPS with Nginx and Let's Encrypt
 
----
 
-## 🧠 Authors & Credits
 
-| Name | Role | Institution |
-|------|------|--------------|
-| Samuel Ponce Luna | Full-Stack Developer | IES El Rincón |
-| Ángel Lallave Herrera | Frontend & UI/UX Designer | IES El Rincón |
-| Néstor García Santos | Backend & Frontend | IES El Rincón |
 
----
 
-## 🔗 Useful Links
 
-| Resource | Link |
-|-----------|------|
-| 🖥️ **Frontend (Main URL)**  | [https://robeurope.samuelponce.es](https://robeurope.samuelponce.es) | 
-| 🌐 **Live Swagger Docs** | [https://api.robeurope.samuelponce.es/api-docs/](https://api.robeurope.samuelponce.es/api-docs/) |
-| 🧩 **Postman Collection** | [View on Postman](https://solar-crater-87778.postman.co/workspace/Team-Workspace~863e014b-231f-4611-84da-6746814f344e/collection/15303917-8ce87247-fb50-4d0f-8770-de9131768fd1) |
-| 🎨 **Figma UI Design** | [View on Figma](https://www.figma.com/design/UptdKH6RgmLhRwNIkr5qpU/Sin-t%C3%ADtulo?node-id=0-1&t=WDyHv57bP0Kiux3v-1) |
 
----
+3. **Start Infrastructure Services**
+   ```bash
+   docker-compose up -d
+   ```
 
-## 🧱 Tech Stack
+4. **Install Backend Dependencies**
+   ```bash
+   cd backend
+   npm install
+   ```
 
-| Layer | Technologies |
-|--------|---------------|
-| 🎨 **Frontend** | React (In Progress) |
-| ⚙️ **Backend** | Node.js (ESM) + Express + Sequelize |
-| 💾 **Database** | MySQL (with Sequelize ORM) |
-| 🔐 **Auth** | JWT (public API) + Session (Admin Panel) |
-| 📄 **API Docs** | Swagger UI (via `/api-docs`) |
+5. **Initialize Database and LDAP**
+   ```bash
+   npm run migrate
+   node init-ldap.js
+   ```
 
----
-## 📘 Diagrams
-Diagrams can be seen in ![Docs](https://github.com/s-pl/RobEurope/docs/diagrams/diagrams.md)
+6. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
 
-## 🚀 Quickstart (Developer Setup)
+## Documentation
 
-### 1️⃣ Install dependencies
+Detailed documentation is located in the `/docs` folder:
 
-```bash
-cd backend
-npm install
-```
+- [Diagrams (ERD, Classes, Use Cases)](docs/diagrams.md)
+- [LDAP and Bind9 Setup](docs/ldap-bind9-setup.md)
+- [Admin Panel Manual](docs/admin-panel.md)
+- [API Documentation](api.robeurope.samuelponce.es/api-docs) (Swagger/OpenAPI)
 
-### 2️⃣ Create environment file
+## Contributing
 
-In `backend/.env`:
+1. Fork the project.
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
 
-```env
-PORT=85
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_NAME=robeurope
-DB_USER=root
-DB_PASS=your_password
-NODE_ENV=development
-JWT_SECRET=your_secret_key_for_jwt
-```
+## License
 
-### 3️⃣ Seed minimal data (example: countries)
-
-```bash
-npm run seed (in backend/)
-```
-
-### 4️⃣ Start the backend
-
-```bash
-node index.js (or npm start) 
-```
-
-👉 API runs at:  
-**http://localhost:85/api**
-
-Swagger Docs:  
-**http://localhost:85/api-docs**
-
----
-
-## 🛠 Admin Panel
-
-The project includes a minimal EJS-powered admin panel for privileged management tasks.
-
-| Feature | Description |
-|---------|-------------|
-| Session Auth | Uses `express-session` with Sequelize store to persist administrator sessions. |
-| CSRF Protection | Enabled via `csurf` for all admin POST forms. |
-| Request Tracking | Every request gets an `X-Request-Id` header (UUID) for log correlation. |
-| Role Gate | Only users with role `super_admin` may access admin routes. |
-| Views | Located under `backend/views/` (`login.ejs`, `dashboard.ejs`, `users.ejs`). |
-
-### Default Admin Credentials (Seeder)
-
-After running `npm run seed`, a default super administrator user is ensured:
-
-```
-Email: admin@example.com
-Password: ChangeMe123!
-Role: super_admin
-```
-
-Change the password in production by updating the user directly or setting `SEED_SUPERADMIN_PASSWORD` before running seeders the first time.
-
-### Panel Routes
-
-| Route | Purpose |
-|-------|---------|
-| `/admin/login` | Session-based login form (POST email/password) |
-| `/admin` | Dashboard with basic statistics |
-| `/admin/users` | User listing + promote action |
-| `/admin/users/:id/promote` | POST to elevate a user to `super_admin` |
-
-### Environment Variables (Admin Panel)
-
-Add to `.env`:
-```env
-SESSION_SECRET=change_this_in_prod
-SEED_SUPERADMIN_PASSWORD=ChangeMe123!
-```
-
-### Security Notes
-
-- Behind a reverse proxy (Nginx), set `app.set('trust proxy', 1)` and change session cookie `secure: true`.
-- CSRF tokens are already injected in forms via hidden `_csrf` fields.
-- Use HTTPS everywhere; see `docs/howToHttps.md`.
-- Consider adding content security policy (CSP) if panel grows.
-
----
-
-
-## 🔑 Authentication
-
-- JWT-based (Bearer tokens)
-- Include this header in protected routes:
-  ```http
-  Authorization: Bearer <your_token>
-  ```
-- Tokens are returned after login or register.
-- Default expiration: **1 hour** (configurable).
-
-### Dual Auth Model
-
-- Public API: JWT (Bearer tokens) for SPA / external clients.
-- Admin Panel: Server-side sessions (no JWT needed once logged into panel).
-
----
-
----
-
-## Nginx Reverse Proxy Setup for HTTPS
-
-Documentation for setting up Nginx as a reverse proxy with HTTPS can be found in [docs/howToHttps.md](docs/howToHttps.md).
-
----
-
-## 🧪 Testing
-
-Run backend tests:
-```bash
-cd backend
-npm test
-```
-Add new tests under `backend/__tests__/` (e.g. session login, protected admin access). Supertest + Vitest are configured.
-
----
-
-## 📌 Roadmap (Next Improvements)
-
-- Input validation layer (`zod` or `express-validator`).
-- Pagination + filtering for large lists.
-- Service layer abstraction for controllers.
-- Index optimization and query performance profiling.
-- CSP & advanced security headers.
-- More comprehensive audit logging UI.
-
----
+Distributed under the MIT License. See `LICENSE` for more information.

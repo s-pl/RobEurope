@@ -62,8 +62,10 @@ export const getCompetitionById = async (req, res) => {
 
     // Check if user is approved for this competition
     let isApproved = false;
-    if (req.user) {
-      const userTeams = await TeamMembers.findAll({ where: { user_id: req.user.id, left_at: null } });
+    const currentUser = req.user || req.session?.user;
+    
+    if (currentUser) {
+      const userTeams = await TeamMembers.findAll({ where: { user_id: currentUser.id, left_at: null } });
       const teamIds = userTeams.map(tm => tm.team_id);
       
       if (teamIds.length > 0) {

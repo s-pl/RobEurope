@@ -31,13 +31,19 @@ export const getTeamMembers = async (req, res) => {
     const userIds = [...new Set(items.map(i => i.user_id))];
     let usersById = {};
     if (userIds.length) {
-      const users = await User.findAll({ where: { id: userIds }, attributes: ['id','username','email','first_name','last_name'] });
+      const users = await User.findAll({ where: { id: userIds }, attributes: ['id','username','email','first_name','last_name', 'profile_photo_url'] });
       usersById = Object.fromEntries(users.map(u => [u.id, u]));
     }
     const enriched = items.map(i => {
       const u = usersById[i.user_id];
       const plain = i.toJSON();
-      return { ...plain, user_username: u?.username || null, user_email: u?.email || null, user_name: u ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : null };
+      return { 
+        ...plain, 
+        user_username: u?.username || null, 
+        user_email: u?.email || null, 
+        user_name: u ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : null,
+        user_photo: u?.profile_photo_url || null
+      };
     });
     res.json(enriched);
   } catch (err) {

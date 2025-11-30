@@ -1,21 +1,21 @@
 <%- include('partials/header') %>
 
-<h2>📋 Logs del Sistema</h2>
+<h2> Logs del Sistema</h2>
 
 <div class="charts-container">
   <div class="chart-wrapper">
-    <h3>🔧 Acciones Registradas</h3>
+    <h3> Acciones Registradas</h3>
     <svg id="actionsChart"></svg>
   </div>
 
   <div class="chart-wrapper">
-    <h3>📦 Entidades Modificadas</h3>
+    <h3> Entidades Modificadas</h3>
     <svg id="entitiesChart"></svg>
   </div>
 </div>
 
 <div style="margin: 2rem 0;">
-  <h3>🔍 Filtros</h3>
+  <h3> Filtros</h3>
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
     <input type="text" id="searchLog" placeholder="Buscar por usuario o acción..." style="grid-column: 1 / -1;">
     <select id="actionFilter">

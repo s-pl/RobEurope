@@ -28,26 +28,6 @@ const resolveDefaultBase = () => {
   console.log('VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL, 'envBase:', envBase);
   if (envBase) return envBase;
 
-  const stored = normalizeBase(readStoredBase());
-  console.log('stored:', stored);
-  if (stored) return stored;
-
-  if (typeof window !== 'undefined') {
-    const { origin } = window.location;
-    console.log('origin:', origin);
-    if (origin.includes('46.101.255.106')) {
-      return normalizeBase(origin);
-    }
-    if (origin.includes('robeurope.samuelponce.es')) {
-      return normalizeBase(origin);
-    }
-  }
-
-  for (const fallback of FALLBACK_BASES) {
-    const normalized = normalizeBase(fallback);
-    if (normalized) return normalized;
-  }
-
   return 'http://localhost:85/api';
 };
 

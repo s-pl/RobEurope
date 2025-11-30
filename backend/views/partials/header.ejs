@@ -7,13 +7,25 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1.5.10/css/pico.min.css" />
   <style>
     :root {
-      --primary: #0ea5e9;
-      --primary-hover: #0284c7;
-      --background: #0f172a;
-      --surface: #1e293b;
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
-      --border: #334155;
+      --primary: #2563eb; /* Solid blue */
+      --primary-hover: #1d4ed8;
+      --background: #ffffff; /* Light background */
+      --surface: #f8fafc; /* Light surface */
+      --text: #0f172a; /* Dark text */
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary: #3b82f6;
+        --primary-hover: #60a5fa;
+        --background: #0f172a; /* Dark background */
+        --surface: #1e293b; /* Dark surface */
+        --text: #f1f5f9; /* Light text */
+        --text-muted: #94a3b8;
+        --border: #334155;
+      }
     }
 
     * {
@@ -23,7 +35,7 @@
     body {
       background: var(--background);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       min-height: 100vh;
       display: flex;
       margin: 0;
@@ -31,7 +43,7 @@
 
     /* Sidebar */
     .sidebar {
-      width: 260px;
+      width: 250px;
       background: var(--surface);
       border-right: 1px solid var(--border);
       display: flex;
@@ -46,46 +58,45 @@
     .sidebar-header {
       padding: 1.5rem;
       border-bottom: 1px solid var(--border);
-      background: linear-gradient(to right, var(--surface), #0f172a);
     }
 
     .sidebar-brand {
-      font-size: 1.25rem;
-      font-weight: bold;
-      background: linear-gradient(135deg, #0ea5e9, #06b6d4);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
 
     .sidebar-nav {
-      padding: 1rem;
+      padding: 1rem 0.75rem;
       flex: 1;
     }
 
     .nav-item {
       display: block;
-      padding: 0.75rem 1rem;
+      padding: 0.6rem 0.75rem;
       color: var(--text-muted);
       text-decoration: none;
       border-radius: 6px;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.1rem;
       transition: all 0.2s ease;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      font-weight: 500;
     }
 
     .nav-item:hover, .nav-item.active {
-      background: rgba(14, 165, 233, 0.1);
+      background: var(--background);
       color: var(--primary);
+      font-weight: 600;
     }
-
-    .nav-item i {
-      margin-right: 0.75rem;
-      width: 20px;
-      text-align: center;
+    
+    /* In dark mode, hover background should be lighter than surface, or just different */
+    @media (prefers-color-scheme: dark) {
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.05);
+        }
     }
 
     .sidebar-footer {
@@ -98,8 +109,6 @@
       align-items: center;
       gap: 0.75rem;
       padding: 0.5rem;
-      border-radius: 6px;
-      background: rgba(15, 23, 42, 0.5);
     }
 
     .user-avatar {
@@ -110,7 +119,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
+      font-weight: 600;
       color: white;
       font-size: 0.85rem;
     }
@@ -118,9 +127,9 @@
     /* Main Content */
     .main-content {
       flex: 1;
-      margin-left: 260px;
+      margin-left: 250px;
       padding: 2rem;
-      width: calc(100% - 260px);
+      width: calc(100% - 250px);
     }
 
     /* Mobile Toggle */
@@ -163,17 +172,17 @@
     h2 {
       color: var(--text);
       margin-bottom: 1.5rem;
-      font-size: 1.8rem;
-      border-left: 4px solid var(--primary);
-      padding-left: 1rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.025em;
     }
 
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 8px;
       padding: 1.5rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      box-shadow: none;
       margin-bottom: 1.5rem;
     }
 
@@ -187,49 +196,49 @@
 
     .stat {
       padding: 1.5rem;
-      background: linear-gradient(135deg, var(--surface), #0f172a);
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      text-align: center;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      text-align: left;
+      transition: none;
+      box-shadow: none;
     }
 
     .stat:hover {
-      transform: translateY(-4px);
+      transform: none;
       border-color: var(--primary);
     }
 
     .stat h3 {
-      margin: 0 0 0.75rem;
-      font-size: 0.85rem;
+      margin: 0 0 0.5rem;
+      font-size: 0.8rem;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.05em;
       color: var(--text-muted);
+      font-weight: 600;
     }
 
     .stat p {
       margin: 0;
-      font-size: 2rem;
-      font-weight: bold;
-      background: linear-gradient(135deg, var(--primary), #06b6d4);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--text);
+      background: none;
+      -webkit-text-fill-color: initial;
     }
 
     /* Charts */
     .charts-container {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-      gap: 2rem;
+      gap: 1.5rem;
       margin-bottom: 2rem;
     }
 
     .chart-wrapper {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 8px;
       padding: 1.5rem;
     }
 
@@ -237,7 +246,7 @@
     .table-container {
       overflow-x: auto;
       background: var(--surface);
-      border-radius: 12px;
+      border-radius: 8px;
       border: 1px solid var(--border);
     }
 
@@ -248,18 +257,18 @@
     }
 
     table th {
-      background: rgba(15, 23, 42, 0.5);
-      color: var(--primary);
+      background: var(--background);
+      color: var(--text-muted);
       font-weight: 600;
       text-transform: uppercase;
       font-size: 0.75rem;
-      padding: 1rem;
+      padding: 0.75rem 1rem;
       text-align: left;
       border-bottom: 1px solid var(--border);
     }
 
     table td {
-      padding: 1rem;
+      padding: 0.75rem 1rem;
       border-bottom: 1px solid var(--border);
       color: var(--text);
       font-size: 0.9rem;
@@ -270,7 +279,13 @@
     }
 
     table tr:hover {
-      background: rgba(14, 165, 233, 0.05);
+      background: rgba(0, 0, 0, 0.02);
+    }
+    
+    @media (prefers-color-scheme: dark) {
+        table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
     }
 
     /* Buttons */
@@ -280,45 +295,51 @@
       gap: 0.5rem;
       padding: 0.5rem 1rem;
       border-radius: 6px;
-      font-weight: 600;
-      font-size: 0.85rem;
+      font-weight: 500;
+      font-size: 0.9rem;
       text-decoration: none;
       transition: all 0.2s ease;
-      border: none;
+      border: 1px solid transparent;
       cursor: pointer;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary), #06b6d4);
+      background: var(--primary);
       color: white;
     }
 
     .btn-primary:hover {
-      filter: brightness(1.1);
-      transform: translateY(-1px);
+      background: var(--primary-hover);
     }
 
     .btn-danger {
-      background: linear-gradient(135deg, #ef4444, #dc2626);
+      background: #ef4444;
       color: white;
+    }
+    
+    .btn-danger:hover {
+        background: #dc2626;
     }
 
     .btn-sm {
       padding: 0.25rem 0.5rem;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
     }
 
     /* Forms */
     input, select, textarea {
-      background: #0f172a !important;
+      background: var(--surface) !important;
       border: 1px solid var(--border) !important;
       color: var(--text) !important;
       border-radius: 6px !important;
+      padding: 0.5rem 0.75rem !important;
+      font-size: 0.9rem !important;
     }
 
     input:focus, select:focus, textarea:focus {
       border-color: var(--primary) !important;
-      box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2) !important;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1) !important;
+      outline: none !important;
     }
 
     /* Badges */
@@ -326,27 +347,28 @@
       padding: 0.25rem 0.5rem;
       border-radius: 4px;
       font-size: 0.75rem;
-      font-weight: bold;
+      font-weight: 600;
     }
 
-    .badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-    .badge-warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
-    .badge-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-    .badge-info { background: rgba(14, 165, 233, 0.2); color: #38bdf8; }
+    .badge-success { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .badge-warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .badge-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    .badge-info { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
 
     /* D3 Tooltip */
     .d3-tooltip {
       position: absolute;
       padding: 0.5rem 0.75rem;
-      background: rgba(15, 23, 42, 0.95);
-      color: #e2e8f0;
-      border: 1px solid #0ea5e9;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
       border-radius: 6px;
       pointer-events: none;
       font-size: 0.85rem;
       z-index: 1000;
       opacity: 0;
       transition: opacity 0.3s;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
   </style>
 </head>
@@ -359,37 +381,40 @@
     <aside class="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-brand">
-          ⚙️ RobEurope Admin
+           RobEurope Admin
         </div>
       </div>
       
       <nav class="sidebar-nav">
         <a href="/admin" class="nav-item <%= title === 'Admin Dashboard' ? 'active' : '' %>">
-          📊 Dashboard
+           Dashboard
         </a>
         <a href="/admin/users" class="nav-item <%= title === 'Users' || title === 'Editar Usuario' ? 'active' : '' %>">
-          👥 Usuarios
+           Usuarios
         </a>
         <a href="/admin/competitions" class="nav-item <%= title === 'Competiciones' ? 'active' : '' %>">
-          🏆 Competiciones
+           Competiciones
         </a>
         <a href="/admin/registrations" class="nav-item <%= title === 'Registrations' ? 'active' : '' %>">
-          📝 Solicitudes
+           Solicitudes
         </a>
         <a href="/admin/teams" class="nav-item <%= title === 'Equipos' ? 'active' : '' %>">
-          🛡️ Equipos
+           Equipos
         </a>
         <a href="/admin/posts" class="nav-item <%= title === 'Posts' ? 'active' : '' %>">
-          📝 Posts
+           Posts
         </a>
         <a href="/admin/sponsors" class="nav-item <%= title === 'Patrocinadores' ? 'active' : '' %>">
-          🤝 Patrocinadores
+           Patrocinadores
         </a>
         <a href="/admin/countries" class="nav-item <%= title === 'Países' ? 'active' : '' %>">
-          🌍 Países
+           Países
         </a>
         <a href="/admin/logs" class="nav-item <%= title === 'Logs del Sistema' ? 'active' : '' %>">
-          📋 Logs
+           Logs
+        </a>
+        <a href="/admin/ldap-users" class="nav-item <%= title === 'Usuarios LDAP' ? 'active' : '' %>">
+           Usuarios LDAP
         </a>
       </nav>
 
