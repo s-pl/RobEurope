@@ -75,11 +75,12 @@ app.use(session({
   store: sessionStore,
   resave: false,
   saveUninitialized: false,
+  proxy: true,
   cookie: {
-    secure: false, // set true behind HTTPS reverse proxy with trust proxy
+    secure: process.env.NODE_ENV === 'production', // set true behind HTTPS reverse proxy with trust proxy
     httpOnly: true,
     sameSite: 'lax',
-    maxAge: 1000 * 60 * 60 // 1 hour
+    maxAge: 1000 * 60 * 60 * 24 // 24 hours
   }
 }));
 
