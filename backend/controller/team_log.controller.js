@@ -54,3 +54,28 @@ export const getTeamLogs = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+export const deleteLogEntry = async (req, res) => {
+    try {
+        const logId = req.params.id;
+        const log = await TeamLog.findByPk(logId);
+        if (!log) {
+            return res.status(404).json({ error: 'Log entry not found' });
+        }
+        // Check permissions
+        const membership = await TeamMembers.findOne({
+            where: {
+                team_id: log.team_id,
+                user_id: req.user.id,
+                left_at: null
+            }
+        });
+        if (!membership && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Not a member of this team' });
+        }
+        await log.destroy();
+        res.json({ message: 'Log entry deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};

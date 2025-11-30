@@ -63,14 +63,32 @@ export const sendMessage = async (req, res) => {
 
         let type = 'text';
         let fileUrl = null;
+        let attachments = [];
 
-        const fileInfo = getFileInfo(req);
-        if (fileInfo) {
-            fileUrl = fileInfo.url;
-            type = fileInfo.mimetype.startsWith('image/') ? 'image' : 'file';
+        if (req.files && req.files.length > 0) {
+            attachments = req.files.map(file => ({
+                url: `/uploads/${file.filename}`,
+                name: file.originalname,
+                type: file.mimetype.startsWith('image/') ? 'image' : 'file',
+                mimetype: file.mimetype
+            }));
+            type = attachments[0].type; // Main type based on first file
+            fileUrl = attachments[0].url; // Backward compatibility
+        } else {
+            const fileInfo = getFileInfo(req);
+            if (fileInfo && fileInfo.url) {
+                fileUrl = fileInfo.url;
+                type = fileInfo.mimetype.startsWith('image/') ? 'image' : 'file';
+                attachments.push({
+                    url: fileUrl,
+                    name: fileInfo.originalname,
+                    type: type,
+                    mimetype: fileInfo.mimetype
+                });
+            }
         }
 
-        if (!content && !fileUrl) {
+        if (!content && attachments.length === 0) {
             return res.status(400).json({ error: 'Message content or file required' });
         }
 
@@ -79,7 +97,8 @@ export const sendMessage = async (req, res) => {
             user_id: userId,
             content,
             type,
-            file_url: fileUrl
+            file_url: fileUrl,
+            attachments
         });
 
         // Fetch full message with user info

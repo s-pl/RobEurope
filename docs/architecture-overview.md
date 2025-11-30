@@ -52,8 +52,10 @@ The RobEurope platform follows a modern web application architecture with clear 
 #### Technology Stack
 - **Runtime**: Node.js 18+
 - **Framework**: Express.js
+- **Real-time**: Socket.IO
 - **ORM**: Sequelize 6
 - **Database**: MySQL 8.0
+- **Cache/State**: Redis
 - **Authentication**: JWT + Sessions
 - **Validation**: Joi
 - **Testing**: Vitest
@@ -176,6 +178,21 @@ const TeamCard = ({ team, onEdit, onDelete }) => (
 );
 ```
 
+## Real-time Architecture
+
+### Collaborative Editor
+The platform features a real-time collaborative code editor (IDE) powered by:
+- **Socket.IO**: Handles real-time event communication (cursor movements, code changes, presence).
+- **Redis**: Persists the state of active coding sessions and user presence to ensure data consistency across server restarts and potential horizontal scaling.
+- **Monaco Editor**: Provides the frontend editing experience.
+
+#### Data Flow
+1. **User Action**: User types in the editor.
+2. **Event Emission**: Frontend emits `code_change` event via Socket.IO.
+3. **Server Processing**: Backend receives event, updates Redis state (`code_session:{teamId}`).
+4. **Broadcast**: Backend broadcasts change to all other users in the same room.
+5. **Persistence**: Changes are periodically saved or persisted in Redis.
+
 ## Security Architecture
 
 ### Authentication Flow
@@ -239,10 +256,9 @@ const TeamCard = ({ team, onEdit, onDelete }) => (
 - **Event-Driven**: Message queues for inter-service communication
 
 ### Advanced Features
-- **Real-time Communication**: WebSocket integration
 - **API Versioning**: Backward compatibility
 - **GraphQL**: Flexible API queries
-- **Caching Layer**: Redis for performance
+- **Advanced Caching**: Expanded Redis usage for query caching
 
 ### Cloud Migration
 - **Managed Database**: AWS RDS or similar

@@ -1,6 +1,8 @@
 import db from '../models/index.js';
 import bcrypt from 'bcryptjs';
 import { Sequelize } from 'sequelize';
+import si from 'systeminformation';
+import redisClient from '../utils/redis.js';
 const { User, Competition, Post, Registration, SystemLog, Team } = db;
 
 // Helper reused (similar logic as auth.controller) to support base64 obfuscated inputs
@@ -93,12 +95,46 @@ export async function getStatsData(req, res) {
       Post.count(),
       Registration.count()
     ]);
+
+    // System Stats
+    const mem = await si.mem();
+    const load = await si.currentLoad();
+    const disk = await si.fsSize();
+    
+    // DB Status
+    let mysqlStatus = 'down';
+    try {
+      await db.sequelize.authenticate();
+      mysqlStatus = 'up';
+    } catch (e) { mysqlStatus = 'down'; }
+
+    let redisStatus = 'down';
+    try {
+      if (redisClient.isOpen) redisStatus = 'up';
+    } catch (e) { redisStatus = 'down'; }
     
     res.json({
       users,
       competitions,
       posts,
       registrations,
+      system: {
+        memory: {
+          total: mem.total,
+          used: mem.used,
+          free: mem.free,
+          active: mem.active
+        },
+        cpu: {
+          load: load.currentLoad
+        },
+        disk: disk[0] ? {
+          size: disk[0].size,
+          used: disk[0].used
+        } : null,
+        mysql: mysqlStatus,
+        redis: redisStatus
+      },
       timestamp: new Date().toISOString()
     });
   } catch (error) {

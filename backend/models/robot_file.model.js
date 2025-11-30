@@ -33,6 +33,11 @@ export default function defineRobotFileModel(sequelize, DataTypes) {
             type: DataTypes.UUID,
             allowNull: true
         },
+        is_public: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
+        },
         created_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW
@@ -41,6 +46,11 @@ export default function defineRobotFileModel(sequelize, DataTypes) {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW
         }
+    }, {
+        tableName: 'RobotFiles',
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at'
     });
 
     RobotFile.associate = (models) => {

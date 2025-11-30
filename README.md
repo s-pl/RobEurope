@@ -13,11 +13,11 @@ Comprehensive platform for managing robotics competitions in Europe. This system
 
 ## Technologies
 
-- **Backend**: Node.js, Express.js
-- **Database**: MySQL (Sequelize ORM)
-- **Frontend**: EJS (Server-Side Rendering for Admin), React (Client - *in development*)
+- **Backend**: Node.js, Express.js, Socket.IO
+- **Database**: MySQL (Sequelize ORM), Redis (Session & Real-time State)
+- **Frontend**: React (Vite), TailwindCSS, Monaco Editor
 - **Infrastructure**: Docker, Docker Compose
-- **Services**: OpenLDAP, Bind9
+- **Services**: OpenLDAP, Bind9, Redis
 
 ## Prerequisites
 
@@ -49,6 +49,7 @@ LDAP_BIND_DN=cn=
 LDAP_BIND_PASSWORD=
 LDAP_BASE_DN=
 LDAP_USER_DN=
+REDIS_URL=redis://localhost:6379
 
 
 
@@ -77,8 +78,24 @@ LDAP_USER_DN=
 
 6. **Start Development Server**
    ```bash
+   # Backend
+   cd backend
+   npm run dev
+   
+   # Frontend (in a new terminal)
+   cd frontend
    npm run dev
    ```
+
+## Features
+
+- **Collaborative IDE**: Real-time code editor with multi-language support, file management, and presence indicators (powered by Monaco Editor & Socket.IO).
+- **User Management**: Registration, authentication, and user profiles.
+- **Teams**: Team creation, member invitations, and role management.
+- **Competitions**: Event calendar, registrations, and status tracking.
+- **Admin Panel**: Complete interface for platform management with system health monitoring (CPU, RAM, DB Status).
+- **LDAP Integration**: Centralized identity management with OpenLDAP.
+- **Docker Infrastructure**: Containerized deployment of auxiliary services (LDAP, DNS, Redis).
 
 ## Documentation
 

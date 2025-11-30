@@ -16,6 +16,8 @@ import * as createTeamMessages from '../migrations/20251123-create-team-messages
 import * as updateNotificationTypeEnum from '../migrations/20251123-update-notification-type-enum.js';
 import * as createRobotFiles from '../migrations/20251130-create-robot-files.js';
 import * as createTeamLogs from '../migrations/20251130-create-team-logs.js';
+import * as addAttachmentsToTeamMessages from '../migrations/20251130-add-attachments-to-team-messages.js';
+import * as addIsPublicToRobotFiles from '../migrations/20251130-add-is-public-to-robot-files.js';
 
 async function run() {
   try {
@@ -166,6 +168,22 @@ async function run() {
       console.log('Created TeamLogs table');
     } catch (e) {
       console.log('Skipping createTeamLogs (probably already exists):', e.message);
+    }
+
+    // Add attachments to TeamMessages
+    try {
+      await addAttachmentsToTeamMessages.up(qi, Sequelize);
+      console.log('Added attachments to TeamMessages');
+    } catch (e) {
+      console.log('Skipping addAttachmentsToTeamMessages:', e.message);
+    }
+
+    // Add is_public to RobotFiles
+    try {
+      await addIsPublicToRobotFiles.up(qi, Sequelize);
+      console.log('Added is_public to RobotFiles');
+    } catch (e) {
+      console.log('Skipping addIsPublicToRobotFiles:', e.message);
     }
 
     console.log('Migrations applied successfully');

@@ -63,8 +63,12 @@ export const getStreams = async (req, res) => {
 
     // Check access permissions
     let isApproved = false;
-    if (competition_id && req.user) {
-      const userTeams = await TeamMembers.findAll({ where: { user_id: req.user.id, left_at: null } });
+    const currentUser = req.user || req.session?.user;
+
+    if (currentUser?.role === 'admin') {
+      isApproved = true;
+    } else if (competition_id && currentUser) {
+      const userTeams = await TeamMembers.findAll({ where: { user_id: currentUser.id, left_at: null } });
       const teamIds = userTeams.map(tm => tm.team_id);
       
       if (teamIds.length > 0) {

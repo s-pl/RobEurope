@@ -35,6 +35,14 @@ services:
     networks:
       - robeurope_network
 
+  redis:
+    image: redis:alpine
+    container_name: robeurope-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - robeurope_network
+
 volumes:
   ldap_data:
   ldap_config:

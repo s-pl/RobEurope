@@ -276,6 +276,7 @@ const resources = {
         activeBadge: 'Activa',
         restrictedBadge: 'Acceso Restringido',
         restrictedMessage: 'Debes ser un participante aprobado en esta competición para ver los streams y detalles adicionales.',
+        streamRestricted: 'Acceso restringido (Regístrate para ver)',
         noStreams: 'No hay streams activos para esta competición.',
         loadError: 'Error al cargar competiciones.',
         createError: 'Error al crear competición',
@@ -692,6 +693,7 @@ const resources = {
         activeBadge: 'Active',
         restrictedBadge: 'Restricted Access',
         restrictedMessage: 'You must be an approved participant in this competition to view streams and additional details.',
+        streamRestricted: 'Restricted Access (Register to view)',
         noStreams: 'No active streams for this competition.',
         loadError: 'Error loading competitions.',
         createError: 'Error creating competition',
@@ -1103,6 +1105,11 @@ const resources = {
           maxTeams: 'Max. Teams',
           isActive: 'Als aktiven Wettbewerb markieren (deaktiviert andere)'
         },
+        activeBadge: 'Aktiv',
+        restrictedBadge: 'Eingeschränkter Zugang',
+        restrictedMessage: 'Sie müssen ein genehmigter Teilnehmer an diesem Wettbewerb sein, um Streams und weitere Details zu sehen.',
+        streamRestricted: 'Eingeschränkter Zugang (Registrieren zum Ansehen)',
+        noStreams: 'Keine aktiven Streams für diesen Wettbewerb.',
         loadError: 'Fehler beim Laden der Wettbewerbe.',
         createError: 'Fehler beim Erstellen des Wettbewerbs',
         noActive: 'Derzeit keine aktiven Wettbewerbe.'

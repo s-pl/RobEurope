@@ -17,7 +17,7 @@ const TeamChat = ({ teamId }) => {
   const { toast } = useToast();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
   const socketRef = useRef(null);
@@ -108,12 +108,14 @@ const TeamChat = ({ teamId }) => {
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() && !file) return;
+    if (!newMessage.trim() && files.length === 0) return;
 
     try {
       const formData = new FormData();
       if (newMessage.trim()) formData.append('content', newMessage);
-      if (file) formData.append('file', file);
+      files.forEach(file => {
+        formData.append('files', file);
+      });
 
       await api(`/teams/${teamId}/messages`, {
         method: 'POST',
@@ -122,26 +124,33 @@ const TeamChat = ({ teamId }) => {
       });
 
       setNewMessage('');
-      setFile(null);
+      setFiles([]);
     } catch (error) {
       console.error(error);
     }
   };
 
   const handleFileSelect = (e) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      if (selectedFile.size > 50 * 1024 * 1024) { // 50MB limit
-        toast({
-          title: t('team.chat.fileTooLarge') || 'Archivo demasiado grande',
-          description: t('team.chat.fileLimit') || 'El límite es de 50MB',
-          variant: 'destructive'
-        });
-        e.target.value = ''; // Reset input
-        return;
-      }
-      setFile(selectedFile);
+    const selectedFiles = Array.from(e.target.files || []);
+    if (selectedFiles.length > 0) {
+      const validFiles = selectedFiles.filter(file => {
+        if (file.size > 50 * 1024 * 1024) { // 50MB limit
+          toast({
+            title: t('team.chat.fileTooLarge') || 'Archivo demasiado grande',
+            description: `${file.name}: ${t('team.chat.fileLimit') || 'El límite es de 50MB'}`,
+            variant: 'destructive'
+          });
+          return false;
+        }
+        return true;
+      });
+      setFiles(prev => [...prev, ...validFiles]);
+      e.target.value = ''; // Reset input
     }
+  };
+
+  const removeFile = (index) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -198,7 +207,46 @@ const TeamChat = ({ teamId }) => {
                   </div>
                   <div className={`p-3 rounded-lg ${isMe ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100'}`}>
                     {msg.content && <p className="whitespace-pre-wrap text-sm">{msg.content}</p>}
-                    {msg.file_url && (
+                    
+                    {/* Multiple attachments */}
+                    {msg.attachments && msg.attachments.length > 0 && (
+                      <div className="mt-2 space-y-2">
+                        {msg.attachments.map((att, idx) => (
+                          <div key={idx}>
+                            {att.type === 'image' ? (
+                              <img src={resolveMediaUrl(att.url)} alt="attachment" className="max-w-full rounded-md max-h-[200px]" />
+                            ) : (
+                              <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700 max-w-xs group transition-all hover:shadow-sm">
+                                <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium truncate text-slate-700 dark:text-slate-200">
+                                    {att.name || 'Archivo adjunto'}
+                                  </p>
+                                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">
+                                    {att.url?.split('.').pop() || 'FILE'}
+                                  </p>
+                                </div>
+                                <a 
+                                  href={resolveMediaUrl(att.url)} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer" 
+                                  download
+                                  className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-500 dark:text-slate-400"
+                                  title="Descargar"
+                                >
+                                  <Download className="h-4 w-4" />
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Legacy single file support */}
+                    {!msg.attachments && msg.file_url && (
                       <div className="mt-2">
                         {msg.type === 'image' ? (
                           <img src={resolveMediaUrl(msg.file_url)} alt="attachment" className="max-w-full rounded-md max-h-[200px]" />
@@ -244,13 +292,17 @@ const TeamChat = ({ teamId }) => {
       </ScrollArea>
 
       <div className="p-4 border-t dark:border-slate-800">
-        {file && (
-          <div className="flex items-center gap-2 mb-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-md text-sm">
-            <Paperclip className="h-4 w-4 text-blue-500" />
-            <span className="truncate max-w-[200px]">{file.name}</span>
-            <button onClick={() => setFile(null)} className="ml-auto hover:text-red-500">
-              <X className="h-4 w-4" />
-            </button>
+        {files.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {files.map((f, i) => (
+              <div key={i} className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-md text-sm border border-slate-200 dark:border-slate-700">
+                <Paperclip className="h-3 w-3 text-blue-500" />
+                <span className="truncate max-w-[150px]">{f.name}</span>
+                <button onClick={() => removeFile(i)} className="ml-auto hover:text-red-500">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
           </div>
         )}
         <form onSubmit={handleSendMessage} className="flex gap-2">
@@ -259,6 +311,7 @@ const TeamChat = ({ teamId }) => {
               type="file"
               id="chat-file"
               className="hidden"
+              multiple
               onChange={handleFileSelect}
             />
             <Button type="button" variant="ghost" size="icon" onClick={() => document.getElementById('chat-file').click()}>
@@ -274,7 +327,7 @@ const TeamChat = ({ teamId }) => {
             placeholder={t('team.chat.placeholder')}
             className="flex-1"
           />
-          <Button type="submit" size="icon" disabled={!newMessage.trim() && !file}>
+          <Button type="submit" size="icon" disabled={!newMessage.trim() && files.length === 0}>
             <Send className="h-4 w-4" />
           </Button>
         </form>

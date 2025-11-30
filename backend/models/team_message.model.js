@@ -35,6 +35,11 @@ export default function defineTeamMessageModel(sequelize, DataTypes) {
             type: DataTypes.STRING,
             allowNull: true
         },
+        attachments: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            defaultValue: []
+        },
         created_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW

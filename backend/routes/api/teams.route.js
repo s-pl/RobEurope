@@ -30,9 +30,10 @@ router.post('/:id/register-competition', authenticateToken, requireOwnership('Te
 // Chat routes
 router.get('/:teamId/messages', authenticateToken, getMessages);
 router.post('/:teamId/messages', authenticateToken, uploadMiddleware({ 
-    fieldName: 'file',
-    allowedTypes: /.*/, // Allow any file type
-    maxSize: 50 * 1024 * 1024 // 50MB limit
+    fieldName: 'files', // Changed from 'file' to 'files'
+    type: 'array',      // Added type array
+    allowedTypes: /.*/, 
+    maxSize: 50 * 1024 * 1024 
 }), sendMessage);
 
 export default router;

@@ -2,20 +2,23 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useApi } from '../hooks/useApi';
+import { resolveMediaUrl } from '../lib/apiClient';
 import { useAuthContext } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
-import { Calendar, MapPin, Users, Video, ArrowLeft } from 'lucide-react';
-import TeamCompetitionDashboard from '../components/teams/TeamCompetitionDashboard';
+import { Calendar, MapPin, Users, Video, ArrowLeft, Share2, FileText, Download } from 'lucide-react';
+import { useToast } from '../hooks/useToast';
 
 const CompetitionDetail = () => {
   const { id } = useParams();
   const api = useApi();
   const { user } = useAuthContext();
+  const { toast } = useToast();
   const [competition, setCompetition] = useState(null);
   const [teams, setTeams] = useState([]);
   const [streams, setStreams] = useState([]);
+  const [publicFiles, setPublicFiles] = useState([]);
   const [myTeamId, setMyTeamId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -25,12 +28,14 @@ const CompetitionDetail = () => {
     const load = async () => {
       try {
         setLoading(true);
-        const [comp, competitionStreams, regs] = await Promise.all([
+        const [comp, competitionStreams, regs, pubFiles] = await Promise.all([
           api(`/competitions/${id}`),
           api(`/streams?competition_id=${id}`),
-          api(`/registrations?competition_id=${id}&status=approved`)
+          api(`/registrations?competition_id=${id}&status=approved`),
+          api(`/robot-files?competition_id=${id}`)
         ]);
         setCompetition(comp);
+        setPublicFiles(pubFiles || []);
         
         // Load teams registered for this competition
         const registeredTeams = regs.map(r => r.Team).filter(Boolean);
@@ -47,6 +52,12 @@ const CompetitionDetail = () => {
           const participatingTeam = registeredTeams.find(t => myTeamIds.includes(t.id));
           if (participatingTeam) {
             setMyTeamId(participatingTeam.id);
+          } else {
+           
+            const ownedTeam = registeredTeams.find(t => t.created_by_user_id === user.id);
+            if (ownedTeam) {
+              setMyTeamId(ownedTeam.id);
+            }
           }
         }
 
@@ -59,17 +70,30 @@ const CompetitionDetail = () => {
     load();
   }, [api, id, user]);
 
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast({
+      title: "Enlace copiado",
+      description: "El enlace a la competición ha sido copiado al portapapeles.",
+    });
+  };
+
   if (loading) return <div className="p-8 text-center">Cargando...</div>;
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
   if (!competition) return <div className="p-8 text-center">Competición no encontrada</div>;
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      <Button variant="ghost" asChild className="mb-4">
-        <Link to="/competitions" className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" /> Volver
-        </Link>
-      </Button>
+      <div className="flex justify-between items-center mb-4">
+        <Button variant="ghost" asChild>
+          <Link to="/competitions" className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" /> Volver
+          </Link>
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleShare} className="gap-2">
+          <Share2 className="h-4 w-4" /> Compartir
+        </Button>
+      </div>
 
       <div className="relative rounded-xl overflow-hidden bg-blue-900 text-white p-8 md:p-12">
         <div className="relative z-10">
@@ -104,11 +128,6 @@ const CompetitionDetail = () => {
         </div>
         
       </div>
-
-      {/* Team Dashboard for Participants */}
-      {myTeamId && competition.is_active && (
-        <TeamCompetitionDashboard competitionId={competition.id} teamId={myTeamId} />
-      )}
 
       <div className="grid gap-8 md:grid-cols-3">
         <div className="md:col-span-2 space-y-8">
@@ -164,7 +183,12 @@ const CompetitionDetail = () => {
               <div className="grid gap-4 sm:grid-cols-2">
                 {teams.map(team => (
                   <Link key={team.id} to={`/teams/${team.id}`}>
-                    <Card className="p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
+                    <Card className="p-4 flex items-center gap-4 hover:shadow-md transition-shadow relative">
+                      {streams.some(s => s.team_id === team.id && s.status === 'live') && (
+                        <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full animate-pulse">
+                          LIVE
+                        </span>
+                      )}
                       <div className="h-12 w-12 bg-slate-100 rounded-full flex items-center justify-center overflow-hidden border border-slate-200">
                         {team.logo_url ? (
                           <img src={team.logo_url} alt={team.name} className="h-full w-full object-cover" />
@@ -184,6 +208,35 @@ const CompetitionDetail = () => {
               <p className="text-slate-500 italic">No hay equipos registrados aún.</p>
             )}
           </section>
+
+          {publicFiles.length > 0 && (
+            <section>
+              <h2 className="text-2xl font-bold text-blue-900 mb-4 flex items-center gap-2">
+                <FileText className="h-6 w-6" /> Archivos Públicos
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {publicFiles.map(file => (
+                  <Card key={file.id} className="p-4 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-bold text-slate-900 truncate max-w-[200px]">{file.file_name}</h3>
+                        <p className="text-sm text-slate-500 mb-1">{file.Team?.name}</p>
+                        <p className="text-xs text-slate-400">{file.description}</p>
+                      </div>
+                      <a 
+                        href={resolveMediaUrl(file.file_url)} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="p-2 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors"
+                      >
+                        <Download className="h-4 w-4" />
+                      </a>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
 
         <div className="space-y-6">

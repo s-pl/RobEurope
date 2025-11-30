@@ -120,10 +120,10 @@ POST /api/admin/competitions/{id}/publish - Publish competition
 - **Query Optimization**: Monitor and improve database performance
 
 ### Server Monitoring
-- **Resource Usage**: CPU, memory, disk monitoring
-- **Service Status**: Check microservice health
-- **Log Management**: View and analyze system logs
-- **Alert Configuration**: Set up monitoring alerts
+- **Resource Usage**: Real-time CPU load, memory usage (total/free/used), and disk space monitoring.
+- **Service Status**: Live status checks for MySQL database and Redis cache.
+- **Log Management**: View and analyze system logs.
+- **Alert Configuration**: Set up monitoring alerts.
 
 ## Security Features
 

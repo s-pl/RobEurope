@@ -29,6 +29,11 @@ export default function defineTeamLogModel(sequelize, DataTypes) {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW
         }
+    }, {
+        tableName: 'TeamLogs',
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at'
     });
 
     TeamLog.associate = (models) => {
