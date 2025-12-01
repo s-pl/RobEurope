@@ -11,9 +11,9 @@ router.get('/favorites/mine', authenticateToken, listFavoriteCompetitions);
 router.post('/:id/favorite', authenticateToken, addFavoriteCompetition);
 router.delete('/:id/favorite', authenticateToken, removeFavoriteCompetition);
 router.get('/:id', getCompetitionById);
-router.post('/', authenticateToken, requireRole('admin'), createCompetition);
-router.put('/:id', authenticateToken, requireRole('admin'), updateCompetition);
-router.delete('/:id', authenticateToken, requireRole('admin'), deleteCompetition);
+router.post('/', authenticateToken, requireRole('super_admin'), createCompetition);
+router.put('/:id', authenticateToken, requireRole('super_admin'), updateCompetition);
+router.delete('/:id', authenticateToken, requireRole('super_admin'), deleteCompetition);
 
 // (favorites routes placed above)
 
