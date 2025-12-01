@@ -9,6 +9,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Teams from './pages/Teams';
 import AcceptInvite from './pages/AcceptInvite';
 import MyTeam from './pages/MyTeam';
@@ -16,6 +18,9 @@ import Posts from './pages/Posts';
 import Sponsors from './pages/Sponsors';
 import Streams from './pages/Streaming';
 import { Toaster } from './components/ui/toast';
+import { EditModeProvider } from './context/EditModeContext';
+import { SocketProvider } from './context/SocketContext';
+import AdminEditButton from './components/admin/AdminEditButton';
 
 
 
@@ -30,6 +35,8 @@ const GuestRoute = ({ children }) => {
 function App() {
   return (
     <BrowserRouter>
+  <SocketProvider>
+  <EditModeProvider>
       <Routes>
         <Route element={<AppLayout />}>
           <Route index element={<Home />} />
@@ -69,11 +76,30 @@ function App() {
             </GuestRoute>
           }
         />
+        <Route
+          path="/forgot-password"
+          element={
+            <GuestRoute>
+              <ForgotPassword />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <GuestRoute>
+              <ResetPassword />
+            </GuestRoute>
+          }
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
         
 
       </Routes>
-      <Toaster />
+  <AdminEditButton />
+  <Toaster />
+  </EditModeProvider>
+  </SocketProvider>
     </BrowserRouter>
   );
 }

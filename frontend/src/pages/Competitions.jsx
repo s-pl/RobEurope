@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Calendar, MapPin, Users, ChevronDown, ChevronUp, ArrowRight, Plus } from 'lucide-react';
+import { useSocket } from '../context/SocketContext';
+import { useEditMode } from '../context/EditModeContext';
+import { Calendar, MapPin, Users, ChevronDown, ChevronUp, ArrowRight, Plus, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/card';
@@ -12,7 +14,7 @@ import { Textarea } from '../components/ui/textarea';
 import { useApi } from '../hooks/useApi';
 import { useAuth } from '../hooks/useAuth';
 
-const CompetitionItem = ({ competition }) => {
+const CompetitionItem = ({ competition, isFavorite, onToggleFavorite }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation();
 
@@ -46,9 +48,23 @@ const CompetitionItem = ({ competition }) => {
               </span>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="text-slate-400 dark:text-slate-500">
-            {isOpen ? <ChevronUp /> : <ChevronDown />}
-          </Button>
+          <div className="flex items-center gap-2">
+            {onToggleFavorite && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={(e)=>{ e.stopPropagation(); onToggleFavorite(competition.id, isFavorite); }}
+                className={isFavorite ? 'text-yellow-500' : 'text-slate-400 dark:text-slate-500'}
+                title={isFavorite ? (t('competitions.removeFavorite')||'Quitar de favoritos') : (t('competitions.addFavorite')||'Añadir a favoritos')}
+              >
+                <Star className="h-5 w-5" fill={isFavorite ? 'currentColor' : 'none'} />
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" className="text-slate-400 dark:text-slate-500">
+              {isOpen ? <ChevronUp /> : <ChevronDown />}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -80,12 +96,17 @@ const CompetitionItem = ({ competition }) => {
 
 const Competitions = () => {
   const api = useApi();
+  const { socket } = useSocket();
+  const { editMode } = useEditMode();
   const { user } = useAuth();
   const [competitions, setCompetitions] = useState([]);
+  const [favorites, setFavorites] = useState(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { t } = useTranslation();
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+  const [filters, setFilters] = useState({ q: '', is_active: '' });
+  const [onlyFavorites, setOnlyFavorites] = useState(false);
 
   // Create form state
   const [createOpen, setCreateOpen] = useState(false);
@@ -104,8 +125,22 @@ const Competitions = () => {
     setLoading(true);
     setError('');
     try {
-      const competitionsResp = await api('/competitions');
-      setCompetitions(competitionsResp);
+      if (onlyFavorites && user?.id) {
+        const favItems = await api('/competitions/favorites/mine');
+        setCompetitions(favItems);
+      } else {
+        const qs = new URLSearchParams();
+        if (filters.q) qs.set('q', filters.q);
+        if (filters.is_active) qs.set('is_active', filters.is_active);
+        const competitionsResp = await api(`/competitions${qs.toString() ? `?${qs.toString()}` : ''}`);
+        setCompetitions(competitionsResp);
+      }
+      if (user?.id) {
+        try {
+          const favs = await api('/competitions/favorites/mine');
+          setFavorites(new Set(favs.map(c => c.id)));
+        } catch {}
+      }
     } catch (err) {
       setError(err.message || 'Error al cargar competiciones.');
     } finally {
@@ -117,6 +152,41 @@ const Competitions = () => {
     fetchAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+    const onCreated = (comp) => {
+      setCompetitions(prev => [comp, ...prev]);
+    };
+    const onUpdated = (comp) => {
+      setCompetitions(prev => prev.map(c => c.id === comp.id ? comp : c));
+    };
+    const onDeleted = ({ id }) => {
+      setCompetitions(prev => prev.filter(c => c.id !== Number(id)));
+    };
+    socket.on('competition_created', onCreated);
+    socket.on('competition_updated', onUpdated);
+    socket.on('competition_deleted', onDeleted);
+    return () => {
+      socket.off('competition_created', onCreated);
+      socket.off('competition_updated', onUpdated);
+      socket.off('competition_deleted', onDeleted);
+    };
+  }, [socket]);
+
+  const toggleFavorite = async (id, isFav) => {
+    try {
+      if (isFav) {
+        await api(`/competitions/${id}/favorite`, { method: 'DELETE' });
+        setFavorites(prev => { const n = new Set(prev); n.delete(id); return n; });
+      } else {
+        await api(`/competitions/${id}/favorite`, { method: 'POST' });
+        setFavorites(prev => { const n = new Set(prev); n.add(id); return n; });
+      }
+    } catch (err) {
+      alert(err.message || 'No se pudo actualizar favorito');
+    }
+  };
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -143,7 +213,7 @@ const Competitions = () => {
     <div className="space-y-8 container mx-auto px-4 py-8">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-4xl font-bold text-blue-900 mb-2">{t('competitions.hero.title')}</h1>
+      <h1 className="text-4xl font-bold text-blue-900 mb-2">{t('competitions.hero.title')}{editMode && <span className="ml-3 text-xs px-2 py-1 rounded bg-amber-200 text-amber-800 align-top">EDIT MODE</span>}</h1>
           <p className="text-slate-600 max-w-2xl">{t('competitions.hero.description')}</p>
         </div>
         {isAdmin && (
@@ -235,6 +305,25 @@ const Competitions = () => {
         )}
       </div>
 
+      {/* Filters */}
+      <div className="flex flex-col md:flex-row gap-3 items-end">
+        <div className="flex-1">
+          <Label htmlFor="search">{t('general.search') || 'Buscar'}</Label>
+          <Input id="search" value={filters.q} onChange={(e)=>setFilters({...filters, q: e.target.value})} placeholder={t('competitions.searchPlaceholder')||'Nombre, etc.'} />
+        </div>
+        <div className="flex items-center gap-2">
+          <input id="activeOnly" type="checkbox" className="h-4 w-4" checked={filters.is_active === 'true'} onChange={(e)=>setFilters({...filters, is_active: e.target.checked ? 'true' : ''})} />
+          <Label htmlFor="activeOnly">{t('competitions.onlyActive') || 'Solo activas'}</Label>
+        </div>
+        {user?.id && (
+          <div className="flex items-center gap-2">
+            <input id="onlyFavs" type="checkbox" className="h-4 w-4" checked={onlyFavorites} onChange={(e)=>setOnlyFavorites(e.target.checked)} />
+            <Label htmlFor="onlyFavs">{t('competitions.onlyFavorites') || 'Solo favoritos'}</Label>
+          </div>
+        )}
+        <Button onClick={fetchAll}>{t('buttons.apply') || 'Aplicar'}</Button>
+      </div>
+
       {loading && <div className="text-center py-12">{t('competitions.loading')}</div>}
       
       {error && (
@@ -245,7 +334,7 @@ const Competitions = () => {
 
       <div className="grid gap-4">
         {competitions.map((comp) => (
-          <CompetitionItem key={comp.id} competition={comp} />
+          <CompetitionItem key={comp.id} competition={comp} isFavorite={favorites.has(comp.id)} onToggleFavorite={user?.id ? toggleFavorite : undefined} />
         ))}
         
         {!loading && competitions.length === 0 && (

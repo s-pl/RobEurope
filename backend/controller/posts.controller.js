@@ -3,6 +3,7 @@ const { Post, User, PostLike, Comment } = db;
 import { Op } from 'sequelize';
 import { getFileInfo } from '../middleware/upload.middleware.js';
 import SystemLogger from '../utils/systemLogger.js';
+import { getIO } from '../utils/realtime.js';
 
 export const createPost = async (req, res) => {
   try {
@@ -14,7 +15,7 @@ export const createPost = async (req, res) => {
       postData.media_urls = [fileInfo.url]; // Assuming single image for now
     }
 
-    const item = await Post.create(postData);
+  const item = await Post.create(postData);
 
     // Log post creation
     await SystemLogger.logCreate('Post', item.id, {
@@ -24,7 +25,16 @@ export const createPost = async (req, res) => {
       media_urls: item.media_urls
     }, req, 'Post created');
 
-    res.status(201).json(item);
+    // Re-fetch with includes for richer payload to clients
+    const fullItem = await Post.findByPk(item.id, {
+      include: [
+        { model: User, attributes: ['id','username','first_name','last_name','profile_photo_url'] },
+        { model: PostLike, attributes: ['user_id'] },
+        { model: Comment, attributes: ['id'] }
+      ]
+    });
+    getIO()?.emit('post_created', fullItem);
+    res.status(201).json(fullItem);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -126,7 +136,8 @@ export const updatePost = async (req, res) => {
       media_urls: updatedItem.media_urls
     }, req, 'Post updated');
 
-    res.json(updatedItem);
+  getIO()?.emit('post_updated', updatedItem);
+  res.json(updatedItem);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -148,7 +159,8 @@ export const deletePost = async (req, res) => {
       media_urls: post.media_urls
     }, req, 'Post deleted');
 
-    res.json({ message: 'Post deleted' });
+  getIO()?.emit('post_deleted', { id: req.params.id });
+  res.json({ message: 'Post deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -163,13 +175,15 @@ export const toggleLike = async (req, res) => {
             where: { post_id: id, user_id }
         });
 
-        if (existingLike) {
-            await existingLike.destroy();
-            res.json({ liked: false });
-        } else {
-            await PostLike.create({ post_id: id, user_id });
-            res.json({ liked: true });
-        }
+    if (existingLike) {
+      await existingLike.destroy();
+      getIO()?.emit('post_liked', { post_id: id, user_id, liked: false });
+      res.json({ liked: false });
+    } else {
+      await PostLike.create({ post_id: id, user_id });
+      getIO()?.emit('post_liked', { post_id: id, user_id, liked: true });
+      res.json({ liked: true });
+    }
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -194,7 +208,8 @@ export const addComment = async (req, res) => {
             }]
         });
 
-        res.status(201).json(commentWithUser);
+  getIO()?.emit('comment_added', commentWithUser);
+  res.status(201).json(commentWithUser);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -226,7 +241,8 @@ export const togglePin = async (req, res) => {
         post.is_pinned = !post.is_pinned;
         await post.save();
 
-        res.json({ is_pinned: post.is_pinned });
+  getIO()?.emit('post_pinned', { id: post.id, is_pinned: post.is_pinned });
+  res.json({ is_pinned: post.is_pinned });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

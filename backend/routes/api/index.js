@@ -15,6 +15,7 @@ import systemLogRouter from './system_log.route.js';
 import robotFilesRouter from './robot_file.route.js';
 import teamLogsRouter from './team_log.route.js';
 import authenticateToken from '../../middleware/auth.middleware.js';
+import adminApiRouter from './admin.route.js';
 const router = express.Router();
 
 // Public routes (GET usually public, POST/PUT/DELETE protected inside)
@@ -36,6 +37,7 @@ router.use('/registrations', registrationRouter);
 router.use('/system-logs', systemLogRouter);
 router.use('/robot-files', robotFilesRouter);
 router.use('/team-logs', teamLogsRouter);
+router.use('/admin', adminApiRouter);
 
 
 export default router;

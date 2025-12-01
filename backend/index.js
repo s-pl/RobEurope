@@ -20,6 +20,7 @@ import fs from 'fs';
 import https from 'https';
 import { Server as SocketIOServer } from 'socket.io';
 import { setIO } from './utils/realtime.js';
+import { startSchedulers } from './utils/scheduler.js';
 import db from './models/index.js';
 import adminRoutes from './routes/admin.route.js';
 import requestId from './middleware/requestId.middleware.js';
@@ -200,6 +201,9 @@ process.on('uncaughtException', (err) => {
   // Allow logger to flush then exit
   setTimeout(() => process.exit(1), 500);
 });
+
+// Start background schedulers
+try { startSchedulers(); } catch (_) {}
 process.on('unhandledRejection', (reason, promise) => {
   // Log detailed rejection reason. If it's an Error include stack.
   if (reason instanceof Error) {

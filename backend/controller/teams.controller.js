@@ -58,13 +58,25 @@ export const createTeam = async (req, res) => {
 
 export const getTeams = async (req, res) => {
   try {
-    const { q, country_id, limit = 50, offset = 0 } = req.query;
+    const { q, country_id, limit = 50, offset = 0, sort = 'name', order = 'ASC', withCount } = req.query;
     const where = {};
     if (q) where.name = { [Op.like]: `%${q}%` };
     if (country_id) where.country_id = country_id;
 
-    const items = await Team.findAll({ where, limit: Number(limit), offset: Number(offset), order: [['name', 'ASC']] });
-    res.json(items);
+    const opts = {
+      where,
+      limit: Number(limit),
+      offset: Number(offset),
+      order: [[sort, String(order).toUpperCase() === 'DESC' ? 'DESC' : 'ASC']]
+    };
+
+    if (String(withCount) === 'true') {
+      const { count, rows } = await Team.findAndCountAll(opts);
+      return res.json({ items: rows, total: count });
+    }
+
+    const items = await Team.findAll(opts);
+    return res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -37,6 +37,12 @@
   <div class="stat" id="sys-redis">
     <h3>Redis Status</h3>
     <p>Loading...</p>
+    <div id="redis-extra" style="font-size: 0.9em; color: #555; margin-top:4px"></div>
+    <p style="margin-top:8px"><a href="/admin/redis">Abrir Redis Explorer →</a></p>
+  </div>
+  <div class="stat" id="sys-sessions">
+    <h3>Active Sessions</h3>
+    <p>Loading...</p>
   </div>
 </div>
 
@@ -77,6 +83,25 @@
         const redisEl = document.querySelector('#sys-redis p');
         redisEl.textContent = data.system.redis.toUpperCase();
         redisEl.style.color = data.system.redis === 'up' ? 'green' : 'red';
+
+        // Fetch Redis overview for extra info
+        try {
+          const rov = await (await fetch('/admin/api/redis/overview', { credentials: 'include' })).json();
+          if (rov && !rov.error) {
+            const extra = document.getElementById('redis-extra');
+            extra.textContent = `Keys: ${rov.dbsize} | Mem: ${rov.info?.used_memory_human || '-'} | Clients: ${rov.info?.connected_clients || '-'}`;
+          }
+        } catch (_) {}
+      }
+
+      // Fetch extended overview from new API
+      try {
+        const over = await (await fetch('/api/admin/stats/overview', { credentials: 'include' })).json();
+        if (over?.activeSessions != null) {
+          document.querySelector('#sys-sessions p').textContent = over.activeSessions;
+        }
+      } catch (e) {
+        // ignore
       }
     } catch (e) {
       console.error('Error fetching system stats', e);

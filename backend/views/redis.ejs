@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Redis Explorer</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 20px; }
+    header { display: flex; align-items: center; justify-content: space-between; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; }
+    .keys { max-height: 55vh; overflow: auto; }
+    .key { padding: 6px 8px; border-bottom: 1px solid #eee; cursor: pointer; }
+    .key:hover { background: #f7f7f7; }
+    .toolbar { display: flex; gap: 8px; align-items: center; }
+    input[type=text] { padding: 6px 8px; width: 260px; }
+    button { padding: 6px 10px; cursor: pointer; }
+    pre { background: #f8f8f8; padding: 8px; border-radius: 6px; overflow: auto; max-height: 50vh; }
+    .danger { color: #b00020; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Redis Explorer</h1>
+    <nav><a href="/admin">← Back to Admin</a></nav>
+  </header>
+
+  <div class="card" id="overview">
+    <h3>Overview</h3>
+    <div id="ov-content">Loading...</div>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <label>Pattern:&nbsp;<input id="pattern" type="text" value="*" /></label>
+      <label>Count:&nbsp;<input id="count" type="text" value="50" /></label>
+      <button id="scanBtn">Scan</button>
+      <span id="cursorInfo"></span>
+      <span id="errorInfo" style="color:#b00020; margin-left:12px"></span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Keys</h3>
+      <div id="keys" class="keys"></div>
+      <div class="toolbar">
+        <button id="prevCursor">Prev</button>
+        <button id="nextCursor">Next</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Key Details</h3>
+      <div id="keyMeta"></div>
+      <pre id="keyValue"></pre>
+      <button id="deleteBtn" class="danger" style="display:none">Delete Key</button>
+    </div>
+  </div>
+
+  <script>
+    let cursor = 0;
+    let lastCursor = 0;
+    let keysPages = [];
+    let currentPageIndex = -1;
+    let selectedKey = null;
+
+    async function scan() {
+      const pattern = document.getElementById('pattern').value || '*';
+      const count = document.getElementById('count').value || '50';
+      const url = `/admin/api/redis/keys?pattern=${encodeURIComponent(pattern)}&count=${encodeURIComponent(count)}&cursor=${cursor}`;
+      const res = await fetch(url, { credentials: 'include' });
+      if (!res.ok) {
+        let text = '';
+        try { text = await res.text(); } catch {}
+        document.getElementById('errorInfo').textContent = `Scan error (${res.status}): ${text?.slice(0,200)}`;
+        alert('Failed to scan');
+        return;
+      }
+      const data = await res.json();
+      cursor = data.cursor;
+      lastCursor = data.cursor;
+      keysPages.push(data.keys);
+      currentPageIndex = keysPages.length - 1;
+      renderKeys(data.keys);
+      document.getElementById('cursorInfo').textContent = `Cursor: ${cursor}`;
+      document.getElementById('errorInfo').textContent = '';
+    }
+
+    function renderKeys(keys) {
+      const container = document.getElementById('keys');
+      container.innerHTML = '';
+      if (!keys || keys.length === 0) {
+        container.textContent = '(no keys)';
+        return;
+      }
+      keys.forEach(k => {
+        const div = document.createElement('div');
+        div.className = 'key';
+        div.textContent = k;
+        div.onclick = () => selectKey(k);
+        container.appendChild(div);
+      });
+    }
+
+    async function selectKey(key) {
+      selectedKey = key;
+      const res = await fetch(`/admin/api/redis/key/${encodeURIComponent(key)}`, { credentials: 'include' });
+      if (!res.ok) {
+        let text = '';
+        try { text = await res.text(); } catch {}
+        document.getElementById('errorInfo').textContent = `Get key error (${res.status}): ${text?.slice(0,200)}`;
+        alert('Failed to get key info');
+        return;
+      }
+      const data = await res.json();
+      document.getElementById('keyMeta').textContent = `Type: ${data.type} | TTL: ${data.ttl}`;
+      document.getElementById('keyValue').textContent = formatValue(data.value);
+      const delBtn = document.getElementById('deleteBtn');
+      delBtn.style.display = 'inline-block';
+      delBtn.onclick = deleteSelected;
+      document.getElementById('errorInfo').textContent = '';
+    }
+
+    function formatValue(val) {
+      try { return JSON.stringify(val, null, 2); } catch { return String(val); }
+    }
+
+    async function deleteSelected() {
+      if (!selectedKey) return;
+      if (!confirm(`Delete key "${selectedKey}"?`)) return;
+      const res = await fetch(`/admin/api/redis/key/${encodeURIComponent(selectedKey)}`, { method: 'DELETE', credentials: 'include' });
+      if (!res.ok) {
+        let text = '';
+        try { text = await res.text(); } catch {}
+        document.getElementById('errorInfo').textContent = `Delete error (${res.status}): ${text?.slice(0,200)}`;
+        alert('Failed to delete');
+        return;
+      }
+      alert('Deleted');
+      // Refresh current page by removing the key
+      keysPages[currentPageIndex] = keysPages[currentPageIndex].filter(k => k !== selectedKey);
+      renderKeys(keysPages[currentPageIndex]);
+      document.getElementById('keyMeta').textContent = '';
+      document.getElementById('keyValue').textContent = '';
+      document.getElementById('deleteBtn').style.display = 'none';
+      selectedKey = null;
+      document.getElementById('errorInfo').textContent = '';
+    }
+
+    document.getElementById('scanBtn').onclick = () => { cursor = 0; keysPages = []; currentPageIndex = -1; scan(); };
+    document.getElementById('nextCursor').onclick = () => { scan(); };
+    document.getElementById('prevCursor').onclick = () => {
+      if (currentPageIndex > 0) {
+        currentPageIndex -= 1;
+        renderKeys(keysPages[currentPageIndex]);
+      }
+    };
+
+    // Overview load
+    (async function loadOverview(){
+      try {
+        const rov = await (await fetch('/admin/api/redis/overview', { credentials: 'include' })).json();
+        const el = document.getElementById('ov-content');
+        if (rov && !rov.error) {
+          el.textContent = `Ping: ${rov.ping} | Keys: ${rov.dbsize} | Mem: ${rov.info?.used_memory_human || '-'} | Clients: ${rov.info?.connected_clients || '-'} | Uptime(s): ${rov.info?.uptime_in_seconds || '-'}`;
+        } else {
+          el.textContent = `Overview error: ${rov.error || 'unknown'}`;
+        }
+      } catch (e) {
+        document.getElementById('ov-content').textContent = 'Overview error';
+      }
+    })();
+
+    // Initial scan
+    scan();
+  </script>
+</body>
+</html>

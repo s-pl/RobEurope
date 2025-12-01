@@ -3,23 +3,14 @@ import { apiRequest } from '../lib/apiClient';
 
 const AuthContext = createContext(null);
 
-const USER_KEY = 'robeurope_user';
+// Use cookie-based session on server; avoid localStorage persistence
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const cached = localStorage.getItem(USER_KEY);
-    return cached ? JSON.parse(cached) : null;
-  });
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const persistSession = (nextUser) => {
-    if (nextUser) {
-      localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
-      setUser(nextUser);
-    } else {
-      localStorage.removeItem(USER_KEY);
-      setUser(null);
-    }
+    setUser(nextUser || null);
   };
 
   const logout = useCallback(async () => {
@@ -91,6 +82,14 @@ export const AuthProvider = ({ children }) => {
     return updatedUser;
   }, []);
 
+  const changePassword = useCallback(async ({ current_password, new_password }) => {
+    await apiRequest('/auth/change-password', {
+      method: 'POST',
+      body: { current_password, new_password }
+    });
+    return true;
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -101,9 +100,10 @@ export const AuthProvider = ({ children }) => {
       logout,
       refreshProfile,
       updateProfile,
-      uploadProfilePhoto
+      uploadProfilePhoto,
+      changePassword
     }),
-    [user, loading, login, register, logout, refreshProfile, updateProfile, uploadProfilePhoto]
+    [user, loading, login, register, logout, refreshProfile, updateProfile, uploadProfilePhoto, changePassword]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
