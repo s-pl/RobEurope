@@ -32,6 +32,11 @@ router.use('/team-members', teamMembersRouter);
 // Protect all routes after this middleware: only authenticated users can access
 router.use(authenticateToken);
 
+// Diagnostic: current authenticated user/session
+router.get('/whoami', (req, res) => {
+	return res.json({ user: req.user || null });
+});
+
 router.use('/notifications', notificationsRouter);
 router.use('/registrations', registrationRouter);
 router.use('/system-logs', systemLogRouter);
