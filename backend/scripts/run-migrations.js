@@ -18,6 +18,7 @@ import * as createRobotFiles from '../migrations/20251130-create-robot-files.js'
 import * as createTeamLogs from '../migrations/20251130-create-team-logs.js';
 import * as addAttachmentsToTeamMessages from '../migrations/20251130-add-attachments-to-team-messages.js';
 import * as addIsPublicToRobotFiles from '../migrations/20251130-add-is-public-to-robot-files.js';
+import * as createTeamMessageReactions from '../migrations/20251201-create-team-message-reactions.js';
 
 async function run() {
   try {
@@ -184,6 +185,14 @@ async function run() {
       console.log('Added is_public to RobotFiles');
     } catch (e) {
       console.log('Skipping addIsPublicToRobotFiles:', e.message);
+    }
+
+    // Create TeamMessageReactions table
+    try {
+      await createTeamMessageReactions.up(qi, Sequelize);
+      console.log('Created TeamMessageReactions table');
+    } catch (e) {
+      console.log('Skipping createTeamMessageReactions (probably already exists):', e.message);
     }
 
     console.log('Migrations applied successfully');

@@ -29,6 +29,13 @@ export const getMessages = async (req, res) => {
             include: [{
                 model: User,
                 attributes: ['id', 'first_name', 'last_name', 'profile_photo_url']
+            }, {
+                model: db.TeamMessageReaction,
+                as: 'Reactions',
+                include: [{
+                    model: User,
+                    attributes: ['id', 'first_name', 'last_name']
+                }]
             }],
             order: [['created_at', 'DESC']],
             limit: Number(limit),
@@ -139,6 +146,89 @@ export const sendMessage = async (req, res) => {
         }
 
         res.status(201).json(fullMessage);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const addReaction = async (req, res) => {
+    try {
+        const { teamId, messageId } = req.params;
+        const { emoji } = req.body;
+        const userId = req.user.id;
+
+        // Check if user is member
+        const isMember = await TeamMembers.findOne({
+            where: { 
+                team_id: Number(teamId), 
+                user_id: userId, 
+                left_at: null 
+            }
+        });
+
+        if (!isMember && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Not a member of this team' });
+        }
+
+        const reaction = await db.TeamMessageReaction.create({
+            message_id: messageId,
+            user_id: userId,
+            emoji
+        });
+
+        // Emit socket event
+        const io = getIO();
+        if (io) {
+            io.to(`team_${teamId}`).emit('message_reaction_added', {
+                messageId: Number(messageId),
+                reaction: {
+                    ...reaction.toJSON(),
+                    User: {
+                        id: req.user.id,
+                        first_name: req.user.first_name,
+                        last_name: req.user.last_name
+                    }
+                }
+            });
+        }
+
+        res.status(201).json(reaction);
+    } catch (error) {
+        if (error.name === 'SequelizeUniqueConstraintError') {
+             return res.status(400).json({ error: 'Reaction already exists' });
+        }
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const removeReaction = async (req, res) => {
+    try {
+        const { teamId, messageId } = req.params;
+        const { emoji } = req.body;
+        const userId = req.user.id;
+
+        const deleted = await db.TeamMessageReaction.destroy({
+            where: {
+                message_id: messageId,
+                user_id: userId,
+                emoji
+            }
+        });
+
+        if (deleted) {
+             const io = getIO();
+            if (io) {
+                io.to(`team_${teamId}`).emit('message_reaction_removed', {
+                    messageId: Number(messageId),
+                    userId,
+                    emoji
+                });
+            }
+        }
+
+        res.json({ success: true });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: error.message });

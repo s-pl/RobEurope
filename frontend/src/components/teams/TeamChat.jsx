@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Send, Paperclip, File, Image as ImageIcon, X, Download, FileText, Smile, Plus } from 'lucide-react';
+import { Send, Paperclip, X, Download, FileText, Plus } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { useApi } from '../../hooks/useApi';
 import { useAuth } from '../../hooks/useAuth';
@@ -11,6 +11,8 @@ import { ScrollArea } from '../ui/scroll-area';
 import { resolveMediaUrl, getApiBaseUrl } from '../../lib/apiClient';
 import { io } from 'socket.io-client';
 
+const COMMON_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '😡'];
+
 const TeamChat = ({ teamId }) => {
   const { t } = useTranslation();
   const api = useApi();
@@ -19,13 +21,32 @@ const TeamChat = ({ teamId }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
   const socketRef = useRef(null);
 
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [typingUsers, setTypingUsers] = useState([]);
   const typingTimeoutRef = useRef(null);
+
+  const scrollToBottom = () => {
+    if (scrollRef.current) {
+      const viewport = scrollRef.current.closest('[data-radix-scroll-area-viewport]');
+      if (viewport) {
+        viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+      } else {
+        scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  };
+
+  const fetchMessages = async () => {
+    try {
+      const data = await api(`/teams/${teamId}/messages`);
+      setMessages(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     // Initialize socket
@@ -99,33 +120,12 @@ const TeamChat = ({ teamId }) => {
 
   useEffect(() => {
     fetchMessages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamId]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  const fetchMessages = async () => {
-    try {
-      const data = await api(`/teams/${teamId}/messages`);
-      setMessages(data);
-      setLoading(false);
-    } catch (error) {
-      console.error(error);
-      setLoading(false);
-    }
-  };
-
-  const scrollToBottom = () => {
-    if (scrollRef.current) {
-      const viewport = scrollRef.current.closest('[data-radix-scroll-area-viewport]');
-      if (viewport) {
-        viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
-      } else {
-        scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }
-  };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -199,8 +199,6 @@ const TeamChat = ({ teamId }) => {
       });
     }
   };
-
-  const COMMON_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '😡'];
 
   return (
     <div className="flex flex-col h-[600px] border rounded-lg bg-white dark:bg-slate-950 dark:border-slate-800">
