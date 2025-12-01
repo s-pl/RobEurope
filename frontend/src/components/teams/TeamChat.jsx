@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Send, Paperclip, File, Image as ImageIcon, X, Download, FileText } from 'lucide-react';
+import { Send, Paperclip, File, Image as ImageIcon, X, Download, FileText, Smile, Plus } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { useApi } from '../../hooks/useApi';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
@@ -57,6 +58,26 @@ const TeamChat = ({ teamId }) => {
 
     socketRef.current.on('user_stop_typing', (typingUser) => {
       setTypingUsers((prev) => prev.filter(u => u.id !== typingUser.id));
+    });
+
+    socketRef.current.on('message_reaction_added', ({ messageId, reaction }) => {
+      setMessages((prev) => prev.map(msg => {
+        if (msg.id === messageId) {
+          const reactions = msg.Reactions || [];
+          return { ...msg, Reactions: [...reactions, reaction] };
+        }
+        return msg;
+      }));
+    });
+
+    socketRef.current.on('message_reaction_removed', ({ messageId, userId, emoji }) => {
+      setMessages((prev) => prev.map(msg => {
+        if (msg.id === messageId) {
+          const reactions = msg.Reactions || [];
+          return { ...msg, Reactions: reactions.filter(r => !(r.user_id === userId && r.emoji === emoji)) };
+        }
+        return msg;
+      }));
     });
 
     return () => {
@@ -153,6 +174,34 @@ const TeamChat = ({ teamId }) => {
     setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleReaction = async (messageId, emoji) => {
+    try {
+      const message = messages.find(m => m.id === messageId);
+      const existingReaction = message?.Reactions?.find(r => r.user_id === user.id && r.emoji === emoji);
+
+      if (existingReaction) {
+        await api(`/teams/${teamId}/messages/${messageId}/reactions`, {
+          method: 'DELETE',
+          body: { emoji }
+        });
+      } else {
+        await api(`/teams/${teamId}/messages/${messageId}/reactions`, {
+          method: 'POST',
+          body: { emoji }
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo actualizar la reacción',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const COMMON_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '😡'];
+
   return (
     <div className="flex flex-col h-[600px] border rounded-lg bg-white dark:bg-slate-950 dark:border-slate-800">
       <div className="p-4 border-b dark:border-slate-800 flex justify-between items-center">
@@ -205,7 +254,9 @@ const TeamChat = ({ teamId }) => {
                     <span className="text-xs font-medium text-slate-500">{msg.User?.first_name}</span>
                     <span className="text-[10px] text-slate-400">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
-                  <div className={`p-3 rounded-lg ${isMe ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100'}`}>
+                  
+                  <div className="relative group">
+                    <div className={`p-3 rounded-lg ${isMe ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100'}`}>
                     {msg.content && <p className="whitespace-pre-wrap text-sm">{msg.content}</p>}
                     
                     {/* Multiple attachments */}
@@ -278,6 +329,54 @@ const TeamChat = ({ teamId }) => {
                       </div>
                     )}
                   </div>
+
+                  {/* Reaction Button */}
+                  <div className={`absolute top-1/2 -translate-y-1/2 ${isMe ? '-left-12' : '-right-12'} opacity-0 group-hover:opacity-100 transition-opacity z-10`}>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full bg-white dark:bg-slate-950 shadow-md border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800">
+                          <Plus className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-1 flex gap-1 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800" side="top">
+                        {COMMON_EMOJIS.map(emoji => (
+                          <button
+                            key={emoji}
+                            onClick={() => handleReaction(msg.id, emoji)}
+                            className={`p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-lg transition-colors ${msg.Reactions?.some(r => r.user_id === user.id && r.emoji === emoji) ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  </div>
+
+                  {/* Reactions List */}
+                  {msg.Reactions && msg.Reactions.length > 0 && (
+                    <div className={`flex flex-wrap gap-1 mt-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                      {Object.entries(msg.Reactions.reduce((acc, r) => {
+                        acc[r.emoji] = acc[r.emoji] || { count: 0, hasReacted: false };
+                        acc[r.emoji].count++;
+                        if (r.user_id === user.id) acc[r.emoji].hasReacted = true;
+                        return acc;
+                      }, {})).map(([emoji, { count, hasReacted }]) => (
+                        <button
+                          key={emoji}
+                          onClick={() => handleReaction(msg.id, emoji)}
+                          className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs border transition-colors ${
+                            hasReacted 
+                              ? 'bg-blue-50 border-blue-200 text-blue-600 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400' 
+                              : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          }`}
+                        >
+                          <span>{emoji}</span>
+                          <span className="font-medium">{count}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             );

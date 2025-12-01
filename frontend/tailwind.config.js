@@ -9,8 +9,8 @@ export default {
     extend: {},
   },
   plugins: [
-    require("tailwindcss-animate"),
-    require("@tailwindcss/typography")
+    ("tailwindcss-animate"),
+    ("@tailwindcss/typography")
   ],
 }
 
