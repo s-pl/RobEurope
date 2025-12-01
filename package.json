@@ -2,10 +2,12 @@
     "name": "robeurope",
     "version": "0.1.0",
     "description": "Proyecto RobEurope",
-    "main": "index.js",
+    "main": "backend/index.js",
     "scripts": {
-        "start": "node index.js",
-        "dev": "nodemon index.js",
+        "start": "node ./backend/index.js",
+        "dev": "npm --prefix backend run dev",
+        "start:backend": "npm --prefix backend run start",
+        "start:frontend": "npm --prefix frontend run dev",
         "build": "echo \"No build step defined\"",
         "test": "echo \"No tests specified\" && exit 0",
         "lint": "eslint ."
