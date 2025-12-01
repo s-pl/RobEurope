@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useEditMode } from '../context/EditModeContext';
 import { useTranslation } from 'react-i18next';
 import { Plus, Search, Image as ImageIcon, Heart, MessageCircle, Share2, MoreVertical, Trash2, Edit2, Pin } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
@@ -14,9 +15,12 @@ import { resolveMediaUrl } from '../lib/apiClient';
 import { useToast } from '../hooks/useToast';
 import { RichTextEditor } from '../components/ui/RichTextEditor';
 import DOMPurify from 'dompurify';
+import { useSocket } from '../context/SocketContext';
 
 const Posts = () => {
   const { t } = useTranslation();
+  const { socket } = useSocket();
+  const { editMode } = useEditMode();
   const api = useApi();
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -48,6 +52,55 @@ const Posts = () => {
   useEffect(() => {
     fetchPosts();
   }, [search]);
+
+  // Realtime subscriptions
+  useEffect(() => {
+    if (!socket) return;
+    const onCreated = (post) => {
+      setPosts(prev => {
+        const exists = prev.find(p => p.id === post.id);
+        if (exists) return prev;
+        return [ { ...post, _isNew: true }, ...prev ];
+      });
+    };
+    const onUpdated = (post) => {
+      setPosts(prev => prev.map(p => p.id === post.id ? { ...post } : p));
+    };
+    const onDeleted = ({ id }) => {
+      setPosts(prev => prev.filter(p => p.id !== id));
+    };
+    const onPinned = ({ id, is_pinned }) => {
+      setPosts(prev => prev.map(p => p.id === id ? { ...p, is_pinned } : p)
+        .sort((a,b) => (b.is_pinned ? 1 : 0) - (a.is_pinned ? 1 : 0) || new Date(b.created_at) - new Date(a.created_at)));
+    };
+    const onLiked = ({ post_id, user_id, liked }) => {
+      setPosts(prev => prev.map(p => {
+        if (p.id !== Number(post_id)) return p;
+        let likes = p.PostLikes || [];
+        const has = likes.some(l => l.user_id === user_id);
+        if (liked && !has) likes = [...likes, { user_id }];
+        if (!liked && has) likes = likes.filter(l => l.user_id !== user_id);
+        return { ...p, PostLikes: likes };
+      }));
+    };
+    const onComment = (comment) => {
+      setPosts(prev => prev.map(p => p.id === comment.post_id ? { ...p, Comments: [...(p.Comments||[]), { id: comment.id }] } : p));
+    };
+    socket.on('post_created', onCreated);
+    socket.on('post_updated', onUpdated);
+    socket.on('post_deleted', onDeleted);
+    socket.on('post_pinned', onPinned);
+    socket.on('post_liked', onLiked);
+    socket.on('comment_added', onComment);
+    return () => {
+      socket.off('post_created', onCreated);
+      socket.off('post_updated', onUpdated);
+      socket.off('post_deleted', onDeleted);
+      socket.off('post_pinned', onPinned);
+      socket.off('post_liked', onLiked);
+      socket.off('comment_added', onComment);
+    };
+  }, [socket]);
 
   const handleCreatePost = async (e) => {
     e.preventDefault();
@@ -184,7 +237,7 @@ const Posts = () => {
     <div className="container mx-auto max-w-3xl space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-blue-900 dark:text-blue-100">{t('posts.title')}</h1>
+          <h1 className="text-3xl font-bold text-blue-900 dark:text-blue-100">{t('posts.title')}{editMode && <span className="ml-3 text-xs px-2 py-1 rounded bg-amber-200 text-amber-800 align-top">EDIT MODE</span>}</h1>
           <p className="text-slate-500 dark:text-slate-400">{t('posts.subtitle')}</p>
         </div>
         
@@ -199,7 +252,7 @@ const Posts = () => {
             />
           </div>
           
-          {isAuthenticated && user?.role === 'admin' && (
+          {isAuthenticated && (user?.role === 'admin' || user?.role === 'super_admin') && editMode && (
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2">
@@ -264,7 +317,7 @@ const Posts = () => {
           </div>
         ) : (
           posts.map(post => (
-            <Card key={post.id} className={`overflow-hidden border-slate-200 dark:border-slate-800 ${post.is_pinned ? 'border-blue-500 dark:border-blue-500 ring-1 ring-blue-500' : ''}`}>
+            <Card key={post.id} className={`overflow-hidden border-slate-200 dark:border-slate-800 ${post.is_pinned ? 'border-blue-500 dark:border-blue-500 ring-1 ring-blue-500' : ''} ${post._isNew ? 'animate-pulse border-amber-400' : ''}`}>
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-slate-100 overflow-hidden border border-slate-200 dark:bg-slate-800 dark:border-slate-700">

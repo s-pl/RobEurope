@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUpRight, Bot, CircuitBoard, Globe2, ShieldCheck, Users, Trophy, Zap, Calendar, Newspaper, ArrowRight, CheckCircle } from 'lucide-react';
+import { ArrowUpRight, Bot, CircuitBoard, Globe2, ShieldCheck, Users, Trophy, Zap, Calendar, Newspaper, ArrowRight, CheckCircle, UserPlus, Medal } from 'lucide-react';
 import gsap from 'gsap';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -8,8 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import { useAuth } from '../hooks/useAuth';
 import { useApi } from '../hooks/useApi';
-
-const pillarIcons = [CircuitBoard, Globe2, ShieldCheck];
 
 const Home = () => {
   const { isAuthenticated } = useAuth();
@@ -78,14 +76,32 @@ const Home = () => {
     };
   }, [api, isAuthenticated]);
 
-  const pillars = useMemo(
-    () => [
-      { title: t('home.pillars.stem.title'), body: t('home.pillars.stem.body'), icon: pillarIcons[0] },
-      { title: t('home.pillars.europe.title'), body: t('home.pillars.europe.body'), icon: pillarIcons[1] },
-      { title: t('home.pillars.impact.title'), body: t('home.pillars.impact.body'), icon: pillarIcons[2] }
-    ],
-    [t]
-  );
+  const steps = [
+    { 
+      title: t('home.howItWorks.steps.register.title'), 
+      description: t('home.howItWorks.steps.register.description'),
+      icon: UserPlus,
+      color: "bg-blue-100 text-blue-600"
+    },
+    { 
+      title: t('home.howItWorks.steps.team.title'), 
+      description: t('home.howItWorks.steps.team.description'),
+      icon: Users,
+      color: "bg-indigo-100 text-indigo-600"
+    },
+    { 
+      title: t('home.howItWorks.steps.enroll.title'), 
+      description: t('home.howItWorks.steps.enroll.description'),
+      icon: Trophy,
+      color: "bg-purple-100 text-purple-600"
+    },
+    { 
+      title: t('home.howItWorks.steps.compete.title'), 
+      description: t('home.howItWorks.steps.compete.description'),
+      icon: Medal,
+      color: "bg-amber-100 text-amber-600"
+    }
+  ];
 
   return (
     <div className="flex flex-col gap-20 pb-20">
@@ -141,56 +157,56 @@ const Home = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="space-y-2">
                 <h3 className="text-4xl font-bold text-blue-600 dark:text-blue-400">50+</h3>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Equipos Activos</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('home.stats.teams')}</p>
             </div>
             <div className="space-y-2">
                 <h3 className="text-4xl font-bold text-blue-600 dark:text-blue-400">12</h3>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Competiciones Anuales</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('home.stats.competitions')}</p>
             </div>
             <div className="space-y-2">
                 <h3 className="text-4xl font-bold text-blue-600 dark:text-blue-400">10k+</h3>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Espectadores</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('home.stats.viewers')}</p>
             </div>
             <div className="space-y-2">
                 <h3 className="text-4xl font-bold text-blue-600 dark:text-blue-400">3</h3>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Países</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('home.stats.countries')}</p>
             </div>
         </div>
       </section>
 
     
-      <section className="space-y-24">
-        {pillars.map((pillar, index) => (
-          <div key={pillar.title} className={`flex flex-col md:flex-row gap-12 items-center ${index % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
-            <div className="flex-1 space-y-6">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                <pillar.icon className="h-6 w-6" />
+      <section className="space-y-16">
+        <div className="text-center max-w-3xl mx-auto space-y-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">{t('home.howItWorks.title')}</h2>
+          <p className="text-lg text-slate-600 dark:text-slate-400">
+            {t('home.howItWorks.description')}
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
+          <div className="hidden lg:block absolute top-12 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200 dark:from-blue-900 dark:via-blue-700 dark:to-blue-900 -z-10"></div>
+          
+          {steps.map((step, index) => (
+            <div key={index} className="relative group">
+              <div className="flex flex-col items-center text-center space-y-4 p-6 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className={`h-16 w-16 rounded-2xl flex items-center justify-center ${step.color} shadow-sm group-hover:scale-110 transition-transform duration-300`}>
+                  <step.icon className="h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{step.title}</h3>
+                <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                  {step.description}
+                </p>
               </div>
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{pillar.title}</h2>
-              <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">{pillar.body}</p>
-              <ul className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <li key={i} className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span>Característica destacada {i}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
-            <div className="flex-1">
-               <div className="aspect-video rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl flex items-center justify-center">
-                  <pillar.icon className="h-24 w-24 text-slate-300 dark:text-slate-700" />
-               </div>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </section>
 
    
       <section className="space-y-10">
         <div className="text-center max-w-2xl mx-auto space-y-4">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Últimas Novedades</h2>
-            <p className="text-slate-600 dark:text-slate-400">Mantente al día con las últimas noticias y competiciones de la liga.</p>
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{t('home.latest.title')}</h2>
+            <p className="text-slate-600 dark:text-slate-400">{t('home.latest.description')}</p>
         </div>
         
         <div className="grid md:grid-cols-2 gap-8">
@@ -198,9 +214,9 @@ const Home = () => {
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold flex items-center gap-2">
-                        <Newspaper className="h-5 w-5 text-blue-600" /> Noticias
+                        <Newspaper className="h-5 w-5 text-blue-600" /> {t('home.latest.news')}
                     </h3>
-                    <Link to="/posts" className="text-sm text-blue-600 hover:underline">Ver todas</Link>
+                    <Link to="/posts" className="text-sm text-blue-600 hover:underline">{t('home.latest.viewAll')}</Link>
                 </div>
                 <div className="space-y-4">
                     {highlights.posts.slice(0, 3).map(post => (
@@ -218,9 +234,9 @@ const Home = () => {
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold flex items-center gap-2">
-                        <Trophy className="h-5 w-5 text-blue-600" /> Competiciones
+                        <Trophy className="h-5 w-5 text-blue-600" /> {t('home.latest.competitions')}
                     </h3>
-                    <Link to="/competitions" className="text-sm text-blue-600 hover:underline">Ver calendario</Link>
+                    <Link to="/competitions" className="text-sm text-blue-600 hover:underline">{t('home.latest.viewCalendar')}</Link>
                 </div>
                 <div className="space-y-4">
                     {highlights.competitions.slice(0, 3).map(comp => (
@@ -245,10 +261,10 @@ const Home = () => {
       <section className="relative rounded-3xl overflow-hidden bg-blue-600 text-white py-20 px-6 text-center">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?q=80&w=2069&auto=format&fit=crop')] bg-cover bg-center opacity-10 mix-blend-overlay"></div>
         <div className="relative z-10 max-w-3xl mx-auto space-y-8">
-            <h2 className="text-4xl font-bold">¿Listo para competir?</h2>
-            <p className="text-blue-100 text-lg">Únete a la comunidad de robótica más grande de Europa y demuestra tus habilidades.</p>
+            <h2 className="text-4xl font-bold">{t('home.cta.title')}</h2>
+            <p className="text-blue-100 text-lg">{t('home.cta.description')}</p>
             <Button asChild size="lg" className="h-14 px-8 text-lg bg-white text-blue-600 hover:bg-blue-50 border-none shadow-lg">
-                <Link to="/register">Registrarse Ahora</Link>
+                <Link to="/register">{t('home.cta.button')}</Link>
             </Button>
         </div>
       </section>

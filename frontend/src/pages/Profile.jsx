@@ -21,6 +21,7 @@ const Profile = () => {
   const [countries, setCountries] = useState([]);
   const [countriesStatus, setCountriesStatus] = useState({ loading: false, error: '' });
   const [userTeams, setUserTeams] = useState([]);
+  // Password change moved to Login -> Forgot Password flow
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -115,6 +116,8 @@ const Profile = () => {
     }
   };
 
+  // handlePasswordChange removed
+
   if (!user) {
     return <p className="text-sm text-slate-500">{t('profile.feedback.error')}</p>;
   }
@@ -166,7 +169,7 @@ const Profile = () => {
         </div>
       </section>
 
-      <div className="grid gap-8 md:grid-cols-3">
+  <div className="grid gap-8 md:grid-cols-3">
         {/* Left Column: Teams & Stats */}
         <div className="space-y-6">
           <Card>
@@ -280,6 +283,8 @@ const Profile = () => {
               </form>
             </CardContent>
           </Card>
+
+          {/* Password change moved to Forgot Password flow */}
         </div>
       </div>
     </div>

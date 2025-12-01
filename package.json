@@ -21,9 +21,8 @@
         "url": "https://example.com/robeurope/issues"
     },
     "homepage": "https://example.com/robeurope#readme",
-    "dependencies": {},
     "devDependencies": {
-        "nodemon": "^2.0.22",
-        "eslint": "^8.49.0"
+        "eslint": "^8.49.0",
+        "nodemon": "^2.0.22"
     }
 }

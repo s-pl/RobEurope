@@ -1,6 +1,8 @@
 import db from '../models/index.js';
 import bcrypt from 'bcryptjs';
 import { Sequelize } from 'sequelize';
+import si from 'systeminformation';
+import redisClient from '../utils/redis.js';
 const { User, Competition, Post, Registration, SystemLog, Team } = db;
 
 // Helper reused (similar logic as auth.controller) to support base64 obfuscated inputs
@@ -93,12 +95,59 @@ export async function getStatsData(req, res) {
       Post.count(),
       Registration.count()
     ]);
+
+    // System Stats
+    const mem = await si.mem();
+    const load = await si.currentLoad();
+    const disk = await si.fsSize();
     
+    // DB Status
+    let mysqlStatus = 'down';
+    try {
+      await db.sequelize.authenticate();
+      mysqlStatus = 'up';
+    } catch (e) { mysqlStatus = 'down'; }
+
+    let redisStatus = 'down';
+    try {
+      if (redisClient.isOpen) redisStatus = 'up';
+    } catch (e) { redisStatus = 'down'; }
+    
+    // Active sessions (users activos): contar sesiones no expiradas en tabla Session
+    let activeSessions = 0;
+    try {
+      // connect-session-sequelize por defecto usa la tabla "Sessions" o la configurada; en index.js se usa tableName 'Session'
+      // Intentamos ambas por compatibilidad
+      const [rows1] = await db.sequelize.query('SELECT COUNT(*) AS c FROM "Session" WHERE expires > NOW()');
+      const [rows2] = await db.sequelize.query('SELECT COUNT(*) AS c FROM "Sessions" WHERE expires > NOW()', { raw: true }).catch(() => [null]);
+      const c1 = rows1 && rows1[0] ? Number(rows1[0].c) : 0;
+      const c2 = rows2 && rows2[0] ? Number(rows2[0].c) : 0;
+      activeSessions = Math.max(c1, c2);
+    } catch (_) { activeSessions = 0; }
+
     res.json({
       users,
       competitions,
       posts,
       registrations,
+      activeSessions,
+      system: {
+        memory: {
+          total: mem.total,
+          used: mem.used,
+          free: mem.free,
+          active: mem.active
+        },
+        cpu: {
+          load: load.currentLoad
+        },
+        disk: disk[0] ? {
+          size: disk[0].size,
+          used: disk[0].used
+        } : null,
+        mysql: mysqlStatus,
+        redis: redisStatus
+      },
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -324,6 +373,18 @@ export async function updateUser(req, res) {
       ip_address: req.ip,
       details: `Updated user ${user.username} (ID: ${user.id})`
     });
+
+    // Log role change specifically (auditoría)
+    if (oldData.role !== user.role) {
+      await SystemLog.create({
+        action: 'ROLE_CHANGED',
+        entity_type: 'User',
+        entity_id: user.id,
+        user_id: req.session.user.id,
+        ip_address: req.ip,
+        details: `Role changed from ${oldData.role} to ${user.role}`
+      });
+    }
 
     res.redirect('/admin/users');
   } catch (error) {

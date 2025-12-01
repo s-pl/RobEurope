@@ -20,9 +20,11 @@ import fs from 'fs';
 import https from 'https';
 import { Server as SocketIOServer } from 'socket.io';
 import { setIO } from './utils/realtime.js';
+import { startSchedulers } from './utils/scheduler.js';
 import db from './models/index.js';
 import adminRoutes from './routes/admin.route.js';
 import requestId from './middleware/requestId.middleware.js';
+import redisClient from './utils/redis.js';
 dotenv.config();
 // import userRoutes from './routes/userRoutes.js';
 const allowedOrigins = [
@@ -68,18 +70,20 @@ const sessionStore = new SequelizeStore({
   db: db.sequelize,
   tableName: 'Session'
 });
-// Ensure session table exists (non-blocking) - will create if absent
+
+
 sessionStore.sync();
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'change_me_in_env',
+  secret: process.env.SESSION_SECRET || 'Session123456789100000',
   store: sessionStore,
   resave: false,
   saveUninitialized: false,
+  proxy: true,
   cookie: {
-    secure: false, // set true behind HTTPS reverse proxy with trust proxy
+    secure: process.env.NODE_ENV === 'production', // set true behind HTTPS reverse proxy with trust proxy
     httpOnly: true,
     sameSite: 'lax',
-    maxAge: 1000 * 60 * 60 // 1 hour
+    maxAge: 1000 * 60 * 60 * 24 // 24 hours
   }
 }));
 
@@ -197,6 +201,9 @@ process.on('uncaughtException', (err) => {
   // Allow logger to flush then exit
   setTimeout(() => process.exit(1), 500);
 });
+
+// Start background schedulers
+try { startSchedulers(); } catch (_) {}
 process.on('unhandledRejection', (reason, promise) => {
   // Log detailed rejection reason. If it's an Error include stack.
   if (reason instanceof Error) {
@@ -261,13 +268,132 @@ io.on('connection', (socket) => {
     }
   });
 
+  // --- Collaborative Coding Events ---
+  socket.on('join_code_session', async (data) => {
+    const { teamId, user } = data;
+    if (teamId) {
+      const room = `code_${teamId}`;
+      socket.join(room);
+      socket.data.codeUser = user;
+      socket.data.codeTeamId = teamId;
+      
+      // Initialize session if not exists
+      const sessionKey = `code_session:${teamId}`;
+      let sessionData = await redisClient.get(sessionKey);
+      
+      if (!sessionData) {
+        const initialSession = {
+          files: [
+            { id: '1', name: 'main.js', content: '// Welcome to your team workspace\nconsole.log("Hello World");', language: 'javascript' },
+            { id: '2', name: 'README.md', content: '# Team Project\n\nCollaborate here.', language: 'markdown' }
+          ]
+        };
+        await redisClient.set(sessionKey, JSON.stringify(initialSession));
+        sessionData = JSON.stringify(initialSession);
+      }
+      
+      // Send current state
+      socket.emit('init_code_session', JSON.parse(sessionData));
+
+      broadcastCodeUsers(room);
+      logger.info({ socket: 'joined_code', id: socket.id, teamId, userId: user?.id });
+    }
+  });
+
+  socket.on('file_update', async (data) => {
+    const { teamId, fileId, content } = data;
+    if (teamId) {
+      const sessionKey = `code_session:${teamId}`;
+      const sessionData = await redisClient.get(sessionKey);
+      if (sessionData) {
+        const session = JSON.parse(sessionData);
+        const file = session.files.find(f => f.id === fileId);
+        if (file) {
+          file.content = content;
+          await redisClient.set(sessionKey, JSON.stringify(session));
+          socket.to(`code_${teamId}`).emit('file_content_update', { fileId, content });
+        }
+      }
+    }
+  });
+
+  socket.on('create_file', async (data) => {
+    const { teamId, name, language, type = 'file' } = data;
+    if (teamId) {
+      const sessionKey = `code_session:${teamId}`;
+      const sessionData = await redisClient.get(sessionKey);
+      if (sessionData) {
+        const session = JSON.parse(sessionData);
+        
+        // Check if file already exists
+        if (session.files.some(f => f.name === name)) {
+            return; // Or emit error
+        }
+
+        const newFile = {
+          id: Date.now().toString(),
+          name,
+          content: type === 'folder' ? null : '',
+          language: language || 'javascript',
+          type
+        };
+        session.files.push(newFile);
+        await redisClient.set(sessionKey, JSON.stringify(session));
+        io.to(`code_${teamId}`).emit('file_created', newFile);
+      }
+    }
+  });
+
+  socket.on('delete_file', async (data) => {
+    const { teamId, fileId } = data;
+    if (teamId) {
+      const sessionKey = `code_session:${teamId}`;
+      const sessionData = await redisClient.get(sessionKey);
+      if (sessionData) {
+        const session = JSON.parse(sessionData);
+        session.files = session.files.filter(f => f.id !== fileId);
+        await redisClient.set(sessionKey, JSON.stringify(session));
+        io.to(`code_${teamId}`).emit('file_deleted', { fileId });
+      }
+    }
+  });
+
+  socket.on('focus_file', (data) => {
+    const { teamId, fileId } = data;
+    if (teamId) {
+      socket.data.focusedFileId = fileId;
+      broadcastCodeUsers(`code_${teamId}`);
+    }
+  });
+
   socket.on('disconnect', (reason) => {
     logger.info({ socket: 'disconnected', id: socket.id, reason });
     if (socket.data.teamId) {
       broadcastTeamUsers(`team_${socket.data.teamId}`);
     }
+    if (socket.data.codeTeamId) {
+      broadcastCodeUsers(`code_${socket.data.codeTeamId}`);
+    }
   });
 });
+
+function broadcastCodeUsers(room) {
+  const clients = io.sockets.adapter.rooms.get(room);
+  if (clients) {
+    const users = [];
+    for (const clientId of clients) {
+      const clientSocket = io.sockets.sockets.get(clientId);
+      if (clientSocket && clientSocket.data.codeUser) {
+        users.push({
+          ...clientSocket.data.codeUser,
+          focusedFileId: clientSocket.data.focusedFileId,
+          socketId: clientId
+        });
+      }
+    }
+    io.to(room).emit('session_users', users);
+  }
+}
 
 function broadcastTeamUsers(room) {
   const clients = io.sockets.adapter.rooms.get(room);

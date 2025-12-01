@@ -1,9 +1,50 @@
 import db from '../models/index.js';
-const { Stream, Registration, TeamMembers } = db;
+const { Stream, Registration, TeamMembers, Competition } = db;
 import { Op } from 'sequelize';
 
 export const createStream = async (req, res) => {
   try {
+    const { competition_id, team_id } = req.body;
+
+    // Check if user is a member of the team (or admin)
+    if (req.user.role !== 'admin') {
+      const membership = await TeamMembers.findOne({
+        where: {
+          team_id,
+          user_id: req.user.id,
+          left_at: null
+        }
+      });
+
+      if (!membership) {
+        return res.status(403).json({ error: 'You are not a member of this team' });
+      }
+    }
+
+    // If competition is specified, enforce active status and registration
+    if (competition_id) {
+      const competition = await Competition.findByPk(competition_id);
+      if (!competition) {
+        return res.status(404).json({ error: 'Competition not found' });
+      }
+
+      if (!competition.is_active) {
+        return res.status(400).json({ error: 'Competition is not active. You cannot start a stream.' });
+      }
+
+      const registration = await Registration.findOne({
+        where: {
+          competition_id,
+          team_id,
+          status: 'approved'
+        }
+      });
+
+      if (!registration) {
+        return res.status(403).json({ error: 'Team is not approved for this competition' });
+      }
+    }
+
     const streamData = { ...req.body };
     const item = await Stream.create(streamData);
     res.status(201).json(item);
@@ -22,8 +63,12 @@ export const getStreams = async (req, res) => {
 
     // Check access permissions
     let isApproved = false;
-    if (competition_id && req.user) {
-      const userTeams = await TeamMembers.findAll({ where: { user_id: req.user.id, left_at: null } });
+    const currentUser = req.user || req.session?.user;
+
+    if (currentUser?.role === 'admin') {
+      isApproved = true;
+    } else if (competition_id && currentUser) {
+      const userTeams = await TeamMembers.findAll({ where: { user_id: currentUser.id, left_at: null } });
       const teamIds = userTeams.map(tm => tm.team_id);
       
       if (teamIds.length > 0) {

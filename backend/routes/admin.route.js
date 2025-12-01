@@ -22,6 +22,7 @@ import {
   updateRegistrationStatus
 } from '../controller/admin.controller.js';
 import * as crudController from '../controller/admin.crud.controller.js';
+import { renderRedisExplorer, listKeys, getKeyInfo, deleteKey, getOverview } from '../controller/admin.redis.controller.js';
 import * as ldapController from '../controller/ldap.controller.js';
 
 const router = Router();
@@ -40,6 +41,8 @@ router.post('/users/:id/edit', requireAdminSession, updateUser);
 // router.get('/competitions', requireAdminSession, listCompetitions); // Handled by generic CRUD
 router.get('/logs', requireAdminSession, listSystemLogs);
 router.get('/registrations', requireAdminSession, listRegistrations);
+// Redis explorer page
+router.get('/redis', requireAdminSession, renderRedisExplorer);
 
 // API endpoints for charts (JSON)
 router.get('/api/stats', requireAdminSession, getStatsData);
@@ -49,6 +52,11 @@ router.get('/api/registrations-stats', requireAdminSession, getRegistrationStats
 router.get('/api/users-detailed', requireAdminSession, getDetailedUsers);
 router.get('/api/competitions-stats', requireAdminSession, getCompetitionStats);
 router.get('/api/logs-stats', requireAdminSession, getLogsStats);
+// Redis explorer API
+router.get('/api/redis/keys', requireAdminSession, listKeys);
+router.get('/api/redis/key/:key', requireAdminSession, getKeyInfo);
+router.delete('/api/redis/key/:key', requireAdminSession, deleteKey);
+router.get('/api/redis/overview', requireAdminSession, getOverview);
 
 // LDAP routes
 router.get('/ldap-users', requireAdminSession, ldapController.listLdapUsers);

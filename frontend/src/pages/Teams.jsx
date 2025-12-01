@@ -52,8 +52,7 @@ const Teams = () => {
 
   useEffect(() => {
     let alive = true;
-    const load = async () => {
-      await reload();
+    const fetchStatus = async () => {
       if (isAuthenticated) {
         try {
           const st = await api('/teams/status');
@@ -68,10 +67,9 @@ const Teams = () => {
         }
       }
     };
-    load();
+    fetchStatus();
     return () => { alive = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
+  }, [isAuthenticated, api]);
 
   const onSearch = async (e) => {
     e.preventDefault();
@@ -257,12 +255,12 @@ const Teams = () => {
             <CardFooter className="pt-4 border-t border-slate-100">
               {isAuthenticated ? (
                 status.ownedTeamId === team.id || status.memberOfTeamId === team.id ? (
-                  <Button variant="outline" className="w-full" asChild>
+                  <Button variant="outline" className="w-full flex items-center justify-center" asChild>
                     <Link to="/my-team">{t('teams.manage')}</Link>
                   </Button>
                 ) : (
                   <Button 
-                    className="w-full gap-2" 
+                    className="w-full gap-2 flex items-center justify-center" 
                     variant="secondary"
                     onClick={() => onRequestJoin(team.id)}
                     disabled={status.ownedTeamId || status.memberOfTeamId}
@@ -271,7 +269,7 @@ const Teams = () => {
                   </Button>
                 )
               ) : (
-                <Button variant="ghost" className="w-full gap-2" asChild>
+                <Button variant="ghost" className="w-full gap-2 flex items-center justify-center" asChild>
                   <Link to="/login">
                     <LogIn className="h-4 w-4" /> {t('teams.loginToJoin')}
                   </Link>

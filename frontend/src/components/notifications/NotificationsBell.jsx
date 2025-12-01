@@ -8,6 +8,7 @@ import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
+import { requestNotificationPermission, showNotification } from '../../lib/notifications';
 
 const NotificationsBell = () => {
   const { user } = useAuth();
@@ -35,6 +36,7 @@ const NotificationsBell = () => {
 
     const bootstrap = async () => {
       await fetchNotifications();
+      await requestNotificationPermission();
 
       try {
         socket = io(socketUrl, { transports: ['websocket', 'polling'] });
@@ -42,6 +44,8 @@ const NotificationsBell = () => {
         socket.on(channel, (notif) => {
           setItems((prev) => [notif, ...prev].slice(0, 20));
           setUnread((x) => x + 1);
+          // Web notification
+          showNotification(notif.title || 'Nueva notificación', { body: notif.message || '', tag: `notif-${notif.id}` });
         });
       } catch (_) {}
     };

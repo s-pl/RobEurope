@@ -3,10 +3,18 @@ import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
 import { useAuth } from '../../hooks/useAuth';
+import { useEffect } from 'react';
+import { requestNotificationPermission } from '../../lib/notifications';
+import NotificationTestButton from '../notifications/NotificationTestButton';
 
 const AppLayout = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+
+  useEffect(() => {
+    // Ask permission once the layout mounts
+    requestNotificationPermission();
+  }, []);
 
   return (
     <div className={`min-h-screen bg-neutral-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50 ${isAdmin ? 'border-t-4 border-red-600' : ''}`}>
@@ -25,6 +33,7 @@ const AppLayout = () => {
           <main className="mx-auto w-full max-w-5xl space-y-10 px-4 pb-16 pt-10 lg:px-8 flex-1">
             <Outlet />
           </main>
+          <NotificationTestButton />
           <Footer />
         </div>
       </div>

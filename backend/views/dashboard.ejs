@@ -21,6 +21,31 @@
   </div>
 </div>
 
+<div class="system-status-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem; margin-bottom: 2rem;">
+  <div class="stat" id="sys-cpu">
+    <h3>CPU Load</h3>
+    <p>Loading...</p>
+  </div>
+  <div class="stat" id="sys-mem">
+    <h3>Memory Usage</h3>
+    <p>Loading...</p>
+  </div>
+  <div class="stat" id="sys-mysql">
+    <h3>MySQL Status</h3>
+    <p>Loading...</p>
+  </div>
+  <div class="stat" id="sys-redis">
+    <h3>Redis Status</h3>
+    <p>Loading...</p>
+    <div id="redis-extra" style="font-size: 0.9em; color: #555; margin-top:4px"></div>
+    <p style="margin-top:8px"><a href="/admin/redis">Abrir Redis Explorer →</a></p>
+  </div>
+  <div class="stat" id="sys-sessions">
+    <h3>Active Sessions</h3>
+    <p>Loading...</p>
+  </div>
+</div>
+
 <div class="charts-container">
   <div class="chart-wrapper">
     <h3> Distribución de Usuarios por Rol</h3>
@@ -37,5 +62,56 @@
     <svg id="timelineChart"></svg>
   </div>
 </div>
+
+<script>
+  async function updateSystemStats() {
+    try {
+      const res = await fetch('/admin/api/stats');
+      const data = await res.json();
+      
+      if (data.system) {
+        document.querySelector('#sys-cpu p').textContent = data.system.cpu.load.toFixed(1) + '%';
+        
+        const memUsed = (data.system.memory.active / 1024 / 1024 / 1024).toFixed(2);
+        const memTotal = (data.system.memory.total / 1024 / 1024 / 1024).toFixed(2);
+        document.querySelector('#sys-mem p').textContent = `${memUsed} / ${memTotal} GB`;
+        
+        const mysqlEl = document.querySelector('#sys-mysql p');
+        mysqlEl.textContent = data.system.mysql.toUpperCase();
+        mysqlEl.style.color = data.system.mysql === 'up' ? 'green' : 'red';
+
+        const redisEl = document.querySelector('#sys-redis p');
+        redisEl.textContent = data.system.redis.toUpperCase();
+        redisEl.style.color = data.system.redis === 'up' ? 'green' : 'red';
+
+        // Fetch Redis overview for extra info
+        try {
+          const rov = await (await fetch('/admin/api/redis/overview', { credentials: 'include' })).json();
+          if (rov && !rov.error) {
+            const extra = document.getElementById('redis-extra');
+            extra.textContent = `Keys: ${rov.dbsize} | Mem: ${rov.info?.used_memory_human || '-'} | Clients: ${rov.info?.connected_clients || '-'}`;
+          }
+        } catch (_) {}
+      }
+
+      // Fetch extended overview from new API
+      try {
+        const over = await (await fetch('/api/admin/stats/overview', { credentials: 'include' })).json();
+        if (over?.activeSessions != null) {
+          document.querySelector('#sys-sessions p').textContent = over.activeSessions;
+        }
+      } catch (e) {
+        // ignore
+      }
+    } catch (e) {
+      console.error('Error fetching system stats', e);
+    }
+  }
+  
+  // Initial load
+  updateSystemStats();
+  // Refresh every 10s
+  setInterval(updateSystemStats, 10000);
+</script>
 
 <%- include('partials/footer') %>

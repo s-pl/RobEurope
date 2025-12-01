@@ -58,6 +58,8 @@ export const uploadMiddleware = (options = {}) => {
   // Return appropriate multer middleware
   if (type === 'fields') {
     return [upload.fields(fieldName), handleUploadErrors];
+  } else if (type === 'array') {
+    return [upload.array(fieldName, 10), handleUploadErrors]; // Limit to 10 files
   } else {
     return [upload.single(fieldName), handleUploadErrors];
   }

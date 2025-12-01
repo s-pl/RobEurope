@@ -12,9 +12,11 @@ import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
 import { 
   Users, Settings, Trophy, Info, Plus, 
-  LogOut, Trash2, Check, X, Video, UserPlus, MessageCircle 
+  LogOut, Trash2, Check, X, Video, UserPlus, MessageCircle, Code 
 } from 'lucide-react';
 import TeamChat from '../components/teams/TeamChat';
+import CollaborativeEditor from '../components/teams/CollaborativeEditor';
+import TeamCompetitionDashboard from '../components/teams/TeamCompetitionDashboard';
 import { resolveMediaUrl } from '../lib/apiClient';
 
 const debounce = (fn, ms = 300) => {
@@ -349,6 +351,7 @@ const MyTeam = () => {
       <div className="border-b border-slate-200 flex gap-2 overflow-x-auto">
         <TabButton id="overview" label={t('myTeam.tabs.overview')} icon={Info} />
         <TabButton id="chat" label={t('team.chat.tab')} icon={MessageCircle} />
+        <TabButton id="code" label="Code" icon={Code} />
         <TabButton id="members" label={t('myTeam.tabs.members')} icon={Users} />
         <TabButton id="competitions" label={t('myTeam.tabs.competitions')} icon={Trophy} />
         {isOwner && <TabButton id="settings" label={t('myTeam.tabs.settings')} icon={Settings} />}
@@ -360,6 +363,11 @@ const MyTeam = () => {
         {/* CHAT TAB */}
         {activeTab === 'chat' && (
           <TeamChat teamId={team.id} />
+        )}
+
+        {/* CODE TAB */}
+        {activeTab === 'code' && (
+          <CollaborativeEditor teamId={team.id} />
         )}
         
         {/* OVERVIEW TAB */}
@@ -552,19 +560,27 @@ const MyTeam = () => {
                     <p className="p-4 text-sm text-slate-500">{t('myTeam.competitions.noRegistrations')}</p>
                   ) : (
                     registrations.map((r) => (
-                      <div key={r.id} className="p-4 flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">{t('myTeam.competitions.compPrefix')} {r.competition_id}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant={r.status === 'approved' ? 'default' : r.status === 'rejected' ? 'destructive' : 'secondary'}>
-                              {r.status}
-                            </Badge>
-                            {r.decision_reason && <span className="text-xs text-slate-500">{t('myTeam.competitions.reason')} {r.decision_reason}</span>}
+                      <div key={r.id} className="flex flex-col">
+                        <div className="p-4 flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">{t('myTeam.competitions.compPrefix')} {r.competition_id}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant={r.status === 'approved' ? 'default' : r.status === 'rejected' ? 'destructive' : 'secondary'}>
+                                {r.status}
+                              </Badge>
+                              {r.decision_reason && <span className="text-xs text-slate-500">{t('myTeam.competitions.reason')} {r.decision_reason}</span>}
+                            </div>
+                          </div>
+                          <div className="text-xs text-slate-400">
+                            {new Date(r.registration_date).toLocaleDateString()}
                           </div>
                         </div>
-                        <div className="text-xs text-slate-400">
-                          {new Date(r.registration_date).toLocaleDateString()}
-                        </div>
+                        {/* Show Dashboard for Approved Competitions */}
+                        {r.status === 'approved' && (
+                          <div className="px-4 pb-4">
+                            <TeamCompetitionDashboard competitionId={r.competition_id} teamId={team.id} />
+                          </div>
+                        )}
                       </div>
                     ))
                   )}

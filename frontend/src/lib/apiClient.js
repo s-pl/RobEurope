@@ -1,8 +1,6 @@
 const FALLBACK_BASES = [
-  'http://localhost:85/api',
-  'http://46.101.255.106:85/api',
-  'https://robeurope.samuelponce.es:85/api',
-  'http://robeurope.samuelponce.es:85/api'
+  'https://api.robeurope.samuelponce.es/api',
+  'http://localhost:85/api'
 ];
 const STORAGE_KEY = 'robeurope:apiBaseUrl';
 
@@ -28,7 +26,7 @@ const resolveDefaultBase = () => {
   console.log('VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL, 'envBase:', envBase);
   if (envBase) return envBase;
 
-  return 'http://localhost:85/api';
+  return 'https://api.robeurope.samuelponce.es/api';
 };
 
 let apiBaseUrl = resolveDefaultBase();
@@ -131,7 +129,9 @@ export async function apiRequest(path, { method = 'GET', body, token, headers = 
 export const resolveMediaUrl = (path) => {
   if (!path) return '';
   if (/^https?:\/\//i.test(path)) return path;
-  return `${getApiOrigin()}${path}`;
+  const origin = getApiOrigin();
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${origin}${cleanPath}`;
 };
 
 export { getApiBaseUrl };

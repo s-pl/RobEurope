@@ -96,6 +96,29 @@ docker-compose up -d db
 docker-compose exec -T db mysql -u root -p robeurope < backup.sql
 ```
 
+### Redis Issues
+
+#### Connection Refused
+```bash
+# Check if Redis container is running
+docker-compose ps redis
+
+# Check Redis logs
+docker-compose logs redis
+
+# Verify REDIS_URL in .env
+cat backend/.env | grep REDIS_URL
+```
+
+#### Session/State Not Persisting
+```bash
+# Check if keys exist in Redis
+docker-compose exec redis redis-cli keys "*"
+
+# Monitor Redis commands in real-time
+docker-compose exec redis redis-cli monitor
+```
+
 ## Authentication Issues
 
 ### JWT Token Errors
