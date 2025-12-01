@@ -104,7 +104,7 @@ const Competitions = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { t } = useTranslation();
-  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+  const isAdmin = user?.role === 'super_admin';
   const [filters, setFilters] = useState({ q: '', is_active: '' });
   const [onlyFavorites, setOnlyFavorites] = useState(false);
 
