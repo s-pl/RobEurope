@@ -10,8 +10,8 @@ const router = express.Router();
 router.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }));
 router.get('/', getCountries);
 router.get('/:id', getCountryById);
-router.post('/', authenticateToken, requireRole('admin'), createCountry);
-router.put('/:id', authenticateToken, requireRole('admin'), updateCountry);
-router.delete('/:id', authenticateToken, requireRole('admin'), deleteCountry);
+router.post('/', authenticateToken, requireRole('super_admin'), createCountry);
+router.put('/:id', authenticateToken, requireRole('super_admin'), updateCountry);
+router.delete('/:id', authenticateToken, requireRole('super_admin'), deleteCountry);
 
 export default router;

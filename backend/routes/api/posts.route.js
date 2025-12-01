@@ -8,13 +8,13 @@ const router = express.Router();
 
 router.get('/', getPosts);
 router.get('/:id', getPostById);
-router.post('/', authenticateToken, requireRole('admin'), uploadMiddleware({ fieldName: 'image' }), createPost);
+router.post('/', authenticateToken, requireRole('super_admin'), uploadMiddleware({ fieldName: 'image' }), createPost);
 router.put('/:id', authenticateToken, requireOwnership('Post'), uploadMiddleware({ fieldName: 'image' }), updatePost);
 router.delete('/:id', authenticateToken, requireOwnership('Post'), deletePost);
 
 router.post('/:id/like', authenticateToken, toggleLike);
 router.post('/:id/comments', authenticateToken, addComment);
 router.get('/:id/comments', getComments);
-router.post('/:id/pin', authenticateToken, requireRole('admin'), togglePin);
+router.post('/:id/pin', authenticateToken, requireRole('super_admin'), togglePin);
 
 export default router;
