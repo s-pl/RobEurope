@@ -252,7 +252,7 @@ const Posts = () => {
             />
           </div>
           
-          {isAuthenticated && (user?.role === 'admin' || user?.role === 'super_admin') && editMode && (
+          {isAuthenticated && user?.role === 'super_admin' && editMode && (
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2">
@@ -343,12 +343,12 @@ const Posts = () => {
                 </div>
                 
                 <div className="flex items-center">
-                    {user?.role === 'admin' && (
+                    {user?.role === 'super_admin' && (
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-500" onClick={() => handlePin(post)}>
                             <Pin className={`h-4 w-4 ${post.is_pinned ? 'fill-blue-500 text-blue-500' : ''}`} />
                         </Button>
                     )}
-                    {(user?.id === post.author_id || user?.role === 'admin') && (
+                    {(user?.id === post.author_id || user?.role === 'super_admin') && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">

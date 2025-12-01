@@ -1,3 +1,5 @@
+// Simple role enforcement: only 'user' or 'super_admin' exist.
+// Use requireRole('super_admin') where privileged access is needed.
 export function requireRole(role) {
   return (req, res, next) => {
     const user = req.user;

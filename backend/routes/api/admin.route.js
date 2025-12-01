@@ -5,7 +5,7 @@ import { getStatsData, getUsersByRole, getUsersTimeline, getRegistrationStats, g
 
 const router = express.Router();
 
-// All admin api routes require auth + super_admin role
+// Admin API routes: only super_admin role has access
 router.use(authenticateToken, requireRole('super_admin'));
 
 router.get('/stats/overview', getStatsData);
