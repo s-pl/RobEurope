@@ -85,6 +85,8 @@ const sessionStore = new SequelizeStore({
 
 
 sessionStore.sync();
+// When behind a reverse proxy (NGINX, Caddy, etc.) trust the first proxy so secure cookies work
+app.set('trust proxy', 1);
 app.use(session({
   secret: process.env.SESSION_SECRET || 'Session123456789100000',
   store: sessionStore,
