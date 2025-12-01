@@ -264,6 +264,34 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('join_competition', (data) => {
+    const { competitionId, user } = data;
+    if (competitionId) {
+      const room = `competition_${competitionId}`;
+      socket.join(room);
+      
+      if (user) {
+        socket.data.user = user;
+        socket.data.competitionId = competitionId;
+        broadcastCompetitionUsers(room);
+      }
+      
+      logger.info({ socket: 'joined_competition', id: socket.id, competitionId, userId: user?.id });
+    }
+  });
+
+  socket.on('competition_typing', (data) => {
+    if (data.competitionId && data.user) {
+      socket.to(`competition_${data.competitionId}`).emit('competition_user_typing', data.user);
+    }
+  });
+
+  socket.on('competition_stop_typing', (data) => {
+    if (data.competitionId && data.user) {
+      socket.to(`competition_${data.competitionId}`).emit('competition_user_stop_typing', data.user);
+    }
+  });
+
   // --- Collaborative Coding Events ---
   socket.on('join_code_session', async (data) => {
     const { teamId, user } = data;
@@ -370,6 +398,9 @@ io.on('connection', (socket) => {
     if (socket.data.codeTeamId) {
       broadcastCodeUsers(`code_${socket.data.codeTeamId}`);
     }
+    if (socket.data.competitionId) {
+      broadcastCompetitionUsers(`competition_${socket.data.competitionId}`);
+    }
   });
 });
 
@@ -405,6 +436,23 @@ function broadcastTeamUsers(room) {
       }
     }
     io.to(room).emit('team_users_update', users);
+  }
+}
+
+function broadcastCompetitionUsers(room) {
+  const clients = io.sockets.adapter.rooms.get(room);
+  if (clients) {
+    const users = [];
+    for (const clientId of clients) {
+      const clientSocket = io.sockets.sockets.get(clientId);
+      if (clientSocket && clientSocket.data.user) {
+        // Avoid duplicates if same user has multiple tabs open
+        if (!users.find(u => u.id === clientSocket.data.user.id)) {
+          users.push(clientSocket.data.user);
+        }
+      }
+    }
+    io.to(room).emit('competition_users_update', users);
   }
 }
 

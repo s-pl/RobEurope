@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge';
 import { Calendar, MapPin, Users, Video, ArrowLeft, Share2, FileText, Download } from 'lucide-react';
 import { useToast } from '../hooks/useToast';
+import CompetitionChat from '../components/competitions/CompetitionChat';
 
 const CompetitionDetail = () => {
   const { id } = useParams();
@@ -19,7 +20,6 @@ const CompetitionDetail = () => {
   const [teams, setTeams] = useState([]);
   const [streams, setStreams] = useState([]);
   const [publicFiles, setPublicFiles] = useState([]);
-  const [myTeamId, setMyTeamId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { t } = useTranslation();
@@ -42,24 +42,6 @@ const CompetitionDetail = () => {
         setTeams(registeredTeams);
      
         setStreams(competitionStreams);
-
-        // Check if current user is in one of these teams
-        if (user) {
-          const myMemberships = await api(`/team-members?user_id=${user.id}`);
-          const myTeamIds = myMemberships.map(m => m.team_id);
-          
-          // Find a team that is both in my teams AND registered for this competition
-          const participatingTeam = registeredTeams.find(t => myTeamIds.includes(t.id));
-          if (participatingTeam) {
-            setMyTeamId(participatingTeam.id);
-          } else {
-           
-            const ownedTeam = registeredTeams.find(t => t.created_by_user_id === user.id);
-            if (ownedTeam) {
-              setMyTeamId(ownedTeam.id);
-            }
-          }
-        }
 
       } catch (err) {
         setError(err.message);
@@ -257,6 +239,8 @@ const CompetitionDetail = () => {
               </div>
             </CardContent>
           </Card>
+
+          <CompetitionChat competitionId={id} />
         </div>
       </div>
     </div>
