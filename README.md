@@ -17,7 +17,7 @@ Comprehensive platform for managing robotics competitions in Europe. This system
 - **Database**: MySQL (Sequelize ORM), Redis (Session & Real-time State)
 - **Frontend**: React (Vite), TailwindCSS, Monaco Editor
 - **Infrastructure**: Docker, Docker Compose
-- **Services**: OpenLDAP, Bind9, Redis
+- **Services**: OpenLDAP, Redis
 
 ## Prerequisites
 
@@ -102,7 +102,7 @@ REDIS_URL=redis://localhost:6379
 Detailed documentation is located in the `/docs` folder:
 
 - [Diagrams (ERD, Classes, Use Cases)](docs/diagrams.md)
-- [LDAP and Bind9 Setup](docs/ldap-bind9-setup.md)
+- [LDAP Setup](docs/ldap-bind9-setup.md)
 - [Admin Panel Manual](docs/admin-panel.md)
 - [API Documentation](api.robeurope.samuelponce.es/api-docs) (Swagger/OpenAPI)
 

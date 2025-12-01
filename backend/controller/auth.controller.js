@@ -1,6 +1,9 @@
 import db from '../models/index.js';
 import bcrypt from 'bcryptjs';
 import SystemLogger from '../utils/systemLogger.js';
+import crypto from 'crypto';
+import redisClient from '../utils/redis.js';
+import { sendPasswordResetEmail, sendPasswordResetCodeEmail } from '../utils/email.js';
 
 const { User } = db;
 
@@ -19,6 +22,18 @@ function decodeIfBase64(value) {
   }
 }
 
+function validatePasswordStrength(password) {
+  if (typeof password !== 'string') return 'Password inválida';
+  if (password.length < 8) return 'La contraseña debe tener al menos 8 caracteres';
+  const hasLower = /[a-z]/.test(password);
+  const hasUpper = /[A-Z]/.test(password);
+  const hasDigit = /\d/.test(password);
+  const hasSymbol = /[^A-Za-z0-9]/.test(password);
+  const groups = [hasLower, hasUpper, hasDigit, hasSymbol].filter(Boolean).length;
+  if (groups < 3) return 'La contraseña debe incluir al menos 3 tipos: mayúsculas, minúsculas, números o símbolos';
+  return null;
+}
+
 export const register = async (req, res) => {
   try {
     // Expect username instead of country_id (models use username)
@@ -28,9 +43,13 @@ export const register = async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields: first_name, last_name, username, email, password' });
     }
 
-    // decode if sent base64
+  // decode if sent base64
     email = decodeIfBase64(email);
     password = decodeIfBase64(password);
+
+  // Password strength validation
+  const pwError = validatePasswordStrength(password);
+  if (pwError) return res.status(400).json({ error: pwError });
 
     // Force default role to 'user' regardless of input
     const role = 'user';
@@ -94,10 +113,24 @@ export const login = async (req, res) => {
     email = decodeIfBase64(email);
     password = decodeIfBase64(password);
 
+    // Throttling/lockout per email
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
+    const lockKey = `login:lock:${email}`;
+    const attemptsKey = `login:attempts:${email}`;
+    const locked = await redisClient.get(lockKey);
+    if (locked) {
+      return res.status(429).json({ error: 'Demasiados intentos. Inténtalo más tarde.' });
+    }
+
     const user = await User.findOne({ where: { email } });
     if (!user) {
       // Log failed login attempt
       await SystemLogger.logAuth('LOGIN', null, req, `Failed login attempt for email: ${email}`);
+      const attempts = await redisClient.incr(attemptsKey);
+      if (attempts === 1) await redisClient.expire(attemptsKey, 10 * 60); // window 10 min
+      if (attempts >= 5) {
+        await redisClient.set(lockKey, '1', { EX: 10 * 60 });
+      }
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
@@ -105,8 +138,16 @@ export const login = async (req, res) => {
     if (!match) {
       // Log failed login attempt
       await SystemLogger.logAuth('LOGIN', user.id, req, 'Failed login attempt - wrong password');
+      const attempts = await redisClient.incr(attemptsKey);
+      if (attempts === 1) await redisClient.expire(attemptsKey, 10 * 60);
+      if (attempts >= 5) {
+        await redisClient.set(lockKey, '1', { EX: 10 * 60 });
+      }
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
+
+    // success: reset attempts
+    await redisClient.del(attemptsKey);
 
     // Set session user
     const userSession = { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, role: user.role };
@@ -143,4 +184,111 @@ export const me = (req, res) => {
     return res.json(req.session.user);
   }
   return res.status(401).json({ error: 'Not authenticated' });
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    if (!req.session?.user?.id) return res.status(401).json({ error: 'Not authenticated' });
+    let { current_password, new_password } = req.body || {};
+    if (!current_password || !new_password) return res.status(400).json({ error: 'Campos requeridos: current_password y new_password' });
+
+    // decode if base64
+    current_password = decodeIfBase64(current_password);
+    new_password = decodeIfBase64(new_password);
+
+    if (current_password === new_password) return res.status(400).json({ error: 'La nueva contraseña no puede ser igual a la actual' });
+
+    // Validate new password strength
+    const pwError = validatePasswordStrength(new_password);
+    if (pwError) return res.status(400).json({ error: pwError });
+
+    const user = await User.findByPk(req.session.user.id);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    const match = await bcrypt.compare(current_password, user.password_hash);
+    if (!match) return res.status(401).json({ error: 'La contraseña actual no es correcta' });
+
+    const password_hash = await bcrypt.hash(new_password, 10);
+    await user.update({ password_hash });
+
+    // Log password change
+  await SystemLogger.logAuth('PW_CHG', user.id, req, 'User changed password');
+
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    let { email } = req.body || {};
+    if (!email) return res.status(400).json({ error: 'Email requerido' });
+    email = decodeIfBase64(email);
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      // Do not reveal user existence
+      return res.json({ success: true });
+    }
+    // Generate 6-digit one-time code and store keyed by email
+    const code = (Math.floor(100000 + Math.random() * 900000)).toString();
+    const key = `pwreset:code:${email}`;
+    await redisClient.set(key, JSON.stringify({ userId: user.id, code }), { EX: 15 * 60 });
+    const sendResult = await sendPasswordResetCodeEmail({ to: email, code });
+    return res.json({ success: true, emailSent: !!sendResult?.sent });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    let { token, new_password } = req.body || {};
+    if (!token || !new_password) return res.status(400).json({ error: 'Campos requeridos: token y new_password' });
+    new_password = decodeIfBase64(new_password);
+    const pwError = validatePasswordStrength(new_password);
+    if (pwError) return res.status(400).json({ error: pwError });
+    const key = `pwreset:token:${token}`;
+    const userId = await redisClient.get(key);
+    if (!userId) return res.status(400).json({ error: 'Token inválido o expirado' });
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    const password_hash = await bcrypt.hash(new_password, 10);
+    await user.update({ password_hash });
+    await redisClient.del(key);
+  await SystemLogger.logAuth('PWRES', user.id, req, 'User reset password via token');
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+export const resetPasswordWithCode = async (req, res) => {
+  try {
+    let { email, code, new_password } = req.body || {};
+    if (!email || !code || !new_password) return res.status(400).json({ error: 'Campos requeridos: email, code y new_password' });
+    email = decodeIfBase64(email);
+    new_password = decodeIfBase64(new_password);
+
+    const pwError = validatePasswordStrength(new_password);
+    if (pwError) return res.status(400).json({ error: pwError });
+
+    const key = `pwreset:code:${email}`;
+    const payload = await redisClient.get(key);
+    if (!payload) return res.status(400).json({ error: 'Código inválido o expirado' });
+    let parsed;
+    try { parsed = JSON.parse(payload); } catch { return res.status(400).json({ error: 'Código inválido o expirado' }); }
+    if (parsed.code !== code) return res.status(400).json({ error: 'Código inválido o expirado' });
+
+    const user = await User.findByPk(parsed.userId);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    const password_hash = await bcrypt.hash(new_password, 10);
+    await user.update({ password_hash });
+    await redisClient.del(key);
+  await SystemLogger.logAuth('PWRES', user.id, req, 'User reset password via one-time code');
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 };

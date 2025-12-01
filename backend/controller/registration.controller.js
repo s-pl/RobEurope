@@ -1,6 +1,7 @@
 import db from '../models/index.js';
 const { Registration, Team, Notification } = db;
 import { Op } from 'sequelize';
+import { Parser as Json2CsvParser } from 'json2csv';
 
 export const createRegistration = async (req, res) => {
   try {
@@ -34,6 +35,39 @@ export const getRegistrations = async (req, res) => {
     res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+export const exportRegistrationsCSV = async (req, res) => {
+  try {
+    const { competition_id, status } = req.query;
+    const where = {};
+    if (competition_id) where.competition_id = competition_id;
+    if (status) where.status = status;
+
+    const items = await Registration.findAll({ 
+      where,
+      include: [{ model: Team, attributes: ['id', 'name'] }],
+      order: [['registration_date', 'DESC']]
+    });
+
+    const rows = items.map(r => ({
+      id: r.id,
+      competition_id: r.competition_id,
+      team_id: r.team_id,
+      team_name: r.Team ? r.Team.name : '',
+      status: r.status,
+      decision_reason: r.decision_reason || '',
+      registration_date: r.registration_date ? new Date(r.registration_date).toISOString() : ''
+    }));
+
+    const parser = new Json2CsvParser({ fields: ['id','competition_id','team_id','team_name','status','decision_reason','registration_date'] });
+    const csv = parser.parse(rows);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="registrations.csv"');
+    return res.send(csv);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 };
 

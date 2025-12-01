@@ -1,6 +1,8 @@
 import db from '../models/index.js';
 const { Competition, Registration, TeamMembers } = db;
 import { Op } from 'sequelize';
+import redisClient from '../utils/redis.js';
+import { getIO } from '../utils/realtime.js';
 
 const generateSlug = (text) => {
   return text
@@ -34,8 +36,9 @@ export const createCompetition = async (req, res) => {
       req.body.slug = uniqueSlug;
     }
 
-    const comp = await Competition.create(req.body);
-    res.status(201).json(comp);
+  const comp = await Competition.create(req.body);
+  getIO()?.emit('competition_created', comp);
+  res.status(201).json(comp);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -43,15 +46,73 @@ export const createCompetition = async (req, res) => {
 
 export const getCompetitions = async (req, res) => {
   try {
-    const { q, country_id, limit = 50, offset = 0, sort = 'id' } = req.query;
+    const { q, country_id, limit = 50, offset = 0, sort = 'id', order = 'ASC', is_active, start_date_from, start_date_to, withCount } = req.query;
     const where = {};
     if (q) where.title = { [Op.like]: `%${q}%` };
     if (country_id) where.country_id = country_id;
+    if (typeof is_active !== 'undefined') where.is_active = String(is_active) === 'true';
+    if (start_date_from || start_date_to) {
+      where.start_date = {};
+      if (start_date_from) where.start_date[Op.gte] = new Date(start_date_from);
+      if (start_date_to) where.start_date[Op.lte] = new Date(start_date_to);
+    }
 
-    const items = await Competition.findAll({ where, limit: Number(limit), offset: Number(offset), order: [[sort, 'ASC']] });
-    res.json(items);
+    const opts = {
+      where,
+      limit: Number(limit),
+      offset: Number(offset),
+      order: [[sort, String(order).toUpperCase() === 'DESC' ? 'DESC' : 'ASC']]
+    };
+
+    if (String(withCount) === 'true') {
+      const { count, rows } = await Competition.findAndCountAll(opts);
+      return res.json({ items: rows, total: count });
+    }
+
+    const items = await Competition.findAll(opts);
+    return res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+// --- Favorites (stored in Redis set per user) ---
+const favKey = (userId) => `user:${userId}:favorites:competitions`;
+
+export const addFavoriteCompetition = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'No autorizado' });
+    const compId = String(req.params.id);
+    await redisClient.sAdd(favKey(userId), compId);
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+export const removeFavoriteCompetition = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'No autorizado' });
+    const compId = String(req.params.id);
+    await redisClient.sRem(favKey(userId), compId);
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+export const listFavoriteCompetitions = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'No autorizado' });
+    const ids = await redisClient.sMembers(favKey(userId));
+    if (!ids || !ids.length) return res.json([]);
+    const items = await Competition.findAll({ where: { id: { [Op.in]: ids.map((s) => Number(s)) } } });
+    return res.json(items);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 };
 
@@ -101,8 +162,9 @@ export const updateCompetition = async (req, res) => {
     }
     const [updated] = await Competition.update(req.body, { where: { id: req.params.id } });
     if (!updated) return res.status(404).json({ error: 'Competition not found' });
-    const updatedItem = await Competition.findByPk(req.params.id);
-    res.json(updatedItem);
+  const updatedItem = await Competition.findByPk(req.params.id);
+  getIO()?.emit('competition_updated', updatedItem);
+  res.json(updatedItem);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -110,9 +172,10 @@ export const updateCompetition = async (req, res) => {
 
 export const deleteCompetition = async (req, res) => {
   try {
-    const deleted = await Competition.destroy({ where: { id: req.params.id } });
+  const deleted = await Competition.destroy({ where: { id: req.params.id } });
     if (!deleted) return res.status(404).json({ error: 'Competition not found' });
-    res.json({ message: 'Competition deleted' });
+  if (deleted) getIO()?.emit('competition_deleted', { id: req.params.id });
+  res.json({ message: 'Competition deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

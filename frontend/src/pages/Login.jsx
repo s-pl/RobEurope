@@ -70,6 +70,12 @@ const Login = () => {
             </Button>
           </form>
 
+          <div className="text-center">
+            <Link to="/forgot-password" className="text-xs text-blue-700 hover:underline dark:text-blue-300">
+              {t('login.forgot') || '¿Has olvidado tu contraseña?'}
+            </Link>
+          </div>
+
           <p className="text-center text-xs text-slate-500 dark:text-slate-400">
             {t('login.noAccount')}{' '}
             <Link to="/register" className="font-semibold text-slate-900 dark:text-slate-50">

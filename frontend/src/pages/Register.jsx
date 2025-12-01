@@ -6,6 +6,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from '../components/ui/c
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { useAuth } from '../hooks/useAuth';
+import { getPasswordStrength, StrengthBar } from '../lib/passwordStrength.jsx';
 
 const Register = () => {
   const { register } = useAuth();
@@ -16,10 +17,12 @@ const Register = () => {
     username: '',
     email: '',
     password: '',
+    confirm_password: '',
     phone: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [pwTouched, setPwTouched] = useState(false);
   const { t } = useTranslation();
 
   const handleChange = (event) => {
@@ -31,8 +34,22 @@ const Register = () => {
     event.preventDefault();
     setLoading(true);
     setError('');
+    // client-side validation
+    if (form.password !== form.confirm_password) {
+      setError(t('forms.passwordsDontMatch') || 'Las contraseñas no coinciden');
+      setLoading(false);
+      return;
+    }
+    const { score } = getPasswordStrength(form.password);
+    if (score < 2) {
+      setError(t('forms.passwordTooWeak') || 'La contraseña es demasiado débil');
+      setLoading(false);
+      return;
+    }
     try {
-      await register(form);
+      const payload = { ...form };
+      delete payload.confirm_password;
+      await register(payload);
       navigate('/', { replace: true });
     } catch (err) {
   setError(err.message || t('profile.feedback.error'));
@@ -82,9 +99,38 @@ const Register = () => {
                 type="password"
                 required
                 value={form.password}
+                onChange={(e) => { handleChange(e); if (!pwTouched) setPwTouched(true); }}
+                className="mt-2"
+              />
+              {pwTouched && (
+                (() => {
+                  const { score, label, color } = getPasswordStrength(form.password);
+                  return (
+                    <div className="mt-1">
+                      <div className="flex items-center justify-between text-xs text-slate-500">
+                        <span>{t('forms.passwordStrength') || 'Fuerza'}</span>
+                        <span style={{ color }}>{label}</span>
+                      </div>
+                      <StrengthBar score={score} color={color} />
+                    </div>
+                  );
+                })()
+              )}
+            </div>
+            <div>
+              <Label htmlFor="confirm_password">{t('forms.repeatPassword') || 'Repetir contraseña'}</Label>
+              <Input
+                id="confirm_password"
+                name="confirm_password"
+                type="password"
+                required
+                value={form.confirm_password}
                 onChange={handleChange}
                 className="mt-2"
               />
+              {form.confirm_password && form.password !== form.confirm_password && (
+                <p className="mt-1 text-xs text-red-600">{t('forms.passwordsDontMatch') || 'Las contraseñas no coinciden'}</p>
+              )}
             </div>
             <div className="md:col-span-2">
               <Button type="submit" disabled={loading} className="w-full">

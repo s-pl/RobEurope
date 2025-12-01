@@ -19,22 +19,6 @@ services:
     networks:
       - robeurope_network
 
-  bind9:
-    image: sameersbn/bind:9.16.1-20200524
-    container_name: bind9
-    environment:
-      WEBMIN_ENABLED: "false"
-    ports:
-      - "53:53/udp"
-      - "53:53/tcp"
-      - "10000:10000"  # Webmin if enabled
-    volumes:
-      - bind_data:/data
-      - ./bind/named.conf:/data/named.conf
-      - ./bind/db.robeurope.samuelponce.es:/data/db.robeurope.samuelponce.es
-    networks:
-      - robeurope_network
-
   redis:
     image: redis:alpine
     container_name: robeurope-redis
@@ -46,7 +30,6 @@ services:
 volumes:
   ldap_data:
   ldap_config:
-  bind_data:
 
 networks:
   robeurope_network:
