@@ -21,7 +21,8 @@ Made with <3 by Samuel Ponce Luna and Angel Lallave Herrera
 - This deployment was made by Angel Lallave Herrera
 - We didn´t implement the BIND9 because we already have the DNS config made in IONOS. <img width="1093" height="89" alt="image" src="https://github.com/user-attachments/assets/eb16d1ca-a6a6-49d1-882f-05a8c42f2164" />
 - In this new version, we´ve implemented a mail service for forgotten passwords.
-- Also, Redis was installed via Docker to manage sessions, and the files for the collaborative editor. You can see the RAW data of the db in the admin panel <img width="336" height="328" alt="image" src="https://github.com/user-attachments/assets/bb04e9fe-147d-4141-9756-a370fb8af750" />
+- Also, Redis was installed via Docker to manage sessions, and the files for the collaborative editor. You can see the RAW data of the db in the admin panel 
+<img width="336" height="328" alt="image" src="https://github.com/user-attachments/assets/bb04e9fe-147d-4141-9756-a370fb8af750" />
 
 
 ## Technologies
