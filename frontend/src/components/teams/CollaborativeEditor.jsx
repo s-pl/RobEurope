@@ -141,7 +141,7 @@ const CollaborativeEditor = ({ teamId }) => {
   const editorRef = useRef(null);
 
   useEffect(() => {
-    const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:85', {
+    const newSocket = io(import.meta.env.VITE_API_BASE_URL || 'http://localhost:85', {
       withCredentials: true
     });
 
