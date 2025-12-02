@@ -2,14 +2,16 @@
 
 Comprehensive platform for managing robotics competitions in Europe. This system allows users to register, form teams, sign up for competitions, and follow live events.
 
-## Features
+Made with <3 by Samuel Ponce Luna and Angel Lallave Herrera
 
-- **User Management**: Registration, authentication, and user profiles.
-- **Teams**: Team creation, member invitations, and role management.
-- **Competitions**: Event calendar, registrations, and status tracking.
-- **Admin Panel**: Complete interface for platform management.
-- **LDAP Integration**: Centralized identity management with OpenLDAP.
-- **Docker Infrastructure**: Containerized deployment of auxiliary services (LDAP, DNS).
+## Important Info
+
+- To access to the LDAP, you have to go to the admin panel and navigate to LDAP -> There you can see the users created in the LDAP
+- The main web may be with some strange texts like nav.posts -> That´s because some translations have not been made yet..
+- This deployment was made by Angel Lallave Herrera
+- We didn´t implement the BIND9 because we already have the DNS config made in IONOS. <img width="1093" height="89" alt="image" src="https://github.com/user-attachments/assets/eb16d1ca-a6a6-49d1-882f-05a8c42f2164" />
+- In this new version, we´ve implemented a mail service for forgotten passwords.
+- Also, Redis was installed via Docker to manage sessions, and the files for the collaborative editor. You can see the RAW data of the db in the admin panel <img width="336" height="328" alt="image" src="https://github.com/user-attachments/assets/bb04e9fe-147d-4141-9756-a370fb8af750" />
 
 ## Technologies
 
@@ -36,7 +38,7 @@ Comprehensive platform for managing robotics competitions in Europe. This system
 2. **Configure Environment Variables**
    Create a `.env` file in the `backend` with the following content:
 
-   PORT=
+PORT=
 DB_HOST=
 DB_PORT=
 DB_NAME=
@@ -93,7 +95,7 @@ REDIS_URL=redis://localhost:6379
 - **User Management**: Registration, authentication, and user profiles.
 - **Teams**: Team creation, member invitations, and role management.
 - **Competitions**: Event calendar, registrations, and status tracking.
-- **Admin Panel**: Complete interface for platform management with system health monitoring (CPU, RAM, DB Status).
+- **Admin Panel**: Complete interface for platform management with system health monitoring (CPU, RAM, DB Status). -> To join to the admin panel - use the credentials that were sent to you via EMAIL by samuelponceluna@alumno.ieselrincon.es
 - **LDAP Integration**: Centralized identity management with OpenLDAP.
 - **Docker Infrastructure**: Containerized deployment of auxiliary services (LDAP, DNS, Redis).
 
