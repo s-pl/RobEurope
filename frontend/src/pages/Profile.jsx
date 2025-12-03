@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Camera, Users, ExternalLink } from 'lucide-react';
+import { Camera, Users, ExternalLink, User, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { useAuth } from '../hooks/useAuth';
 import { useApi } from '../hooks/useApi';
 import { resolveMediaUrl } from '../lib/apiClient';
@@ -168,53 +169,49 @@ const Profile = () => {
           </div>
         </div>
       </section>
+      {/* Tabbed Content */}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="overview" className="flex items-center gap-2"><User className="h-4 w-4" /> {t('profile.overview')}</TabsTrigger>
+          <TabsTrigger value="edit" className="flex items-center gap-2"><Pencil className="h-4 w-4" /> {t('profile.personalInfo')}</TabsTrigger>
+          <TabsTrigger value="teams" className="flex items-center gap-2"><Users className="h-4 w-4" /> {t('teams.title')}</TabsTrigger>
+        </TabsList>
 
-  <div className="grid gap-8 md:grid-cols-3">
-        {/* Left Column: Teams & Stats */}
-        <div className="space-y-6">
+        {/* Overview */}
+        <TabsContent value="overview" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Users className="h-5 w-5 text-blue-600" />
-                {t('teams.title')}
-              </CardTitle>
+              <CardTitle>{t('profile.overview')}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {userTeams.length > 0 ? (
-                userTeams.map(member => (
-                  <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
-                    <div className="h-10 w-10 rounded bg-white border border-slate-200 flex items-center justify-center overflow-hidden">
-                      {member.team?.logo_url ? (
-                        <img src={resolveMediaUrl(member.team.logo_url)} alt={member.team.name} className="h-full w-full object-cover" />
-                      ) : (
-                        <Users className="h-5 w-5 text-slate-300" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-900 truncate">{member.team?.name || 'Team'}</p>
-                      <p className="text-xs text-slate-500 capitalize">{member.role}</p>
-                    </div>
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link to={`/teams/${member.team_id}`}>
-                        <ExternalLink className="h-4 w-4 text-slate-400" />
-                      </Link>
-                    </Button>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-6 text-slate-500">
-                  <p className="text-sm mb-3">{t('myTeam.createDesc')}</p>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to="/teams/create">{t('teams.create')}</Link>
-                  </Button>
+            <CardContent className="space-y-3 text-sm text-slate-600">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <p className="font-medium text-slate-900">{t('forms.firstName')} / {t('forms.lastName')}</p>
+                  <p>{user.first_name} {user.last_name}</p>
                 </div>
-              )}
+                <div>
+                  <p className="font-medium text-slate-900">Email</p>
+                  <p>{user.email}</p>
+                </div>
+                <div>
+                  <p className="font-medium text-slate-900">@{t('profile.username') || 'username'}</p>
+                  <p>@{user.username}</p>
+                </div>
+                <div>
+                  <p className="font-medium text-slate-900">{t('forms.phone')}</p>
+                  <p>{form.phone || '—'}</p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="font-medium text-slate-900">{t('profile.bio')}</p>
+                  <p>{form.bio || t('profile.bioEmpty')}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
-        </div>
+        </TabsContent>
 
-        {/* Right Column: Edit Profile Form */}
-        <div className="md:col-span-2">
+        {/* Edit */}
+        <TabsContent value="edit" className="mt-6">
           <Card>
             <CardHeader>
               <CardTitle>{t('profile.personalInfo')}</CardTitle>
@@ -283,10 +280,51 @@ const Profile = () => {
               </form>
             </CardContent>
           </Card>
+        </TabsContent>
 
-          {/* Password change moved to Forgot Password flow */}
-        </div>
-      </div>
+        {/* Teams */}
+        <TabsContent value="teams" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Users className="h-5 w-5 text-blue-600" />
+                {t('teams.title')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {userTeams.length > 0 ? (
+                userTeams.map(member => (
+                  <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
+                    <div className="h-10 w-10 rounded bg-white border border-slate-200 flex items-center justify-center overflow-hidden">
+                      {member.team?.logo_url ? (
+                        <img src={resolveMediaUrl(member.team.logo_url)} alt={member.team.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <Users className="h-5 w-5 text-slate-300" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-slate-900 truncate">{member.team?.name || 'Team'}</p>
+                      <p className="text-xs text-slate-500 capitalize">{member.role}</p>
+                    </div>
+                    <Button variant="ghost" size="icon" asChild>
+                      <Link to={`/teams/${member.team_id}`}>
+                        <ExternalLink className="h-4 w-4 text-slate-400" />
+                      </Link>
+                    </Button>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6 text-slate-500">
+                  <p className="text-sm mb-3">{t('myTeam.createDesc')}</p>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/teams/create">{t('teams.create')}</Link>
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
