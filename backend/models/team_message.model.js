@@ -54,6 +54,7 @@ export default function defineTeamMessageModel(sequelize, DataTypes) {
     TeamMessage.associate = (models) => {
         TeamMessage.belongsTo(models.Team, { foreignKey: 'team_id' });
         TeamMessage.belongsTo(models.User, { foreignKey: 'user_id' });
+        TeamMessage.hasMany(models.TeamMessageReaction, { foreignKey: 'message_id', as: 'Reactions' });
     };
 
     return TeamMessage;

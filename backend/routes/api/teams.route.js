@@ -1,6 +1,6 @@
 import express from 'express';
 import { createTeam, getTeams, getTeamById, updateTeam, deleteTeam, inviteToTeam, acceptInvite, requestJoinTeam, approveJoinRequest, registerTeamInCompetition, getMyTeam, listJoinRequests, getMembershipStatus, leaveTeam } from '../../controller/teams.controller.js';
-import { getMessages, sendMessage } from '../../controller/team_chat.controller.js';
+import { getMessages, sendMessage, addReaction, removeReaction } from '../../controller/team_chat.controller.js';
 import authenticateToken from '../../middleware/auth.middleware.js';
 import { requireOwnership } from '../../middleware/ownership.middleware.js';
 import { uploadMiddleware } from '../../middleware/upload.middleware.js';
@@ -35,5 +35,8 @@ router.post('/:teamId/messages', authenticateToken, uploadMiddleware({
     allowedTypes: /.*/, 
     maxSize: 50 * 1024 * 1024 
 }), sendMessage);
+
+router.post('/:teamId/messages/:messageId/reactions', authenticateToken, addReaction);
+router.delete('/:teamId/messages/:messageId/reactions', authenticateToken, removeReaction);
 
 export default router;
