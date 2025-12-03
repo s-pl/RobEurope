@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
 import { requestNotificationPermission, showNotification } from '../../lib/notifications';
+import { registerServiceWorker, subscribeToPush } from '../../lib/push';
 
 const NotificationsBell = () => {
   const { user } = useAuth();
@@ -35,8 +36,11 @@ const NotificationsBell = () => {
     let alive = true;
 
     const bootstrap = async () => {
-      await fetchNotifications();
-      await requestNotificationPermission();
+  await fetchNotifications();
+  await requestNotificationPermission();
+  // Push registration
+  const reg = await registerServiceWorker();
+  if (reg) await subscribeToPush(reg);
 
       try {
         socket = io(socketUrl, { transports: ['websocket', 'polling'] });

@@ -76,6 +76,8 @@ LDAP_BIND_PASSWORD=
 LDAP_BASE_DN=
 LDAP_USER_DN=
 REDIS_URL=redis://localhost:6379
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
 
 
 
@@ -122,6 +124,29 @@ REDIS_URL=redis://localhost:6379
 - **Admin Panel**: Complete interface for platform management with system health monitoring (CPU, RAM, DB Status). -> To join to the admin panel - use the credentials that were sent to you via EMAIL by samuelponceluna@alumno.ieselrincon.es
 - **LDAP Integration**: Centralized identity management with OpenLDAP.
 - **Docker Infrastructure**: Containerized deployment of auxiliary services (LDAP, DNS, Redis).
+ - **Push Notifications (PWA)**: Browser push notifications using Service Workers and VAPID keys.
+
+### Push Notifications setup (VAPID)
+
+1. Generate VAPID keys (once):
+
+   ```bash
+   # In backend
+   npm install web-push
+   npx web-push generate-vapid-keys
+   ```
+
+2. Copy the generated keys to backend `.env`:
+
+   ```env
+   VAPID_PUBLIC_KEY=BDc...yourPublicKey
+   VAPID_PRIVATE_KEY=ZXv...yourPrivateKey
+   VAPID_SUBJECT=mailto:admin@example.com
+   ```
+
+3. Ensure the frontend serves `/sw.js` (already added in `frontend/public/sw.js`) and the site is served over HTTPS (required for push on production).
+
+4. Users will be prompted to allow notifications; subscriptions are stored in Redis under `push:subs:{userId}`.
 
 ## Documentation
 

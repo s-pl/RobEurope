@@ -7,6 +7,7 @@ import authRouter from './auth.route.js';
 import competitionsRouter from './competitions.route.js';
 import postsRouter from './posts.route.js';
 import notificationsRouter from './notifications.route.js';
+import pushRouter from './push.route.js';
 import registrationRouter from './registration.route.js';
 import sponsorsRouter from './sponsors.route.js';
 import teamsRouter from './teams.route.js';
@@ -38,6 +39,7 @@ router.get('/whoami', (req, res) => {
 });
 
 router.use('/notifications', notificationsRouter);
+router.use('/notifications/push', pushRouter);
 router.use('/registrations', registrationRouter);
 router.use('/system-logs', systemLogRouter);
 router.use('/robot-files', robotFilesRouter);
