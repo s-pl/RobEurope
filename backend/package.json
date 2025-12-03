@@ -43,7 +43,8 @@
     "systeminformation": "^5.27.11",
     "uuid": "^13.0.0",
     "winston": "^3.18.3",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "web-push": "^3.5.0"
   },
   "devDependencies": {
     "supertest": "^7.1.4",
