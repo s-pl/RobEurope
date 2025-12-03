@@ -34,7 +34,7 @@ export const sendTestPush = async (req, res) => {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
     const payload = {
-      title: '🔔 Test push',
+      title: 'Test push',
       body: 'Esto es una notificación push de prueba',
       data: { ts: Date.now() }
     };

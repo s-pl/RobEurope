@@ -22,8 +22,19 @@ export async function registerServiceWorker() {
 
 export async function subscribeToPush(registration) {
   if (!registration || !('pushManager' in registration)) return null;
+  // Must be secure context unless localhost
+  const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+  if (!window.isSecureContext && !isLocalhost) {
+    console.warn('Push disabled: insecure context. Use HTTPS');
+    return null;
+  }
+  // Require notifications permission
+  if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
+    console.warn('Push subscribe skipped: Notification permission not granted');
+    return null;
+  }
   try {
-  const { publicKey } = await apiRequest('/notifications/push/vapidPublicKey');
+    const { publicKey } = await apiRequest('/notifications/push/vapidPublicKey');
     if (!publicKey) {
       console.warn('VAPID public key not available');
       return null;
@@ -33,10 +44,16 @@ export async function subscribeToPush(registration) {
       applicationServerKey: urlBase64ToUint8Array(publicKey)
     });
     // Send subscription to backend
-  await apiRequest('/notifications/push/subscribe', { method: 'POST', body: subscription });
+    await apiRequest('/notifications/push/subscribe', { method: 'POST', body: subscription });
     return subscription;
   } catch (e) {
-    console.error('Push subscribe failed', e);
+    if (e?.name === 'AbortError') {
+      console.error('Push subscribe failed (AbortError): likely invalid VAPID key or browser push service error. Check backend VAPID keys and HTTPS.', e);
+    } else if (e?.name === 'NotAllowedError') {
+      console.warn('Push subscribe not allowed by the browser (permission).');
+    } else {
+      console.error('Push subscribe failed', e);
+    }
     return null;
   }
 }
