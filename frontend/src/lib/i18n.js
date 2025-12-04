@@ -37,10 +37,13 @@ const resources = {
         competitions: 'Competiciones',
         teams: 'Equipos',
         sponsors: 'Patrocinadores',
+        posts: 'Noticias',
         streams: 'Streaming',
         contact: 'Contacto',
         terms: 'Términos',
-        profile: 'Perfil'
+        profile: 'Perfil',
+        login: 'Iniciar sesión',
+        register: 'Registrarse'
       },
       status: {
         connected: 'Conectado',
@@ -474,10 +477,13 @@ const resources = {
         competitions: 'Competitions',
         teams: 'Teams',
         sponsors: 'Sponsors',
+        posts: 'Posts',
         streams: 'Streaming',
         contact: 'Contact',
         terms: 'Terms',
-        profile: 'Profile'
+        profile: 'Profile',
+        login: 'Log in',
+        register: 'Register'
       },
       status: {
         connected: 'Online',
@@ -909,10 +915,13 @@ const resources = {
         competitions: 'Wettkämpfe',
         teams: 'Teams',
         sponsors: 'Sponsoren',
+        posts: 'Beiträge',
         streams: 'Streaming',
         contact: 'Kontakt',
         terms: 'Bedingungen',
-        profile: 'Profil'
+        profile: 'Profil',
+        login: 'Anmelden',
+        register: 'Registrieren'
       },
       status: {
         connected: 'Verbunden',
