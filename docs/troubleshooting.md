@@ -5,6 +5,20 @@
 This guide provides solutions to common issues encountered during development and deployment of the RobEurope platform.
 
 ## Application Issues
+### Where to find logs
+
+- Access logs (HTTP requests): `backend/logs/access-YYYY-MM-DD.log`
+- Error logs (application errors): `backend/logs/error-YYYY-MM-DD.log`
+- Exceptions (uncaught): `backend/logs/exceptions-YYYY-MM-DD.log`
+
+Code references:
+
+- Logger: [`backend/utils/logger.js`](../backend/utils/logger.js)
+- Access logging (Morgan): [`backend/index.js`](../backend/index.js) — `app.use(morgan('combined', ...))`
+- Centralized error handler and global crash handlers: [`backend/index.js`](../backend/index.js)
+
+More details: [docs/logging-and-rotation.md](./logging-and-rotation.md)
+
 
 ### Backend Won't Start
 

@@ -230,6 +230,14 @@ The platform features a real-time collaborative code editor (IDE) powered by:
 - **System Metrics**: CPU, memory, disk usage
 - **Database Metrics**: Query performance, connection pool
 
+### Logging
+- The backend uses Winston + daily rotation for structured JSON logs, and Morgan for HTTP access logs.
+- See Logging details: [docs/logging-and-rotation.md](./logging-and-rotation.md)
+- Code references:
+  - Logger setup: [`backend/utils/logger.js`](../backend/utils/logger.js)
+  - Access logs via Morgan: [`backend/index.js`](../backend/index.js)
+  - Error handling and crash handlers: [`backend/index.js`](../backend/index.js)
+
 ## Deployment Architecture
 
 ### Development Environment
