@@ -30,6 +30,11 @@ const Posts = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', content: '', image: null });
+  const MAX_CONTENT_BYTES = 200 * 1024; // ~200KB for HTML content
+  const usedBytes = (() => {
+    try { return new TextEncoder().encode(`${newPost.title}\n${newPost.content || ''}`).length; } catch { return (newPost.title?.length || 0) + (newPost.content?.length || 0); }
+  })();
+  const remainingBytes = Math.max(0, MAX_CONTENT_BYTES - usedBytes);
   
   // New state for comments
   const [activePostId, setActivePostId] = useState(null);
@@ -259,7 +264,7 @@ const Posts = () => {
                   <Plus className="h-4 w-4" /> {t('posts.create')}
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-h-[85vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{t('posts.createTitle')}</DialogTitle>
                 </DialogHeader>
@@ -282,6 +287,11 @@ const Posts = () => {
                         onChange={val => setNewPost({...newPost, content: val})}
                         placeholder={t('posts.form.content')}
                       />
+                      <div className={`mt-2 text-xs ${usedBytes > MAX_CONTENT_BYTES ? 'text-red-600' : 'text-slate-500'}`}>
+                        {usedBytes > MAX_CONTENT_BYTES
+                          ? t('posts.form.tooLarge') || `Contenido demasiado grande por ${((usedBytes-MAX_CONTENT_BYTES)/1024).toFixed(1)} KB`
+                          : `${(usedBytes/1024).toFixed(1)} KB / ${(MAX_CONTENT_BYTES/1024).toFixed(0)} KB`}
+                      </div>
                     </div>
                   </div>
                   <div>
@@ -293,9 +303,12 @@ const Posts = () => {
                       onChange={e => setNewPost({...newPost, image: e.target.files[0]})}
                       className="mt-1"
                     />
+                    {newPost.image && (
+                      <div className="mt-1 text-xs text-slate-500">{(newPost.image.size/1024).toFixed(1)} KB</div>
+                    )}
                   </div>
                   <DialogFooter>
-                    <Button type="submit" disabled={creating}>
+                    <Button type="submit" disabled={creating || usedBytes > MAX_CONTENT_BYTES}>
                       {creating ? t('common.saving') : t('common.save')}
                     </Button>
                   </DialogFooter>
@@ -342,16 +355,16 @@ const Posts = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center">
-                    {user?.role === 'super_admin' && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-500" onClick={() => handlePin(post)}>
+        <div className="flex items-center">
+          {user?.role === 'super_admin' && (
+            <Button variant="ghost" size="icon" className="h-8 w-8 p-0 border-0 rounded-md text-slate-500 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => handlePin(post)}>
                             <Pin className={`h-4 w-4 ${post.is_pinned ? 'fill-blue-500 text-blue-500' : ''}`} />
                         </Button>
                     )}
                     {(user?.id === post.author_id || user?.role === 'super_admin') && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button variant="ghost" size="icon" className="h-8 w-8 p-0 border-0 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">
                             <MoreVertical className="h-4 w-4" />
                         </Button>
                         </DropdownMenuTrigger>
@@ -368,7 +381,7 @@ const Posts = () => {
               <CardContent className="space-y-4 pt-4">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">{post.title}</h3>
                 <div 
-                  className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 [&_img]:rounded-lg [&_img]:max-h-[500px] [&_img]:w-auto [&_img]:mx-auto"
+                  className="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 break-words [&_img]:rounded-lg [&_img]:max-h-[500px] [&_img]:w-auto [&_img]:mx-auto"
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
                 />
                 

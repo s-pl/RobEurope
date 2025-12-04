@@ -5,9 +5,16 @@ import { getFileInfo } from '../middleware/upload.middleware.js';
 import SystemLogger from '../utils/systemLogger.js';
 import { getIO } from '../utils/realtime.js';
 
+const MAX_CONTENT_BYTES = Number(process.env.POST_CONTENT_MAX_BYTES || 200 * 1024); // 200 kb max payload
+
 export const createPost = async (req, res) => {
   try {
     const postData = { ...req.body };
+
+    // Enforce content max size to avoid oversized payloads (e.g., pasted base64)
+    if (postData.content && Buffer.byteLength(postData.content, 'utf8') > MAX_CONTENT_BYTES) {
+      return res.status(413).json({ error: `Content too large. Max ${Math.floor(MAX_CONTENT_BYTES/1024)}KB` });
+    }
 
     // Handle file upload
     const fileInfo = getFileInfo(req);
@@ -114,6 +121,11 @@ export const updatePost = async (req, res) => {
     if (!currentPost) return res.status(404).json({ error: 'Post not found' });
 
     const updates = { ...req.body };
+
+    // Enforce content max size
+    if (updates.content && Buffer.byteLength(updates.content, 'utf8') > MAX_CONTENT_BYTES) {
+      return res.status(413).json({ error: `Content too large. Max ${Math.floor(MAX_CONTENT_BYTES/1024)}KB` });
+    }
 
     // Handle file upload
     const fileInfo = getFileInfo(req);
