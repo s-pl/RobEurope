@@ -8,7 +8,9 @@
 ![Prettier](https://img.shields.io/badge/Prettier-F7BA3E?logo=prettier&logoColor=black)
  ![Repo size](https://img.shields.io/github/repo-size/s-pl/RobEurope)
   ![Last commit](https://img.shields.io/github/last-commit/s-pl/RobEurope)
- 
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-s--pl%2FRobEurope-blue.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAyCAYAAAAnWDnqAAAAAXNSR0IArs4c6QAAA05JREFUaEPtmUtyEzEQhtWTQyQLHNak2AB7ZnyXZMEjXMGeK/AIi+QuHrMnbChYY7MIh8g01fJoopFb0uhhEqqcbWTp06/uv1saEDv4O3n3dV60RfP947Mm9/SQc0ICFQgzfc4CYZoTPAswgSJCCUJUnAAoRHOAUOcATwbmVLWdGoH//PB8mnKqScAhsD0kYP3j/Yt5LPQe2KvcXmGvRHcDnpxfL2zOYJ1mFwrryWTz0advv1Ut4CJgf5uhDuDj5eUcAUoahrdY/56ebRWeraTjMt/00Sh3UDtjgHtQNHwcRGOC98BJEAEymycmYcWwOprTgcB6VZ5JK5TAJ+fXGLBm3FDAmn6oPPjR4rKCAoJCal2eAiQp2x0vxTPB3ALO2CRkwmDy5WohzBDwSEFKRwPbknEggCPB/imwrycgxX2NzoMCHhPkDwqYMr9tRcP5qNrMZHkVnOjRMWwLCcr8ohBVb1OMjxLwGCvjTikrsBOiA6fNyCrm8V1rP93iVPpwaE+gO0SsWmPiXB+jikdf6SizrT5qKasx5j8ABbHpFTx+vFXp9EnYQmLx02h1QTTrl6eDqxLnGjporxl3NL3agEvXdT0WmEost648sQOYAeJS9Q7bfUVoMGnjo4AZdUMQku50McDcMWcBPvr0SzbTAFDfvJqwLzgxwATnCgnp4wDl6Aa+Ax283gghmj+vj7feE2KBBRMW3FzOpLOADl0Isb5587h/U4gGvkt5v60Z1VLG8BhYjbzRwyQZemwAd6cCR5/XFWLYZRIMpX39AR0tjaGGiGzLVyhse5C9RKC6ai42ppWPKiBagOvaYk8lO7DajerabOZP46Lby5wKjw1HCRx7p9sVMOWGzb/vA1hwiWc6jm3MvQDTogQkiqIhJV0nBQBTU+3okKCFDy9WwferkHjtxib7t3xIUQtHxnIwtx4mpg26/HfwVNVDb4oI9RHmx5WGelRVlrtiw43zboCLaxv46AZeB3IlTkwouebTr1y2NjSpHz68WNFjHvupy3q8TFn3Hos2IAk4Ju5dCo8B3wP7VPr/FGaKiG+T+v+TQqIrOqMTL1VdWV1DdmcbO8KXBz6esmYWYKPwDL5b5FA1a0hwapHiom0r/cKaoqr+27/XcrS5UwSMbQAAAABJRU5ErkJggg==)](https://deepwiki.com/s-pl/RobEurope)
+
+
 
 Comprehensive platform for managing robotics competitions in Europe. This system allows users to register, form teams, sign up for competitions, and follow live events.
 
@@ -22,7 +24,9 @@ Made with <3 by Samuel Ponce Luna and Angel Lallave Herrera
 - We didn´t implement the BIND9 because we already have the DNS config made in IONOS. <img width="1093" height="89" alt="image" src="https://github.com/user-attachments/assets/eb16d1ca-a6a6-49d1-882f-05a8c42f2164" />
 - In this new version, we´ve implemented a mail service for forgotten passwords.
 - Also, Redis was installed via Docker to manage sessions, and the files for the collaborative editor. You can see the RAW data of the db in the admin panel 
+
 <img width="336" height="328" alt="image" src="https://github.com/user-attachments/assets/bb04e9fe-147d-4141-9756-a370fb8af750" />
+- If you have any questions on how to use the platform, or code related questions, please visit: ![deepwiki](https://deepwiki.com/s-pl/RobEurope)
 
 
 ## Technologies
@@ -156,7 +160,7 @@ Detailed documentation is located in the `/docs` folder:
 - [LDAP Setup](docs/ldap-bind9-setup.md)
 - [Admin Panel Manual](docs/admin-panel.md)
 - [API Documentation](api.robeurope.samuelponce.es/api-docs) (Swagger/OpenAPI)
-
+- [Logging and Rotation](docs/logging-and-rotation.md)
 ## Contributing
 
 1. Fork the project.
