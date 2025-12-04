@@ -282,6 +282,26 @@ const resources = {
         createError: 'Error al crear competición',
         noActive: 'No hay competiciones activas en este momento.'
       },
+      streamsPage: {
+        title: 'Streams',
+        description: 'Visualiza todos los streams de las competiciones',
+        loading: 'Cargando streams...',
+        error: 'Error: {{message}}',
+        statuses: {
+          live: 'En vivo',
+          offline: 'Offline',
+          scheduled: 'Programado'
+        },
+        labels: {
+          team: 'Equipo:',
+          competition: 'Competición:',
+          createdAt: 'Creado: {{date}}'
+        },
+        actions: {
+          viewStream: 'Ver Stream'
+        },
+        empty: 'No hay streams disponibles.'
+      },
       contact: {
         hero: {
           tagline: 'Contacto',
@@ -699,6 +719,26 @@ const resources = {
         createError: 'Error creating competition',
         noActive: 'No active competitions at the moment.'
       },
+      streamsPage: {
+        title: 'Streams',
+        description: 'View every competition stream',
+        loading: 'Loading streams...',
+        error: 'Error: {{message}}',
+        statuses: {
+          live: 'Live',
+          offline: 'Offline',
+          scheduled: 'Scheduled'
+        },
+        labels: {
+          team: 'Team:',
+          competition: 'Competition:',
+          createdAt: 'Created: {{date}}'
+        },
+        actions: {
+          viewStream: 'Watch Stream'
+        },
+        empty: 'No streams available.'
+      },
       contact: {
         hero: {
           tagline: 'Contact',
@@ -1113,6 +1153,26 @@ const resources = {
         loadError: 'Fehler beim Laden der Wettbewerbe.',
         createError: 'Fehler beim Erstellen des Wettbewerbs',
         noActive: 'Derzeit keine aktiven Wettbewerbe.'
+      },
+      streamsPage: {
+        title: 'Streams',
+        description: 'Sieh dir alle Wettbewerbsstreams an',
+        loading: 'Streams werden geladen...',
+        error: 'Fehler: {{message}}',
+        statuses: {
+          live: 'Live',
+          offline: 'Offline',
+          scheduled: 'Geplant'
+        },
+        labels: {
+          team: 'Team:',
+          competition: 'Wettbewerb:',
+          createdAt: 'Erstellt: {{date}}'
+        },
+        actions: {
+          viewStream: 'Stream ansehen'
+        },
+        empty: 'Keine Streams verfügbar.'
       },
       contact: {
         hero: {
