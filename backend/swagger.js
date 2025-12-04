@@ -87,6 +87,69 @@ const swaggerSpec = {
       get: { summary: 'List countries', responses: { '200': { description: 'List of countries', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Country' } } } } } } },
       post: { summary: 'Create country', requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/CountryCreate' } } } }, responses: { '201': { description: 'Created' } } }
     },
+    '/notifications/push/vapidPublicKey': {
+      get: {
+        summary: 'Get VAPID public key',
+        description: 'Returns the application VAPID public key used for Web Push subscriptions.',
+        responses: { '200': { description: 'Public key', content: { 'application/json': { schema: { type: 'object', properties: { publicKey: { type: 'string' } } } } } } }
+      }
+    },
+    '/notifications/push/subscribe': {
+      post: {
+        summary: 'Subscribe to push notifications',
+        description: 'Stores a Web Push subscription for the current authenticated user.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  subscription: {
+                    type: 'object',
+                    description: 'The PushSubscription JSON per W3C spec',
+                  },
+                },
+                required: ['subscription']
+              }
+            }
+          }
+        },
+        responses: { '201': { description: 'Subscription saved' }, '400': { description: 'Invalid subscription' } }
+      }
+    },
+    '/notifications/push/unsubscribe': {
+      post: {
+        summary: 'Unsubscribe from push notifications',
+        description: 'Removes a stored Web Push subscription for the current authenticated user.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  endpoint: { type: 'string', description: 'Subscription endpoint to remove' }
+                },
+                required: ['endpoint']
+              }
+            }
+          }
+        },
+        responses: { '200': { description: 'Unsubscribed' }, '404': { description: 'Subscription not found' } }
+      }
+    },
+    '/notifications/push/test': {
+      post: {
+        summary: 'Send test push',
+        description: 'Sends a test Web Push notification to the current user’s active subscriptions.',
+        security: [{ bearerAuth: [] }],
+        requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { title: { type: 'string' }, body: { type: 'string' } } } } } },
+        responses: { '200': { description: 'Test sent (or queued)' } }
+      }
+    },
     '/countries/{id}': {
       get: { summary: 'Get country by id', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Country', content: { 'application/json': { schema: { $ref: '#/components/schemas/Country' } } } } } },
       put: { summary: 'Update country', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/CountryCreate' } } } }, responses: { '200': { description: 'Updated' } } },
@@ -128,6 +191,16 @@ const swaggerSpec = {
       put: { summary: 'Update post', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/PostCreate' } } } }, responses: { '200': { description: 'Updated' } } },
       delete: { summary: 'Delete post', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Deleted' } } }
     },
+    '/posts/{id}/like': {
+      post: { summary: 'Toggle like on post', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Liked/Unliked' }, '404': { description: 'Post not found' } } }
+    },
+    '/posts/{id}/comments': {
+      get: { summary: 'List comments for post', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'List of comments', content: { 'application/json': { schema: { type: 'array', items: { type: 'object' } } } } } } },
+      post: { summary: 'Add comment to post', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { content: { type: 'string' } }, required: ['content'] } } } }, responses: { '201': { description: 'Comment added' }, '404': { description: 'Post not found' } } }
+    },
+    '/posts/{id}/pin': {
+      post: { summary: 'Toggle pin on post (super admin)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Pinned/Unpinned' }, '403': { description: 'Requires super_admin' }, '404': { description: 'Post not found' } } }
+    },
     '/notifications': {
       get: { summary: 'List notifications', responses: { '200': { description: 'List', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Notification' } } } } } } },
       post: { summary: 'Create notification', requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/NotificationCreate' } } } }, responses: { '201': { description: 'Created' } } }
@@ -136,6 +209,123 @@ const swaggerSpec = {
       get: { summary: 'Get notification', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Notification', content: { 'application/json': { schema: { $ref: '#/components/schemas/Notification' } } } } } },
       put: { summary: 'Update notification', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/NotificationCreate' } } } }, responses: { '200': { description: 'Updated' } } },
       delete: { summary: 'Delete notification', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Deleted' } } }
+    },
+    '/media': {
+      get: { summary: 'List media (auth required)', security: [{ bearerAuth: [] }], responses: { '200': { description: 'List', content: { 'application/json': { schema: { type: 'array', items: { type: 'object' } } } } } } },
+      post: {
+        summary: 'Upload media (auth required)',
+        description: 'Uploads a media file. Use multipart/form-data with a file field named "file". Returns created media metadata including URL.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  file: { type: 'string', format: 'binary' }
+                },
+                required: ['file']
+              }
+            }
+          }
+        },
+        responses: { '201': { description: 'Uploaded' }, '400': { description: 'Validation error' } }
+      }
+    },
+    '/media/{id}': {
+      get: { summary: 'Get media by id (auth required)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Media item' }, '404': { description: 'Not found' } } },
+      delete: { summary: 'Delete media (auth required)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Deleted' }, '404': { description: 'Not found' } } }
+    },
+    '/system-logs': {
+      get: {
+        summary: 'List system logs (super admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'user_id', in: 'query', schema: { type: 'string' } },
+          { name: 'action', in: 'query', schema: { type: 'string' } },
+          { name: 'entity_type', in: 'query', schema: { type: 'string' } },
+          { name: 'entity_id', in: 'query', schema: { type: 'string' } },
+          { name: 'date_from', in: 'query', schema: { type: 'string', format: 'date-time' } },
+          { name: 'date_to', in: 'query', schema: { type: 'string', format: 'date-time' } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 50 } },
+          { name: 'offset', in: 'query', schema: { type: 'integer', default: 0 } },
+          { name: 'sort', in: 'query', schema: { type: 'string', default: 'created_at' } },
+          { name: 'order', in: 'query', schema: { type: 'string', enum: ['ASC','DESC'], default: 'DESC' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Logs with pagination',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    logs: { type: 'array', items: { type: 'object' } },
+                    pagination: {
+                      type: 'object',
+                      properties: { total: { type: 'integer' }, limit: { type: 'integer' }, offset: { type: 'integer' }, hasMore: { type: 'boolean' } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '403': { description: 'Requires super_admin' }
+        }
+      }
+    },
+    '/system-logs/stats': {
+      get: {
+        summary: 'System statistics (super admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'date_from', in: 'query', schema: { type: 'string', format: 'date-time' } },
+          { name: 'date_to', in: 'query', schema: { type: 'string', format: 'date-time' } }
+        ],
+        responses: {
+          '200': { description: 'Aggregated stats', content: { 'application/json': { schema: { type: 'object', properties: { actionStats: { type: 'array', items: { type: 'object' } }, entityStats: { type: 'array', items: { type: 'object' } }, dailyStats: { type: 'array', items: { type: 'object' } }, userStats: { type: 'array', items: { type: 'object' } } } } } } },
+          '403': { description: 'Requires super_admin' }
+        }
+      }
+    },
+    '/system-logs/{id}': {
+      get: { summary: 'Get system log by id (super admin)', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Log entry' }, '404': { description: 'Not found' }, '403': { description: 'Requires super_admin' } } }
+    },
+    '/system-logs/cleanup': {
+      delete: { summary: 'Delete old logs (super admin)', security: [{ bearerAuth: [] }], parameters: [{ name: 'days_old', in: 'query', schema: { type: 'integer', default: 90 } }], responses: { '200': { description: 'Cleanup result' }, '403': { description: 'Requires super_admin' } } }
+    },
+    '/robot-files': {
+      get: { summary: 'List robot files', security: [{ bearerAuth: [] }], responses: { '200': { description: 'List of files', content: { 'application/json': { schema: { type: 'array', items: { type: 'object' } } } } } } },
+      post: {
+        summary: 'Upload robot file',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } }, required: ['file'] }
+            }
+          }
+        },
+        responses: { '201': { description: 'Uploaded' } }
+      }
+    },
+    '/robot-files/{id}': {
+      delete: { summary: 'Delete robot file', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Deleted' }, '404': { description: 'Not found' } } }
+    },
+    '/robot-files/{id}/visibility': {
+      put: { summary: 'Toggle file visibility', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Visibility updated' }, '404': { description: 'Not found' } } }
+    },
+    '/team-logs': {
+      get: { summary: 'List team logs', security: [{ bearerAuth: [] }], responses: { '200': { description: 'List', content: { 'application/json': { schema: { type: 'array', items: { type: 'object' } } } } } } },
+      post: { summary: 'Create team log entry', security: [{ bearerAuth: [] }], requestBody: { content: { 'application/json': { schema: { type: 'object' } } } }, responses: { '201': { description: 'Created' } } }
+    },
+    '/team-logs/{id}': {
+      delete: { summary: 'Delete team log', security: [{ bearerAuth: [] }], parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Deleted' }, '404': { description: 'Not found' } } }
+    },
+    '/whoami': {
+      get: { summary: 'Current authenticated user', security: [{ bearerAuth: [] }], responses: { '200': { description: 'Session info', content: { 'application/json': { schema: { type: 'object', properties: { user: { type: 'object', nullable: true } } } } } } } }
     },
     '/registrations': {
       get: { summary: 'List registrations', responses: { '200': { description: 'List', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Registration' } } } } } } },
@@ -183,6 +373,30 @@ const swaggerSpec = {
       get: { summary: 'Get team', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'Team', content: { 'application/json': { schema: { $ref: '#/components/schemas/Team' } } } } } },
       put: { summary: 'Update team', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/TeamCreate' } } } }, responses: { '200': { description: 'Updated' } } },
       delete: { summary: 'Delete team', parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }], responses: { '204': { description: 'Deleted' } } }
+    },
+    '/teams/{teamId}/messages': {
+      get: { summary: 'Get team chat messages', security: [{ bearerAuth: [] }], parameters: [{ name: 'teamId', in: 'path', required: true, schema: { type: 'string' } }], responses: { '200': { description: 'List of messages', content: { 'application/json': { schema: { type: 'array', items: { type: 'object' } } } } } } },
+      post: {
+        summary: 'Send team chat message',
+        description: 'Sends a message to the team chat. Supports file attachments via multipart/form-data with an array field named "files".',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'teamId', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  message: { type: 'string' },
+                  files: { type: 'array', items: { type: 'string', format: 'binary' } }
+                }
+              }
+            }
+          }
+        },
+        responses: { '201': { description: 'Message sent' } }
+      }
     },
     '/teams/mine': {
       get: { summary: 'Get my team (owner)', security: [{ bearerAuth: [] }], responses: { '200': { description: 'Owned team (if any)', content: { 'application/json': { schema: { $ref: '#/components/schemas/Team' } } } }, '404': { description: 'No team owned' } } }
