@@ -106,9 +106,22 @@ const TeamChat = ({ teamId }) => {
     }
   };
 
+  const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB per file limit
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() && files.length === 0) return;
+
+    // Frontend guard: block sending if any file exceeds 25MB
+    const tooLarge = files.find(f => f.size > MAX_FILE_SIZE);
+    if (tooLarge) {
+      toast({
+        title: t('team.chat.fileTooLarge') || 'Archivo demasiado grande',
+        description: `${tooLarge.name}: ${t('team.chat.fileLimit') || 'El límite es de 25MB por archivo'}`,
+        variant: 'destructive'
+      });
+      return;
+    }
 
     try {
       const formData = new FormData();
@@ -134,10 +147,10 @@ const TeamChat = ({ teamId }) => {
     const selectedFiles = Array.from(e.target.files || []);
     if (selectedFiles.length > 0) {
       const validFiles = selectedFiles.filter(file => {
-        if (file.size > 50 * 1024 * 1024) { // 50MB limit
+        if (file.size > MAX_FILE_SIZE) { // 25MB limit
           toast({
             title: t('team.chat.fileTooLarge') || 'Archivo demasiado grande',
-            description: `${file.name}: ${t('team.chat.fileLimit') || 'El límite es de 50MB'}`,
+            description: `${file.name}: ${t('team.chat.fileLimit') || 'El límite es de 25MB por archivo'}`,
             variant: 'destructive'
           });
           return false;
