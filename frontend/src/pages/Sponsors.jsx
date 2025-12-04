@@ -11,7 +11,7 @@ import { Badge } from '../components/ui/badge';
 import { Plus, Edit, Trash2, ExternalLink } from 'lucide-react';
 
 const Sponsors = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
   const { list, create, update, remove } = useSponsors();
@@ -30,13 +30,21 @@ const Sponsors = () => {
     loadSponsors();
   }, []);
 
+  const formatDate = (value) => {
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return t('sponsorsPage.labels.dateFallback');
+    }
+    return parsed.toLocaleDateString(i18n.language || undefined);
+  };
+
   const loadSponsors = async () => {
     try {
       setLoading(true);
       const data = await list();
       setSponsors(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err.message || 'Error loading sponsors');
+      setError(err.message || t('sponsorsPage.errors.load'));
     } finally {
       setLoading(false);
     }
@@ -54,7 +62,7 @@ const Sponsors = () => {
       setDialogOpen(false);
       resetForm();
     } catch (err) {
-      setError(err.message || 'Error saving sponsor');
+      setError(err.message || t('sponsorsPage.errors.save'));
     }
   };
 
@@ -69,13 +77,12 @@ const Sponsors = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este sponsor?')) {
-      try {
-        await remove(id);
-        await loadSponsors();
-      } catch (err) {
-        setError(err.message || 'Error deleting sponsor');
-      }
+    if (!window.confirm(t('sponsorsPage.confirmations.delete'))) return;
+    try {
+      await remove(id);
+      await loadSponsors();
+    } catch (err) {
+      setError(err.message || t('sponsorsPage.errors.delete'));
     }
   };
 
@@ -91,8 +98,9 @@ const Sponsors = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex flex-col justify-center items-center min-h-64 gap-3 text-blue-700">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" aria-hidden="true"></div>
+        <p>{t('sponsorsPage.loading')}</p>
       </div>
     );
   }
@@ -101,13 +109,13 @@ const Sponsors = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-blue-900">Sponsors</h1>
-          <p className="text-blue-600 mt-1">Gestiona los sponsors del evento</p>
+          <h1 className="text-3xl font-bold text-blue-900">{t('sponsorsPage.title')}</h1>
+          <p className="text-blue-600 mt-1">{t('sponsorsPage.subtitle')}</p>
         </div>
         {isAdmin && (
           <Button onClick={openCreateDialog} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            Nuevo Sponsor
+            {t('sponsorsPage.buttons.new')}
           </Button>
         )}
       </div>
@@ -126,7 +134,7 @@ const Sponsors = () => {
                 <div className="flex-1">
                   <CardTitle className="text-lg text-blue-900">{sponsor.name}</CardTitle>
                   <CardDescription className="text-blue-600">
-                    ID: {sponsor.id}
+                    {t('sponsorsPage.labels.id', { id: sponsor.id })}
                   </CardDescription>
                 </div>
                 {isAdmin && (
@@ -154,7 +162,7 @@ const Sponsors = () => {
             <CardContent className="space-y-3">
               {sponsor.logo_url && (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-blue-700">Logo:</span>
+                  <span className="text-sm font-medium text-blue-700">{t('sponsorsPage.labels.logo')}</span>
                   <img
                     src={sponsor.logo_url}
                     alt={`${sponsor.name} logo`}
@@ -165,7 +173,7 @@ const Sponsors = () => {
 
               {sponsor.website_url && (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-blue-700">Website:</span>
+                  <span className="text-sm font-medium text-blue-700">{t('sponsorsPage.labels.website')}</span>
                   <a
                     href={sponsor.website_url}
                     target="_blank"
@@ -179,9 +187,9 @@ const Sponsors = () => {
               )}
 
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-blue-700">Creado:</span>
+                <span className="text-sm font-medium text-blue-700">{t('sponsorsPage.labels.createdAt')}</span>
                 <Badge variant="outline">
-                  {new Date(sponsor.created_at).toLocaleDateString()}
+                  {formatDate(sponsor.created_at)}
                 </Badge>
               </div>
             </CardContent>
@@ -194,12 +202,12 @@ const Sponsors = () => {
           <div className="text-blue-400 mb-4">
             <Plus className="h-12 w-12 mx-auto" />
           </div>
-          <h3 className="text-lg font-medium text-blue-900 mb-2">No hay sponsors</h3>
-          <p className="text-blue-600 mb-4">Comienza añadiendo tu primer sponsor</p>
+          <h3 className="text-lg font-medium text-blue-900 mb-2">{t('sponsorsPage.empty.title')}</h3>
+          <p className="text-blue-600 mb-4">{t('sponsorsPage.empty.description')}</p>
           {isAdmin && (
             <Button onClick={openCreateDialog}>
               <Plus className="h-4 w-4 mr-2" />
-              Añadir Sponsor
+              {t('sponsorsPage.buttons.add')}
             </Button>
           )}
         </div>
@@ -209,49 +217,49 @@ const Sponsors = () => {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="text-blue-900">
-              {editingSponsor ? 'Editar Sponsor' : 'Nuevo Sponsor'}
+              {editingSponsor ? t('sponsorsPage.dialog.editTitle') : t('sponsorsPage.dialog.createTitle')}
             </DialogTitle>
             <DialogDescription className="text-blue-600">
               {editingSponsor
-                ? 'Modifica los datos del sponsor'
-                : 'Añade un nuevo sponsor al evento'
+                ? t('sponsorsPage.dialog.editDescription')
+                : t('sponsorsPage.dialog.createDescription')
               }
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-blue-900">Nombre *</Label>
+              <Label htmlFor="name" className="text-blue-900">{t('sponsorsPage.labels.name')}</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Nombre del sponsor"
+                placeholder={t('sponsorsPage.placeholders.name')}
                 required
                 className="border-blue-200 focus:border-blue-400"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="logo_url" className="text-blue-900">URL del Logo</Label>
+              <Label htmlFor="logo_url" className="text-blue-900">{t('sponsorsPage.labels.logoUrl')}</Label>
               <Input
                 id="logo_url"
                 type="url"
                 value={formData.logo_url}
                 onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
-                placeholder="https://ejemplo.com/logo.png"
+                placeholder={t('sponsorsPage.placeholders.logoUrl')}
                 className="border-blue-200 focus:border-blue-400"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="website_url" className="text-blue-900">Sitio Web</Label>
+              <Label htmlFor="website_url" className="text-blue-900">{t('sponsorsPage.labels.websiteUrl')}</Label>
               <Input
                 id="website_url"
                 type="url"
                 value={formData.website_url}
                 onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
-                placeholder="https://ejemplo.com"
+                placeholder={t('sponsorsPage.placeholders.websiteUrl')}
                 className="border-blue-200 focus:border-blue-400"
               />
             </div>
@@ -262,10 +270,10 @@ const Sponsors = () => {
                 variant="outline"
                 onClick={() => setDialogOpen(false)}
               >
-                Cancelar
+                {t('common.cancel')}
               </Button>
               <Button type="submit">
-                {editingSponsor ? 'Actualizar' : 'Crear'} Sponsor
+                {editingSponsor ? t('sponsorsPage.buttons.update') : t('sponsorsPage.buttons.create')}
               </Button>
             </DialogFooter>
           </form>

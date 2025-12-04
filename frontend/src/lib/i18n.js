@@ -163,6 +163,51 @@ const resources = {
           requestError: 'No se pudo enviar la solicitud'
         }
       },
+      sponsorsPage: {
+        title: 'Sponsors',
+        subtitle: 'Gestiona los sponsors del evento',
+        loading: 'Cargando sponsors...',
+        buttons: {
+          new: 'Nuevo Sponsor',
+          add: 'Añadir Sponsor',
+          create: 'Crear Sponsor',
+          update: 'Actualizar Sponsor'
+        },
+        dialog: {
+          createTitle: 'Nuevo Sponsor',
+          editTitle: 'Editar Sponsor',
+          createDescription: 'Añade un nuevo sponsor al evento',
+          editDescription: 'Modifica los datos del sponsor'
+        },
+        labels: {
+          id: 'ID: {{id}}',
+          logo: 'Logo:',
+          website: 'Sitio Web:',
+          createdAt: 'Creado:',
+          name: 'Nombre *',
+          logoUrl: 'URL del Logo',
+          websiteUrl: 'Sitio Web',
+          dateFallback: 'Sin fecha'
+        },
+        placeholders: {
+          name: 'Nombre del sponsor',
+          logoUrl: 'https://ejemplo.com/logo.png',
+          websiteUrl: 'https://ejemplo.com'
+        },
+        confirmations: {
+          delete: '¿Estás seguro de que quieres eliminar este sponsor?'
+        },
+        errors: {
+          load: 'Error al cargar sponsors',
+          save: 'Error al guardar el sponsor',
+          delete: 'Error al eliminar sponsor'
+        },
+        empty: {
+          title: 'No hay sponsors',
+          description: 'Comienza añadiendo tu primer sponsor',
+          cta: 'Añadir Sponsor'
+        }
+      },
       home: {
         hero: {
           tagline: 'Robótica educativa europea',
@@ -603,6 +648,51 @@ const resources = {
           requestError: 'Could not send request'
         }
       },
+      sponsorsPage: {
+        title: 'Sponsors',
+        subtitle: 'Manage the event sponsors',
+        loading: 'Loading sponsors...',
+        buttons: {
+          new: 'New Sponsor',
+          add: 'Add Sponsor',
+          create: 'Create Sponsor',
+          update: 'Update Sponsor'
+        },
+        dialog: {
+          createTitle: 'New Sponsor',
+          editTitle: 'Edit Sponsor',
+          createDescription: 'Add a new sponsor to the event',
+          editDescription: 'Update the sponsor details'
+        },
+        labels: {
+          id: 'ID: {{id}}',
+          logo: 'Logo:',
+          website: 'Website:',
+          createdAt: 'Created:',
+          name: 'Name *',
+          logoUrl: 'Logo URL',
+          websiteUrl: 'Website',
+          dateFallback: 'No date'
+        },
+        placeholders: {
+          name: 'Sponsor name',
+          logoUrl: 'https://example.com/logo.png',
+          websiteUrl: 'https://example.com'
+        },
+        confirmations: {
+          delete: 'Are you sure you want to delete this sponsor?'
+        },
+        errors: {
+          load: 'Error loading sponsors',
+          save: 'Error saving sponsor',
+          delete: 'Error deleting sponsor'
+        },
+        empty: {
+          title: 'No sponsors yet',
+          description: 'Start by adding your first sponsor',
+          cta: 'Add Sponsor'
+        }
+      },
       home: {
         hero: {
           tagline: 'European educational robotics',
@@ -1039,6 +1129,51 @@ const resources = {
           createError: 'Team konnte nicht erstellt werden',
           requestSent: 'Anfrage gesendet',
           requestError: 'Anfrage konnte nicht gesendet werden'
+        }
+      },
+      sponsorsPage: {
+        title: 'Sponsoren',
+        subtitle: 'Verwalte die Sponsoren des Events',
+        loading: 'Sponsoren werden geladen...',
+        buttons: {
+          new: 'Neuer Sponsor',
+          add: 'Sponsor hinzufügen',
+          create: 'Sponsor erstellen',
+          update: 'Sponsor aktualisieren'
+        },
+        dialog: {
+          createTitle: 'Neuer Sponsor',
+          editTitle: 'Sponsor bearbeiten',
+          createDescription: 'Füge dem Event einen neuen Sponsor hinzu',
+          editDescription: 'Passe die Sponsor-Daten an'
+        },
+        labels: {
+          id: 'ID: {{id}}',
+          logo: 'Logo:',
+          website: 'Webseite:',
+          createdAt: 'Erstellt:',
+          name: 'Name *',
+          logoUrl: 'Logo-URL',
+          websiteUrl: 'Webseite',
+          dateFallback: 'Kein Datum'
+        },
+        placeholders: {
+          name: 'Name des Sponsors',
+          logoUrl: 'https://beispiel.de/logo.png',
+          websiteUrl: 'https://beispiel.de'
+        },
+        confirmations: {
+          delete: 'Bist du sicher, dass du diesen Sponsor löschen möchtest?'
+        },
+        errors: {
+          load: 'Fehler beim Laden der Sponsoren',
+          save: 'Fehler beim Speichern des Sponsors',
+          delete: 'Fehler beim Löschen des Sponsors'
+        },
+        empty: {
+          title: 'Noch keine Sponsoren',
+          description: 'Füge deinen ersten Sponsor hinzu',
+          cta: 'Sponsor hinzufügen'
         }
       },
       home: {
