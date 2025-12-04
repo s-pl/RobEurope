@@ -177,12 +177,16 @@ const corsOptions = {
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization','X-Requested-With'],
 };
 
 app.use('/api', cors(corsOptions));
 app.use('/api/streams', cors(corsOptions));
 app.use('/api/media', cors(corsOptions));
 app.use('/api-docs', cors(corsOptions));
+// Ensure preflight requests succeed for all routes
+app.options('*', cors(corsOptions));
 
 
 app.use(express.json());
