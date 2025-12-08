@@ -15,7 +15,6 @@ import {
   LogOut, Trash2, Check, X, Video, UserPlus, MessageCircle, Code 
 } from 'lucide-react';
 import TeamChat from '../components/teams/TeamChat';
-import CollaborativeEditor from '../components/teams/CollaborativeEditor';
 import TeamCompetitionDashboard from '../components/teams/TeamCompetitionDashboard';
 import { resolveMediaUrl } from '../lib/apiClient';
 
@@ -351,9 +350,6 @@ const MyTeam = () => {
       <div className="border-b border-slate-200 flex gap-2 overflow-x-auto">
         <TabButton id="overview" label={t('myTeam.tabs.overview')} icon={Info} />
         <TabButton id="chat" label={t('team.chat.tab')} icon={MessageCircle} />
-        <div className="hidden md:block">
-          <TabButton id="code" label="Code" icon={Code} />
-        </div>
         <TabButton id="members" label={t('myTeam.tabs.members')} icon={Users} />
         <TabButton id="competitions" label={t('myTeam.tabs.competitions')} icon={Trophy} />
         {isOwner && <TabButton id="settings" label={t('myTeam.tabs.settings')} icon={Settings} />}
@@ -365,11 +361,6 @@ const MyTeam = () => {
         {/* CHAT TAB */}
         {activeTab === 'chat' && (
           <TeamChat teamId={team.id} />
-        )}
-
-        {/* CODE TAB */}
-        {activeTab === 'code' && (
-          <CollaborativeEditor teamId={team.id} />
         )}
         
         {/* OVERVIEW TAB */}

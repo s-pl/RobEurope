@@ -4,6 +4,7 @@
 
 <div class="card" style="max-width: 800px;">
   <form action="/admin/<%= modelName %>/save<%= item ? '/' + item[config.pk] : '' %>" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     
     <% config.fields.filter(f => f.form).forEach(field => { %>
       <div style="margin-bottom: 1rem;">

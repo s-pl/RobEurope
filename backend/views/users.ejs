@@ -71,6 +71,7 @@
               </a>
               <% if (u.role !== 'super_admin') { %>
                 <form action="/admin/users/<%= u.id %>/promote" method="POST" onsubmit="return confirm('¿Hacer admin a este usuario?');" style="margin: 0;">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <button type="submit" class="btn btn-sm btn-warning" style="background: #f59e0b; border: none;">
                     ⬆️ Admin
                   </button>
