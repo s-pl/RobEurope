@@ -11,20 +11,20 @@ const Streams = () => {
 
   const getStatusBadge = (status) => {
     const variants = {
-      live: 'bg-red-100 text-red-800 border-red-200',
-      offline: 'bg-gray-100 text-gray-800 border-gray-200',
-      scheduled: 'bg-blue-100 text-blue-800 border-blue-200',
+      live: 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800',
+      offline: 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700',
+      scheduled: 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800',
     };
 
     const labels = {
-      live: 'En vivo',
-      offline: 'Offline',
-      scheduled: 'Programado',
+      live: t('streams.status.live'),
+      offline: t('streams.status.offline'),
+      scheduled: t('streams.status.scheduled'),
     };
 
     return (
       <Badge variant="outline" className={variants[status] || variants.offline}>
-        {labels[status] || 'Offline'}
+        {labels[status] || t('streams.status.offline')}
       </Badge>
     );
   };
@@ -32,7 +32,7 @@ const Streams = () => {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Cargando streams...</div>
+        <div className="text-center text-slate-600 dark:text-slate-400">{t('streams.loading')}</div>
       </div>
     );
   }
@@ -40,7 +40,7 @@ const Streams = () => {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-red-600">Error: {error}</div>
+        <div className="text-center text-red-600 dark:text-red-400">{t('streams.error')} {error}</div>
       </div>
     );
   }
@@ -49,18 +49,18 @@ const Streams = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-blue-900">Streams</h1>
-          <p className="text-gray-600 mt-2">Visualiza todos los streams de las competiciones</p>
+          <h1 className="text-3xl font-bold text-blue-900 dark:text-blue-100">{t('streams.title')}</h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-2">{t('streams.subtitle')}</p>
         </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {streams.map((stream) => (
-          <Card key={stream.id} className="hover:shadow-lg transition-shadow border-blue-200">
+          <Card key={stream.id} className="hover:shadow-lg transition-shadow border-blue-200 dark:border-slate-700">
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-blue-900">{stream.title}</CardTitle>
+                  <CardTitle className="text-blue-900 dark:text-blue-100">{stream.title}</CardTitle>
                   <div className="mt-2">
                     {getStatusBadge(stream.status)}
                   </div>
@@ -69,16 +69,16 @@ const Streams = () => {
             </CardHeader>
             <CardContent>
               {stream.description && (
-                <p className="text-gray-600 mb-4">{stream.description}</p>
+                <p className="text-slate-600 dark:text-slate-400 mb-4">{stream.description}</p>
               )}
 
               <div className="mb-4">
-                <p className="text-sm font-medium text-gray-700">
-                  <span className="font-semibold">Equipo:</span> {stream.team?.name || 'N/A'}
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <span className="font-semibold">{t('streams.team')}:</span> {stream.team?.name || 'N/A'}
                 </p>
                 {stream.competition && (
-                  <p className="text-sm font-medium text-gray-700">
-                    <span className="font-semibold">Competición:</span> {stream.competition.title}
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <span className="font-semibold">{t('streams.competition')}:</span> {stream.competition.title}
                   </p>
                 )}
               </div>
@@ -89,15 +89,15 @@ const Streams = () => {
                     href={stream.stream_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
+                    className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
                   >
                     <Eye className="w-4 h-4" />
-                    Ver Stream
+                    {t('streams.watch')}
                   </a>
                 </div>
               )}
 
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-slate-500 dark:text-slate-400">
                 <p>Creado: {new Date(stream.created_at).toLocaleDateString()}</p>
               </div>
             </CardContent>

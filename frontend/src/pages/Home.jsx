@@ -110,7 +110,7 @@ const Home = () => {
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
         
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium uppercase tracking-wide dark:bg-blue-900/30 dark:text-blue-300 animate-fade-in-up">
-          <Bot className="h-3 w-3" />
+          <Bot className="h-3 w-3" aria-hidden="true" />
           {t('home.hero.tagline')}
         </div>
         
@@ -125,12 +125,13 @@ const Home = () => {
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Button asChild size="lg" className="h-12 px-8 text-lg shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 transition-all">
             <Link to="/competitions">
-              {t('home.hero.primaryCta')} <ArrowRight className="ml-2 h-5 w-5" />
+              {t('home.hero.primaryCta')} <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="h-12 px-8 text-lg">
             <a href="https://api.robeurope.samuelpòcne.es/api-docs" target="_blank" rel="noreferrer">
               {t('home.hero.secondaryCta')}
+              <span className="sr-only"> (opens in a new tab)</span>
             </a>
           </Button>
         </div>
@@ -156,19 +157,19 @@ const Home = () => {
       <section className="border-y border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="space-y-2">
-                <h3 className="text-4xl font-bold text-blue-600 dark:text-blue-400">50+</h3>
+                <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">50+</div>
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('home.stats.teams')}</p>
             </div>
             <div className="space-y-2">
-                <h3 className="text-4xl font-bold text-blue-600 dark:text-blue-400">12</h3>
+                <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">12</div>
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('home.stats.competitions')}</p>
             </div>
             <div className="space-y-2">
-                <h3 className="text-4xl font-bold text-blue-600 dark:text-blue-400">10k+</h3>
+                <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">10k+</div>
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('home.stats.viewers')}</p>
             </div>
             <div className="space-y-2">
-                <h3 className="text-4xl font-bold text-blue-600 dark:text-blue-400">3</h3>
+                <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">3</div>
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('home.stats.countries')}</p>
             </div>
         </div>
@@ -216,7 +217,7 @@ const Home = () => {
                     <h3 className="text-xl font-bold flex items-center gap-2">
                         <Newspaper className="h-5 w-5 text-blue-600" /> {t('home.latest.news')}
                     </h3>
-                    <Link to="/posts" className="text-sm text-blue-600 hover:underline">{t('home.latest.viewAll')}</Link>
+                    <Link to="/posts" className="text-sm text-blue-700 hover:underline dark:text-blue-400">{t('home.latest.viewAll')}</Link>
                 </div>
                 <div className="space-y-4">
                     {highlights.posts.slice(0, 3).map(post => (
@@ -236,7 +237,7 @@ const Home = () => {
                     <h3 className="text-xl font-bold flex items-center gap-2">
                         <Trophy className="h-5 w-5 text-blue-600" /> {t('home.latest.competitions')}
                     </h3>
-                    <Link to="/competitions" className="text-sm text-blue-600 hover:underline">{t('home.latest.viewCalendar')}</Link>
+                    <Link to="/competitions" className="text-sm text-blue-700 hover:underline dark:text-blue-400">{t('home.latest.viewCalendar')}</Link>
                 </div>
                 <div className="space-y-4">
                     {highlights.competitions.slice(0, 3).map(comp => (

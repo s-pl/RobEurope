@@ -95,7 +95,7 @@ const Navbar = () => {
             } ${mobile ? 'w-fit mt-2' : ''}`
           }
         >
-          Mi equipo
+          {t('nav.myTeam')}
         </NavLink>
       )}
     </>
@@ -109,7 +109,8 @@ const Navbar = () => {
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="lg:hidden">
-                <Menu className="h-6 w-6 text-blue-900 dark:text-blue-400" />
+                <Menu className="h-6 w-6 text-blue-900 dark:text-blue-400" aria-hidden="true" />
+                <span className="sr-only">{t('nav.menu')}</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0 flex flex-col">
@@ -127,7 +128,7 @@ const Navbar = () => {
                 {!isAuthenticated && (
                   <div className="flex flex-col gap-2 mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
                     <Link to="/login" onClick={() => setIsOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start text-blue-600 dark:text-blue-400">
+                      <Button variant="ghost" className="w-full justify-start text-blue-700 dark:text-blue-400">
                         {t('nav.login')}
                       </Button>
                     </Link>
@@ -155,7 +156,7 @@ const Navbar = () => {
 
               <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 mt-auto">
                 <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Language</span>
+                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('nav.language')}</span>
                     <div className="flex gap-2">
                       {languages.map((lang) => (
                         <button
@@ -173,7 +174,7 @@ const Navbar = () => {
                     </div>
                 </div>
                 <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Theme</span>
+                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('nav.theme')}</span>
                     <ThemeToggle />
                 </div>
               </div>
@@ -197,7 +198,8 @@ const Navbar = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
-                <Globe className="h-5 w-5 text-blue-900 dark:text-blue-400" />
+                <Globe className="h-5 w-5 text-blue-900 dark:text-blue-400" aria-hidden="true" />
+                <span className="sr-only">{t('nav.language')}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -217,11 +219,12 @@ const Navbar = () => {
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                     <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border border-blue-200 bg-blue-50">
                       {avatarUrl ? (
-                        <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" />
+                        <img src={avatarUrl} alt={t('nav.profile')} className="h-full w-full object-cover" />
                       ) : (
-                        <User className="h-5 w-5 text-blue-400" />
+                        <User className="h-5 w-5 text-blue-400" aria-hidden="true" />
                       )}
                     </div>
+                    <span className="sr-only">{t('nav.userMenu')}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -248,7 +251,7 @@ const Navbar = () => {
           ) : (
             <div className="flex items-center gap-2">
               <Link to="/login">
-                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-900">
+                <Button variant="ghost" size="sm" className="text-blue-700 hover:text-blue-900 dark:text-blue-400">
                   {t('nav.login')}
                 </Button>
               </Link>

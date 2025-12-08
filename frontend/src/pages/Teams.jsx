@@ -112,8 +112,8 @@ const Teams = () => {
     <div className="container mx-auto px-4 py-8 space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-blue-900">{t('teams.title')}</h1>
-          <p className="text-slate-600 mt-1">{t('teams.subtitle')}</p>
+          <h1 className="text-3xl font-bold text-blue-900 dark:text-blue-100">{t('teams.title')}</h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-1">{t('teams.subtitle')}</p>
         </div>
         
         {isAuthenticated && !status.ownedTeamId && !status.memberOfTeamId && (
@@ -195,6 +195,7 @@ const Teams = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input 
             placeholder={t('teams.searchPlaceholder')} 
+            aria-label={t('teams.searchPlaceholder')}
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && reload()}
@@ -207,7 +208,7 @@ const Teams = () => {
             onValueChange={setCountryFilter}
             disabled={countriesStatus?.loading}
           >
-            <SelectTrigger>
+            <SelectTrigger aria-label={t('teams.form.country')}>
               <SelectValue placeholder={countriesStatus?.loading ? t('general.countriesLoading') : t('teams.form.country')} />
             </SelectTrigger>
             <SelectContent>
@@ -229,22 +230,22 @@ const Teams = () => {
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-xl text-blue-900">{team.name}</CardTitle>
+                  <CardTitle className="text-xl">{team.name}</CardTitle>
                   {team.city && (
                     <CardDescription>{team.city}</CardDescription>
                   )}
                 </div>
-                <Badge variant="outline" className="bg-slate-50">
+                <Badge variant="outline" className="bg-slate-50 dark:bg-slate-800">
                   {membersMap[team.id]?.length || 0} {t('teams.members')}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="flex-1 space-y-4">
               {team.description && (
-                <p className="text-sm text-slate-600 line-clamp-3">{team.description}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3">{team.description}</p>
               )}
               
-              <div className="flex flex-wrap gap-2 text-sm text-slate-500">
+              <div className="flex flex-wrap gap-2 text-sm text-slate-500 dark:text-slate-400">
                 {team.website_url && (
                   <a href={team.website_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-blue-600">
                     <Globe className="h-3 w-3" /> Website
@@ -280,7 +281,7 @@ const Teams = () => {
         ))}
         
         {teams.length === 0 && (
-          <div className="col-span-full text-center py-12 text-slate-500">
+          <div className="col-span-full text-center py-12 text-slate-500 dark:text-slate-400">
             {t('teams.noTeams')}
           </div>
         )}

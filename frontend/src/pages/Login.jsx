@@ -41,7 +41,7 @@ const Login = () => {
       <Card className="w-full max-w-md border-slate-200 dark:border-slate-800">
         <CardHeader className="space-y-2 text-center">
           <p className="text-xs uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">{t('login.tagline')}</p>
-          <CardTitle className="text-3xl">{t('login.title')}</CardTitle>
+          <CardTitle as="h1" className="text-3xl">{t('login.title')}</CardTitle>
           <CardDescription>{t('login.description')}</CardDescription>
         </CardHeader>
 

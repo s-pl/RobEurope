@@ -63,7 +63,7 @@ const Register = () => {
       <Card className="w-full max-w-3xl border-slate-200 dark:border-slate-800">
         <CardHeader className="space-y-2 text-center">
           <p className="text-xs uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">{t('register.tagline')}</p>
-          <CardTitle className="text-3xl">{t('register.title')}</CardTitle>
+          <CardTitle as="h1" className="text-3xl">{t('register.title')}</CardTitle>
           <CardDescription>{t('register.description')}</CardDescription>
         </CardHeader>
 

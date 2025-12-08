@@ -231,7 +231,7 @@ const TeamChat = ({ teamId }) => {
                             ) : (
                               <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700 max-w-xs group transition-all hover:shadow-sm">
                                 <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                                  <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                  <FileText className="h-5 w-5 text-blue-700 dark:text-blue-400" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium truncate text-slate-700 dark:text-slate-200">
@@ -266,7 +266,7 @@ const TeamChat = ({ teamId }) => {
                         ) : (
                           <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700 max-w-xs group transition-all hover:shadow-sm">
                             <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                              <FileText className="h-5 w-5 text-blue-700 dark:text-blue-400" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium truncate text-slate-700 dark:text-slate-200">
@@ -328,7 +328,8 @@ const TeamChat = ({ teamId }) => {
               onChange={handleFileSelect}
             />
             <Button type="button" variant="ghost" size="icon" onClick={() => document.getElementById('chat-file').click()}>
-              <Paperclip className="h-5 w-5 text-slate-500" />
+              <Paperclip className="h-5 w-5 text-slate-500" aria-hidden="true" />
+              <span className="sr-only">{t('common.attachFile') || 'Attach file'}</span>
             </Button>
           </div>
           <Input
@@ -341,7 +342,8 @@ const TeamChat = ({ teamId }) => {
             className="flex-1"
           />
           <Button type="submit" size="icon" disabled={!newMessage.trim() && files.length === 0}>
-            <Send className="h-4 w-4" />
+            <Send className="h-4 w-4" aria-hidden="true" />
+            <span className="sr-only">{t('common.send') || 'Send'}</span>
           </Button>
         </form>
       </div>

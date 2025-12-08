@@ -357,15 +357,17 @@ const Posts = () => {
                 
         <div className="flex items-center">
           {user?.role === 'super_admin' && (
-            <Button variant="ghost" size="icon" className="h-8 w-8 p-0 border-0 rounded-md text-slate-500 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => handlePin(post)}>
-                            <Pin className={`h-4 w-4 ${post.is_pinned ? 'fill-blue-500 text-blue-500' : ''}`} />
+            <Button variant="ghost" size="icon" className="h-8 w-8 p-0 border-0 rounded-md text-slate-500 hover:text-blue-700 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400" onClick={() => handlePin(post)}>
+                            <Pin className={`h-4 w-4 ${post.is_pinned ? 'fill-blue-500 text-blue-500' : ''}`} aria-hidden="true" />
+                            <span className="sr-only">{post.is_pinned ? t('posts.unpinned') : t('posts.pinned')}</span>
                         </Button>
                     )}
                     {(user?.id === post.author_id || user?.role === 'super_admin') && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 p-0 border-0 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">
-                            <MoreVertical className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="h-8 w-8 p-0 border-0 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400">
+                            <MoreVertical className="h-4 w-4" aria-hidden="true" />
+                            <span className="sr-only">{t('common.moreOptions') || 'More options'}</span>
                         </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -410,20 +412,22 @@ const Posts = () => {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="gap-2 text-slate-500 hover:text-blue-500 dark:text-slate-400"
+                    className="gap-2 text-slate-600 hover:text-blue-700 dark:text-slate-400 dark:hover:text-blue-400"
                     onClick={() => openComments(post)}
                   >
-                    <MessageCircle className="h-4 w-4" />
+                    <MessageCircle className="h-4 w-4" aria-hidden="true" />
                     <span>{post.Comments?.length || 0}</span>
+                    <span className="sr-only">{t('posts.comments')}</span>
                   </Button>
                   <div className="flex-1" />
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-500"
+                    className="gap-2 text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400"
                     onClick={() => handleShare(post)}
                   >
-                    <Share2 className="h-4 w-4" />
+                    <Share2 className="h-4 w-4" aria-hidden="true" />
+                    <span className="sr-only">{t('common.share') || 'Share'}</span>
                   </Button>
                 </div>
               </CardFooter>

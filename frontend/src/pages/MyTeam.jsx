@@ -328,10 +328,10 @@ const MyTeam = () => {
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-slate-900">{team.name}</h1>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{team.name}</h1>
             <Badge variant={isOwner ? "default" : "secondary"}>
               {isOwner ? t('myTeam.roles.owner') : t('myTeam.roles.member')}
             </Badge>
@@ -351,7 +351,9 @@ const MyTeam = () => {
       <div className="border-b border-slate-200 flex gap-2 overflow-x-auto">
         <TabButton id="overview" label={t('myTeam.tabs.overview')} icon={Info} />
         <TabButton id="chat" label={t('team.chat.tab')} icon={MessageCircle} />
-        <TabButton id="code" label="Code" icon={Code} />
+        <div className="hidden md:block">
+          <TabButton id="code" label="Code" icon={Code} />
+        </div>
         <TabButton id="members" label={t('myTeam.tabs.members')} icon={Users} />
         <TabButton id="competitions" label={t('myTeam.tabs.competitions')} icon={Trophy} />
         {isOwner && <TabButton id="settings" label={t('myTeam.tabs.settings')} icon={Settings} />}
@@ -385,7 +387,7 @@ const MyTeam = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <h4 className="text-sm font-medium text-slate-500">{t('myTeam.form.website')}</h4>
-                    <a href={team.website_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline truncate block">
+                    <a href={team.website_url} target="_blank" rel="noreferrer" className="text-blue-700 hover:underline truncate block dark:text-blue-400">
                       {team.website_url || '-'}
                     </a>
                   </div>
@@ -436,7 +438,7 @@ const MyTeam = () => {
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-slate-900">
+                          <p className="font-medium text-slate-900 dark:text-slate-100">
                             {m.user_username || `${t('myTeam.members.userPrefix')} ${m.user_id}`}
                           </p>
                           <p className="text-xs text-slate-500 capitalize">{m.role}</p>
@@ -468,9 +470,9 @@ const MyTeam = () => {
                         <Input placeholder="Username..." value={query} onChange={(e) => setQuery(e.target.value)} />
                       </div>
                       {candidates.length > 0 && (
-                        <div className="mt-2 border rounded-md divide-y max-h-40 overflow-y-auto">
+                        <div className="mt-2 border rounded-md divide-y max-h-40 overflow-y-auto dark:border-slate-700 dark:divide-slate-700">
                           {candidates.map(u => (
-                            <div key={u.id} className="p-2 flex justify-between items-center text-sm hover:bg-slate-50">
+                            <div key={u.id} className="p-2 flex justify-between items-center text-sm hover:bg-slate-50 dark:hover:bg-slate-800">
                               <span>{u.username}</span>
                               <Button size="sm" variant="outline" onClick={() => onInviteUsername(u.username)}>{t('myTeam.actions.invite')}</Button>
                             </div>
@@ -534,7 +536,7 @@ const MyTeam = () => {
                       <Label htmlFor="comp-select">{t('myTeam.competitions.selectLabel')}</Label>
                       <select 
                         id="comp-select"
-                        className="flex h-10 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mt-1.5"
+                        className="flex h-10 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mt-1.5 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-50 dark:ring-offset-slate-950 dark:placeholder:text-slate-400 dark:focus:ring-slate-300"
                         value={selectedCompetition}
                         onChange={(e) => setSelectedCompetition(e.target.value)}
                       >
@@ -649,10 +651,10 @@ const MyTeam = () => {
                     <Button variant="outline" onClick={onSave}>{t('myTeam.form.saveUrl')}</Button>
                   </div>
                 </div>
-                <div className="rounded-lg bg-slate-50 p-4 border border-slate-100 flex items-center justify-between">
+                <div className="rounded-lg bg-slate-50 dark:bg-slate-800 p-4 border border-slate-100 dark:border-slate-700 flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium text-slate-900">{t('myTeam.settings.streamStatus')}</h4>
-                    <p className="text-sm text-slate-500">{t('myTeam.settings.streamStatusDesc')}</p>
+                    <h4 className="font-medium text-slate-900 dark:text-slate-100">{t('myTeam.settings.streamStatus')}</h4>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('myTeam.settings.streamStatusDesc')}</p>
                   </div>
                   <div className="flex items-center gap-4">
                     {activeStream && (

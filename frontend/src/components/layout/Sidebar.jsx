@@ -60,6 +60,7 @@ const Sidebar = () => {
       <button
         onClick={() => setCollapsed(!collapsed)}
         className="absolute -right-3 top-9 flex h-6 w-6 items-center justify-center rounded-full border border-blue-200 bg-white text-blue-900 shadow-sm hover:bg-blue-50 dark:border-slate-800 dark:bg-slate-900 dark:text-blue-100 z-50"
+        aria-label={collapsed ? t('common.expand') || 'Expand sidebar' : t('common.collapse') || 'Collapse sidebar'}
       >
         {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </button>

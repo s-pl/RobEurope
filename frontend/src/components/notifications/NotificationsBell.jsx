@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Bell, Check } from 'lucide-react';
 import io from 'socket.io-client';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useApi } from '../../hooks/useApi';
 import { getApiBaseUrl } from '../../lib/apiClient';
@@ -12,6 +13,7 @@ import { requestNotificationPermission, showNotification } from '../../lib/notif
 import { registerServiceWorker, subscribeToPush } from '../../lib/push';
 
 const NotificationsBell = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const api = useApi();
   const [open, setOpen] = useState(false);
@@ -87,6 +89,7 @@ const NotificationsBell = () => {
           {unread > 0 && (
             <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-slate-950" />
           )}
+          <span className="sr-only">{t('nav.notifications') || 'Notifications'}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
