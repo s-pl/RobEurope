@@ -40,20 +40,20 @@ const Register = () => {
     setError('');
 
     if (!acceptedTerms) {
-      setError(t('forms.acceptTerms') || 'Debes aceptar los términos y condiciones');
+      setError(t('forms.acceptTerms'));
       setLoading(false);
       return;
     }
 
     // client-side validation
     if (form.password !== form.confirm_password) {
-      setError(t('forms.passwordsDontMatch') || 'Las contraseñas no coinciden');
+      setError(t('forms.passwordsDontMatch'));
       setLoading(false);
       return;
     }
     const { score } = getPasswordStrength(form.password);
     if (score < 2) {
-      setError(t('forms.passwordTooWeak') || 'La contraseña es demasiado débil');
+      setError(t('forms.passwordTooWeak'));
       setLoading(false);
       return;
     }
