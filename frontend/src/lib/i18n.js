@@ -1110,7 +1110,20 @@ const resources = {
         organization: 'Organisation',
         message: 'Nachricht',
         country: 'Land',
-        name: 'Name'
+        name: 'Name',
+        acceptTerms: 'Sie müssen die Geschäftsbedingungen akzeptieren',
+        passwordsDontMatch: 'Passwörter stimmen nicht überein',
+        passwordTooWeak: 'Passwort ist zu schwach',
+        passwordStrength: 'Stärke',
+        repeatPassword: 'Passwort wiederholen'
+      },
+      placeholders: {
+        emailExample: 'name@beispiel.de',
+        phoneExample: '+49 170 1234567',
+        nameExample: 'Max',
+        lastNameExample: 'Mustermann',
+        usernameExample: 'maxmuster',
+        passwordExample: '••••••••'
       },
       common: {
         save: 'Speichern',
