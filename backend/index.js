@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import http from 'http';
 import path from 'path';
@@ -27,8 +28,7 @@ import requestId from './middleware/requestId.middleware.js';
 import redisClient from './utils/redis.js';
 import passport from 'passport';
 import './config/passport.js';
-dotenv.config();
-// import userRoutes from './routes/userRoutes.js';
+
 const allowedOrigins = [
   /^https?:\/\/localhost(:\d+)?$/,
   /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
