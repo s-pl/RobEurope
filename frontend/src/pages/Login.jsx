@@ -63,7 +63,7 @@ const Login = () => {
                   value={form.email} 
                   onChange={handleChange} 
                   className="pl-10" 
-                  placeholder="name@example.com"
+                  placeholder={t('placeholders.emailExample')}
                 />
               </div>
             </div>
@@ -79,7 +79,7 @@ const Login = () => {
                   value={form.password}
                   onChange={handleChange}
                   className="pl-10 pr-10"
-                  placeholder="••••••••"
+                  placeholder={t('placeholders.passwordExample')}
                 />
                 <button
                   type="button"
