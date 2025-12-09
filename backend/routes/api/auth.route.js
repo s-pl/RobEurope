@@ -48,8 +48,6 @@ router.get('/github/callback',
   socialLoginCallback
 );
 
-// Apple (Placeholder - requires more setup)
-// router.get('/apple', passport.authenticate('apple'));
-// router.post('/apple/callback', passport.authenticate('apple', { failureRedirect: '/login' }), socialLoginCallback);
+
 
 export default router;

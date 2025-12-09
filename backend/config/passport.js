@@ -71,30 +71,36 @@ const handleSocialLogin = async (req, accessToken, refreshToken, profile, done, 
 
 
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    console.log('Registering Google Strategy');
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "/api/auth/google/callback",
+        callbackURL: "https://api.robeurope.samuelponce.es/api/auth/google/callback",
         passReqToCallback: true
     },
     (req, accessToken, refreshToken, profile, done) => {
         handleSocialLogin(req, accessToken, refreshToken, profile, done, 'google_id');
     }
     ));
+} else {
+    console.log('Google Client ID or Secret missing');
 }
 
 
 if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+    console.log('Registering GitHub Strategy');
     passport.use(new GitHubStrategy({
         clientID: process.env.GITHUB_CLIENT_ID,
         clientSecret: process.env.GITHUB_CLIENT_SECRET,
-        callbackURL: "/api/auth/github/callback",
+        callbackURL: "https://api.robeurope.samuelponce.es/api/auth/github/callback",
         passReqToCallback: true
     },
     (req, accessToken, refreshToken, profile, done) => {
         handleSocialLogin(req, accessToken, refreshToken, profile, done, 'github_id');
     }
     ));
+} else {
+    console.log('GitHub Client ID or Secret missing');
 }
 
 
