@@ -86,35 +86,35 @@ const Register = () => {
               <Label htmlFor="first_name">{t('forms.firstName')}</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="first_name" name="first_name" required value={form.first_name} onChange={handleChange} className="pl-10" placeholder="John" />
+                <Input id="first_name" name="first_name" required value={form.first_name} onChange={handleChange} className="pl-10" placeholder={t('placeholders.nameExample')} />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="last_name">{t('forms.lastName')}</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="last_name" name="last_name" required value={form.last_name} onChange={handleChange} className="pl-10" placeholder="Doe" />
+                <Input id="last_name" name="last_name" required value={form.last_name} onChange={handleChange} className="pl-10" placeholder={t('placeholders.lastNameExample')} />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="username">{t('forms.username')}</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="username" name="username" required value={form.username} onChange={handleChange} className="pl-10" placeholder="johndoe" />
+                <Input id="username" name="username" required value={form.username} onChange={handleChange} className="pl-10" placeholder={t('placeholders.usernameExample')} />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">{t('forms.phone')}</Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="phone" name="phone" value={form.phone} onChange={handleChange} className="pl-10" placeholder="+1 234 567 890" />
+                <Input id="phone" name="phone" value={form.phone} onChange={handleChange} className="pl-10" placeholder={t('placeholders.phoneExample')} />
               </div>
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="email">{t('forms.email')}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="email" name="email" type="email" required value={form.email} onChange={handleChange} className="pl-10" placeholder="name@example.com" />
+                <Input id="email" name="email" type="email" required value={form.email} onChange={handleChange} className="pl-10" placeholder={t('placeholders.emailExample')} />
               </div>
             </div>
             <div className="space-y-2">
@@ -129,7 +129,7 @@ const Register = () => {
                   value={form.password}
                   onChange={(e) => { handleChange(e); if (!pwTouched) setPwTouched(true); }}
                   className="pl-10 pr-10"
-                  placeholder="••••••••"
+                  placeholder={t('placeholders.passwordExample')}
                 />
                 <button
                   type="button"
@@ -145,7 +145,7 @@ const Register = () => {
                   return (
                     <div className="mt-1">
                       <div className="flex items-center justify-between text-xs text-slate-500">
-                        <span>{t('forms.passwordStrength') || 'Fuerza'}</span>
+                        <span>{t('forms.passwordStrength')}</span>
                         <span style={{ color }}>{label}</span>
                       </div>
                       <StrengthBar score={score} color={color} />
@@ -155,7 +155,7 @@ const Register = () => {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm_password">{t('forms.repeatPassword') || 'Repetir contraseña'}</Label>
+              <Label htmlFor="confirm_password">{t('forms.repeatPassword')}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
@@ -166,7 +166,7 @@ const Register = () => {
                   value={form.confirm_password}
                   onChange={handleChange}
                   className="pl-10 pr-10"
-                  placeholder="••••••••"
+                  placeholder={t('placeholders.passwordExample')}
                 />
                 <button
                   type="button"
@@ -177,7 +177,7 @@ const Register = () => {
                 </button>
               </div>
               {form.confirm_password && form.password !== form.confirm_password && (
-                <p className="mt-1 text-xs text-red-600">{t('forms.passwordsDontMatch') || 'Las contraseñas no coinciden'}</p>
+                <p className="mt-1 text-xs text-red-600">{t('forms.passwordsDontMatch')}</p>
               )}
             </div>
 
