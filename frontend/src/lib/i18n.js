@@ -107,7 +107,7 @@ const resources = {
         reviewSamuel: "Este organizador de eventos de robótica realmente eleva cada taller. Las sesiones están bien estructuradas, son interactivas e increíblemente inspiradoras. Es el lugar ideal para explorar la robótica y obtener experiencia práctica real.",
         roleAngel: "Frontend Lead @ Google",
         reviewAngel: "Encontré una solución para todas mis necesidades de diseño con Creative Tim. ¡Los uso como freelancer en mis proyectos de hobby por diversión! ¡Y es realmente asequible, gente muy humilde!"
-      },
+      }, 
       forms: {
         firstName: 'Nombre',
         lastName: 'Apellidos',
@@ -118,7 +118,20 @@ const resources = {
         organization: 'Organización',
         message: 'Mensaje',
         country: 'País',
-        name: 'Nombre'
+        name: 'Nombre',
+        acceptTerms: 'Debes aceptar los términos y condiciones',
+        passwordsDontMatch: 'Las contraseñas no coinciden',
+        passwordTooWeak: 'La contraseña es demasiado débil',
+        passwordStrength: 'Fuerza',
+        repeatPassword: 'Repetir contraseña'
+      },
+      placeholders: {
+        emailExample: 'nombre@ejemplo.com',
+        phoneExample: '+34 600 000 000',
+        nameExample: 'Juan',
+        lastNameExample: 'Pérez',
+        usernameExample: 'juanperez',
+        passwordExample: '••••••••'
       },
       common: {
         save: 'Guardar',
@@ -395,7 +408,8 @@ const resources = {
         title: 'Crea tu cuenta',
         description: 'Los datos se envían al endpoint /auth/register para emitir un token y almacenarte en la base de datos.',
         hasAccount: '¿Ya tienes cuenta?',
-        loginLink: 'Inicia sesión'
+        loginLink: 'Inicia sesión',
+        acceptTerms: 'Acepto los'
       },
       general: {
         countriesLoading: 'Cargando países…',
@@ -601,7 +615,20 @@ const resources = {
         organization: 'Organization',
         message: 'Message',
         country: 'Country',
-        name: 'Name'
+        name: 'Name',
+        acceptTerms: 'You must accept the terms and conditions',
+        passwordsDontMatch: 'Passwords do not match',
+        passwordTooWeak: 'Password is too weak',
+        passwordStrength: 'Strength',
+        repeatPassword: 'Repeat password'
+      },
+      placeholders: {
+        emailExample: 'name@example.com',
+        phoneExample: '+1 234 567 890',
+        nameExample: 'John',
+        lastNameExample: 'Doe',
+        usernameExample: 'johndoe',
+        passwordExample: '••••••••'
       },
       common: {
         save: 'Save',
@@ -878,7 +905,8 @@ const resources = {
         title: 'Create your account',
         description: 'Data is sent to /auth/register to issue a token and store you in the database.',
         hasAccount: 'Already have an account?',
-        loginLink: 'Sign in'
+        loginLink: 'Sign in',
+        acceptTerms: 'I accept the'
       },
       general: {
         countriesLoading: 'Loading countries…',
@@ -1313,7 +1341,8 @@ const resources = {
         title: 'Erstelle dein Konto',
         description: 'Die Daten werden an /auth/register gesendet, um ein Token zu erstellen und dich zu speichern.',
         hasAccount: 'Hast du schon ein Konto?',
-        loginLink: 'Anmelden'
+        loginLink: 'Anmelden',
+        acceptTerms: 'Ich akzeptiere die'
       },
       general: {
         countriesLoading: 'Länder werden geladen…',
