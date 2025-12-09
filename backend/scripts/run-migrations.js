@@ -18,7 +18,7 @@ import * as createRobotFiles from '../migrations/20251130-create-robot-files.js'
 import * as createTeamLogs from '../migrations/20251130-create-team-logs.js';
 import * as addAttachmentsToTeamMessages from '../migrations/20251130-add-attachments-to-team-messages.js';
 import * as addIsPublicToRobotFiles from '../migrations/20251130-add-is-public-to-robot-files.js';
-
+import * as addOauthFieldsToUsers from '../migrations/20251123215620-add-oauth-fields-to-users.js';
 async function run() {
   try {
     await sequelize.authenticate();
@@ -184,6 +184,13 @@ async function run() {
       console.log('Added is_public to RobotFiles');
     } catch (e) {
       console.log('Skipping addIsPublicToRobotFiles:', e.message);
+    }
+    // Add OAuth fields to Users
+    try {
+      await addOauthFieldsToUsers.up(qi, Sequelize);
+      console.log('Added OAuth fields to Users');
+    } catch (e) {
+      console.log('Skipping addOauthFieldsToUsers:', e.message);
     }
 
     console.log('Migrations applied successfully');

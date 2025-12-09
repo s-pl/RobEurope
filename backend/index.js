@@ -25,6 +25,8 @@ import db from './models/index.js';
 import adminRoutes from './routes/admin.route.js';
 import requestId from './middleware/requestId.middleware.js';
 import redisClient from './utils/redis.js';
+import passport from 'passport';
+import './config/passport.js';
 dotenv.config();
 // import userRoutes from './routes/userRoutes.js';
 const allowedOrigins = [
@@ -153,6 +155,9 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 24 // 24 hours
   }
 }));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Simple helper to expose session user to templates
 app.use((req, res, next) => {

@@ -95,6 +95,29 @@ const Login = () => {
             </Button>
           </form>
 
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-slate-200 dark:border-slate-700" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-slate-500 dark:bg-slate-950 dark:text-slate-400">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            <Button variant="outline" onClick={() => window.location.href = 'http://localhost:85/api/auth/google'}>
+              Google
+            </Button>
+            <Button variant="outline" onClick={() => window.location.href = 'http://localhost:85/api/auth/github'}>
+              GitHub
+            </Button>
+            <Button variant="outline" onClick={() => window.location.href = 'http://localhost:85/api/auth/apple'}>
+              Apple
+            </Button>
+          </div>
+
           <div className="text-center">
             <Link to="/forgot-password" className="text-xs text-blue-700 hover:underline dark:text-blue-300">
               {t('login.forgot') || '¿Has olvidado tu contraseña?'}
