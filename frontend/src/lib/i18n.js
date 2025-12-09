@@ -40,7 +40,12 @@ const resources = {
         streams: 'Streaming',
         contact: 'Contacto',
         terms: 'Términos',
-        profile: 'Perfil'
+        profile: 'Perfil',
+        menu: 'Menú',
+        userMenu: 'Menú de usuario',
+        myTeam: 'Mi equipo',
+        theme: 'Tema',
+        posts: 'Noticias'
       },
       status: {
         connected: 'Conectado',
@@ -63,7 +68,8 @@ const resources = {
         uploading: 'Subiendo…',
         saving: 'Guardando…',
         creating: 'Creando…',
-        entering: 'Entrando…'
+        entering: 'Entrando…',
+        apply: 'Aplicar'
       },
       footer: {
         description:
@@ -79,7 +85,16 @@ const resources = {
         company: 'COMPAÑÍA',
         about: 'Sobre nosotros',
         contact: 'Contacto',
-        terms: 'Términos'
+        terms: 'Términos',
+        social: {
+          twitter: 'Twitter',
+          github: 'GitHub',
+          linkedin: 'LinkedIn',
+          facebook: 'Facebook',
+          instagram: 'Instagram',
+          youtube: 'YouTube'
+        },
+        copyright: 'Todos los derechos reservados.'
       },
       gallery: {
         galleryTitle: "Galería",
@@ -92,7 +107,7 @@ const resources = {
         reviewSamuel: "Este organizador de eventos de robótica realmente eleva cada taller. Las sesiones están bien estructuradas, son interactivas e increíblemente inspiradoras. Es el lugar ideal para explorar la robótica y obtener experiencia práctica real.",
         roleAngel: "Frontend Lead @ Google",
         reviewAngel: "Encontré una solución para todas mis necesidades de diseño con Creative Tim. ¡Los uso como freelancer en mis proyectos de hobby por diversión! ¡Y es realmente asequible, gente muy humilde!"
-      },
+      }, 
       forms: {
         firstName: 'Nombre',
         lastName: 'Apellidos',
@@ -103,14 +118,47 @@ const resources = {
         organization: 'Organización',
         message: 'Mensaje',
         country: 'País',
-        name: 'Nombre'
+        name: 'Nombre',
+        acceptTerms: 'Debes aceptar los términos y condiciones',
+        passwordsDontMatch: 'Las contraseñas no coinciden',
+        passwordTooWeak: 'La contraseña es demasiado débil',
+        passwordStrength: 'Fuerza',
+        repeatPassword: 'Repetir contraseña'
+      },
+      placeholders: {
+        emailExample: 'nombre@ejemplo.com',
+        phoneExample: '+34 600 000 000',
+        nameExample: 'Juan',
+        lastNameExample: 'Pérez',
+        usernameExample: 'juanperez',
+        passwordExample: '••••••••'
       },
       common: {
         save: 'Guardar',
         saving: 'Guardando...',
         delete: 'Eliminar',
         cancel: 'Cancelar',
-        edit: 'Editar'
+        edit: 'Editar',
+        close: 'Cerrar'
+      },
+      sponsors: {
+        title: 'Sponsors',
+        subtitle: 'Gestiona los sponsors del evento',
+        create: 'Nuevo Sponsor',
+        edit: 'Editar Sponsor',
+        createDesc: 'Añade un nuevo sponsor al evento',
+        editDesc: 'Modifica los datos del sponsor',
+        form: {
+          name: 'Nombre',
+          logo: 'URL del Logo',
+          website: 'Sitio Web'
+        },
+        empty: 'No hay sponsors',
+        emptyDesc: 'Comienza añadiendo tu primer sponsor',
+        created: 'Creado',
+        logo: 'Logo',
+        website: 'Website',
+        id: 'ID'
       },
       posts: {
         title: 'Noticias',
@@ -280,7 +328,24 @@ const resources = {
         noStreams: 'No hay streams activos para esta competición.',
         loadError: 'Error al cargar competiciones.',
         createError: 'Error al crear competición',
-        noActive: 'No hay competiciones activas en este momento.'
+        noActive: 'No hay competiciones activas en este momento.',
+        searchPlace: 'Nombre, ciudad...',
+        onlyActive: 'Solo activas',
+        onlyFavorites: 'Solo favoritos'
+      },
+      streams: {
+        title: 'Streams',
+        subtitle: 'Visualiza todos los streams de las competiciones',
+        loading: 'Cargando streams...',
+        error: 'Error:',
+        status: {
+          live: 'En vivo',
+          offline: 'Offline',
+          scheduled: 'Programado'
+        },
+        team: 'Equipo',
+        competition: 'Competición',
+        watch: 'Ver Stream'
       },
       contact: {
         hero: {
@@ -304,12 +369,20 @@ const resources = {
         contactUsDesc: "Estamos aquí para ayudarte. Rellena el formulario y nos pondremos en contacto contigo lo antes posible.",
         sentTitle: "¡Mensaje Enviado!",
         sentDesc: "Gracias por contactarnos. Te responderemos a la brevedad posible.",
-        sendAnother: "Enviar otro mensaje"
+        sendAnother: "Enviar otro mensaje",
+        support: "Soporte 24/7 para equipos",
+        placeholders: {
+          name: "Tu nombre",
+          email: "tu@email.com"
+        }
       },
       profile: {
         title: 'Mi Perfil',
+        overview: 'Resumen',
         personalInfo: 'Información Personal',
         bio: 'Biografía',
+        bioEmpty: 'Sin biografía',
+        username: 'Nombre de usuario',
         country: 'País',
         photo: 'Foto de Perfil',
         heroTagline: 'Cuenta vinculada',
@@ -335,10 +408,12 @@ const resources = {
         title: 'Crea tu cuenta',
         description: 'Los datos se envían al endpoint /auth/register para emitir un token y almacenarte en la base de datos.',
         hasAccount: '¿Ya tienes cuenta?',
-        loginLink: 'Inicia sesión'
+        loginLink: 'Inicia sesión',
+        acceptTerms: 'Acepto los'
       },
       general: {
-        countriesLoading: 'Cargando países…'
+        countriesLoading: 'Cargando países…',
+        search: 'Buscar'
       },
       myTeam: {
         title: "Mi Equipo",
@@ -442,6 +517,12 @@ const resources = {
           streamStopped: "Emisión detenida",
           streamError: "Error al iniciar stream"
         }
+      },
+      team: {
+        chat: {
+          tab: 'Chat',
+          title: 'Chat de Equipo'
+        }
       }
     }
   },
@@ -457,7 +538,11 @@ const resources = {
         streams: 'Streaming',
         contact: 'Contact',
         terms: 'Terms',
-        profile: 'Profile'
+        profile: 'Profile',
+        menu: 'Menu',
+        userMenu: 'User menu',
+        myTeam: 'My Team',
+        theme: 'Theme'
       },
       status: {
         connected: 'Online',
@@ -480,7 +565,8 @@ const resources = {
         uploading: 'Uploading…',
         saving: 'Saving…',
         creating: 'Creating…',
-        entering: 'Logging in…'
+        entering: 'Logging in…',
+        apply: 'Apply'
       },
       footer: {
         description:
@@ -496,7 +582,16 @@ const resources = {
         company: 'COMPANY',
         about: 'About Us',
         contact: 'Contact',
-        terms: 'Terms'
+        terms: 'Terms',
+        social: {
+          twitter: 'Twitter',
+          github: 'GitHub',
+          linkedin: 'LinkedIn',
+          facebook: 'Facebook',
+          instagram: 'Instagram',
+          youtube: 'YouTube'
+        },
+        copyright: 'All rights reserved.'
       },
       gallery: {
         galleryTitle: "Gallery",
@@ -520,14 +615,47 @@ const resources = {
         organization: 'Organization',
         message: 'Message',
         country: 'Country',
-        name: 'Name'
+        name: 'Name',
+        acceptTerms: 'You must accept the terms and conditions',
+        passwordsDontMatch: 'Passwords do not match',
+        passwordTooWeak: 'Password is too weak',
+        passwordStrength: 'Strength',
+        repeatPassword: 'Repeat password'
+      },
+      placeholders: {
+        emailExample: 'name@example.com',
+        phoneExample: '+1 234 567 890',
+        nameExample: 'John',
+        lastNameExample: 'Doe',
+        usernameExample: 'johndoe',
+        passwordExample: '••••••••'
       },
       common: {
         save: 'Save',
         saving: 'Saving...',
         delete: 'Delete',
         cancel: 'Cancel',
-        edit: 'Edit'
+        edit: 'Edit',
+        close: 'Close'
+      },
+      sponsors: {
+        title: 'Sponsors',
+        subtitle: 'Manage event sponsors',
+        create: 'New Sponsor',
+        edit: 'Edit Sponsor',
+        createDesc: 'Add a new sponsor to the event',
+        editDesc: 'Modify sponsor data',
+        form: {
+          name: 'Name',
+          logo: 'Logo URL',
+          website: 'Website'
+        },
+        empty: 'No sponsors found',
+        emptyDesc: 'Start by adding your first sponsor',
+        created: 'Created',
+        logo: 'Logo',
+        website: 'Website',
+        id: 'ID'
       },
       posts: {
         title: 'News',
@@ -697,7 +825,24 @@ const resources = {
         noStreams: 'No active streams for this competition.',
         loadError: 'Error loading competitions.',
         createError: 'Error creating competition',
-        noActive: 'No active competitions at the moment.'
+        noActive: 'No active competitions at the moment.',
+        searchPlace: 'Name, city...',
+        onlyActive: 'Active only',
+        onlyFavorites: 'Favorites only'
+      },
+      streams: {
+        title: 'Streams',
+        subtitle: 'Watch all competition streams',
+        loading: 'Loading streams...',
+        error: 'Error:',
+        status: {
+          live: 'Live',
+          offline: 'Offline',
+          scheduled: 'Scheduled'
+        },
+        team: 'Team',
+        competition: 'Competition',
+        watch: 'Watch Stream'
       },
       contact: {
         hero: {
@@ -721,12 +866,20 @@ const resources = {
         contactUsDesc: "We are here to help. Fill out the form and we will get back to you as soon as possible.",
         sentTitle: "Message Sent!",
         sentDesc: "Thank you for contacting us. We will respond shortly.",
-        sendAnother: "Send another message"
+        sendAnother: "Send another message",
+        support: "24/7 Team Support",
+        placeholders: {
+          name: "Your name",
+          email: "you@email.com"
+        }
       },
       profile: {
         title: 'My Profile',
+        overview: 'Overview',
         personalInfo: 'Personal Information',
         bio: 'Biography',
+        bioEmpty: 'No biography provided',
+        username: 'Username',
         country: 'Country',
         photo: 'Profile Photo',
         heroTagline: 'Linked account',
@@ -752,10 +905,12 @@ const resources = {
         title: 'Create your account',
         description: 'Data is sent to /auth/register to issue a token and store you in the database.',
         hasAccount: 'Already have an account?',
-        loginLink: 'Sign in'
+        loginLink: 'Sign in',
+        acceptTerms: 'I accept the'
       },
       general: {
-        countriesLoading: 'Loading countries…'
+        countriesLoading: 'Loading countries…',
+        search: 'Search'
       },
       myTeam: {
         title: "My Team",
@@ -857,6 +1012,12 @@ const resources = {
           streamStarted: "Broadcast started!",
           streamError: "Error starting stream"
         }
+      },
+      team: {
+        chat: {
+          tab: 'Chat',
+          title: 'Team Chat'
+        }
       }
     }
   },
@@ -872,7 +1033,11 @@ const resources = {
         streams: 'Streaming',
         contact: 'Kontakt',
         terms: 'Bedingungen',
-        profile: 'Profil'
+        profile: 'Profil',
+        menu: 'Menü',
+        userMenu: 'Benutzermenü',
+        myTeam: 'Mein Team',
+        theme: 'Thema'
       },
       status: {
         connected: 'Verbunden',
@@ -895,7 +1060,8 @@ const resources = {
         uploading: 'Wird hochgeladen…',
         saving: 'Wird gespeichert…',
         creating: 'Wird erstellt…',
-        entering: 'Anmeldung…'
+        entering: 'Anmeldung…',
+        apply: 'Anwenden'
       },
       footer: {
         description:
@@ -911,7 +1077,16 @@ const resources = {
         company: 'UNTERNEHMEN',
         about: 'Über uns',
         contact: 'Kontakt',
-        terms: 'Bedingungen'
+        terms: 'Bedingungen',
+        social: {
+          twitter: 'Twitter',
+          github: 'GitHub',
+          linkedin: 'LinkedIn',
+          facebook: 'Facebook',
+          instagram: 'Instagram',
+          youtube: 'YouTube'
+        },
+        copyright: 'Alle Rechte vorbehalten.'
       },
       gallery: {
         galleryTitle: "Galerie",
@@ -935,14 +1110,28 @@ const resources = {
         organization: 'Organisation',
         message: 'Nachricht',
         country: 'Land',
-        name: 'Name'
+        name: 'Name',
+        acceptTerms: 'Sie müssen die Geschäftsbedingungen akzeptieren',
+        passwordsDontMatch: 'Passwörter stimmen nicht überein',
+        passwordTooWeak: 'Passwort ist zu schwach',
+        passwordStrength: 'Stärke',
+        repeatPassword: 'Passwort wiederholen'
+      },
+      placeholders: {
+        emailExample: 'name@beispiel.de',
+        phoneExample: '+49 170 1234567',
+        nameExample: 'Max',
+        lastNameExample: 'Mustermann',
+        usernameExample: 'maxmuster',
+        passwordExample: '••••••••'
       },
       common: {
         save: 'Speichern',
         saving: 'Speichert...',
         delete: 'Löschen',
         cancel: 'Abbrechen',
-        edit: 'Bearbeiten'
+        edit: 'Bearbeiten',
+        close: 'Schließen'
       },
       posts: {
         title: 'Nachrichten',
@@ -1112,7 +1301,10 @@ const resources = {
         noStreams: 'Keine aktiven Streams für diesen Wettbewerb.',
         loadError: 'Fehler beim Laden der Wettbewerbe.',
         createError: 'Fehler beim Erstellen des Wettbewerbs',
-        noActive: 'Derzeit keine aktiven Wettbewerbe.'
+        noActive: 'Derzeit keine aktiven Wettbewerbe.',
+        searchPlace: 'Name, Stadt...',
+        onlyActive: 'Nur aktive',
+        onlyFavorites: 'Nur Favoriten'
       },
       contact: {
         hero: {
@@ -1162,10 +1354,12 @@ const resources = {
         title: 'Erstelle dein Konto',
         description: 'Die Daten werden an /auth/register gesendet, um ein Token zu erstellen und dich zu speichern.',
         hasAccount: 'Hast du schon ein Konto?',
-        loginLink: 'Anmelden'
+        loginLink: 'Anmelden',
+        acceptTerms: 'Ich akzeptiere die'
       },
       general: {
-        countriesLoading: 'Länder werden geladen…'
+        countriesLoading: 'Länder werden geladen…',
+        search: 'Suchen'
       },
       myTeam: {
         title: "Mein Team",
@@ -1266,6 +1460,12 @@ const resources = {
           streamUrlMissing: "Du musst zuerst eine Stream-URL speichern",
           streamStarted: "Übertragung gestartet!",
           streamError: "Fehler beim Starten des Streams"
+        }
+      },
+      team: {
+        chat: {
+          tab: 'Chat',
+          title: 'Team-Chat'
         }
       }
     }

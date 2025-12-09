@@ -58,11 +58,13 @@ const CompetitionItem = ({ competition, isFavorite, onToggleFavorite }) => {
                 className={isFavorite ? 'text-yellow-500' : 'text-slate-400 dark:text-slate-500'}
                 title={isFavorite ? (t('competitions.removeFavorite')||'Quitar de favoritos') : (t('competitions.addFavorite')||'Añadir a favoritos')}
               >
-                <Star className="h-5 w-5" fill={isFavorite ? 'currentColor' : 'none'} />
+                <Star className="h-5 w-5" fill={isFavorite ? 'currentColor' : 'none'} aria-hidden="true" />
+                <span className="sr-only">{isFavorite ? (t('competitions.removeFavorite')||'Quitar de favoritos') : (t('competitions.addFavorite')||'Añadir a favoritos')}</span>
               </Button>
             )}
-            <Button variant="ghost" size="icon" className="text-slate-400 dark:text-slate-500">
-              {isOpen ? <ChevronUp /> : <ChevronDown />}
+            <Button variant="ghost" size="icon" className="text-slate-500 dark:text-slate-400">
+              {isOpen ? <ChevronUp aria-hidden="true" /> : <ChevronDown aria-hidden="true" />}
+              <span className="sr-only">{isOpen ? t('common.collapse') || 'Colapsar' : t('common.expand') || 'Expandir'}</span>
             </Button>
           </div>
         </div>
@@ -213,8 +215,8 @@ const Competitions = () => {
     <div className="space-y-8 container mx-auto px-4 py-8">
       <div className="flex justify-between items-end">
         <div>
-      <h1 className="text-4xl font-bold text-blue-900 mb-2">{t('competitions.hero.title')}{editMode && <span className="ml-3 text-xs px-2 py-1 rounded bg-amber-200 text-amber-800 align-top">EDIT MODE</span>}</h1>
-          <p className="text-slate-600 max-w-2xl">{t('competitions.hero.description')}</p>
+      <h1 className="text-4xl font-bold text-blue-900 dark:text-blue-100 mb-2">{t('competitions.hero.title')}{editMode && <span className="ml-3 text-xs px-2 py-1 rounded bg-amber-200 text-amber-800 align-top">EDIT MODE</span>}</h1>
+          <p className="text-slate-600 dark:text-slate-400 max-w-2xl">{t('competitions.hero.description')}</p>
         </div>
         {isAdmin && (
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
@@ -285,7 +287,7 @@ const Competitions = () => {
                     <input
                       type="checkbox"
                       id="is_active"
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="h-4 w-4 rounded border-gray-300 text-blue-700 focus:ring-blue-500 dark:text-blue-400"
                       checked={formData.is_active}
                       onChange={e => setFormData({...formData, is_active: e.target.checked})}
                     />
@@ -309,7 +311,7 @@ const Competitions = () => {
       <div className="flex flex-col md:flex-row gap-3 items-end">
         <div className="flex-1">
           <Label htmlFor="search">{t('general.search') || 'Buscar'}</Label>
-          <Input id="search" value={filters.q} onChange={(e)=>setFilters({...filters, q: e.target.value})} placeholder={t('competitions.searchPlaceholder')||'Nombre, etc.'} />
+          <Input id="search" value={filters.q} onChange={(e)=>setFilters({...filters, q: e.target.value})} placeholder={t('competitions.searchPlace')||'Nombre, etc.'} />
         </div>
         <div className="flex items-center gap-2">
           <input id="activeOnly" type="checkbox" className="h-4 w-4" checked={filters.is_active === 'true'} onChange={(e)=>setFilters({...filters, is_active: e.target.checked ? 'true' : ''})} />
@@ -338,7 +340,7 @@ const Competitions = () => {
         ))}
         
         {!loading && competitions.length === 0 && (
-          <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+          <div className="text-center py-12 text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
             {t('competitions.noActive')}
           </div>
         )}

@@ -183,26 +183,26 @@ const Profile = () => {
             <CardHeader>
               <CardTitle>{t('profile.overview')}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm text-slate-600">
+            <CardContent className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <p className="font-medium text-slate-900">{t('forms.firstName')} / {t('forms.lastName')}</p>
+                  <p className="font-medium text-slate-900 dark:text-slate-100">{t('forms.firstName')} / {t('forms.lastName')}</p>
                   <p>{user.first_name} {user.last_name}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-slate-900">Email</p>
+                  <p className="font-medium text-slate-900 dark:text-slate-100">Email</p>
                   <p>{user.email}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-slate-900">@{t('profile.username') || 'username'}</p>
+                  <p className="font-medium text-slate-900 dark:text-slate-100">@{t('profile.username') || 'username'}</p>
                   <p>@{user.username}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-slate-900">{t('forms.phone')}</p>
+                  <p className="font-medium text-slate-900 dark:text-slate-100">{t('forms.phone')}</p>
                   <p>{form.phone || '—'}</p>
                 </div>
                 <div className="md:col-span-2">
-                  <p className="font-medium text-slate-900">{t('profile.bio')}</p>
+                  <p className="font-medium text-slate-900 dark:text-slate-100">{t('profile.bio')}</p>
                   <p>{form.bio || t('profile.bioEmpty')}</p>
                 </div>
               </div>
@@ -267,7 +267,7 @@ const Profile = () => {
                       name="bio"
                       value={form.bio}
                       onChange={handleChange}
-                      className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex min-h-[100px] w-full rounded-md border border-input bg-background dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -294,21 +294,22 @@ const Profile = () => {
             <CardContent className="space-y-4">
               {userTeams.length > 0 ? (
                 userTeams.map(member => (
-                  <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
-                    <div className="h-10 w-10 rounded bg-white border border-slate-200 flex items-center justify-center overflow-hidden">
+                  <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+                    <div className="h-10 w-10 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden">
                       {member.team?.logo_url ? (
                         <img src={resolveMediaUrl(member.team.logo_url)} alt={member.team.name} className="h-full w-full object-cover" />
                       ) : (
-                        <Users className="h-5 w-5 text-slate-300" />
+                        <Users className="h-5 w-5 text-slate-300 dark:text-slate-600" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-900 truncate">{member.team?.name || 'Team'}</p>
-                      <p className="text-xs text-slate-500 capitalize">{member.role}</p>
+                      <p className="font-medium text-slate-900 dark:text-slate-100 truncate">{member.team?.name || 'Team'}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">{member.role}</p>
                     </div>
                     <Button variant="ghost" size="icon" asChild>
                       <Link to={`/teams/${member.team_id}`}>
-                        <ExternalLink className="h-4 w-4 text-slate-400" />
+                        <ExternalLink className="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" />
+                        <span className="sr-only">{t('common.viewDetails') || 'View details'}</span>
                       </Link>
                     </Button>
                   </div>

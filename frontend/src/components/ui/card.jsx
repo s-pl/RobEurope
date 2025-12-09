@@ -11,12 +11,12 @@ const CardHeader = ({ className, ...props }) => (
   <div className={cn('mb-4 space-y-1', className)} {...props} />
 );
 
-const CardTitle = ({ className, ...props }) => (
-  <h3 className={cn('text-xl font-semibold tracking-tight text-blue-900 dark:text-blue-100', className)} {...props} />
+const CardTitle = ({ className, as: Component = 'h3', ...props }) => (
+  <Component className={cn('text-xl font-semibold tracking-tight text-blue-900 dark:text-blue-100', className)} {...props} />
 );
 
 const CardDescription = ({ className, ...props }) => (
-  <p className={cn('text-sm text-blue-600 dark:text-blue-400', className)} {...props} />
+  <p className={cn('text-sm text-blue-700 dark:text-blue-400', className)} {...props} />
 );
 
 const CardContent = ({ className, ...props }) => (

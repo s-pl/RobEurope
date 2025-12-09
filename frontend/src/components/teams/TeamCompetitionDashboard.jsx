@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthContext } from '../../context/AuthContext';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Video, FileText, Upload, Activity, BarChart2, Eye, EyeOff, Download, Trash2 } from 'lucide-react';
 import { apiRequest, resolveMediaUrl } from '../../lib/apiClient';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
 
 const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
   const { user } = useAuthContext();
@@ -137,235 +143,298 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
     if (activeTab === 'logs') fetchLogs();
   };
 
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: Activity },
+    { id: 'stream', label: 'Stream', icon: Video },
+    { id: 'files', label: 'Files', icon: Upload },
+    { id: 'logs', label: 'Logs', icon: FileText },
+    { id: 'stats', label: 'Stats', icon: BarChart2 },
+  ];
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mt-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Team Dashboard</h2>
-        <button 
-          onClick={refreshData}
-          className="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
-          title="Refresh Data"
-        >
-          <RefreshCw className="h-5 w-5" />
-        </button>
-      </div>
-      
-      <div className="flex space-x-4 mb-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
-        {['overview', 'stream', 'files', 'logs', 'stats'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`pb-2 px-4 capitalize whitespace-nowrap ${
-              activeTab === tab
-                ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+    <div className="space-y-6 mt-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Team Dashboard</h2>
+        <Button variant="outline" size="sm" onClick={refreshData} className="gap-2">
+          <RefreshCw className="h-4 w-4" />
+          Refresh
+        </Button>
       </div>
 
-      {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
-      {success && <div className="bg-green-100 text-green-700 p-3 rounded mb-4">{success}</div>}
-
-      {activeTab === 'overview' && (
-        <div className="space-y-6">
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg border border-blue-100 dark:border-blue-800">
-            <h3 className="text-xl font-bold text-blue-900 dark:text-blue-100 mb-2">Welcome to the Competition Dashboard</h3>
-            <p className="text-blue-700 dark:text-blue-300">
-              Manage your team's participation, upload robot files, log your progress, and stream your matches live.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
-              <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h4>
-              <div className="space-y-2">
-                <button onClick={() => setActiveTab('stream')} className="w-full text-left px-4 py-2 rounded bg-gray-50 hover:bg-gray-100 dark:bg-gray-600 dark:hover:bg-gray-500 text-sm transition-colors">
-                  🎥 Start Live Stream
-                </button>
-                <button onClick={() => setActiveTab('files')} className="w-full text-left px-4 py-2 rounded bg-gray-50 hover:bg-gray-100 dark:bg-gray-600 dark:hover:bg-gray-500 text-sm transition-colors">
-                  📂 Upload Robot Files
-                </button>
-                <button onClick={() => setActiveTab('logs')} className="w-full text-left px-4 py-2 rounded bg-gray-50 hover:bg-gray-100 dark:bg-gray-600 dark:hover:bg-gray-500 text-sm transition-colors">
-                  📝 Add Log Entry
-                </button>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
-              <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Status Summary</h4>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Files Uploaded</span>
-                  <span className="font-medium dark:text-white">{robotFiles.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Log Entries</span>
-                  <span className="font-medium dark:text-white">{logs.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Public Files</span>
-                  <span className="font-medium dark:text-white">{robotFiles.filter(f => f.is_public).length}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'stream' && (
-        <form onSubmit={handleStartStream} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Stream URL</label>
-            <input
-              type="url"
-              value={streamData.stream_url}
-              onChange={(e) => setStreamData({...streamData, stream_url: e.target.value})}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              placeholder="https://twitch.tv/..."
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Stream Title</label>
-            <input
-              type="text"
-              value={streamData.title}
-              onChange={(e) => setStreamData({...streamData, title: e.target.value})}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-            <textarea
-              value={streamData.description}
-              onChange={(e) => setStreamData({...streamData, description: e.target.value})}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
-          >
-            {loading ? 'Starting...' : 'Start Live Stream'}
-          </button>
-        </form>
-      )}
-
-      {activeTab === 'files' && (
-        <div className="space-y-6">
-          <form onSubmit={handleFileUpload} className="bg-gray-50 dark:bg-gray-700 p-4 rounded">
-            <h3 className="text-lg font-medium mb-2 dark:text-white">Upload Robot File</h3>
-            <div className="space-y-3">
-              <input
-                type="file"
-                multiple
-                onChange={(e) => setUploadFiles(e.target.files)}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                required
-              />
-              <input
-                type="text"
-                placeholder="File description"
-                value={fileDescription}
-                onChange={(e) => setFileDescription(e.target.value)}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-              >
-                Upload
-              </button>
-            </div>
-          </form>
-
-          <div className="space-y-2">
-            {robotFiles.map((file) => (
-              <div key={file.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded gap-4 sm:gap-0">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium dark:text-white">{file.file_name}</p>
-                    {file.is_public && <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">Public</span>}
-                  </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{file.description}</p>
-                  <p className="text-xs text-gray-400">Uploaded by {file.uploader?.username} on {new Date(file.created_at).toLocaleDateString()}</p>
-                </div>
-                <div className="flex items-center gap-3 self-end sm:self-auto">
-                  <button
-                    onClick={() => toggleFileVisibility(file.id)}
-                    className={`text-sm px-3 py-1 rounded ${file.is_public ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                  >
-                    {file.is_public ? 'Make Private' : 'Make Public'}
-                  </button>
-                  <a
-                    href={resolveMediaUrl(file.file_url)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400"
-                  >
-                    Download
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'logs' && (
-        <div className="space-y-6">
-          <form onSubmit={handleAddLog} className="space-y-3">
-            <textarea
-              value={newLog}
-              onChange={(e) => setNewLog(e.target.value)}
-              placeholder="Add a new log entry..."
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              rows="3"
-              required
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+      {/* Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <Button
+              key={tab.id}
+              variant={activeTab === tab.id ? "default" : "ghost"}
+              onClick={() => setActiveTab(tab.id)}
+              className="gap-2"
             >
-              Add Log Entry
-            </button>
-          </form>
+              <Icon className="h-4 w-4" />
+              {tab.label}
+            </Button>
+          );
+        })}
+      </div>
 
-          <div className="space-y-4">
-            {logs.map((log) => (
-              <div key={log.id} className="border-l-4 border-green-500 pl-4 py-2">
-                <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{log.content}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {log.author?.username} • {new Date(log.created_at).toLocaleString()}
-                </p>
-              </div>
-            ))}
-          </div>
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg border border-red-200 dark:border-red-800">
+          {error}
         </div>
       )}
-      {activeTab === 'stats' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800">
-            <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300">Files Uploaded</h3>
-            <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">{robotFiles.length}</p>
-          </div>
-          <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-100 dark:border-green-800">
-            <h3 className="text-lg font-semibold text-green-700 dark:text-green-300">Log Entries</h3>
-            <p className="text-3xl font-bold text-green-900 dark:text-green-100">{logs.length}</p>
-          </div>
-          <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-100 dark:border-purple-800">
-            <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300">Public Files</h3>
-            <p className="text-3xl font-bold text-purple-900 dark:text-purple-100">{robotFiles.filter(f => f.is_public).length}</p>
-          </div>
+      {success && (
+        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-4 rounded-lg border border-green-200 dark:border-green-800">
+          {success}
         </div>
       )}
+
+      {/* Content */}
+      <div className="min-h-[400px]">
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            <Card className="bg-blue-50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-800">
+              <CardHeader>
+                <CardTitle className="text-blue-900 dark:text-blue-100">Welcome to the Competition Dashboard</CardTitle>
+                <CardDescription className="text-blue-700 dark:text-blue-300">
+                  Manage your team's participation, upload robot files, log your progress, and stream your matches live.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Button variant="outline" className="w-full justify-start gap-2" onClick={() => setActiveTab('stream')}>
+                    <Video className="h-4 w-4" /> Start Live Stream
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start gap-2" onClick={() => setActiveTab('files')}>
+                    <Upload className="h-4 w-4" /> Upload Robot Files
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start gap-2" onClick={() => setActiveTab('logs')}>
+                    <FileText className="h-4 w-4" /> Add Log Entry
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Status Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 dark:text-slate-400">Files Uploaded</span>
+                    <Badge variant="secondary">{robotFiles.length}</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 dark:text-slate-400">Log Entries</span>
+                    <Badge variant="secondary">{logs.length}</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 dark:text-slate-400">Public Files</span>
+                    <Badge variant="secondary">{robotFiles.filter(f => f.is_public).length}</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'stream' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Live Stream Configuration</CardTitle>
+              <CardDescription>Set up your stream details to go live.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleStartStream} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="stream-url">Stream URL</Label>
+                  <Input
+                    id="stream-url"
+                    type="url"
+                    value={streamData.stream_url}
+                    onChange={(e) => setStreamData({...streamData, stream_url: e.target.value})}
+                    placeholder="https://twitch.tv/..."
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="stream-title">Stream Title</Label>
+                  <Input
+                    id="stream-title"
+                    type="text"
+                    value={streamData.title}
+                    onChange={(e) => setStreamData({...streamData, title: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="stream-desc">Description</Label>
+                  <Textarea
+                    id="stream-desc"
+                    value={streamData.description}
+                    onChange={(e) => setStreamData({...streamData, description: e.target.value})}
+                  />
+                </div>
+                <Button type="submit" disabled={loading} className="w-full sm:w-auto">
+                  {loading ? 'Starting...' : 'Start Live Stream'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === 'files' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload Robot File</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleFileUpload} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="file-upload">Select Files</Label>
+                    <Input
+                      id="file-upload"
+                      type="file"
+                      multiple
+                      onChange={(e) => setUploadFiles(e.target.files)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="file-desc">Description</Label>
+                    <Input
+                      id="file-desc"
+                      type="text"
+                      placeholder="File description"
+                      value={fileDescription}
+                      onChange={(e) => setFileDescription(e.target.value)}
+                    />
+                  </div>
+                  <Button type="submit" disabled={loading}>
+                    Upload
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-4">
+              {robotFiles.map((file) => (
+                <Card key={file.id}>
+                  <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="font-medium text-slate-900 dark:text-slate-100">{file.file_name}</p>
+                        {file.is_public && <Badge variant="success" className="bg-green-100 text-green-800 hover:bg-green-200">Public</Badge>}
+                      </div>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">{file.description}</p>
+                      <p className="text-xs text-slate-400">
+                        Uploaded by {file.uploader?.username} on {new Date(file.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleFileVisibility(file.id)}
+                        className={file.is_public ? "text-yellow-600" : "text-slate-600"}
+                      >
+                        {file.is_public ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+                        {file.is_public ? 'Make Private' : 'Make Public'}
+                      </Button>
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={resolveMediaUrl(file.file_url)} target="_blank" rel="noopener noreferrer">
+                          <Download className="h-4 w-4 mr-2" /> Download
+                        </a>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {robotFiles.length === 0 && (
+                <div className="text-center py-8 text-slate-500">No files uploaded yet.</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'logs' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>New Log Entry</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleAddLog} className="space-y-4">
+                  <Textarea
+                    value={newLog}
+                    onChange={(e) => setNewLog(e.target.value)}
+                    placeholder="Write your log entry here..."
+                    rows={3}
+                    required
+                  />
+                  <Button type="submit" disabled={loading}>
+                    Add Log Entry
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-4">
+              {logs.map((log) => (
+                <div key={log.id} className="flex gap-4">
+                  <div className="flex flex-col items-center">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 mt-2"></div>
+                    <div className="w-0.5 h-full bg-slate-200 dark:bg-slate-800 my-1"></div>
+                  </div>
+                  <Card className="flex-1 mb-4">
+                    <CardContent className="p-4">
+                      <p className="text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{log.content}</p>
+                      <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
+                        <span className="font-medium">{log.author?.username}</span>
+                        <span>•</span>
+                        <span>{new Date(log.created_at).toLocaleString()}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+              {logs.length === 0 && (
+                <div className="text-center py-8 text-slate-500">No logs yet.</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'stats' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800">
+              <CardContent className="p-6 text-center">
+                <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-2">Files Uploaded</h3>
+                <p className="text-4xl font-bold text-blue-900 dark:text-blue-100">{robotFiles.length}</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800">
+              <CardContent className="p-6 text-center">
+                <h3 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-2">Log Entries</h3>
+                <p className="text-4xl font-bold text-green-900 dark:text-green-100">{logs.length}</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-100 dark:border-purple-800">
+              <CardContent className="p-6 text-center">
+                <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-2">Public Files</h3>
+                <p className="text-4xl font-bold text-purple-900 dark:text-purple-100">{robotFiles.filter(f => f.is_public).length}</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

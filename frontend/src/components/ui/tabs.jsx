@@ -23,7 +23,7 @@ export function Tabs({ defaultValue, value: controlledValue, onValueChange, clas
 
 export function TabsList({ className = '', children }) {
   return (
-    <div className={`inline-flex items-center justify-center rounded-md bg-slate-100 p-1 text-slate-600 ${className}`.trim()}>
+    <div className={`inline-flex items-center justify-center rounded-md bg-slate-100 dark:bg-slate-800 p-1 text-slate-600 dark:text-slate-400 ${className}`.trim()}>
       {children}
     </div>
   );
@@ -38,7 +38,7 @@ export function TabsTrigger({ value, className = '', children }) {
       onClick={() => api?.setValue(value)}
       className={[
         'px-3 py-2 text-sm font-medium rounded-md transition-colors',
-        isActive ? 'bg-white text-slate-900 shadow' : 'hover:text-slate-900',
+        isActive ? 'bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 shadow' : 'hover:text-slate-900 dark:hover:text-slate-100',
         className
       ].join(' ')}
     >

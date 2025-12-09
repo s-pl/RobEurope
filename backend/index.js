@@ -25,6 +25,8 @@ import db from './models/index.js';
 import adminRoutes from './routes/admin.route.js';
 import requestId from './middleware/requestId.middleware.js';
 import redisClient from './utils/redis.js';
+import passport from 'passport';
+import './config/passport.js';
 dotenv.config();
 // import userRoutes from './routes/userRoutes.js';
 const allowedOrigins = [
@@ -153,6 +155,9 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 24 // 24 hours
   }
 }));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Simple helper to expose session user to templates
 app.use((req, res, next) => {
@@ -336,104 +341,6 @@ io.on('connection', (socket) => {
   socket.on('stop_typing', (data) => {
     if (data.teamId && data.user) {
       socket.to(`team_${data.teamId}`).emit('user_stop_typing', data.user);
-    }
-  });
-
-  // --- Collaborative Coding Events ---
-  socket.on('join_code_session', async (data) => {
-    const { teamId, user } = data;
-    if (teamId) {
-      const room = `code_${teamId}`;
-      socket.join(room);
-      socket.data.codeUser = user;
-      socket.data.codeTeamId = teamId;
-      
-      // Initialize session if not exists
-      const sessionKey = `code_session:${teamId}`;
-      let sessionData = await redisClient.get(sessionKey);
-      
-      if (!sessionData) {
-        const initialSession = {
-          files: [
-            { id: '1', name: 'main.js', content: '// Welcome to your team workspace\nconsole.log("Hello World");', language: 'javascript' },
-            { id: '2', name: 'README.md', content: '# Team Project\n\nCollaborate here.', language: 'markdown' }
-          ]
-        };
-        await redisClient.set(sessionKey, JSON.stringify(initialSession));
-        sessionData = JSON.stringify(initialSession);
-      }
-      
-      // Send current state
-      socket.emit('init_code_session', JSON.parse(sessionData));
-
-      broadcastCodeUsers(room);
-      logger.info({ socket: 'joined_code', id: socket.id, teamId, userId: user?.id });
-    }
-  });
-
-  socket.on('file_update', async (data) => {
-    const { teamId, fileId, content } = data;
-    if (teamId) {
-      const sessionKey = `code_session:${teamId}`;
-      const sessionData = await redisClient.get(sessionKey);
-      if (sessionData) {
-        const session = JSON.parse(sessionData);
-        const file = session.files.find(f => f.id === fileId);
-        if (file) {
-          file.content = content;
-          await redisClient.set(sessionKey, JSON.stringify(session));
-          socket.to(`code_${teamId}`).emit('file_content_update', { fileId, content });
-        }
-      }
-    }
-  });
-
-  socket.on('create_file', async (data) => {
-    const { teamId, name, language, type = 'file' } = data;
-    if (teamId) {
-      const sessionKey = `code_session:${teamId}`;
-      const sessionData = await redisClient.get(sessionKey);
-      if (sessionData) {
-        const session = JSON.parse(sessionData);
-        
-        // Check if file already exists
-        if (session.files.some(f => f.name === name)) {
-            return; // Or emit error
-        }
-
-        const newFile = {
-          id: Date.now().toString(),
-          name,
-          content: type === 'folder' ? null : '',
-          language: language || 'javascript',
-          type
-        };
-        session.files.push(newFile);
-        await redisClient.set(sessionKey, JSON.stringify(session));
-        io.to(`code_${teamId}`).emit('file_created', newFile);
-      }
-    }
-  });
-
-  socket.on('delete_file', async (data) => {
-    const { teamId, fileId } = data;
-    if (teamId) {
-      const sessionKey = `code_session:${teamId}`;
-      const sessionData = await redisClient.get(sessionKey);
-      if (sessionData) {
-        const session = JSON.parse(sessionData);
-        session.files = session.files.filter(f => f.id !== fileId);
-        await redisClient.set(sessionKey, JSON.stringify(session));
-        io.to(`code_${teamId}`).emit('file_deleted', { fileId });
-      }
-    }
-  });
-
-  socket.on('focus_file', (data) => {
-    const { teamId, fileId } = data;
-    if (teamId) {
-      socket.data.focusedFileId = fileId;
-      broadcastCodeUsers(`code_${teamId}`);
     }
   });
 

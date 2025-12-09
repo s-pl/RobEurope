@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
+  <meta name="csrf-token" content="<%= csrfToken %>">
   <title>Redis Explorer</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 20px; }
@@ -127,7 +128,12 @@
     async function deleteSelected() {
       if (!selectedKey) return;
       if (!confirm(`Delete key "${selectedKey}"?`)) return;
-      const res = await fetch(`/admin/api/redis/key/${encodeURIComponent(selectedKey)}`, { method: 'DELETE', credentials: 'include' });
+      const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+      const res = await fetch(`/admin/api/redis/key/${encodeURIComponent(selectedKey)}`, { 
+        method: 'DELETE', 
+        credentials: 'include',
+        headers: { 'CSRF-Token': token }
+      });
       if (!res.ok) {
         let text = '';
         try { text = await res.text(); } catch {}

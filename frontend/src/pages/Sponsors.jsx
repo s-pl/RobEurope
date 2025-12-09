@@ -101,19 +101,19 @@ const Sponsors = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-blue-900">Sponsors</h1>
-          <p className="text-blue-600 mt-1">Gestiona los sponsors del evento</p>
+          <h1 className="text-3xl font-bold text-blue-900 dark:text-blue-100">{t('sponsors.title')}</h1>
+          <p className="text-blue-600 dark:text-blue-400 mt-1">{t('sponsors.subtitle')}</p>
         </div>
         {isAdmin && (
           <Button onClick={openCreateDialog} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            Nuevo Sponsor
+            {t('sponsors.create')}
           </Button>
         )}
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
@@ -124,9 +124,9 @@ const Sponsors = () => {
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <CardTitle className="text-lg text-blue-900">{sponsor.name}</CardTitle>
-                  <CardDescription className="text-blue-600">
-                    ID: {sponsor.id}
+                  <CardTitle className="text-lg text-blue-900 dark:text-blue-100">{sponsor.name}</CardTitle>
+                  <CardDescription className="text-blue-600 dark:text-blue-400">
+                    {t('sponsors.id')}: {sponsor.id}
                   </CardDescription>
                 </div>
                 {isAdmin && (
@@ -143,7 +143,7 @@ const Sponsors = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDelete(sponsor.id)}
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -153,24 +153,23 @@ const Sponsors = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               {sponsor.logo_url && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-blue-700">Logo:</span>
+                <div className="w-full h-40 bg-white dark:bg-slate-800 rounded-md p-4 flex items-center justify-center border border-slate-100 dark:border-slate-700 mb-4">
                   <img
                     src={sponsor.logo_url}
                     alt={`${sponsor.name} logo`}
-                    className="h-8 w-8 object-contain rounded"
+                    className="max-h-full max-w-full object-contain"
                   />
                 </div>
               )}
 
               {sponsor.website_url && (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-blue-700">Website:</span>
+                  <span className="text-sm font-medium text-blue-700 dark:text-blue-300">{t('sponsors.website')}:</span>
                   <a
                     href={sponsor.website_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1"
                   >
                     {sponsor.website_url}
                     <ExternalLink className="h-3 w-3" />
@@ -179,7 +178,7 @@ const Sponsors = () => {
               )}
 
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-blue-700">Creado:</span>
+                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">{t('sponsors.created')}:</span>
                 <Badge variant="outline">
                   {new Date(sponsor.created_at).toLocaleDateString()}
                 </Badge>
@@ -194,12 +193,12 @@ const Sponsors = () => {
           <div className="text-blue-400 mb-4">
             <Plus className="h-12 w-12 mx-auto" />
           </div>
-          <h3 className="text-lg font-medium text-blue-900 mb-2">No hay sponsors</h3>
-          <p className="text-blue-600 mb-4">Comienza añadiendo tu primer sponsor</p>
+          <h3 className="text-lg font-medium text-blue-900 dark:text-blue-100 mb-2">{t('sponsors.empty')}</h3>
+          <p className="text-blue-600 dark:text-blue-400 mb-4">{t('sponsors.emptyDesc')}</p>
           {isAdmin && (
             <Button onClick={openCreateDialog}>
               <Plus className="h-4 w-4 mr-2" />
-              Añadir Sponsor
+              {t('sponsors.create')}
             </Button>
           )}
         </div>
@@ -208,51 +207,51 @@ const Sponsors = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-blue-900">
-              {editingSponsor ? 'Editar Sponsor' : 'Nuevo Sponsor'}
+            <DialogTitle className="text-blue-900 dark:text-blue-100">
+              {editingSponsor ? t('sponsors.edit') : t('sponsors.create')}
             </DialogTitle>
-            <DialogDescription className="text-blue-600">
+            <DialogDescription className="text-blue-600 dark:text-blue-400">
               {editingSponsor
-                ? 'Modifica los datos del sponsor'
-                : 'Añade un nuevo sponsor al evento'
+                ? t('sponsors.editDesc')
+                : t('sponsors.createDesc')
               }
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-blue-900">Nombre *</Label>
+              <Label htmlFor="name" className="text-blue-900 dark:text-blue-100">{t('sponsors.form.name')} *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Nombre del sponsor"
+                placeholder={t('sponsors.form.name')}
                 required
-                className="border-blue-200 focus:border-blue-400"
+                className="border-blue-200 focus:border-blue-400 dark:border-slate-700 dark:bg-slate-900"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="logo_url" className="text-blue-900">URL del Logo</Label>
+              <Label htmlFor="logo_url" className="text-blue-900 dark:text-blue-100">{t('sponsors.form.logo')}</Label>
               <Input
                 id="logo_url"
                 type="url"
                 value={formData.logo_url}
                 onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
                 placeholder="https://ejemplo.com/logo.png"
-                className="border-blue-200 focus:border-blue-400"
+                className="border-blue-200 focus:border-blue-400 dark:border-slate-700 dark:bg-slate-900"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="website_url" className="text-blue-900">Sitio Web</Label>
+              <Label htmlFor="website_url" className="text-blue-900 dark:text-blue-100">{t('sponsors.form.website')}</Label>
               <Input
                 id="website_url"
                 type="url"
                 value={formData.website_url}
                 onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
                 placeholder="https://ejemplo.com"
-                className="border-blue-200 focus:border-blue-400"
+                className="border-blue-200 focus:border-blue-400 dark:border-slate-700 dark:bg-slate-900"
               />
             </div>
 
@@ -262,10 +261,10 @@ const Sponsors = () => {
                 variant="outline"
                 onClick={() => setDialogOpen(false)}
               >
-                Cancelar
+                {t('common.cancel')}
               </Button>
               <Button type="submit">
-                {editingSponsor ? 'Actualizar' : 'Crear'} Sponsor
+                {editingSponsor ? t('common.save') : t('common.create') || 'Crear'}
               </Button>
             </DialogFooter>
           </form>

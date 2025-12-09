@@ -34,7 +34,22 @@ export default async function defineUserModel(sequelize, DataTypes) {
     },
     password_hash: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
+    },
+    google_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true
+    },
+    github_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true
+    },
+    apple_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true
     },
     phone: {
         type: DataTypes.STRING,

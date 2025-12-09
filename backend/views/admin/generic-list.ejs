@@ -45,6 +45,7 @@
                   ✏️ Editar
                 </a>
                 <form action="/admin/<%= modelName %>/delete/<%= item[config.pk] %>" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar este registro?');" style="margin: 0;">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                   <button type="submit" class="btn btn-sm btn-danger">
                     🗑️ Eliminar
                   </button>

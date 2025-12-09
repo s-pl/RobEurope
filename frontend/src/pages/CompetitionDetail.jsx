@@ -158,7 +158,7 @@ const CompetitionDetail = () => {
                     <CardContent className="p-4">
                       <h3 className="font-bold text-blue-900 truncate">{stream.title}</h3>
                       {stream.stream_url ? (
-                        <a href={stream.stream_url} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline">
+                        <a href={stream.stream_url} target="_blank" rel="noreferrer" className="text-sm text-blue-700 hover:underline dark:text-blue-400">
                           Ver en plataforma
                         </a>
                       ) : (
@@ -251,7 +251,7 @@ const CompetitionDetail = () => {
               </div>
               <div>
                 <span className="text-sm text-slate-500 block">Website</span>
-                <a href={competition.website_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline truncate block">
+                <a href={competition.website_url} target="_blank" rel="noreferrer" className="text-blue-700 hover:underline truncate block dark:text-blue-400">
                   {competition.website_url || 'N/A'}
                 </a>
               </div>
