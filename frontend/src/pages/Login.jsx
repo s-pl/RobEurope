@@ -107,13 +107,13 @@ const Login = () => {
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            <Button variant="outline" onClick={() => window.location.href = 'http://localhost:85/api/auth/google'}>
+            <Button variant="outline" onClick={() => window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`}>
               Google
             </Button>
-            <Button variant="outline" onClick={() => window.location.href = 'http://localhost:85/api/auth/github'}>
+            <Button variant="outline" onClick={() => window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/github`}>
               GitHub
             </Button>
-            <Button variant="outline" onClick={() => window.location.href = 'http://localhost:85/api/auth/apple'}>
+            <Button variant="outline" onClick={() => window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/apple`}>
               Apple
             </Button>
           </div>
