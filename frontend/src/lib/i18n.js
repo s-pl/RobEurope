@@ -1139,6 +1139,25 @@ const resources = {
         edit: 'Bearbeiten',
         close: 'Schließen'
       },
+      sponsors: {
+        title: 'Sponsoren',
+        subtitle: 'Verwalte die Sponsoren des Events',
+        create: 'Neuer Sponsor',
+        edit: 'Sponsor bearbeiten',
+        createDesc: 'Füge einen neuen Sponsor zum Event hinzu',
+        editDesc: 'Passe die Sponsor-Daten an',
+        form: {
+          name: 'Name',
+          logo: 'Logo-URL',
+          website: 'Webseite'
+        },
+        empty: 'Keine Sponsoren vorhanden',
+        emptyDesc: 'Füge deinen ersten Sponsor hinzu',
+        created: 'Erstellt',
+        logo: 'Logo',
+        website: 'Webseite',
+        id: 'ID'
+      },
       posts: {
         title: 'Nachrichten',
         subtitle: 'Bleiben Sie auf dem Laufenden mit den neuesten Updates',
