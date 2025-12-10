@@ -46,6 +46,8 @@ const resources = {
         myTeam: 'Mi equipo',
         theme: 'Tema',
         posts: 'Noticias',
+        gallery: 'Galería',
+        feedback: 'Opiniones',
         login: 'Iniciar sesión',
         register: 'Registrarse'
       },
@@ -545,6 +547,9 @@ const resources = {
         userMenu: 'User menu',
         myTeam: 'My Team',
         theme: 'Theme',
+        posts: 'News',
+        gallery: 'Gallery',
+        feedback: 'Feedback',
         login: 'Log in',
         register: 'Register'
       },
@@ -1042,6 +1047,9 @@ const resources = {
         userMenu: 'Benutzermenü',
         myTeam: 'Mein Team',
         theme: 'Thema',
+        posts: 'Nachrichten',
+        gallery: 'Galerie',
+        feedback: 'Feedback',
         login: 'Anmelden',
         register: 'Registrieren'
       },
