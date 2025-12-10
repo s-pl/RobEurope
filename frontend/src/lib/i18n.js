@@ -1367,7 +1367,12 @@ const resources = {
         contactUsDesc: "Wir sind hier, um zu helfen. Füllen Sie das Formular aus und wir werden uns so schnell wie möglich bei Ihnen melden.",
         sentTitle: "Nachricht gesendet!",
         sentDesc: "Danke für Ihre Nachricht. Wir werden uns in Kürze melden.",
-        sendAnother: "Eine weitere Nachricht senden"
+        sendAnother: "Eine weitere Nachricht senden",
+        support: "24/7 Support für Teams",
+        placeholders: {
+          name: "Dein Name",
+          email: "du@email.com"
+        }
       },
       profile: {
         heroTagline: 'Verknüpftes Konto',
