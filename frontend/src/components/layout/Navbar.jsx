@@ -14,6 +14,8 @@ import React, { useState } from 'react';
 const navLinks = [
   { to: '/', key: 'nav.home' },
   { to: '/posts', key: 'nav.posts' },
+  { to: '/gallery', key: 'nav.gallery' },
+  { to: '/feedback', key: 'nav.feedback' },
   { to: '/competitions', key: 'nav.competitions' },
   { to: '/teams', key: 'nav.teams' },
   { to: '/sponsors', key: 'nav.sponsors' },
