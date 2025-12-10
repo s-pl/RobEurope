@@ -45,7 +45,9 @@ const resources = {
         userMenu: 'Menú de usuario',
         myTeam: 'Mi equipo',
         theme: 'Tema',
-        posts: 'Noticias'
+        posts: 'Noticias',
+        login: 'Iniciar sesión',
+        register: 'Registrarse'
       },
       status: {
         connected: 'Conectado',
@@ -542,7 +544,9 @@ const resources = {
         menu: 'Menu',
         userMenu: 'User menu',
         myTeam: 'My Team',
-        theme: 'Theme'
+        theme: 'Theme',
+        login: 'Log in',
+        register: 'Register'
       },
       status: {
         connected: 'Online',
@@ -1037,7 +1041,9 @@ const resources = {
         menu: 'Menü',
         userMenu: 'Benutzermenü',
         myTeam: 'Mein Team',
-        theme: 'Thema'
+        theme: 'Thema',
+        login: 'Anmelden',
+        register: 'Registrieren'
       },
       status: {
         connected: 'Verbunden',
