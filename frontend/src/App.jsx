@@ -19,6 +19,7 @@ import Sponsors from './pages/Sponsors';
 import Streams from './pages/Streaming';
 import Gallery from './pages/Gallery';
 import Feedback from './pages/Feedback';
+import Terms from './pages/Terms';
 import { Toaster } from './components/ui/toast';
 import { EditModeProvider } from './context/EditModeContext';
 import { SocketProvider } from './context/SocketContext';
@@ -53,6 +54,7 @@ function App() {
           <Route path="feedback" element={<Feedback />} />
           <Route path="sponsors" element={<Sponsors />} />
           <Route path="streams" element={<Streams />} />
+          <Route path="terms" element={<Terms />} />
 
           <Route
             path="profile"
