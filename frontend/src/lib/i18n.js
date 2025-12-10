@@ -1331,6 +1331,20 @@ const resources = {
         onlyActive: 'Nur aktive',
         onlyFavorites: 'Nur Favoriten'
       },
+      streams: {
+        title: 'Streams',
+        subtitle: 'Sieh dir alle Streams der Wettbewerbe an',
+        loading: 'Streams werden geladen...',
+        error: 'Fehler:',
+        status: {
+          live: 'Live',
+          offline: 'Offline',
+          scheduled: 'Geplant'
+        },
+        team: 'Team',
+        competition: 'Wettbewerb',
+        watch: 'Stream ansehen'
+      },
       contact: {
         hero: {
           tagline: 'Kontakt',
