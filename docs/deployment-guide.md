@@ -1,85 +1,32 @@
-# Deployment Guide Ángel Lallave Herrera
+ Deployment Guide
 
-## Deployment Upload
+## Uploading the app
 
-## 1. Install Docker on Ubuntu
+To upload the app to Github, we do the following steps:
+1. Commit all changes to the local repository:
+   bash
+   git switch develop
+   git checkout -b feature/your-feature-name
+   git add .
+   git commit -m "Your commit message"
+   
+2. Push the changes to the remote repository:
+   bash
+   git push origin feature/your-feature-name
+   
+3. Deploy the app to the server (DigitalOcean):
+   bash
+   ssh user@your-server "cd /path/to/your/app && git pull origin feature/your-feature-name && npm install && pm2 restart all"
+   
+   But we do not follow these steps, we access the server trough the Root Console in DigitalOcean.
+   ![Screenshot](image.jpg)
 
-Install Docker using the official method:
-
-sudo apt update
-sudo apt upgrade -y
-
-sudo apt install -y ca-certificates curl gnupg
-
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
-  | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-docker --version
-docker compose version
-
-sudo usermod -aG docker $USER
-
-
-## 2. Start the Docker Services
-
-Enter the project folder:
-
-cd RobEurope
-
-Start the containers:
-
-docker compose up -d
-
-This will start the following services:
-- BIND9
-- LDAP
-- Redis
-
-
-## 3. Backend Setup
-
-Go to the backend folder and install the dependencies:
-
-cd backend
-npm install
-
-
-## 4. Initialize the Database and LDAP
-
-Run the migrations and LDAP initialization:
-
-npm run migrate
-node init-ldap.js
-
-
-## 5. Start the Development Server
-
-npm run dev
-
-
-## 6. Environment Variables
-
-Update your .env file with the correct values:
-
-PORT=
-DB_HOST=
-DB_PORT=
-DB_NAME=
-DB_USER=
-DB_PASS=
-JWT_SECRET=
-NODE_ENV=
-LDAP_URL=
-LDAP_BIND_DN=cn=
-LDAP_BIND_PASSWORD=
-LDAP_BASE_DN=
-LDAP_USER_DN=
+    Then we do the following commands:
+    bash
+    cd /path/to/your/app
+    git pull origin main
+    npm install
+    pm2 restart all
+    
+    ## Screenshot of PM2
+    ![PM2 STATUS](image-1.jpg)
