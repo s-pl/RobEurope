@@ -19,9 +19,9 @@ const socialLoginCallback = (req, res) => {
     req.session.save((err) => {
         if (err) {
             console.error('Session save error:', err);
-            return res.redirect('http://localhost:5173/login?error=session_save_failed');
+      return res.redirect('https://robeurope.samuelponce.es/login?error=session_save_failed');
         }
-        res.redirect('http://localhost:5173/');
+    res.redirect('https://robeurope.samuelponce.es/');
     });
 };
 
@@ -37,14 +37,14 @@ router.post('/reset-password-code', resetPasswordWithCode);
 // Google
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 router.get('/google/callback', 
-  passport.authenticate('google', { failureRedirect: 'http://localhost:5173/login?error=google_auth_failed' }),
+  passport.authenticate('google', { failureRedirect: 'https://robeurope.samuelponce.es/login?error=google_auth_failed' }),
   socialLoginCallback
 );
 
 // GitHub
 router.get('/github', passport.authenticate('github', { scope: ['user:email'] }));
 router.get('/github/callback', 
-  passport.authenticate('github', { failureRedirect: 'http://localhost:5173/login?error=github_auth_failed' }),
+  passport.authenticate('github', { failureRedirect: 'https://robeurope.samuelponce.es/login?error=github_auth_failed' }),
   socialLoginCallback
 );
 

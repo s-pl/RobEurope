@@ -190,18 +190,20 @@ app.use('/api', cors(corsOptions));
 app.use('/api/streams', cors(corsOptions));
 app.use('/api/media', cors(corsOptions));
 app.use('/api-docs', cors(corsOptions));
+// Ensure preflight requests succeed for all routes
 app.options('*', cors(corsOptions));
 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(timeoutMiddleware);
-
+// Serve static files from backend/public so we can host a simple test UI
 app.use(express.static('public'));
+// Serve uploaded files
 app.use('/uploads', express.static('uploads'));
-
+// Serve API documentation (Swagger UI)
 app.use('/api-docs', swaggerRouter);
-
+// Apply rate limiting on API routes
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
 app.use('/api/streams', streamRoutes);
 app.use('/api/media', mediaRoutes); 
