@@ -216,13 +216,13 @@ const Register = () => {
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            <Button variant="outline" onClick={() => window.location.href = `${getApiBaseUrl()}auth/google`}>
+            <Button variant="outline" onClick={() => window.location.href = `${getApiBaseUrl()}/auth/google`}>
               Google
             </Button>
-            <Button variant="outline" onClick={() => window.location.href = `${getApiBaseUrl()}auth/github`}>
+            <Button variant="outline" onClick={() => window.location.href = `${getApiBaseUrl()}/auth/github`}>
               GitHub
             </Button>
-            <Button variant="outline" onClick={() => window.location.href = `${getApiBaseUrl()}auth/apple`}>
+            <Button variant="outline" onClick={() => window.location.href = `${getApiBaseUrl()}/auth/apple`}>
               Apple
             </Button>
           </div>
