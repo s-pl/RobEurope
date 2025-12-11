@@ -8,6 +8,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { useAuth } from '../hooks/useAuth';
 import { getPasswordStrength, StrengthBar } from '../lib/passwordStrength.jsx';
+import { getApiBaseUrl } from '../lib/apiClient';
 
 const Register = () => {
   const { register } = useAuth();
@@ -215,13 +216,13 @@ const Register = () => {
           </div>
 
           <div className="grid grid-cols-3 gap-2">
-            <Button variant="outline" onClick={() => window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`}>
+            <Button variant="outline" onClick={() => window.location.href = `${getApiBaseUrl()}auth/google`}>
               Google
             </Button>
-            <Button variant="outline" onClick={() => window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/github`}>
+            <Button variant="outline" onClick={() => window.location.href = `${getApiBaseUrl()}auth/github`}>
               GitHub
             </Button>
-            <Button variant="outline" onClick={() => window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/apple`}>
+            <Button variant="outline" onClick={() => window.location.href = `${getApiBaseUrl()}auth/apple`}>
               Apple
             </Button>
           </div>
