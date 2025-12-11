@@ -1,7 +1,7 @@
 import { Link, NavLink } from 'react-router-dom';
 import { 
   Bot, User, LogOut, Globe, ChevronLeft, ChevronRight,
-  Home, Newspaper, Trophy, Users, Heart, Tv, Mail, Shield
+  Home, Newspaper, Trophy, Users, Heart, Tv, Mail, Shield, Image, MessageSquare
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
@@ -16,6 +16,8 @@ import React, { useState } from 'react';
 const navLinks = [
   { to: '/', key: 'nav.home', icon: Home },
   { to: '/posts', key: 'nav.posts', icon: Newspaper },
+  { to: '/gallery', key: 'nav.gallery', icon: Image },
+  { to: '/feedback', key: 'nav.feedback', icon: MessageSquare },
   { to: '/competitions', key: 'nav.competitions', icon: Trophy },
   { to: '/teams', key: 'nav.teams', icon: Users },
   { to: '/sponsors', key: 'nav.sponsors', icon: Heart },

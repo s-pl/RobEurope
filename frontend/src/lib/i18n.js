@@ -45,7 +45,11 @@ const resources = {
         userMenu: 'Menú de usuario',
         myTeam: 'Mi equipo',
         theme: 'Tema',
-        posts: 'Noticias'
+        posts: 'Noticias',
+        gallery: 'Galería',
+        feedback: 'Opiniones',
+        login: 'Iniciar sesión',
+        register: 'Registrarse'
       },
       status: {
         connected: 'Conectado',
@@ -542,7 +546,12 @@ const resources = {
         menu: 'Menu',
         userMenu: 'User menu',
         myTeam: 'My Team',
-        theme: 'Theme'
+        theme: 'Theme',
+        posts: 'News',
+        gallery: 'Gallery',
+        feedback: 'Feedback',
+        login: 'Log in',
+        register: 'Register'
       },
       status: {
         connected: 'Online',
@@ -1037,7 +1046,12 @@ const resources = {
         menu: 'Menü',
         userMenu: 'Benutzermenü',
         myTeam: 'Mein Team',
-        theme: 'Thema'
+        theme: 'Thema',
+        posts: 'Nachrichten',
+        gallery: 'Galerie',
+        feedback: 'Feedback',
+        login: 'Anmelden',
+        register: 'Registrieren'
       },
       status: {
         connected: 'Verbunden',
@@ -1132,6 +1146,25 @@ const resources = {
         cancel: 'Abbrechen',
         edit: 'Bearbeiten',
         close: 'Schließen'
+      },
+      sponsors: {
+        title: 'Sponsoren',
+        subtitle: 'Verwalte die Sponsoren des Events',
+        create: 'Neuer Sponsor',
+        edit: 'Sponsor bearbeiten',
+        createDesc: 'Füge einen neuen Sponsor zum Event hinzu',
+        editDesc: 'Passe die Sponsor-Daten an',
+        form: {
+          name: 'Name',
+          logo: 'Logo-URL',
+          website: 'Webseite'
+        },
+        empty: 'Keine Sponsoren vorhanden',
+        emptyDesc: 'Füge deinen ersten Sponsor hinzu',
+        created: 'Erstellt',
+        logo: 'Logo',
+        website: 'Webseite',
+        id: 'ID'
       },
       posts: {
         title: 'Nachrichten',
@@ -1306,6 +1339,20 @@ const resources = {
         onlyActive: 'Nur aktive',
         onlyFavorites: 'Nur Favoriten'
       },
+      streams: {
+        title: 'Streams',
+        subtitle: 'Sieh dir alle Streams der Wettbewerbe an',
+        loading: 'Streams werden geladen...',
+        error: 'Fehler:',
+        status: {
+          live: 'Live',
+          offline: 'Offline',
+          scheduled: 'Geplant'
+        },
+        team: 'Team',
+        competition: 'Wettbewerb',
+        watch: 'Stream ansehen'
+      },
       contact: {
         hero: {
           tagline: 'Kontakt',
@@ -1328,7 +1375,12 @@ const resources = {
         contactUsDesc: "Wir sind hier, um zu helfen. Füllen Sie das Formular aus und wir werden uns so schnell wie möglich bei Ihnen melden.",
         sentTitle: "Nachricht gesendet!",
         sentDesc: "Danke für Ihre Nachricht. Wir werden uns in Kürze melden.",
-        sendAnother: "Eine weitere Nachricht senden"
+        sendAnother: "Eine weitere Nachricht senden",
+        support: "24/7 Support für Teams",
+        placeholders: {
+          name: "Dein Name",
+          email: "du@email.com"
+        }
       },
       profile: {
         heroTagline: 'Verknüpftes Konto',
