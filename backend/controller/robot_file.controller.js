@@ -44,7 +44,7 @@ export const getRobotFiles = async (req, res) => {
     try {
         const { team_id, competition_id } = req.query;
         
-        // If only competition_id is provided, return all public files for that competition
+       
         if (competition_id && !team_id) {
             const files = await RobotFile.findAll({
                 where: { 
@@ -60,7 +60,7 @@ export const getRobotFiles = async (req, res) => {
             return res.json(files);
         }
 
-        // Basic validation
+   
         if (!team_id || !competition_id) {
             return res.status(400).json({ error: 'team_id and competition_id are required' });
         }
