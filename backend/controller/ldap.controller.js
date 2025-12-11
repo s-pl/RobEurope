@@ -6,7 +6,7 @@ const client = ldap.createClient({
   url: process.env.LDAP_URL,
 });
 
-// Handle connection errors globally to prevent crashes
+
 client.on('error', (err) => {
   console.error('LDAP Client Error:', err.message);
 });
@@ -14,7 +14,6 @@ client.on('error', (err) => {
 const baseDN = process.env.LDAP_BASE_DN;
 const userDN = process.env.LDAP_USER_DN;
 
-// Helper to bind client
 const bindClient = () => {
   return new Promise((resolve, reject) => {
     client.bind(process.env.LDAP_BIND_DN, process.env.LDAP_BIND_PASSWORD, (err) => {
@@ -24,7 +23,7 @@ const bindClient = () => {
   });
 };
 
-// List LDAP users
+
 export const listLdapUsers = async (req, res) => {
   try {
     await bindClient();
@@ -44,7 +43,7 @@ export const listLdapUsers = async (req, res) => {
         let userObj = entry.object;
         
         if (!userObj) {
-            // Manually construct object from attributes for ldapjs v3 compatibility
+           
             userObj = {};
             const attributes = entry.attributes || (entry.pojo && entry.pojo.attributes) || [];
             attributes.forEach(attr => {
@@ -53,7 +52,7 @@ export const listLdapUsers = async (req, res) => {
                     userObj[attr.type] = attr.values;
                 }
             });
-            // Add DN if available
+           
             if (entry.objectName) userObj.dn = entry.objectName;
         }
         
@@ -75,12 +74,12 @@ export const listLdapUsers = async (req, res) => {
   }
 };
 
-// Render add user form
+
 export const renderAddLdapUser = (req, res) => {
   res.render('admin/ldap-user-form', { user: null, action: 'add', title: 'Añadir Usuario LDAP' });
 };
 
-// Add LDAP user
+
 export const addLdapUser = async (req, res) => {
   const { uid, cn, sn, mail, password } = req.body;
   const dn = `uid=${uid},${userDN}`;
@@ -101,7 +100,7 @@ export const addLdapUser = async (req, res) => {
         return res.status(500).json({ error: err.message });
       }
       console.log('LDAP User added successfully');
-      // Give a small delay for consistency
+      // DELAY TO ENSURE THE USER IS WEELL PROCESSED BEFORE REDIRECT
       setTimeout(() => {
         res.redirect('/admin/ldap-users');
       }, 500);
@@ -112,7 +111,6 @@ export const addLdapUser = async (req, res) => {
   }
 };
 
-// Render edit user form
 export const renderEditLdapUser = async (req, res) => {
   const uid = req.params.uid;
   const dn = `uid=${uid},${userDN}`;
@@ -132,7 +130,7 @@ export const renderEditLdapUser = async (req, res) => {
   }
 };
 
-// Update LDAP user
+
 export const updateLdapUser = async (req, res) => {
   const uid = req.params.uid;
   const { cn, sn, mail, password } = req.body;
@@ -153,7 +151,7 @@ export const updateLdapUser = async (req, res) => {
   }
 };
 
-// Delete LDAP user
+
 export const deleteLdapUser = async (req, res) => {
   const uid = req.params.uid;
   const dn = `uid=${uid},${userDN}`;

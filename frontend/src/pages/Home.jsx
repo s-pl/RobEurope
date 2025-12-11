@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUpRight, Bot, CircuitBoard, Globe2, ShieldCheck, Users, Trophy, Zap, Calendar, Newspaper, ArrowRight, CheckCircle, UserPlus, Medal } from 'lucide-react';
+import { ArrowUpRight, Bot, CircuitBoard, Globe2, ShieldCheck, Users, Trophy, Zap, Calendar, Newspaper, ArrowRight, CheckCircle, UserPlus, Medal, Thermometer } from 'lucide-react';
 import gsap from 'gsap';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -68,7 +68,8 @@ const Home = () => {
         if (active) setLoading(false);
       }
     };
-
+ 
+   
     fetchData();
 
     return () => {
@@ -129,7 +130,7 @@ const Home = () => {
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="h-12 px-8 text-lg">
-            <a href="https://api.robeurope.samuelpòcne.es/api-docs" target="_blank" rel="noreferrer">
+            <a href="https://api.robeurope.samuelponce.es/api-docs" target="_blank" rel="noreferrer">
               {t('home.hero.secondaryCta')}
               <span className="sr-only"> (opens in a new tab)</span>
             </a>
