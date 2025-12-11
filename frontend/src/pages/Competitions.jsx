@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { useEditMode } from '../context/EditModeContext';
-import { Calendar, MapPin, Users, ChevronDown, ChevronUp, ArrowRight, Plus, Star } from 'lucide-react';
+import { Calendar, MapPin, Users, ChevronDown, ChevronUp, ArrowRight, Plus, Star, MessageCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/card';
@@ -13,8 +13,7 @@ import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { useApi } from '../hooks/useApi';
 import { useAuth } from '../hooks/useAuth';
-
-const CompetitionItem = ({ competition, isFavorite, onToggleFavorite }) => {
+const CompetitionItem = ({ competition, isFavorite, onToggleFavorite, canChat }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation();
 
@@ -60,6 +59,23 @@ const CompetitionItem = ({ competition, isFavorite, onToggleFavorite }) => {
               >
                 <Star className="h-5 w-5" fill={isFavorite ? 'currentColor' : 'none'} aria-hidden="true" />
                 <span className="sr-only">{isFavorite ? (t('competitions.removeFavorite')||'Quitar de favoritos') : (t('competitions.addFavorite')||'Añadir a favoritos')}</span>
+              </Button>
+            )}
+            {canChat && (
+              <Button
+                asChild
+                variant="ghost"
+                size="icon"
+                className="text-blue-600 dark:text-blue-300"
+                title={t('competitions.chat.openButton') || 'Abrir chat'}
+              >
+                <Link
+                  to={`/competitions/${competition.id}#competition-chat`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MessageCircle className="h-5 w-5" aria-hidden="true" />
+                  <span className="sr-only">{t('competitions.chat.openButton') || 'Abrir chat'}</span>
+                </Link>
               </Button>
             )}
             <Button variant="ghost" size="icon" className="text-slate-500 dark:text-slate-400">
@@ -109,6 +125,7 @@ const Competitions = () => {
   const isAdmin = user?.role === 'super_admin';
   const [filters, setFilters] = useState({ q: '', is_active: '' });
   const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const [teamStatus, setTeamStatus] = useState({ ownedTeamId: null, memberOfTeamId: null });
 
   // Create form state
   const [createOpen, setCreateOpen] = useState(false);
@@ -122,6 +139,34 @@ const Competitions = () => {
     max_teams: '',
     is_active: false
   });
+
+  const canUseChat = Boolean(user && (user.role === 'super_admin' || teamStatus.ownedTeamId || teamStatus.memberOfTeamId));
+
+
+  useEffect(() => {
+    let alive = true;
+    const fetchStatus = async () => {
+      if (!user) {
+        setTeamStatus({ ownedTeamId: null, memberOfTeamId: null });
+        return;
+      }
+      try {
+        const status = await api('/teams/status');
+        if (!alive) return;
+        setTeamStatus({
+          ownedTeamId: status?.ownedTeamId ?? null,
+          memberOfTeamId: status?.memberOfTeamId ?? null
+        });
+      } catch {
+        if (!alive) return;
+        setTeamStatus({ ownedTeamId: null, memberOfTeamId: null });
+      }
+    };
+    fetchStatus();
+    return () => {
+      alive = false;
+    };
+  }, [api, user]);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -336,7 +381,13 @@ const Competitions = () => {
 
       <div className="grid gap-4">
         {competitions.map((comp) => (
-          <CompetitionItem key={comp.id} competition={comp} isFavorite={favorites.has(comp.id)} onToggleFavorite={user?.id ? toggleFavorite : undefined} />
+          <CompetitionItem
+            key={comp.id}
+            competition={comp}
+            isFavorite={favorites.has(comp.id)}
+            onToggleFavorite={user?.id ? toggleFavorite : undefined}
+            canChat={canUseChat}
+          />
         ))}
         
         {!loading && competitions.length === 0 && (
@@ -345,6 +396,7 @@ const Competitions = () => {
           </div>
         )}
       </div>
+
     </div>
   );
 };

@@ -143,7 +143,9 @@ const resources = {
         delete: 'Eliminar',
         cancel: 'Cancelar',
         edit: 'Editar',
-        close: 'Cerrar'
+        close: 'Cerrar',
+        attachFile: 'Adjuntar archivo',
+        send: 'Enviar'
       },
       sponsors: {
         title: 'Sponsors',
@@ -202,6 +204,8 @@ const resources = {
         allCountries: 'Todos los países',
         members: 'Miembros',
         manage: 'Gestionar mi equipo',
+        openChat: 'Abrir chat',
+        chatTitle: 'Chat del equipo {{team}}',
         requestJoin: 'Solicitar Unirse',
         loginToJoin: 'Inicia sesión para unirte',
         noTeams: 'No se encontraron equipos.',
@@ -335,7 +339,23 @@ const resources = {
         noActive: 'No hay competiciones activas en este momento.',
         searchPlace: 'Nombre, ciudad...',
         onlyActive: 'Solo activas',
-        onlyFavorites: 'Solo favoritos'
+        onlyFavorites: 'Solo favoritos',
+        chat: {
+          openButton: 'Abrir chat',
+          title: 'Chat de competición',
+          dialogTitle: 'Chat · {{title}}',
+          placeholder: 'Comparte novedades con los demás equipos...',
+          fileTooLarge: 'Archivo demasiado grande',
+          fileLimit: 'El límite es de 25MB por archivo',
+          noAccess: 'Necesitas pertenecer a un equipo inscrito para usar este chat.',
+          empty: 'Aún no hay mensajes en esta competición.',
+          attachmentFallback: 'Archivo adjunto',
+          download: 'Descargar',
+          typingOne: 'está escribiendo...',
+          typingMany: 'están escribiendo...',
+          sendError: 'No se pudo enviar el mensaje',
+          loginRequired: 'Inicia sesión para unirte al chat de la competición.'
+        }
       },
       streams: {
         title: 'Streams',
@@ -525,7 +545,10 @@ const resources = {
       team: {
         chat: {
           tab: 'Chat',
-          title: 'Chat de Equipo'
+          title: 'Chat de Equipo',
+          placeholder: 'Escribe un mensaje...',
+          fileTooLarge: 'Archivo demasiado grande',
+          fileLimit: 'El límite es de 25MB por archivo'
         }
       }
     }
@@ -645,7 +668,9 @@ const resources = {
         delete: 'Delete',
         cancel: 'Cancel',
         edit: 'Edit',
-        close: 'Close'
+        close: 'Close',
+        attachFile: 'Attach file',
+        send: 'Send'
       },
       sponsors: {
         title: 'Sponsors',
@@ -704,6 +729,8 @@ const resources = {
         allCountries: 'All countries',
         members: 'Members',
         manage: 'Manage my team',
+        openChat: 'Open chat',
+        chatTitle: 'Chat for {{team}}',
         requestJoin: 'Request to Join',
         loginToJoin: 'Log in to join',
         noTeams: 'No teams found.',
@@ -837,7 +864,23 @@ const resources = {
         noActive: 'No active competitions at the moment.',
         searchPlace: 'Name, city...',
         onlyActive: 'Active only',
-        onlyFavorites: 'Favorites only'
+        onlyFavorites: 'Favorites only',
+        chat: {
+          openButton: 'Open chat',
+          title: 'Competition chat',
+          dialogTitle: 'Chat · {{title}}',
+          placeholder: 'Share updates with the rest of the grid...',
+          fileTooLarge: 'File is too large',
+          fileLimit: 'The limit is 25MB per file',
+          noAccess: 'You must belong to a registered team to use this chat.',
+          empty: 'No messages have been posted in this competition yet.',
+          attachmentFallback: 'Attachment',
+          download: 'Download',
+          typingOne: 'is typing...',
+          typingMany: 'are typing...',
+          sendError: 'We could not send your message',
+          loginRequired: 'Sign in to join the competition chat.'
+        }
       },
       streams: {
         title: 'Streams',
@@ -1025,7 +1068,10 @@ const resources = {
       team: {
         chat: {
           tab: 'Chat',
-          title: 'Team Chat'
+          title: 'Team Chat',
+          placeholder: 'Write a message...',
+          fileTooLarge: 'File is too large',
+          fileLimit: 'The limit is 25MB per file'
         }
       }
     }
@@ -1145,7 +1191,9 @@ const resources = {
         delete: 'Löschen',
         cancel: 'Abbrechen',
         edit: 'Bearbeiten',
-        close: 'Schließen'
+        close: 'Schließen',
+        attachFile: 'Datei anhängen',
+        send: 'Senden'
       },
       sponsors: {
         title: 'Sponsoren',
@@ -1204,6 +1252,8 @@ const resources = {
         allCountries: 'Alle Länder',
         members: 'Mitglieder',
         manage: 'Mein Team verwalten',
+        openChat: 'Chat öffnen',
+        chatTitle: 'Chat für {{team}}',
         requestJoin: 'Beitritt anfragen',
         loginToJoin: 'Anmelden zum Beitreten',
         noTeams: 'Keine Teams gefunden.',
@@ -1337,7 +1387,23 @@ const resources = {
         noActive: 'Derzeit keine aktiven Wettbewerbe.',
         searchPlace: 'Name, Stadt...',
         onlyActive: 'Nur aktive',
-        onlyFavorites: 'Nur Favoriten'
+        onlyFavorites: 'Nur Favoriten',
+        chat: {
+          openButton: 'Chat öffnen',
+          title: 'Wettbewerbs-Chat',
+          dialogTitle: 'Chat · {{title}}',
+          placeholder: 'Teile Updates mit den anderen Teams...',
+          fileTooLarge: 'Datei ist zu groß',
+          fileLimit: 'Das Limit beträgt 25 MB pro Datei',
+          noAccess: 'Du musst zu einem registrierten Team gehören, um diesen Chat zu nutzen.',
+          empty: 'Für diesen Wettbewerb gibt es noch keine Nachrichten.',
+          attachmentFallback: 'Anhang',
+          download: 'Herunterladen',
+          typingOne: 'schreibt gerade...',
+          typingMany: 'schreiben gerade...',
+          sendError: 'Nachricht konnte nicht gesendet werden',
+          loginRequired: 'Melde dich an, um dem Wettbewerbs-Chat beizutreten.'
+        }
       },
       streams: {
         title: 'Streams',
@@ -1517,7 +1583,10 @@ const resources = {
       team: {
         chat: {
           tab: 'Chat',
-          title: 'Team-Chat'
+          title: 'Team-Chat',
+          placeholder: 'Schreibe eine Nachricht...',
+          fileTooLarge: 'Datei ist zu groß',
+          fileLimit: 'Das Limit beträgt 25 MB pro Datei'
         }
       }
     }

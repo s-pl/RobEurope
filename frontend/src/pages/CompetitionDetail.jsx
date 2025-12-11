@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge';
 import { Calendar, MapPin, Users, Video, ArrowLeft, Share2, FileText, Download } from 'lucide-react';
 import { useToast } from '../hooks/useToast';
+import CompetitionChat from '../components/competitions/CompetitionChat';
 
 const CompetitionDetail = () => {
   const { id } = useParams();
@@ -23,6 +24,7 @@ const CompetitionDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { t } = useTranslation();
+  const canUseChat = Boolean(user && (user.role === 'super_admin' || myTeamId));
 
   useEffect(() => {
     const load = async () => {
@@ -240,6 +242,22 @@ const CompetitionDetail = () => {
         </div>
 
         <div className="space-y-6">
+          <div id="competition-chat">
+            {canUseChat ? (
+              <CompetitionChat competitionId={competition.id} />
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t('competitions.chat.title')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-slate-500">
+                    {t('competitions.chat.restricted') || 'Solo los administradores o equipos inscritos pueden participar en el chat de esta competición.'}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
           <Card>
             <CardHeader>
               <CardTitle>Información</CardTitle>

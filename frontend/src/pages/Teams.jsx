@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Users, Globe, Plus, UserPlus, LogIn } from 'lucide-react';
+import { Search, Users, Globe, Plus, UserPlus, LogIn, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useApi } from '../hooks/useApi';
 import { useTeams } from '../hooks/useTeams';
 import { useCountries } from '../hooks/useCountries';
+import TeamChat from '../components/teams/TeamChat';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../components/ui/card';
@@ -28,6 +29,8 @@ const Teams = () => {
   const [status, setStatus] = useState({ ownsTeam: false, ownedTeamId: null, memberOfTeamId: null });
   const [creating, setCreating] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [chatTeam, setChatTeam] = useState(null);
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [form, setForm] = useState({ name: '', country_id: '', description: '', website_url: '' });
 
   const reload = async () => {
@@ -105,6 +108,23 @@ const Teams = () => {
       setFeedback(t('teams.feedback.requestSent'));
     } catch (err) {
       setFeedback(err.message || t('teams.feedback.requestError'));
+    }
+  };
+
+  const canChat = (teamId) => {
+    return status.ownedTeamId === teamId || status.memberOfTeamId === teamId || user?.role === 'admin';
+  };
+
+  const openChat = (team) => {
+    if (!team) return;
+    setChatTeam(team);
+    setChatDialogOpen(true);
+  };
+
+  const handleChatDialogChange = (open) => {
+    setChatDialogOpen(open);
+    if (!open) {
+      setChatTeam(null);
     }
   };
 
@@ -253,21 +273,41 @@ const Teams = () => {
                 )}
               </div>
             </CardContent>
-            <CardFooter className="pt-4 border-t border-slate-100">
+            <CardFooter className="pt-4 border-t border-slate-100 flex flex-col gap-2">
               {isAuthenticated ? (
                 status.ownedTeamId === team.id || status.memberOfTeamId === team.id ? (
-                  <Button variant="outline" className="w-full flex items-center justify-center" asChild>
-                    <Link to="/my-team">{t('teams.manage')}</Link>
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full">
+                    <Button variant="outline" className="flex-1" asChild>
+                      <Link to="/my-team">{t('teams.manage')}</Link>
+                    </Button>
+                    <Button 
+                      variant="secondary" 
+                      className="flex-1 gap-2"
+                      onClick={() => openChat(team)}
+                    >
+                      <MessageCircle className="h-4 w-4" /> {t('teams.openChat')}
+                    </Button>
+                  </div>
                 ) : (
-                  <Button 
-                    className="w-full gap-2 flex items-center justify-center" 
-                    variant="secondary"
-                    onClick={() => onRequestJoin(team.id)}
-                    disabled={status.ownedTeamId || status.memberOfTeamId}
-                  >
-                    <UserPlus className="h-4 w-4" /> {t('teams.requestJoin')}
-                  </Button>
+                  <>
+                    <Button 
+                      className="w-full gap-2 flex items-center justify-center" 
+                      variant="secondary"
+                      onClick={() => onRequestJoin(team.id)}
+                      disabled={status.ownedTeamId || status.memberOfTeamId}
+                    >
+                      <UserPlus className="h-4 w-4" /> {t('teams.requestJoin')}
+                    </Button>
+                    {canChat(team.id) && (
+                      <Button 
+                        variant="outline" 
+                        className="w-full gap-2 flex items-center justify-center"
+                        onClick={() => openChat(team)}
+                      >
+                        <MessageCircle className="h-4 w-4" /> {t('teams.openChat')}
+                      </Button>
+                    )}
+                  </>
                 )
               ) : (
                 <Button variant="ghost" className="w-full gap-2 flex items-center justify-center" asChild>
@@ -286,6 +326,19 @@ const Teams = () => {
           </div>
         )}
       </div>
+
+      <Dialog open={chatDialogOpen} onOpenChange={handleChatDialogChange}>
+        <DialogContent className="max-w-4xl w-full">
+          <DialogHeader>
+            <DialogTitle>
+              {chatTeam ? t('teams.chatTitle', { team: chatTeam.name }) : t('teams.openChat')}
+            </DialogTitle>
+          </DialogHeader>
+          {chatTeam && (
+            <TeamChat teamId={chatTeam.id} />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

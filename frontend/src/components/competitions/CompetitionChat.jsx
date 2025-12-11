@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Send, Paperclip, X, Download, FileText, Smile } from 'lucide-react';
+import { io } from 'socket.io-client';
 import { useApi } from '../../hooks/useApi';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
@@ -8,8 +9,8 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
 import { resolveMediaUrl, getApiBaseUrl } from '../../lib/apiClient';
-import { io } from 'socket.io-client';
 
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB per file limit
 const REACTION_OPTIONS = ['👍', '❤️', '🔥', '🎉', '😮', '👏'];
 
 const summarizeReactions = (reactions = []) => {
@@ -27,7 +28,7 @@ const getUserReaction = (reactions = [], userId) => {
   return match?.reaction || null;
 };
 
-const TeamChat = ({ teamId }) => {
+const CompetitionChat = ({ competitionId }) => {
   const { t } = useTranslation();
   const api = useApi();
   const { user } = useAuth();
@@ -36,28 +37,27 @@ const TeamChat = ({ teamId }) => {
   const [newMessage, setNewMessage] = useState('');
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const scrollRef = useRef(null);
-  const socketRef = useRef(null);
-
+  const [error, setError] = useState('');
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [typingUsers, setTypingUsers] = useState([]);
   const [reactionTarget, setReactionTarget] = useState(null);
   const typingTimeoutRef = useRef(null);
+  const scrollRef = useRef(null);
+  const socketRef = useRef(null);
+  const fileInputRef = useRef(null);
   const updateMessageReactions = useCallback((messageId, reactions = []) => {
     setMessages((prev) => prev.map((msg) => (msg.id === messageId ? { ...msg, reactions } : msg)));
   }, []);
 
   useEffect(() => {
-    // Initialize socket
+    if (!competitionId || !user) return undefined;
     const baseUrl = getApiBaseUrl();
     const socketUrl = baseUrl.replace(/\/api$/, '');
     socketRef.current = io(socketUrl);
+    socketRef.current.emit('join_competition', { competitionId, user });
 
-    // Send user info when joining
-    socketRef.current.emit('join_team', { teamId, user });
-
-    const handleTeamMessage = (message) => {
-      if (Number(message.team_id) !== Number(teamId)) return;
+    const handleIncomingMessage = (message) => {
+      if (Number(message.competition_id) !== Number(competitionId)) return;
       setMessages((prev) => [...prev, { ...message, reactions: message.reactions || [] }]);
       scrollToBottom();
     };
@@ -67,17 +67,17 @@ const TeamChat = ({ teamId }) => {
       updateMessageReactions(Number(payload.messageId), payload.reactions || []);
     };
 
-    socketRef.current.on('team_message', handleTeamMessage);
-    socketRef.current.on('team_reaction', handleReactionUpdate);
+    socketRef.current.on('competition_message', handleIncomingMessage);
+    socketRef.current.on('competition_reaction', handleReactionUpdate);
 
-    socketRef.current.on('team_users_update', (users) => {
-      setOnlineUsers(users);
+    socketRef.current.on('competition_users_update', (users) => {
+      setOnlineUsers(users || []);
     });
 
-    socketRef.current.on('user_typing', (typingUser) => {
+    socketRef.current.on('competition_user_typing', (typingUser) => {
       if (typingUser.id !== user.id) {
         setTypingUsers((prev) => {
-          if (!prev.find(u => u.id === typingUser.id)) {
+          if (!prev.find((u) => u.id === typingUser.id)) {
             return [...prev, typingUser];
           }
           return prev;
@@ -85,52 +85,45 @@ const TeamChat = ({ teamId }) => {
       }
     });
 
-    socketRef.current.on('user_stop_typing', (typingUser) => {
-      setTypingUsers((prev) => prev.filter(u => u.id !== typingUser.id));
+    socketRef.current.on('competition_user_stop_typing', (typingUser) => {
+      setTypingUsers((prev) => prev.filter((u) => u.id !== typingUser.id));
     });
 
     return () => {
       if (socketRef.current) {
-        socketRef.current.off('team_message', handleTeamMessage);
-        socketRef.current.off('team_reaction', handleReactionUpdate);
+        socketRef.current.off('competition_message', handleIncomingMessage);
+        socketRef.current.off('competition_reaction', handleReactionUpdate);
         socketRef.current.disconnect();
       }
     };
-  }, [teamId, updateMessageReactions, user]);
+  }, [competitionId, updateMessageReactions, user]);
 
-  const handleTyping = () => {
-    if (socketRef.current) {
-      socketRef.current.emit('typing', { teamId, user });
-      
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-      
-      typingTimeoutRef.current = setTimeout(() => {
-        socketRef.current.emit('stop_typing', { teamId, user });
-      }, 2000);
-    }
-  };
-
-  useEffect(() => {
-    fetchMessages();
-  }, [teamId]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
+    if (!competitionId || !user) return;
+    setLoading(true);
     try {
-      const data = await api(`/teams/${teamId}/messages`);
+      const data = await api(`/competitions/${competitionId}/messages`);
       const normalized = Array.isArray(data)
         ? data.map((msg) => ({ ...msg, reactions: msg.reactions || [] }))
         : [];
       setMessages(normalized);
-      setLoading(false);
-    } catch (error) {
-      console.error(error);
+      setError('');
+    } catch (err) {
+      console.error(err);
+      setMessages([]);
+      setError(err?.message || t('competitions.chat.noAccess'));
+    } finally {
       setLoading(false);
     }
-  };
+  }, [api, competitionId, t, user]);
+
+  useEffect(() => {
+    fetchMessages();
+  }, [fetchMessages]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const scrollToBottom = () => {
     if (scrollRef.current) {
@@ -143,18 +136,25 @@ const TeamChat = ({ teamId }) => {
     }
   };
 
-  const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB per file limit
+  const handleTyping = () => {
+    if (!socketRef.current) return;
+    socketRef.current.emit('competition_typing', { competitionId, user });
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      socketRef.current.emit('competition_stop_typing', { competitionId, user });
+    }, 2000);
+  };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() && files.length === 0) return;
 
-    // Frontend guard: block sending if any file exceeds 25MB
-    const tooLarge = files.find(f => f.size > MAX_FILE_SIZE);
+    const tooLarge = files.find((f) => f.size > MAX_FILE_SIZE);
     if (tooLarge) {
       toast({
-        title: t('team.chat.fileTooLarge') || 'Archivo demasiado grande',
-        description: `${tooLarge.name}: ${t('team.chat.fileLimit') || 'El límite es de 25MB por archivo'}`,
+        title: t('competitions.chat.fileTooLarge') || 'Archivo demasiado grande',
+        description: `${tooLarge.name}: ${t('competitions.chat.fileLimit') || 'El límite es de 25MB por archivo'}`,
         variant: 'destructive'
       });
       return;
@@ -163,11 +163,9 @@ const TeamChat = ({ teamId }) => {
     try {
       const formData = new FormData();
       if (newMessage.trim()) formData.append('content', newMessage);
-      files.forEach(file => {
-        formData.append('files', file);
-      });
+      files.forEach((file) => formData.append('files', file));
 
-      await api(`/teams/${teamId}/messages`, {
+      await api(`/competitions/${competitionId}/messages`, {
         method: 'POST',
         body: formData,
         formData: true
@@ -175,57 +173,77 @@ const TeamChat = ({ teamId }) => {
 
       setNewMessage('');
       setFiles([]);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleFileSelect = (e) => {
-    const selectedFiles = Array.from(e.target.files || []);
-    if (selectedFiles.length > 0) {
-      const validFiles = selectedFiles.filter(file => {
-        if (file.size > MAX_FILE_SIZE) { // 25MB limit
-          toast({
-            title: t('team.chat.fileTooLarge') || 'Archivo demasiado grande',
-            description: `${file.name}: ${t('team.chat.fileLimit') || 'El límite es de 25MB por archivo'}`,
-            variant: 'destructive'
-          });
-          return false;
-        }
-        return true;
-      });
-      setFiles(prev => [...prev, ...validFiles]);
-      e.target.value = ''; // Reset input
-    }
-  };
-
-  const removeFile = (index) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSelectReaction = async (messageId, emoji) => {
-    if (!teamId) return;
-    try {
-      const payload = await api(`/teams/${teamId}/messages/${messageId}/reactions`, {
-        method: 'POST',
-        body: { reaction: emoji }
-      });
-      setReactionTarget(null);
-      updateMessageReactions(messageId, payload.reactions || []);
-    } catch (error) {
+      if (error) {
+        // if previous fetch failed due to temporary reason, re-fetch
+        fetchMessages();
+      }
+    } catch (err) {
+      console.error(err);
       toast({
-        title: t('team.chat.reactionError') || 'No se pudo aplicar la reacción',
-        description: error?.message,
+        title: t('competitions.chat.sendError') || 'No se pudo enviar el mensaje',
+        description: err?.message,
         variant: 'destructive'
       });
     }
   };
 
+  const handleFileSelect = (e) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    if (!selectedFiles.length) return;
+
+    const validFiles = selectedFiles.filter((file) => {
+      if (file.size > MAX_FILE_SIZE) {
+        toast({
+          title: t('competitions.chat.fileTooLarge') || 'Archivo demasiado grande',
+          description: `${file.name}: ${t('competitions.chat.fileLimit') || 'El límite es de 25MB por archivo'}`,
+          variant: 'destructive'
+        });
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length) {
+      setFiles((prev) => [...prev, ...validFiles]);
+    }
+    e.target.value = '';
+  };
+
+  const removeFile = (index) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSelectReaction = async (messageId, emoji) => {
+    if (!competitionId) return;
+    try {
+      const payload = await api(`/competitions/${competitionId}/messages/${messageId}/reactions`, {
+        method: 'POST',
+        body: { reaction: emoji }
+      });
+      setReactionTarget(null);
+      updateMessageReactions(messageId, payload.reactions || []);
+    } catch (err) {
+      toast({
+        title: t('competitions.chat.reactionError') || 'No se pudo aplicar la reacción',
+        description: err?.message,
+        variant: 'destructive'
+      });
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="flex h-[400px] items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+        {t('competitions.chat.loginRequired') || 'Inicia sesión para unirte al chat de la competición.'}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-[600px] border rounded-lg bg-white dark:bg-slate-950 dark:border-slate-800">
       <div className="p-4 border-b dark:border-slate-800 flex justify-between items-center">
         <div>
-          <h3 className="font-semibold text-lg">{t('team.chat.title')}</h3>
+          <h3 className="font-semibold text-lg">{t('competitions.chat.title')}</h3>
           {onlineUsers.length > 0 && (
             <p className="text-xs text-green-600 flex items-center gap-1">
               <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
@@ -234,7 +252,7 @@ const TeamChat = ({ teamId }) => {
           )}
         </div>
         <div className="flex -space-x-2">
-          {onlineUsers.slice(0, 5).map(u => (
+          {onlineUsers.slice(0, 5).map((u) => (
             <div key={u.id} className="h-8 w-8 rounded-full border-2 border-white dark:border-slate-900 bg-slate-100 overflow-hidden" title={u.first_name}>
               {u.profile_photo_url ? (
                 <img src={resolveMediaUrl(u.profile_photo_url)} alt={u.first_name} className="h-full w-full object-cover" />
@@ -254,7 +272,17 @@ const TeamChat = ({ teamId }) => {
       </div>
 
       <ScrollArea className="flex-1 p-4">
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+            {error || t('competitions.chat.noAccess')}
+          </div>
+        )}
         <div className="space-y-4">
+          {!loading && !error && messages.length === 0 && (
+            <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+              {t('competitions.chat.empty') || 'Aún no hay mensajes en esta competición.'}
+            </p>
+          )}
           {messages.map((msg) => {
             const isMe = msg.user_id === user.id;
             const groupedReactions = summarizeReactions(msg.reactions || []);
@@ -279,34 +307,32 @@ const TeamChat = ({ teamId }) => {
                   </div>
                   <div className={`p-3 rounded-lg ${isMe ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100'}`}>
                     {msg.content && <p className="whitespace-pre-wrap text-sm">{msg.content}</p>}
-                    
-                    {/* Multiple attachments */}
                     {msg.attachments && msg.attachments.length > 0 && (
                       <div className="mt-2 space-y-2">
                         {msg.attachments.map((att, idx) => (
-                          <div key={idx}>
+                          <div key={`${att.url}-${idx}`}>
                             {att.type === 'image' ? (
                               <img src={resolveMediaUrl(att.url)} alt="attachment" className="max-w-full rounded-md max-h-[200px]" />
                             ) : (
-                              <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700 max-w-xs group transition-all hover:shadow-sm">
+                              <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700 max-w-xs">
                                 <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
                                   <FileText className="h-5 w-5 text-blue-700 dark:text-blue-400" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium truncate text-slate-700 dark:text-slate-200">
-                                    {att.name || 'Archivo adjunto'}
+                                    {att.name || t('competitions.chat.attachmentFallback') || 'Archivo adjunto'}
                                   </p>
                                   <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">
                                     {att.url?.split('.').pop() || 'FILE'}
                                   </p>
                                 </div>
-                                <a 
-                                  href={resolveMediaUrl(att.url)} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer" 
+                                <a
+                                  href={resolveMediaUrl(att.url)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
                                   download
                                   className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-500 dark:text-slate-400"
-                                  title="Descargar"
+                                  title={t('competitions.chat.download') || 'Descargar'}
                                 >
                                   <Download className="h-4 w-4" />
                                 </a>
@@ -314,39 +340,6 @@ const TeamChat = ({ teamId }) => {
                             )}
                           </div>
                         ))}
-                      </div>
-                    )}
-
-                    {/* Legacy single file support */}
-                    {!msg.attachments && msg.file_url && (
-                      <div className="mt-2">
-                        {msg.type === 'image' ? (
-                          <img src={resolveMediaUrl(msg.file_url)} alt="attachment" className="max-w-full rounded-md max-h-[200px]" />
-                        ) : (
-                          <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700 max-w-xs group transition-all hover:shadow-sm">
-                            <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <FileText className="h-5 w-5 text-blue-700 dark:text-blue-400" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate text-slate-700 dark:text-slate-200">
-                                Archivo adjunto
-                              </p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">
-                                {msg.file_url?.split('.').pop() || 'FILE'}
-                              </p>
-                            </div>
-                            <a 
-                              href={resolveMediaUrl(msg.file_url)} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              download
-                              className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-500 dark:text-slate-400"
-                              title="Descargar"
-                            >
-                              <Download className="h-4 w-4" />
-                            </a>
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
@@ -375,7 +368,7 @@ const TeamChat = ({ teamId }) => {
                         onClick={() => setReactionTarget((prev) => (prev === msg.id ? null : msg.id))}
                       >
                         <Smile className="h-3 w-3" aria-hidden="true" />
-                        {t('team.chat.addReaction') || 'Reaccionar'}
+                        {t('competitions.chat.addReaction') || 'Reaccionar'}
                       </button>
                     )}
                   </div>
@@ -388,7 +381,7 @@ const TeamChat = ({ teamId }) => {
                         type="button"
                         className="text-xl leading-none hover:scale-110 transition"
                         onClick={() => handleSelectReaction(msg.id, emoji)}
-                        aria-label={t('team.chat.reactWith', { emoji }) || `Reaccionar con ${emoji}`}
+                        aria-label={t('competitions.chat.reactWith', { emoji }) || `Reaccionar con ${emoji}`}
                       >
                         {emoji}
                       </button>
@@ -399,7 +392,7 @@ const TeamChat = ({ teamId }) => {
                         className="text-xs text-red-500 font-medium ml-2"
                         onClick={() => handleSelectReaction(msg.id, null)}
                       >
-                        {t('team.chat.removeReaction') || 'Quitar'}
+                        {t('competitions.chat.removeReaction') || 'Quitar'}
                       </button>
                     )}
                   </div>
@@ -408,9 +401,9 @@ const TeamChat = ({ teamId }) => {
             );
           })}
           <div ref={scrollRef} />
-          {typingUsers.length > 0 && (
+          {typingUsers.length > 0 && !error && (
             <div className="text-xs text-slate-400 italic animate-pulse ml-10">
-              {typingUsers.map(u => u.first_name).join(', ')} {typingUsers.length === 1 ? 'está escribiendo...' : 'están escribiendo...'}
+              {typingUsers.map((u) => u.first_name).join(', ')} {typingUsers.length === 1 ? t('competitions.chat.typingOne') || 'está escribiendo…' : t('competitions.chat.typingMany') || 'están escribiendo…'}
             </div>
           )}
         </div>
@@ -419,11 +412,11 @@ const TeamChat = ({ teamId }) => {
       <div className="p-4 border-t dark:border-slate-800">
         {files.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-2">
-            {files.map((f, i) => (
-              <div key={i} className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-md text-sm border border-slate-200 dark:border-slate-700">
+            {files.map((file, index) => (
+              <div key={`${file.name}-${index}`} className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-md text-sm border border-slate-200 dark:border-slate-700">
                 <Paperclip className="h-3 w-3 text-blue-500" />
-                <span className="truncate max-w-[150px]">{f.name}</span>
-                <button onClick={() => removeFile(i)} className="ml-auto hover:text-red-500">
+                <span className="truncate max-w-[150px]">{file.name}</span>
+                <button type="button" onClick={() => removeFile(index)} className="ml-auto hover:text-red-500">
                   <X className="h-3 w-3" />
                 </button>
               </div>
@@ -431,31 +424,30 @@ const TeamChat = ({ teamId }) => {
           </div>
         )}
         <form onSubmit={handleSendMessage} className="flex gap-2">
-          <div className="relative">
-            <input
-              type="file"
-              id="chat-file"
-              className="hidden"
-              multiple
-              onChange={handleFileSelect}
-            />
-            <Button type="button" variant="ghost" size="icon" onClick={() => document.getElementById('chat-file').click()}>
-              <Paperclip className="h-5 w-5 text-slate-500" aria-hidden="true" />
-              <span className="sr-only">{t('common.attachFile') || 'Attach file'}</span>
-            </Button>
-          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+          <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
+            <Paperclip className="h-5 w-5 text-slate-500" aria-hidden="true" />
+            <span className="sr-only">{t('common.attachFile') || 'Adjuntar archivo'}</span>
+          </Button>
           <Input
             value={newMessage}
             onChange={(e) => {
               setNewMessage(e.target.value);
               handleTyping();
             }}
-            placeholder={t('team.chat.placeholder')}
+            placeholder={t('competitions.chat.placeholder') || 'Escribe un mensaje...'}
             className="flex-1"
+            disabled={Boolean(error)}
           />
-          <Button type="submit" size="icon" disabled={!newMessage.trim() && files.length === 0}>
+          <Button type="submit" size="icon" disabled={(!newMessage.trim() && files.length === 0) || Boolean(error)}>
             <Send className="h-4 w-4" aria-hidden="true" />
-            <span className="sr-only">{t('common.send') || 'Send'}</span>
+            <span className="sr-only">{t('common.send') || 'Enviar'}</span>
           </Button>
         </form>
       </div>
@@ -463,4 +455,4 @@ const TeamChat = ({ teamId }) => {
   );
 };
 
-export default TeamChat;
+export default CompetitionChat;
