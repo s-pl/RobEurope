@@ -241,10 +241,11 @@ export async function getCompetitionStats(req, res) {
       attributes: [
         'id',
         'title',
-        [Sequelize.fn('COUNT', Sequelize.col('Registrations.id')), 'registrationCount']
+        [Sequelize.fn('COUNT', Sequelize.col('registrations.id')), 'registrationCount']
       ],
       include: [{
         model: Registration,
+        as: 'registrations',
         attributes: [],
         required: false
       }],

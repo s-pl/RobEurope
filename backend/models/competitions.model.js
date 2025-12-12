@@ -66,6 +66,11 @@ export default async function defineCompetitionsModel(sequelize, DataTypes) {
             foreignKey: 'competition_id',
             as: 'streams'
         });
+        // Link registrations to competitions for admin statistics and joins
+        Competition.hasMany(models.Registration, {
+            foreignKey: 'competition_id',
+            as: 'registrations'
+        });
     };
 
 return Competition;
