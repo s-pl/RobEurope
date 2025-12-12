@@ -1,21 +1,32 @@
 <%- include('partials/header') %>
 
-<h2> Solicitudes de Registro</h2>
+<section class="page-header">
+  <div>
+    <p class="page-eyebrow"><%= t('registrations.eyebrow') %></p>
+    <h2 class="page-title"><%= t('registrations.title') %></h2>
+  </div>
+  <p class="page-description"><%= t('registrations.description') %></p>
+</section>
 
-<div style="margin: 1rem 0; display:flex; gap:.5rem; align-items:center;">
-  <a class="btn" href="/api/registrations/export" target="_blank" rel="noopener">Descargar CSV</a>
+<div class="filters-panel filters-inline">
+  <div>
+    <p style="margin:0; color: var(--muted-foreground); font-size:0.9rem;">
+      <%- t('registrations.filters.total', { count: registrations ? registrations.length : 0 }) %>
+    </p>
+  </div>
+  <a class="btn btn-outline" href="/api/registrations/export" target="_blank" rel="noopener"><%= t('actions.downloadCsv') %></a>
 </div>
 
 <div class="table-container">
   <table role="grid">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Equipo</th>
-        <th>Competición</th>
-        <th>Fecha</th>
-        <th>Estado</th>
-        <th>Acciones</th>
+        <th><%= t('registrations.table.headers.id') %></th>
+        <th><%= t('registrations.table.headers.team') %></th>
+        <th><%= t('registrations.table.headers.competition') %></th>
+        <th><%= t('registrations.table.headers.date') %></th>
+        <th><%= t('registrations.table.headers.status') %></th>
+        <th><%= t('registrations.table.headers.actions') %></th>
       </tr>
     </thead>
     <tbody>
@@ -23,41 +34,41 @@
         <% registrations.forEach(reg => { %>
           <tr>
             <td><%= reg.id %></td>
-            <td><%= reg.Team ? reg.Team.name : 'N/A' %></td>
-            <td><%= reg.Competition ? reg.Competition.title : 'N/A' %></td>
-            <td><%= new Date(reg.registration_date).toLocaleDateString() %></td>
+            <td><%= reg.Team ? reg.Team.name : t('common.notAvailable') %></td>
+            <td><%= reg.Competition ? reg.Competition.title : t('common.notAvailable') %></td>
+            <td><%= new Date(reg.registration_date).toLocaleDateString(locale || 'es-ES') %></td>
             <td>
               <% if (reg.status === 'pending') { %>
-                <span class="badge badge-warning">Pendiente</span>
+                <span class="badge badge-warning"><%= t('status.pending') %></span>
               <% } else if (reg.status === 'approved') { %>
-                <span class="badge badge-success">Aprobado</span>
+                <span class="badge badge-success"><%= t('status.approved') %></span>
               <% } else { %>
-                <span class="badge badge-danger">Rechazado</span>
+                <span class="badge badge-danger"><%= t('status.rejected') %></span>
               <% } %>
             </td>
             <td>
               <% if (reg.status === 'pending') { %>
-                <div style="display: flex; gap: 0.5rem;">
+                <div class="table-actions">
                   <form action="/admin/registrations/<%= reg.id %>/status" method="POST" style="margin:0;">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <input type="hidden" name="status" value="approved">
-                    <button type="submit" class="btn-sm" style="background: var(--primary); border: none;">Aprobar</button>
+                    <button type="submit" class="btn btn-sm btn-primary"><%= t('actions.approve') %></button>
                   </form>
                   <form action="/admin/registrations/<%= reg.id %>/status" method="POST" style="margin:0;">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <input type="hidden" name="status" value="rejected">
-                    <button type="submit" class="btn-sm btn-danger" style="border: none;">Rechazar</button>
+                    <button type="submit" class="btn btn-sm btn-danger"><%= t('actions.reject') %></button>
                   </form>
                 </div>
               <% } else { %>
-                <span style="color: var(--text-muted); font-size: 0.8rem;">Procesado</span>
+                <span class="stat-note"><%= t('actions.processed') %></span>
               <% } %>
             </td>
           </tr>
         <% }) %>
       <% } else { %>
         <tr>
-          <td colspan="6" style="text-align: center; padding: 2rem;">No hay solicitudes de registro.</td>
+          <td colspan="6" class="table-empty"><%= t('registrations.table.empty') %></td>
         </tr>
       <% } %>
     </tbody>

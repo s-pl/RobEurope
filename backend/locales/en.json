@@ -1,0 +1,433 @@
+{
+  "common": {
+    "panelFallback": "Panel",
+    "appName": "RobEurope Admin",
+    "brand": "RobEurope",
+    "tagline": "Control Suite",
+    "menuToggle": "Toggle navigation",
+    "navLabel": "Panel navigation",
+    "sidebarHint": "Manage users, content, systems, and connected services from a single place.",
+    "workspace": {
+      "eyebrow": "RobEurope operations",
+      "description": "Monitor key metrics, teams, and the platform's mission-critical services.",
+      "status": "Active session"
+    },
+    "language": {
+      "label": "Language",
+      "names": {
+        "es": "Spanish",
+        "en": "English",
+        "de": "German"
+      }
+    },
+    "logout": "Sign out",
+    "loading": "Loading..."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "competitions": "Competitions",
+    "registrations": "Requests",
+    "teams": "Teams",
+    "posts": "Posts",
+    "sponsors": "Sponsors",
+    "countries": "Countries",
+    "logs": "Logs",
+    "ldap": "LDAP Users",
+    "redis": "Redis Explorer"
+  },
+  "auth": {
+    "metaTitle": "Admin access",
+    "eyebrow": "Secure access",
+    "title": "RobEurope Admin",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "errors": {
+      "missing": "Email and password are required",
+      "invalid": "Invalid credentials",
+      "role": "Administrator role required",
+      "unexpected": "An unexpected error occurred"
+    }
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create new",
+    "confirmDelete": "Are you sure you want to delete this record?",
+    "downloadCsv": "Download CSV",
+    "approve": "Approve",
+    "reject": "Reject",
+    "processed": "Processed",
+    "promote": "Promote to admin",
+    "confirmPromote": "Promote this user to admin?",
+    "addUser": "Add user",
+    "updateUser": "Update user",
+    "resetFilters": "Reset filters",
+    "add": "Add",
+    "update": "Update",
+    "scan": "Scan",
+    "prev": "Previous",
+    "next": "Next",
+    "openRedis": "Open Redis Explorer",
+    "login": "Sign in",
+    "logout": "Sign out"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "processed": "Processed",
+    "up": "Up",
+    "down": "Down"
+  },
+  "roles": {
+    "user": "User",
+    "super_admin": "Administrator"
+  },
+  "errors": {
+    "userNotFound": "User not found"
+  },
+  "dashboard": {
+    "metaTitle": "Admin dashboard",
+    "eyebrow": "Overview",
+    "title": "Administration Dashboard",
+    "description": "Track the pulse of the platform with live metrics on users, content, and system health.",
+    "stats": {
+      "users": "Users",
+      "competitions": "Competitions",
+      "posts": "Posts",
+      "registrations": "Registrations"
+    },
+    "system": {
+      "cpu": "CPU load",
+      "memory": "Memory usage",
+      "mysql": "MySQL",
+      "redis": "Redis",
+      "sessions": "Active sessions"
+    },
+    "charts": {
+      "rolesLabel": "Users",
+      "rolesTitle": "Role distribution",
+      "registrationLabel": "Registrations",
+      "registrationTitle": "Request status",
+      "timelineLabel": "Growth",
+      "timelineTitle": "Users registered per day"
+    },
+    "redis": {
+      "extra": "Keys: {keys} | Mem: {memory} | Clients: {clients}",
+      "link": "Open Redis Explorer"
+    }
+  },
+  "users": {
+    "metaTitle": "User management",
+    "eyebrow": "Users",
+    "title": "User Management",
+    "description": "Review roles, states, and activity to act quickly on community profiles.",
+    "charts": {
+      "rolesLabel": "Roles",
+      "rolesTitle": "User distribution",
+      "statusLabel": "Status",
+      "statusTitle": "Active vs inactive users"
+    },
+    "filters": {
+      "title": "Filters & search",
+      "searchLabel": "Search",
+      "searchPlaceholder": "Email, username, or name",
+      "roleLabel": "Role",
+      "roleAll": "All roles",
+      "roleUser": "User",
+      "roleAdmin": "Administrator",
+      "statusLabel": "Status",
+      "statusAll": "All statuses"
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "email": "Email",
+        "username": "Username",
+        "name": "Name",
+        "role": "Role",
+        "status": "Status",
+        "created": "Created",
+        "actions": "Actions"
+      }
+    }
+  },
+  "competitions": {
+    "metaTitle": "Competition management",
+    "eyebrow": "Competitions",
+    "title": "Competition Management",
+    "description": "Visualize registrations per competition and spot live events instantly.",
+    "chart": {
+      "label": "Registrations",
+      "title": "Participation by competition"
+    },
+    "filters": {
+      "title": "Competition list",
+      "searchLabel": "Search",
+      "searchPlaceholder": "Name or slug"
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "title": "Title",
+        "slug": "Slug",
+        "description": "Description",
+        "start": "Start",
+        "end": "End"
+      }
+    }
+  },
+  "registrations": {
+    "metaTitle": "Registration requests",
+    "eyebrow": "Registrations",
+    "title": "Registration Requests",
+    "description": "Approve or reject team submissions and export data for audits.",
+    "filters": {
+      "total": "Total requests: <strong>{count}</strong>"
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "team": "Team",
+        "competition": "Competition",
+        "date": "Date",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "empty": "No registration requests."
+    }
+  },
+  "logs": {
+    "metaTitle": "System logs",
+    "eyebrow": "Audit",
+    "title": "System Logs",
+    "description": "Audit critical actions, launch investigations, and filter quickly by user or event type.",
+    "chart": {
+      "activityLabel": "Activity",
+      "activityTitle": "Recorded actions",
+      "entitiesLabel": "Entities",
+      "entitiesTitle": "Modified resources"
+    },
+    "filters": {
+      "title": "Filters",
+      "searchLabel": "Search",
+      "searchPlaceholder": "User, email, or action",
+      "actionLabel": "Action",
+      "actionAll": "All actions"
+    },
+    "actions": {
+      "CREATE": "Create",
+      "UPDATE": "Update",
+      "DELETE": "Delete",
+      "LOGIN": "Log in",
+      "LOGOUT": "Log out",
+      "REGISTER": "Register",
+      "ROLE_CHANGED": "Role change"
+    },
+    "table": {
+      "headers": {
+        "time": "Time",
+        "user": "User",
+        "action": "Action",
+        "entity": "Entity",
+        "entityId": "Entity ID",
+        "ip": "IP address",
+        "details": "Details"
+      },
+      "systemUser": "System"
+    },
+    "pagination": {
+      "first": "First",
+      "prev": "Previous",
+      "summary": "Page {current} of {total} ({count} records)",
+      "next": "Next",
+      "last": "Last"
+    }
+  },
+  "editUser": {
+    "metaTitle": "Edit user",
+    "eyebrow": "Users",
+    "title": "Edit User",
+    "form": {
+      "username": "Username",
+      "email": "Email",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "role": "Role",
+      "status": "Status",
+      "roleUser": "User",
+      "roleAdmin": "Administrator",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "submit": "Save changes"
+    }
+  },
+  "tables": {
+    "actions": "Actions",
+    "empty": "No records available.",
+    "link": "Link"
+  },
+  "generic": {
+    "eyebrow": "Collection",
+    "create": "Create new",
+    "table": {
+      "actions": "Actions",
+      "empty": "No records found."
+    },
+    "link": "Link",
+    "form": {
+      "jsonHint": "Valid JSON required.",
+      "cancel": "Cancel",
+      "save": "Save",
+      "createTitle": "Create {collection}",
+      "editTitle": "Edit {collection}"
+    }
+  },
+  "crud": {
+    "fields": {
+      "id": "ID",
+      "title": "Title",
+      "description": "Description",
+      "status": "Status",
+      "website": "Website",
+      "logo": "Logo URL",
+      "mediaUrls": "Media URLs (JSON)",
+      "stats": "Stats (JSON)",
+      "createdAt": "Created",
+      "name": "Name",
+      "streamUrl": "Stream URL",
+      "startDate": "Start date",
+      "endDate": "End date"
+    },
+    "teams": {
+      "label": "Teams",
+      "fields": {
+        "name": "Name",
+        "countryId": "Country ID",
+        "city": "City",
+        "institution": "Institution",
+        "description": "Description",
+        "socialLinks": "Social links (JSON)"
+      }
+    },
+    "posts": {
+      "label": "Posts",
+      "fields": {
+        "content": "Content",
+        "authorId": "Author ID"
+      }
+    },
+    "sponsors": {
+      "label": "Sponsors",
+      "fields": {
+        "name": "Name",
+        "type": "Type"
+      }
+    },
+    "countries": {
+      "label": "Countries",
+      "fields": {
+        "code": "Code",
+        "flag": "Flag"
+      }
+    },
+    "competitions": {
+      "label": "Competitions",
+      "fields": {
+        "slug": "Slug",
+        "location": "Location",
+        "maxTeams": "Max teams",
+        "registrationStart": "Registration start",
+        "registrationEnd": "Registration end"
+      }
+    }
+  },
+  "ldap": {
+    "metaTitle": "LDAP Users",
+    "eyebrow": "Integrations",
+    "title": "LDAP Users",
+    "add": "Add user",
+    "table": {
+      "headers": {
+        "uid": "UID",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "actions": "Actions"
+      },
+      "empty": "No LDAP users found."
+    },
+    "form": {
+      "addTitle": "Add LDAP User",
+      "editTitle": "Edit LDAP User",
+      "uid": "UID",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "passwordHint": "(leave blank to keep)",
+      "cancel": "Cancel",
+      "submitAdd": "Add user",
+      "submitEdit": "Update user"
+    },
+    "confirmDelete": "Delete user?"
+  },
+  "redis": {
+    "metaTitle": "Redis Explorer",
+    "eyebrow": "Integrations",
+    "title": "Redis Explorer",
+    "description": "Inspect Redis health and manage keys in real time.",
+    "overview": {
+      "title": "Overview",
+      "loading": "Loading overview...",
+      "summary": "Ping: {ping} | Keys: {keys} | Mem: {memory} | Clients: {clients} | Uptime(s): {uptime}",
+      "error": "Overview error: {message}"
+    },
+    "controls": {
+      "pattern": "Pattern",
+      "count": "Count",
+      "scan": "Scan",
+      "cursor": "Cursor: {value}",
+      "error": "Error: {message}"
+    },
+    "keys": {
+      "title": "Keys",
+      "empty": "(no keys)",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "details": {
+      "title": "Key details",
+      "meta": "Type: {type} | TTL: {ttl}",
+      "delete": "Delete key"
+    },
+    "alerts": {
+      "scanFailed": "Failed to scan keys.",
+      "getFailed": "Failed to fetch key.",
+      "deleteFailed": "Failed to delete key.",
+      "deleted": "Key deleted"
+    },
+    "confirmDelete": "Delete key \"{key}\"?"
+  },
+  "charts": {
+    "axes": {
+      "count": "Count",
+      "users": "Users",
+      "registrations": "Registrations"
+    },
+    "tooltips": {
+      "usersCount": "Users: {count}",
+      "registrationsCount": "Registrations: {count}",
+      "percentage": "Percentage: {value}%",
+      "date": "Date: {value}",
+      "newUsers": "New users: {count}"
+    },
+    "empty": "No data available"
+  }
+}

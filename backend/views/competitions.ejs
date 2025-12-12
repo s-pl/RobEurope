@@ -1,28 +1,39 @@
-<% const content = (function(){ %>
-<h2> Gestión de Competiciones</h2>
+<%- include('partials/header') %>
 
-<div class="charts-container">
-  <div class="chart-wrapper" style="grid-column: 1 / -1;">
-    <h3> Registraciones por Competición</h3>
-    <svg id="competitionChart"></svg>
+<section class="page-header">
+  <div>
+    <p class="page-eyebrow"><%= t('competitions.eyebrow') %></p>
+    <h2 class="page-title"><%= t('competitions.title') %></h2>
   </div>
+  <p class="page-description"><%= t('competitions.description') %></p>
+</section>
+
+<div class="chart-wrapper">
+  <div class="chart-head">
+    <p class="chart-label"><%= t('competitions.chart.label') %></p>
+    <h3 class="chart-title"><%= t('competitions.chart.title') %></h3>
+  </div>
+  <svg id="competitionChart"></svg>
 </div>
 
-<div style="margin: 2rem 0;">
-  <h3> Lista de Competiciones</h3>
-  <input type="text" id="searchCompetition" placeholder="Buscar competición..." style="margin-bottom: 1rem;">
-</div>
+<section class="filters-panel">
+  <h3 style="margin:0 0 0.6rem 0"><%= t('competitions.filters.title') %></h3>
+  <div>
+    <label for="searchCompetition"><%= t('competitions.filters.searchLabel') %></label>
+    <input type="text" id="searchCompetition" placeholder="<%= t('competitions.filters.searchPlaceholder') %>" />
+  </div>
+</section>
 
-<div style="overflow-x: auto;">
+<div class="table-container">
   <table role="grid">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Título</th>
-        <th>Slug</th>
-        <th>Descripción</th>
-        <th>Inicio</th>
-        <th>Fin</th>
+        <th><%= t('competitions.table.headers.id') %></th>
+        <th><%= t('competitions.table.headers.title') %></th>
+        <th><%= t('competitions.table.headers.slug') %></th>
+        <th><%= t('competitions.table.headers.description') %></th>
+        <th><%= t('competitions.table.headers.start') %></th>
+        <th><%= t('competitions.table.headers.end') %></th>
       </tr>
     </thead>
     <tbody id="competitionsTableBody">
@@ -31,14 +42,13 @@
           <td><%= c.id %></td>
           <td><strong><%= c.title %></strong></td>
           <td><code><%= c.slug %></code></td>
-          <td><%= c.description || '—' %></td>
-          <td><%= c.start_date ? new Date(c.start_date).toLocaleDateString('es-ES') : '—' %></td>
-          <td><%= c.end_date ? new Date(c.end_date).toLocaleDateString('es-ES') : '—' %></td>
+          <td><%= c.description || t('common.notAvailable') %></td>
+          <td><%= c.start_date ? new Date(c.start_date).toLocaleDateString(locale || 'es-ES') : t('common.notAvailable') %></td>
+          <td><%= c.end_date ? new Date(c.end_date).toLocaleDateString(locale || 'es-ES') : t('common.notAvailable') %></td>
         </tr>
       <% }) %>
     </tbody>
   </table>
 </div>
 
-<% })(); %>
-<%- include('partials/layout', { body: content, title }) %>
+<%- include('partials/footer') %>

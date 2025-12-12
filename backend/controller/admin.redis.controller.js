@@ -8,8 +8,8 @@ const parseCount = (v, def = 50) => {
 
 export async function renderRedisExplorer(req, res) {
   return res.render('redis', {
-    pageTitle: 'Redis Explorer',
-    user: req.session.adminUser || null
+    title: req.__('redis.metaTitle'),
+    pageKey: 'redis'
   });
 }
 

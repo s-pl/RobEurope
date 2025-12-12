@@ -20,14 +20,14 @@ function decodeIfBase64(value) {
 }
 
 export async function renderLogin(req, res) {
-  return res.render('login', { title: 'Admin Login' });
+  return res.render('login', { title: req.__('auth.metaTitle'), pageKey: 'login' });
 }
 
 export async function handleLogin(req, res) {
   try {
     let { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).render('login', { title: 'Admin Login', error: 'Email and password required' });
+      return res.status(400).render('login', { title: req.__('auth.metaTitle'), pageKey: 'login', error: req.__('auth.errors.missing') });
     }
     // Normalize & decode
     email = decodeIfBase64(email.trim()).toLowerCase();
@@ -35,19 +35,19 @@ export async function handleLogin(req, res) {
 
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      return res.status(401).render('login', { title: 'Admin Login', error: 'Invalid credentials' });
+      return res.status(401).render('login', { title: req.__('auth.metaTitle'), pageKey: 'login', error: req.__('auth.errors.invalid') });
     }
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
-      return res.status(401).render('login', { title: 'Admin Login', error: 'Invalid credentials' });
+      return res.status(401).render('login', { title: req.__('auth.metaTitle'), pageKey: 'login', error: req.__('auth.errors.invalid') });
     }
     if (user.role !== 'super_admin') {
-      return res.status(403).render('login', { title: 'Admin Login', error: 'Admin role required' });
+      return res.status(403).render('login', { title: req.__('auth.metaTitle'), pageKey: 'login', error: req.__('auth.errors.role') });
     }
     req.session.user = { id: user.id, email: user.email, role: user.role, username: user.username };
     return res.redirect('/admin');
   } catch (e) {
-    return res.status(500).render('login', { title: 'Admin Login', error: e.message });
+    return res.status(500).render('login', { title: req.__('auth.metaTitle'), pageKey: 'login', error: req.__('auth.errors.unexpected') });
   }
 }
 
@@ -67,14 +67,15 @@ export async function renderDashboard(req, res) {
     Registration.count()
   ]);
   res.render('dashboard', {
-    title: 'Admin Dashboard',
+    title: req.__('dashboard.metaTitle'),
+    pageKey: 'dashboard',
     stats: { users, competitions, posts, registrations }
   });
 }
 
 export async function listUsers(req, res) {
-  const all = await User.findAll({ attributes: ['id', 'email', 'username', 'first_name', 'last_name', 'role', 'created_at'] });
-  res.render('users', { title: 'Users', users: all });
+  const all = await User.findAll({ attributes: ['id', 'email', 'username', 'first_name', 'last_name', 'role', 'is_active', 'created_at'] });
+  res.render('users', { title: req.__('users.metaTitle'), pageKey: 'users', users: all });
 }
 
 export async function promoteUser(req, res) {
@@ -228,7 +229,7 @@ export async function listCompetitions(req, res) {
     const competitions = await Competition.findAll({
       attributes: ['id', 'title', 'slug', 'description', 'start_date', 'end_date']
     });
-    res.render('competitions', { title: 'Competiciones', competitions });
+    res.render('competitions', { title: req.__('competitions.metaTitle'), pageKey: 'competitions', competitions });
   } catch (error) {
     res.status(500).render('error', { status: 500, message: 'Error loading competitions', error });
   }
@@ -282,7 +283,8 @@ export async function listSystemLogs(req, res) {
 
     const totalPages = Math.ceil(count / limit);
     res.render('system-logs', {
-      title: 'Logs del Sistema',
+      title: req.__('logs.metaTitle'),
+      pageKey: 'logs',
       logs: rows,
       currentPage: page,
       totalPages,
@@ -335,9 +337,9 @@ export async function renderEditUser(req, res) {
     const { id } = req.params;
     const user = await User.findByPk(id);
     if (!user) {
-      return res.status(404).render('error', { status: 404, message: 'User not found' });
+      return res.status(404).render('error', { status: 404, message: req.__('errors.userNotFound') });
     }
-    res.render('edit-user', { title: 'Editar Usuario', user });
+    res.render('edit-user', { title: req.__('editUser.metaTitle'), pageKey: 'users', user });
   } catch (error) {
     res.status(500).render('error', { status: 500, message: error.message });
   }
@@ -350,7 +352,7 @@ export async function updateUser(req, res) {
     
     const user = await User.findByPk(id);
     if (!user) {
-      return res.status(404).render('error', { status: 404, message: 'User not found' });
+      return res.status(404).render('error', { status: 404, message: req.__('errors.userNotFound') });
     }
 
     const oldData = { ...user.toJSON() };
@@ -401,7 +403,7 @@ export async function listRegistrations(req, res) {
       ],
       order: [['registration_date', 'DESC']]
     });
-    res.render('registrations', { title: 'Registrations', registrations });
+    res.render('registrations', { title: req.__('registrations.metaTitle'), pageKey: 'registrations', registrations });
   } catch (error) {
     res.status(500).render('error', { status: 500, message: error.message });
   }

@@ -1,18 +1,36 @@
+    <% if (currentUser) { %>
+        </main>
+      </div>
+    </div>
+    <% } else { %>
     </main>
+    <% } %>
 
   <!-- D3.js Library (must be before chart utilities) -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <!-- Chart utilities (must be before specific chart scripts) -->
   <script src="/js/chart-utils.js"></script>
   <!-- Page-specific scripts load here based on page title -->
-  <% if (title && title.includes('Dashboard')) { %>
+  <% if (pageKey === 'dashboard') { %>
     <script src="/js/dashboard.js"></script>
-  <% } else if (title && (title.includes('Usuarios') || title.includes('Users'))) { %>
+  <% } else if (pageKey === 'users') { %>
     <script src="/js/users.js"></script>
-  <% } else if (title && title.includes('Competiciones')) { %>
+  <% } else if (pageKey === 'competitions') { %>
     <script src="/js/competitions.js"></script>
-  <% } else if (title && title.includes('Logs')) { %>
+  <% } else if (pageKey === 'logs') { %>
     <script src="/js/system-logs.js"></script>
   <% } %>
+  <script>
+    (function() {
+      const sidebar = document.querySelector('.sidebar');
+      if (!sidebar) return;
+      document.querySelectorAll('.sidebar-nav a').forEach((link) => {
+        link.addEventListener('click', () => {
+          sidebar.classList.remove('open');
+          document.body.classList.remove('sidebar-open');
+        });
+      });
+    })();
+  </script>
 </body>
 </html>

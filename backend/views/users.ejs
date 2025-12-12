@@ -1,49 +1,73 @@
 <%- include('partials/header') %>
 
-<h2>👥 Gestión de Usuarios</h2>
+<section class="page-header">
+  <div>
+    <p class="page-eyebrow"><%= t('users.eyebrow') %></p>
+    <h2 class="page-title"><%= t('users.title') %></h2>
+  </div>
+  <p class="page-description"><%= t('users.description') %></p>
+</section>
 
 <div class="charts-container">
-  <div class="chart-wrapper">
-    <h3>📊 Distribución de Roles</h3>
+  <section class="chart-wrapper">
+    <div class="chart-head">
+      <p class="chart-label"><%= t('users.charts.rolesLabel') %></p>
+      <h3 class="chart-title"><%= t('users.charts.rolesTitle') %></h3>
+    </div>
     <svg id="userRoleDistribution"></svg>
-  </div>
+  </section>
 
-  <div class="chart-wrapper">
-    <h3>🔄 Estados de Usuarios</h3>
+  <section class="chart-wrapper">
+    <div class="chart-head">
+      <p class="chart-label"><%= t('users.charts.statusLabel') %></p>
+      <h3 class="chart-title"><%= t('users.charts.statusTitle') %></h3>
+    </div>
     <svg id="userStatusChart"></svg>
-  </div>
+  </section>
 </div>
 
-<div style="margin: 2rem 0;">
-  <h3>🔍 Filtros y Búsqueda</h3>
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-    <input type="text" id="searchInput" placeholder="Buscar por email, username o nombre..." style="grid-column: 1 / -1;">
-    <select id="roleFilter">
-      <option value="">Todos los roles</option>
-      <option value="user">Usuario</option>
-      <option value="super_admin">Admin</option>
-    </select>
-    <select id="statusFilter">
-      <option value="">Todos los estados</option>
-      <option value="active">Activo</option>
-      <option value="inactive">Inactivo</option>
-    </select>
-    <button onclick="resetFilters()" style="background: linear-gradient(135deg, #f59e0b, #d97706);">Limpiar Filtros</button>
+<section class="filters-panel">
+  <h3 style="margin:0"><%= t('users.filters.title') %></h3>
+  <div class="filters-grid">
+    <div style="grid-column: 1 / -1;">
+      <label for="searchInput"><%= t('users.filters.searchLabel') %></label>
+      <input type="text" id="searchInput" placeholder="<%= t('users.filters.searchPlaceholder') %>" />
+    </div>
+    <div>
+      <label for="roleFilter"><%= t('users.filters.roleLabel') %></label>
+      <select id="roleFilter">
+        <option value=""><%= t('users.filters.roleAll') %></option>
+        <option value="user"><%= t('users.filters.roleUser') %></option>
+        <option value="super_admin"><%= t('users.filters.roleAdmin') %></option>
+      </select>
+    </div>
+    <div>
+      <label for="statusFilter"><%= t('users.filters.statusLabel') %></label>
+      <select id="statusFilter">
+        <option value=""><%= t('users.filters.statusAll') %></option>
+        <option value="active"><%= t('status.active') %></option>
+        <option value="inactive"><%= t('status.inactive') %></option>
+      </select>
+    </div>
+    <div>
+      <label class="sr-only" for="resetFilters"><%= t('actions.resetFilters') %></label>
+      <button id="resetFilters" class="btn btn-outline" type="button" onclick="resetFilters()"><%= t('actions.resetFilters') %></button>
+    </div>
   </div>
-</div>
+</section>
 
 <div class="table-container">
   <table role="grid">
     <thead>
       <tr>
-        <th>ID</th>
-        <th>Email</th>
-        <th>Usuario</th>
-        <th>Nombre</th>
-        <th>Rol</th>
-        <th>Estado</th>
-        <th>Creado</th>
-        <th>Acciones</th>
+        <th><%= t('users.table.headers.id') %></th>
+        <th><%= t('users.table.headers.email') %></th>
+        <th><%= t('users.table.headers.username') %></th>
+        <th><%= t('users.table.headers.name') %></th>
+        <th><%= t('users.table.headers.role') %></th>
+        <th><%= t('users.table.headers.status') %></th>
+        <th><%= t('users.table.headers.created') %></th>
+        <th><%= t('users.table.headers.actions') %></th>
       </tr>
     </thead>
     <tbody id="usersTableBody">
@@ -55,25 +79,25 @@
           <td><%= u.first_name %> <%= u.last_name %></td>
           <td>
             <span class="badge <%= u.role === 'super_admin' ? 'badge-danger' : 'badge-info' %>">
-              <%= u.role %>
+              <%= t('roles.' + u.role) %>
             </span>
           </td>
           <td>
             <span class="badge <%= u.is_active ? 'badge-success' : 'badge-warning' %>">
-              <%= u.is_active ? 'Activo' : 'Inactivo' %>
+              <%= u.is_active ? t('status.active') : t('status.inactive') %>
             </span>
           </td>
-          <td><%= new Date(u.created_at).toLocaleDateString() %></td>
+          <td><%= new Date(u.created_at).toLocaleDateString(locale || 'es-ES') %></td>
           <td>
-            <div style="display: flex; gap: 0.5rem;">
-              <a href="/admin/users/<%= u.id %>/edit" class="btn btn-sm btn-primary">
-                ✏️ Editar
+            <div class="table-actions">
+              <a href="/admin/users/<%= u.id %>/edit" class="btn btn-sm btn-outline">
+                <%= t('actions.edit') %>
               </a>
               <% if (u.role !== 'super_admin') { %>
-                <form action="/admin/users/<%= u.id %>/promote" method="POST" onsubmit="return confirm('¿Hacer admin a este usuario?');" style="margin: 0;">
+                <form action="/admin/users/<%= u.id %>/promote" method="POST" onsubmit="return confirm(<%- JSON.stringify(t('actions.confirmPromote')) %>);" style="margin: 0;">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                  <button type="submit" class="btn btn-sm btn-warning" style="background: #f59e0b; border: none;">
-                    ⬆️ Admin
+                  <button type="submit" class="btn btn-sm btn-primary">
+                    <%= t('actions.promote') %>
                   </button>
                 </form>
               <% } %>
@@ -84,5 +108,9 @@
     </tbody>
   </table>
 </div>
+
+<script>
+  window.usersDataGlobal = <%- JSON.stringify(users || []) %>;
+</script>
 
 <%- include('partials/footer') %>

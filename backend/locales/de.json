@@ -1,0 +1,433 @@
+{
+  "common": {
+    "panelFallback": "Panel",
+    "appName": "RobEurope Admin",
+    "brand": "RobEurope",
+    "tagline": "Control Suite",
+    "menuToggle": "Navigation umschalten",
+    "navLabel": "Bereichsnavigation",
+    "sidebarHint": "Verwalte Benutzer, Inhalte, Systeme und angebundene Dienste an einem Ort.",
+    "workspace": {
+      "eyebrow": "RobEurope-Betrieb",
+      "description": "Überwache Kennzahlen, Teams und geschäftskritische Dienste der Plattform.",
+      "status": "Aktive Sitzung"
+    },
+    "language": {
+      "label": "Sprache",
+      "names": {
+        "es": "Spanisch",
+        "en": "Englisch",
+        "de": "Deutsch"
+      }
+    },
+    "logout": "Abmelden",
+    "loading": "Lädt..."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "Benutzer",
+    "competitions": "Wettbewerbe",
+    "registrations": "Anfragen",
+    "teams": "Teams",
+    "posts": "Beiträge",
+    "sponsors": "Sponsoren",
+    "countries": "Länder",
+    "logs": "Logs",
+    "ldap": "LDAP-Benutzer",
+    "redis": "Redis Explorer"
+  },
+  "auth": {
+    "metaTitle": "Administratorzugang",
+    "eyebrow": "Gesicherter Zugang",
+    "title": "RobEurope Admin",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "submit": "Anmelden",
+    "errors": {
+      "missing": "E-Mail und Passwort sind erforderlich",
+      "invalid": "Ungültige Zugangsdaten",
+      "role": "Administratorrolle erforderlich",
+      "unexpected": "Ein unerwarteter Fehler ist aufgetreten"
+    }
+  },
+  "actions": {
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "create": "Neu anlegen",
+    "confirmDelete": "Möchtest du diesen Datensatz wirklich löschen?",
+    "downloadCsv": "CSV herunterladen",
+    "approve": "Genehmigen",
+    "reject": "Ablehnen",
+    "processed": "Verarbeitet",
+    "promote": "Zum Admin befördern",
+    "confirmPromote": "Diesen Benutzer zum Admin machen?",
+    "addUser": "Benutzer hinzufügen",
+    "updateUser": "Benutzer aktualisieren",
+    "resetFilters": "Filter zurücksetzen",
+    "add": "Hinzufügen",
+    "update": "Aktualisieren",
+    "scan": "Scannen",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "openRedis": "Redis Explorer öffnen",
+    "login": "Anmelden",
+    "logout": "Abmelden"
+  },
+  "status": {
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "pending": "Ausstehend",
+    "approved": "Genehmigt",
+    "rejected": "Abgelehnt",
+    "processed": "Verarbeitet",
+    "up": "Online",
+    "down": "Offline"
+  },
+  "roles": {
+    "user": "Benutzer",
+    "super_admin": "Administrator"
+  },
+  "errors": {
+    "userNotFound": "Benutzer nicht gefunden"
+  },
+  "dashboard": {
+    "metaTitle": "Admin-Dashboard",
+    "eyebrow": "Überblick",
+    "title": "Administrations-Dashboard",
+    "description": "Überwache Nutzer, Inhalte und Systemgesundheit mit Live-Metriken.",
+    "stats": {
+      "users": "Benutzer",
+      "competitions": "Wettbewerbe",
+      "posts": "Beiträge",
+      "registrations": "Registrierungen"
+    },
+    "system": {
+      "cpu": "CPU-Last",
+      "memory": "Speicherauslastung",
+      "mysql": "MySQL",
+      "redis": "Redis",
+      "sessions": "Aktive Sitzungen"
+    },
+    "charts": {
+      "rolesLabel": "Benutzer",
+      "rolesTitle": "Rollenverteilung",
+      "registrationLabel": "Registrierungen",
+      "registrationTitle": "Status der Anfragen",
+      "timelineLabel": "Wachstum",
+      "timelineTitle": "Registrierte Benutzer je Tag"
+    },
+    "redis": {
+      "extra": "Schlüssel: {keys} | Speicher: {memory} | Clients: {clients}",
+      "link": "Redis Explorer öffnen"
+    }
+  },
+  "users": {
+    "metaTitle": "Benutzerverwaltung",
+    "eyebrow": "Benutzer",
+    "title": "Benutzerverwaltung",
+    "description": "Analysiere Rollen, Status und Aktivität, um schnell handeln zu können.",
+    "charts": {
+      "rolesLabel": "Rollen",
+      "rolesTitle": "Benutzerverteilung",
+      "statusLabel": "Status",
+      "statusTitle": "Aktiv vs. inaktiv"
+    },
+    "filters": {
+      "title": "Filter & Suche",
+      "searchLabel": "Suche",
+      "searchPlaceholder": "E-Mail, Benutzername oder Name",
+      "roleLabel": "Rolle",
+      "roleAll": "Alle Rollen",
+      "roleUser": "Benutzer",
+      "roleAdmin": "Administrator",
+      "statusLabel": "Status",
+      "statusAll": "Alle Status"
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "email": "E-Mail",
+        "username": "Benutzername",
+        "name": "Name",
+        "role": "Rolle",
+        "status": "Status",
+        "created": "Erstellt",
+        "actions": "Aktionen"
+      }
+    }
+  },
+  "competitions": {
+    "metaTitle": "Wettbewerbsverwaltung",
+    "eyebrow": "Wettbewerbe",
+    "title": "Wettbewerbsverwaltung",
+    "description": "Verfolge Anmeldungen pro Wettbewerb und erkenne aktive Events sofort.",
+    "chart": {
+      "label": "Registrierungen",
+      "title": "Teilnahmen pro Wettbewerb"
+    },
+    "filters": {
+      "title": "Wettbewerbsliste",
+      "searchLabel": "Suche",
+      "searchPlaceholder": "Name oder Slug"
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "title": "Titel",
+        "slug": "Slug",
+        "description": "Beschreibung",
+        "start": "Start",
+        "end": "Ende"
+      }
+    }
+  },
+  "registrations": {
+    "metaTitle": "Registrierungsanfragen",
+    "eyebrow": "Registrierungen",
+    "title": "Registrierungsanfragen",
+    "description": "Genehmige oder lehne Team-Anfragen ab und exportiere Daten für Audits.",
+    "filters": {
+      "total": "Gesamtanzahl: <strong>{count}</strong>"
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "team": "Team",
+        "competition": "Wettbewerb",
+        "date": "Datum",
+        "status": "Status",
+        "actions": "Aktionen"
+      },
+      "empty": "Keine Registrierungsanfragen."
+    }
+  },
+  "logs": {
+    "metaTitle": "System-Logs",
+    "eyebrow": "Audit",
+    "title": "System-Logs",
+    "description": "Prüfe kritische Aktionen, starte Untersuchungen und filtere schnell nach Benutzer oder Ereignis.",
+    "chart": {
+      "activityLabel": "Aktivität",
+      "activityTitle": "Erfasste Aktionen",
+      "entitiesLabel": "Entitäten",
+      "entitiesTitle": "Veränderte Ressourcen"
+    },
+    "filters": {
+      "title": "Filter",
+      "searchLabel": "Suche",
+      "searchPlaceholder": "Benutzer, E-Mail oder Aktion",
+      "actionLabel": "Aktion",
+      "actionAll": "Alle Aktionen"
+    },
+    "actions": {
+      "CREATE": "Anlegen",
+      "UPDATE": "Aktualisieren",
+      "DELETE": "Löschen",
+      "LOGIN": "Anmelden",
+      "LOGOUT": "Abmelden",
+      "REGISTER": "Registrieren",
+      "ROLE_CHANGED": "Rollenwechsel"
+    },
+    "table": {
+      "headers": {
+        "time": "Zeit",
+        "user": "Benutzer",
+        "action": "Aktion",
+        "entity": "Entität",
+        "entityId": "Entitäts-ID",
+        "ip": "IP-Adresse",
+        "details": "Details"
+      },
+      "systemUser": "System"
+    },
+    "pagination": {
+      "first": "Erste",
+      "prev": "Zurück",
+      "summary": "Seite {current} von {total} ({count} Einträge)",
+      "next": "Weiter",
+      "last": "Letzte"
+    }
+  },
+  "editUser": {
+    "metaTitle": "Benutzer bearbeiten",
+    "eyebrow": "Benutzer",
+    "title": "Benutzer bearbeiten",
+    "form": {
+      "username": "Benutzername",
+      "email": "E-Mail",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "role": "Rolle",
+      "status": "Status",
+      "roleUser": "Benutzer",
+      "roleAdmin": "Administrator",
+      "statusActive": "Aktiv",
+      "statusInactive": "Inaktiv",
+      "submit": "Änderungen speichern"
+    }
+  },
+  "tables": {
+    "actions": "Aktionen",
+    "empty": "Keine Daten vorhanden.",
+    "link": "Link"
+  },
+  "generic": {
+    "eyebrow": "Sammlung",
+    "create": "Neu anlegen",
+    "table": {
+      "actions": "Aktionen",
+      "empty": "Keine Einträge gefunden."
+    },
+    "link": "Link",
+    "form": {
+      "jsonHint": "Gültiges JSON erforderlich.",
+      "cancel": "Abbrechen",
+      "save": "Speichern",
+      "createTitle": "{collection} erstellen",
+      "editTitle": "{collection} bearbeiten"
+    }
+  },
+  "crud": {
+    "fields": {
+      "id": "ID",
+      "title": "Titel",
+      "description": "Beschreibung",
+      "status": "Status",
+      "website": "Website",
+      "logo": "Logo-URL",
+      "mediaUrls": "Media-URLs (JSON)",
+      "stats": "Stats (JSON)",
+      "createdAt": "Erstellt",
+      "name": "Name",
+      "streamUrl": "Stream-URL",
+      "startDate": "Startdatum",
+      "endDate": "Enddatum"
+    },
+    "teams": {
+      "label": "Teams",
+      "fields": {
+        "name": "Name",
+        "countryId": "Land-ID",
+        "city": "Stadt",
+        "institution": "Institution",
+        "description": "Beschreibung",
+        "socialLinks": "Social Links (JSON)"
+      }
+    },
+    "posts": {
+      "label": "Beiträge",
+      "fields": {
+        "content": "Inhalt",
+        "authorId": "Autor-ID"
+      }
+    },
+    "sponsors": {
+      "label": "Sponsoren",
+      "fields": {
+        "name": "Name",
+        "type": "Typ"
+      }
+    },
+    "countries": {
+      "label": "Länder",
+      "fields": {
+        "code": "Code",
+        "flag": "Flagge"
+      }
+    },
+    "competitions": {
+      "label": "Wettbewerbe",
+      "fields": {
+        "slug": "Slug",
+        "location": "Ort",
+        "maxTeams": "Max. Teams",
+        "registrationStart": "Registrierungsbeginn",
+        "registrationEnd": "Registrierungsende"
+      }
+    }
+  },
+  "ldap": {
+    "metaTitle": "LDAP-Benutzer",
+    "eyebrow": "Integrationen",
+    "title": "LDAP-Benutzer",
+    "add": "Benutzer hinzufügen",
+    "table": {
+      "headers": {
+        "uid": "UID",
+        "firstName": "Vorname",
+        "lastName": "Nachname",
+        "email": "E-Mail",
+        "actions": "Aktionen"
+      },
+      "empty": "Keine LDAP-Benutzer gefunden."
+    },
+    "form": {
+      "addTitle": "LDAP-Benutzer hinzufügen",
+      "editTitle": "LDAP-Benutzer bearbeiten",
+      "uid": "UID",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "passwordHint": "(leer lassen, um zu behalten)",
+      "cancel": "Abbrechen",
+      "submitAdd": "Benutzer hinzufügen",
+      "submitEdit": "Benutzer speichern"
+    },
+    "confirmDelete": "Benutzer löschen?"
+  },
+  "redis": {
+    "metaTitle": "Redis Explorer",
+    "eyebrow": "Integrationen",
+    "title": "Redis Explorer",
+    "description": "Prüfe den Redis-Zustand und verwalte Schlüssel in Echtzeit.",
+    "overview": {
+      "title": "Übersicht",
+      "loading": "Übersicht wird geladen...",
+      "summary": "Ping: {ping} | Schlüssel: {keys} | Speicher: {memory} | Clients: {clients} | Laufzeit(s): {uptime}",
+      "error": "Übersichtsfehler: {message}"
+    },
+    "controls": {
+      "pattern": "Muster",
+      "count": "Anzahl",
+      "scan": "Scannen",
+      "cursor": "Cursor: {value}",
+      "error": "Fehler: {message}"
+    },
+    "keys": {
+      "title": "Schlüssel",
+      "empty": "(keine Schlüssel)",
+      "prev": "Zurück",
+      "next": "Weiter"
+    },
+    "details": {
+      "title": "Schlüsseldetails",
+      "meta": "Typ: {type} | TTL: {ttl}",
+      "delete": "Schlüssel löschen"
+    },
+    "alerts": {
+      "scanFailed": "Schlüssel konnten nicht gescannt werden.",
+      "getFailed": "Schlüssel konnte nicht geladen werden.",
+      "deleteFailed": "Schlüssel konnte nicht gelöscht werden.",
+      "deleted": "Schlüssel gelöscht"
+    },
+    "confirmDelete": "Schlüssel \"{key}\" löschen?"
+  },
+  "charts": {
+    "axes": {
+      "count": "Anzahl",
+      "users": "Benutzer",
+      "registrations": "Registrierungen"
+    },
+    "tooltips": {
+      "usersCount": "Benutzer: {count}",
+      "registrationsCount": "Registrierungen: {count}",
+      "percentage": "Prozent: {value}%",
+      "date": "Datum: {value}",
+      "newUsers": "Neue Benutzer: {count}"
+    },
+    "empty": "Keine Daten vorhanden"
+  }
+}

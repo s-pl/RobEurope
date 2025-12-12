@@ -1,0 +1,433 @@
+{
+  "common": {
+    "panelFallback": "Panel",
+    "appName": "RobEurope Admin",
+    "brand": "RobEurope",
+    "tagline": "Control Suite",
+    "menuToggle": "Alternar navegación",
+    "navLabel": "Navegación del panel",
+    "sidebarHint": "Gestiona usuarios, contenido, sistemas y servicios conectados desde un único lugar.",
+    "workspace": {
+      "eyebrow": "Operaciones RobEurope",
+      "description": "Supervisa métricas clave, equipos y servicios fundamentales de la plataforma.",
+      "status": "Sesión activa"
+    },
+    "language": {
+      "label": "Idioma",
+      "names": {
+        "es": "Español",
+        "en": "Inglés",
+        "de": "Alemán"
+      }
+    },
+    "logout": "Cerrar sesión",
+    "loading": "Cargando..."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "Usuarios",
+    "competitions": "Competiciones",
+    "registrations": "Solicitudes",
+    "teams": "Equipos",
+    "posts": "Posts",
+    "sponsors": "Patrocinadores",
+    "countries": "Países",
+    "logs": "Logs",
+    "ldap": "Usuarios LDAP",
+    "redis": "Redis Explorer"
+  },
+  "auth": {
+    "metaTitle": "Acceso administrativo",
+    "eyebrow": "Acceso seguro",
+    "title": "RobEurope Admin",
+    "email": "Email",
+    "password": "Contraseña",
+    "submit": "Iniciar sesión",
+    "errors": {
+      "missing": "Email y contraseña obligatorios",
+      "invalid": "Credenciales inválidas",
+      "role": "Se requiere rol de administrador",
+      "unexpected": "Ha ocurrido un error inesperado"
+    }
+  },
+  "actions": {
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "create": "Crear nuevo",
+    "confirmDelete": "¿Estás seguro de eliminar este registro?",
+    "downloadCsv": "Descargar CSV",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "processed": "Procesado",
+    "promote": "Promover a admin",
+    "confirmPromote": "¿Hacer admin a este usuario?",
+    "addUser": "Añadir usuario",
+    "updateUser": "Actualizar usuario",
+    "resetFilters": "Limpiar filtros",
+    "add": "Añadir",
+    "update": "Actualizar",
+    "scan": "Explorar",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "openRedis": "Abrir Redis Explorer",
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión"
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "pending": "Pendiente",
+    "approved": "Aprobado",
+    "rejected": "Rechazado",
+    "processed": "Procesado",
+    "up": "Activo",
+    "down": "Inactivo"
+  },
+  "roles": {
+    "user": "Usuario",
+    "super_admin": "Administrador"
+  },
+  "errors": {
+    "userNotFound": "Usuario no encontrado"
+  },
+  "dashboard": {
+    "metaTitle": "Dashboard administrativo",
+    "eyebrow": "Resumen general",
+    "title": "Dashboard de Administración",
+    "description": "Monitorea el pulso de la plataforma con métricas en vivo sobre usuarios, contenido y salud del sistema.",
+    "stats": {
+      "users": "Usuarios",
+      "competitions": "Competiciones",
+      "posts": "Posts",
+      "registrations": "Registraciones"
+    },
+    "system": {
+      "cpu": "Carga de CPU",
+      "memory": "Uso de memoria",
+      "mysql": "MySQL",
+      "redis": "Redis",
+      "sessions": "Sesiones activas"
+    },
+    "charts": {
+      "rolesLabel": "Usuarios",
+      "rolesTitle": "Distribución por rol",
+      "registrationLabel": "Registro",
+      "registrationTitle": "Estado de solicitudes",
+      "timelineLabel": "Crecimiento",
+      "timelineTitle": "Usuarios registrados por día"
+    },
+    "redis": {
+      "extra": "Claves: {keys} | Mem: {memory} | Clientes: {clients}",
+      "link": "Abrir Redis Explorer"
+    }
+  },
+  "users": {
+    "metaTitle": "Gestión de usuarios",
+    "eyebrow": "Usuarios",
+    "title": "Gestión de Usuarios",
+    "description": "Analiza roles, estados y actividad para tomar acciones rápidas sobre los perfiles de la comunidad.",
+    "charts": {
+      "rolesLabel": "Roles",
+      "rolesTitle": "Distribución de usuarios",
+      "statusLabel": "Estado",
+      "statusTitle": "Usuarios activos vs inactivos"
+    },
+    "filters": {
+      "title": "Filtros y búsqueda",
+      "searchLabel": "Buscar",
+      "searchPlaceholder": "Email, usuario o nombre",
+      "roleLabel": "Rol",
+      "roleAll": "Todos los roles",
+      "roleUser": "Usuario",
+      "roleAdmin": "Administrador",
+      "statusLabel": "Estado",
+      "statusAll": "Todos los estados"
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "email": "Email",
+        "username": "Usuario",
+        "name": "Nombre",
+        "role": "Rol",
+        "status": "Estado",
+        "created": "Creado",
+        "actions": "Acciones"
+      }
+    }
+  },
+  "competitions": {
+    "metaTitle": "Gestión de competiciones",
+    "eyebrow": "Competiciones",
+    "title": "Gestión de Competiciones",
+    "description": "Visualiza la actividad de registros por competencia y localiza rápidamente cualquier evento activo.",
+    "chart": {
+      "label": "Registros",
+      "title": "Participación por competición"
+    },
+    "filters": {
+      "title": "Lista de competiciones",
+      "searchLabel": "Buscar",
+      "searchPlaceholder": "Nombre o slug"
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "title": "Título",
+        "slug": "Slug",
+        "description": "Descripción",
+        "start": "Inicio",
+        "end": "Fin"
+      }
+    }
+  },
+  "registrations": {
+    "metaTitle": "Solicitudes de registro",
+    "eyebrow": "Registros",
+    "title": "Solicitudes de Registro",
+    "description": "Aprueba o rechaza solicitudes de equipos y exporta la información para auditorías.",
+    "filters": {
+      "total": "Total de solicitudes: <strong>{count}</strong>"
+    },
+    "table": {
+      "headers": {
+        "id": "ID",
+        "team": "Equipo",
+        "competition": "Competición",
+        "date": "Fecha",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "empty": "No hay solicitudes de registro."
+    }
+  },
+  "logs": {
+    "metaTitle": "Logs del sistema",
+    "eyebrow": "Auditoría",
+    "title": "Logs del Sistema",
+    "description": "Audita acciones críticas, inicia investigaciones y filtra rápidamente por usuario o tipo de evento.",
+    "chart": {
+      "activityLabel": "Actividad",
+      "activityTitle": "Acciones registradas",
+      "entitiesLabel": "Entidades",
+      "entitiesTitle": "Recursos modificados"
+    },
+    "filters": {
+      "title": "Filtros",
+      "searchLabel": "Buscar",
+      "searchPlaceholder": "Usuario, email o acción",
+      "actionLabel": "Acción",
+      "actionAll": "Todas las acciones"
+    },
+    "actions": {
+      "CREATE": "Crear",
+      "UPDATE": "Actualizar",
+      "DELETE": "Eliminar",
+      "LOGIN": "Iniciar sesión",
+      "LOGOUT": "Cerrar sesión",
+      "REGISTER": "Registrarse",
+      "ROLE_CHANGED": "Cambio de rol"
+    },
+    "table": {
+      "headers": {
+        "time": "Hora",
+        "user": "Usuario",
+        "action": "Acción",
+        "entity": "Entidad",
+        "entityId": "ID Entidad",
+        "ip": "Dirección IP",
+        "details": "Detalles"
+      },
+      "systemUser": "Sistema"
+    },
+    "pagination": {
+      "first": "Primera",
+      "prev": "Anterior",
+      "summary": "Página {current} de {total} ({count} registros)",
+      "next": "Siguiente",
+      "last": "Última"
+    }
+  },
+  "editUser": {
+    "metaTitle": "Editar usuario",
+    "eyebrow": "Usuarios",
+    "title": "Editar Usuario",
+    "form": {
+      "username": "Usuario",
+      "email": "Email",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "role": "Rol",
+      "status": "Estado",
+      "roleUser": "Usuario",
+      "roleAdmin": "Administrador",
+      "statusActive": "Activo",
+      "statusInactive": "Inactivo",
+      "submit": "Guardar cambios"
+    }
+  },
+  "tables": {
+    "actions": "Acciones",
+    "empty": "No hay registros disponibles.",
+    "link": "Enlace"
+  },
+  "generic": {
+    "eyebrow": "Colección",
+    "create": "Crear nuevo",
+    "table": {
+      "actions": "Acciones",
+      "empty": "No hay registros encontrados."
+    },
+    "link": "Enlace",
+    "form": {
+      "jsonHint": "Formato JSON válido requerido.",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "createTitle": "Crear {collection}",
+      "editTitle": "Editar {collection}"
+    }
+  },
+  "crud": {
+    "fields": {
+      "id": "ID",
+      "title": "Título",
+      "description": "Descripción",
+      "status": "Estado",
+      "website": "Sitio Web",
+      "logo": "Logo URL",
+      "mediaUrls": "Media URLs (JSON)",
+      "stats": "Stats (JSON)",
+      "createdAt": "Creado",
+      "name": "Nombre",
+      "streamUrl": "Stream URL",
+      "startDate": "Fecha Inicio",
+      "endDate": "Fecha Fin"
+    },
+    "teams": {
+      "label": "Equipos",
+      "fields": {
+        "name": "Nombre",
+        "countryId": "País ID",
+        "city": "Ciudad",
+        "institution": "Institución",
+        "description": "Descripción",
+        "socialLinks": "Redes Sociales (JSON)"
+      }
+    },
+    "posts": {
+      "label": "Posts",
+      "fields": {
+        "content": "Contenido",
+        "authorId": "Autor ID"
+      }
+    },
+    "sponsors": {
+      "label": "Patrocinadores",
+      "fields": {
+        "name": "Nombre",
+        "type": "Tipo"
+      }
+    },
+    "countries": {
+      "label": "Países",
+      "fields": {
+        "code": "Código",
+        "flag": "Bandera"
+      }
+    },
+    "competitions": {
+      "label": "Competiciones",
+      "fields": {
+        "slug": "Slug",
+        "location": "Ubicación",
+        "maxTeams": "Máx. equipos",
+        "registrationStart": "Inicio registro",
+        "registrationEnd": "Fin registro"
+      }
+    }
+  },
+  "ldap": {
+    "metaTitle": "Usuarios LDAP",
+    "eyebrow": "Integraciones",
+    "title": "Usuarios LDAP",
+    "add": "Añadir usuario",
+    "table": {
+      "headers": {
+        "uid": "UID",
+        "firstName": "Nombre",
+        "lastName": "Apellido",
+        "email": "Email",
+        "actions": "Acciones"
+      },
+      "empty": "No se encontraron usuarios LDAP."
+    },
+    "form": {
+      "addTitle": "Añadir Usuario LDAP",
+      "editTitle": "Editar Usuario LDAP",
+      "uid": "UID",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Email",
+      "password": "Contraseña",
+      "passwordHint": "(deja en blanco para mantener)",
+      "cancel": "Cancelar",
+      "submitAdd": "Añadir usuario",
+      "submitEdit": "Actualizar usuario"
+    },
+    "confirmDelete": "¿Eliminar usuario?"
+  },
+  "redis": {
+    "metaTitle": "Redis Explorer",
+    "eyebrow": "Integraciones",
+    "title": "Redis Explorer",
+    "description": "Explora el estado de Redis y gestiona claves en vivo.",
+    "overview": {
+      "title": "Resumen",
+      "loading": "Cargando resumen...",
+      "summary": "Ping: {ping} | Claves: {keys} | Mem: {memory} | Clientes: {clients} | Uptime(s): {uptime}",
+      "error": "Error en el resumen: {message}"
+    },
+    "controls": {
+      "pattern": "Patrón",
+      "count": "Cantidad",
+      "scan": "Explorar",
+      "cursor": "Cursor: {value}",
+      "error": "Error: {message}"
+    },
+    "keys": {
+      "title": "Claves",
+      "empty": "(sin claves)",
+      "prev": "Anterior",
+      "next": "Siguiente"
+    },
+    "details": {
+      "title": "Detalle de clave",
+      "meta": "Tipo: {type} | TTL: {ttl}",
+      "delete": "Eliminar clave"
+    },
+    "alerts": {
+      "scanFailed": "Error al explorar claves.",
+      "getFailed": "Error al obtener la clave.",
+      "deleteFailed": "Error al eliminar la clave.",
+      "deleted": "Clave eliminada"
+    },
+    "confirmDelete": "¿Eliminar la clave \"{key}\"?"
+  },
+  "charts": {
+    "axes": {
+      "count": "Cantidad",
+      "users": "Usuarios",
+      "registrations": "Registraciones"
+    },
+    "tooltips": {
+      "usersCount": "Usuarios: {count}",
+      "registrationsCount": "Registraciones: {count}",
+      "percentage": "Porcentaje: {value}%",
+      "date": "Fecha: {value}",
+      "newUsers": "Nuevos usuarios: {count}"
+    },
+    "empty": "No hay datos disponibles"
+  }
+}
