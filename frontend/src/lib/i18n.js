@@ -335,7 +335,17 @@ const resources = {
         noActive: 'No hay competiciones activas en este momento.',
         searchPlace: 'Nombre, ciudad...',
         onlyActive: 'Solo activas',
-        onlyFavorites: 'Solo favoritos'
+        onlyFavorites: 'Solo favoritos',
+        // Action labels
+        active: 'Activa',
+        setActive: 'Marcar activa',
+        setActiveError: 'No se pudo marcar como activa'
+      },
+      // Additional keys for competitions UI actions
+      competitionActions: {
+        active: 'Activa',
+        setActive: 'Marcar activa',
+        setActiveError: 'No se pudo marcar como activa'
       },
       streams: {
         title: 'Streams',
@@ -837,7 +847,11 @@ const resources = {
         noActive: 'No active competitions at the moment.',
         searchPlace: 'Name, city...',
         onlyActive: 'Active only',
-        onlyFavorites: 'Favorites only'
+        onlyFavorites: 'Favorites only',
+        // Action labels
+        active: 'Active',
+        setActive: 'Set active',
+        setActiveError: 'Could not mark as active'
       },
       streams: {
         title: 'Streams',
@@ -1337,7 +1351,11 @@ const resources = {
         noActive: 'Derzeit keine aktiven Wettbewerbe.',
         searchPlace: 'Name, Stadt...',
         onlyActive: 'Nur aktive',
-        onlyFavorites: 'Nur Favoriten'
+        onlyFavorites: 'Nur Favoriten',
+        // Action labels
+        active: 'Aktiv',
+        setActive: 'Als aktiv markieren',
+        setActiveError: 'Konnte nicht als aktiv markieren'
       },
       streams: {
         title: 'Streams',
