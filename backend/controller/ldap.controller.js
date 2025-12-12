@@ -11,8 +11,9 @@ client.on('error', (err) => {
   console.error('LDAP Client Error:', err.message);
 });
 
-const baseDN = process.env.LDAP_BASE_DN;
-const userDN = process.env.LDAP_USER_DN;
+// Align with .env used by passport-ldapauth and init-ldap
+const baseDN = process.env.LDAP_SEARCH_BASE; // e.g., dc=robeurope,dc=samuelponce,dc=es
+const userDN = `ou=users,${baseDN}`;
 
 const bindClient = () => {
   return new Promise((resolve, reject) => {
@@ -32,7 +33,7 @@ export const listLdapUsers = async (req, res) => {
       scope: 'sub',
       attributes: ['cn', 'sn', 'mail', 'uid']
     };
-    console.log(`Searching LDAP users in ${userDN} with filter ${opts.filter}`);
+  console.log(`Searching LDAP users in ${userDN} with filter ${opts.filter}`);
     client.search(userDN, opts, (err, search) => {
       if (err) {
         console.error('LDAP Search Error:', err);
