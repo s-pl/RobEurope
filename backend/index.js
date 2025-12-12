@@ -93,7 +93,9 @@ app.use(
           "https://cdn.jsdelivr.net",
           "https://unpkg.com",
           "https://api.github.com",
-          "https://www.googleapis.com"
+          "https://www.googleapis.com",
+          // Allow API calls to the production origin and port used by Swagger UI
+          "https://robeurope.samuelponce.es:85"
         ],
         
        
