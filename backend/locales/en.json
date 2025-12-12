@@ -2,14 +2,14 @@
   "common": {
     "panelFallback": "Panel",
     "appName": "RobEurope Admin",
-    "brand": "RobEurope",
-    "tagline": "Control Suite",
+  "brand": "RobEurope",
+  "tagline": "",
     "menuToggle": "Toggle navigation",
     "navLabel": "Panel navigation",
-    "sidebarHint": "Manage users, content, systems, and connected services from a single place.",
+  "sidebarHint": "",
     "workspace": {
-      "eyebrow": "RobEurope operations",
-      "description": "Monitor key metrics, teams, and the platform's mission-critical services.",
+  "eyebrow": "",
+  "description": "",
       "status": "Active session"
     },
     "language": {

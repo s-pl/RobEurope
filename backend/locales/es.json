@@ -2,14 +2,14 @@
   "common": {
     "panelFallback": "Panel",
     "appName": "RobEurope Admin",
-    "brand": "RobEurope",
-    "tagline": "Control Suite",
+  "brand": "RobEurope",
+  "tagline": "",
     "menuToggle": "Alternar navegación",
     "navLabel": "Navegación del panel",
-    "sidebarHint": "Gestiona usuarios, contenido, sistemas y servicios conectados desde un único lugar.",
+  "sidebarHint": "",
     "workspace": {
-      "eyebrow": "Operaciones RobEurope",
-      "description": "Supervisa métricas clave, equipos y servicios fundamentales de la plataforma.",
+  "eyebrow": "",
+  "description": "",
       "status": "Sesión activa"
     },
     "language": {
