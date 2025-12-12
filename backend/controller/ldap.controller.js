@@ -62,7 +62,7 @@ export const listLdapUsers = async (req, res) => {
       });
       search.on('end', (result) => {
         console.log('LDAP Search finished. Users found:', users.length);
-        res.render('admin/ldap-users', { users, title: 'Usuarios LDAP' });
+        res.render('admin/ldap-users', { users, title: req.__('ldap.metaTitle'), pageKey: 'ldap' });
       });
       search.on('error', (err) => {
         console.error('LDAP Search Stream Error:', err);
@@ -77,7 +77,7 @@ export const listLdapUsers = async (req, res) => {
 
 
 export const renderAddLdapUser = (req, res) => {
-  res.render('admin/ldap-user-form', { user: null, action: 'add', title: 'Añadir Usuario LDAP' });
+  res.render('admin/ldap-user-form', { user: null, action: 'add', title: req.__('ldap.form.addTitle'), pageKey: 'ldap' });
 };
 
 
@@ -120,7 +120,7 @@ export const renderEditLdapUser = async (req, res) => {
     client.search(dn, { scope: 'base' }, (err, search) => {
       if (err) return res.status(500).json({ error: err.message });
       search.on('searchEntry', (entry) => {
-        res.render('admin/ldap-user-form', { user: entry.object, action: 'edit', title: 'Editar Usuario LDAP' });
+        res.render('admin/ldap-user-form', { user: entry.object, action: 'edit', title: req.__('ldap.form.editTitle'), pageKey: 'ldap' });
       });
       search.on('error', (err) => {
         res.status(500).json({ error: err.message });

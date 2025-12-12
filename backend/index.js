@@ -28,6 +28,7 @@ import requestId from './middleware/requestId.middleware.js';
 import redisClient from './utils/redis.js';
 import passport from 'passport';
 import './config/passport.js';
+import i18n, { supportedLocales } from './config/i18n.js';
 
 const allowedOrigins = [
   /^https?:\/\/localhost(:\d+)?$/,
@@ -156,14 +157,31 @@ app.use(session({
   }
 }));
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Simple helper to expose session user to templates
+app.use(i18n.init);
 app.use((req, res, next) => {
+  const queryLocale = typeof req.query.lang === 'string' ? req.query.lang : null;
+  if (queryLocale && supportedLocales.includes(queryLocale)) {
+    req.session.locale = queryLocale;
+  }
+
+  let locale = req.session?.locale;
+  if (!locale || !supportedLocales.includes(locale)) {
+    locale = i18n.getLocale();
+  }
+  req.setLocale(locale);
+
+  res.locals.locale = locale;
+  res.locals.availableLocales = supportedLocales;
   res.locals.currentUser = req.session?.user || null;
+  res.locals.currentPath = req.originalUrl || '/';
+  res.locals.pageKey = null;
+  res.locals.t = (...args) => (res.__ ? res.__.apply(res, args) : i18n.__.apply(i18n, args));
+  res.locals.clientTranslations = i18n.getCatalog(locale) || {};
   next();
 });
+
+app.use(passport.initialize());
+app.use(passport.session());
 const PORT = process.env.PORT || 85;
 
 // registrar peticiones (access logs) vía winston
@@ -203,6 +221,36 @@ app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 // Serve API documentation (Swagger UI)
 app.use('/api-docs', swaggerRouter);
+
+app.get('/locale/:locale', (req, res) => {
+  const { locale } = req.params;
+  if (supportedLocales.includes(locale)) {
+    req.session.locale = locale;
+    req.setLocale(locale);
+  }
+
+  const redirectParam = typeof req.query.redirect === 'string' && req.query.redirect.startsWith('/')
+    ? req.query.redirect
+    : null;
+
+  let fallback = '/admin';
+  if (!redirectParam) {
+    const referer = req.get('Referer');
+    if (referer) {
+      try {
+        const refererUrl = new URL(referer);
+        const host = req.get('host');
+        if (refererUrl.host === host) {
+          fallback = `${refererUrl.pathname}${refererUrl.search}${refererUrl.hash}`;
+        }
+      } catch (_) {
+        // ignore parsing issues
+      }
+    }
+  }
+
+  res.redirect(redirectParam || fallback);
+});
 // Apply rate limiting on API routes
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
 app.use('/api/streams', streamRoutes);

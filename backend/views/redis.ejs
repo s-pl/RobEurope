@@ -1,183 +1,264 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="csrf-token" content="<%= csrfToken %>">
-  <title>Redis Explorer</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 20px; }
-    header { display: flex; align-items: center; justify-content: space-between; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; }
-    .keys { max-height: 55vh; overflow: auto; }
-    .key { padding: 6px 8px; border-bottom: 1px solid #eee; cursor: pointer; }
-    .key:hover { background: #f7f7f7; }
-    .toolbar { display: flex; gap: 8px; align-items: center; }
-    input[type=text] { padding: 6px 8px; width: 260px; }
-    button { padding: 6px 10px; cursor: pointer; }
-    pre { background: #f8f8f8; padding: 8px; border-radius: 6px; overflow: auto; max-height: 50vh; }
-    .danger { color: #b00020; }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Redis Explorer</h1>
-    <nav><a href="/admin">← Back to Admin</a></nav>
-  </header>
+<%- include('partials/header') %>
 
-  <div class="card" id="overview">
-    <h3>Overview</h3>
-    <div id="ov-content">Loading...</div>
+<style>
+  .redis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.25rem;
+  }
+  .redis-keys-list {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+  }
+  .redis-key-item {
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .redis-key-item:last-child { border-bottom: none; }
+  .redis-key-item:hover {
+    background: rgba(37, 99, 235, 0.08);
+  }
+  .redis-controls label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted-foreground);
+  }
+  .redis-controls input {
+    width: 180px;
+  }
+  .redis-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .redis-pre {
+    background: rgba(15, 23, 42, 0.04);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 1rem;
+    min-height: 220px;
+    max-height: 360px;
+    overflow: auto;
+  }
+</style>
+
+<section class="page-header">
+  <div>
+    <p class="page-eyebrow"><%= t('redis.eyebrow') %></p>
+    <h2 class="page-title"><%= t('redis.title') %></h2>
   </div>
+  <p class="page-description"><%= t('redis.description') %></p>
+</section>
 
-  <div class="card">
-    <div class="toolbar">
-      <label>Pattern:&nbsp;<input id="pattern" type="text" value="*" /></label>
-      <label>Count:&nbsp;<input id="count" type="text" value="50" /></label>
-      <button id="scanBtn">Scan</button>
-      <span id="cursorInfo"></span>
-      <span id="errorInfo" style="color:#b00020; margin-left:12px"></span>
-    </div>
+<article class="card" id="overview">
+  <h3 style="margin-top:0;"><%= t('redis.overview.title') %></h3>
+  <p id="ov-content" class="stat-note"><%= t('redis.overview.loading') %></p>
+</article>
+
+<section class="filters-panel redis-controls">
+  <div class="table-actions" style="flex-wrap: wrap; gap: 1rem;">
+    <label>
+      <span><%= t('redis.controls.pattern') %></span>
+      <input id="pattern" type="text" value="*" />
+    </label>
+    <label>
+      <span><%= t('redis.controls.count') %></span>
+      <input id="count" type="number" min="1" max="500" value="50" />
+    </label>
+    <button id="scanBtn" class="btn btn-primary"><%= t('redis.controls.scan') %></button>
   </div>
-
-  <div class="grid">
-    <div class="card">
-      <h3>Keys</h3>
-      <div id="keys" class="keys"></div>
-      <div class="toolbar">
-        <button id="prevCursor">Prev</button>
-        <button id="nextCursor">Next</button>
-      </div>
-    </div>
-    <div class="card">
-      <h3>Key Details</h3>
-      <div id="keyMeta"></div>
-      <pre id="keyValue"></pre>
-      <button id="deleteBtn" class="danger" style="display:none">Delete Key</button>
-    </div>
+  <div class="redis-status">
+    <span id="cursorInfo" class="stat-note"></span>
+    <span id="errorInfo" class="stat-note" style="color: var(--danger);"></span>
   </div>
+</section>
 
-  <script>
-    let cursor = 0;
-    let lastCursor = 0;
-    let keysPages = [];
-    let currentPageIndex = -1;
-    let selectedKey = null;
+<div class="redis-grid">
+  <article class="card">
+    <div class="chart-head">
+      <h3 class="chart-title"><%= t('redis.keys.title') %></h3>
+    </div>
+    <div id="keys" class="redis-keys-list"></div>
+    <div class="table-actions" style="margin-top:1rem;">
+      <button id="prevCursor" class="btn btn-outline btn-sm"><%= t('redis.keys.prev') %></button>
+      <button id="nextCursor" class="btn btn-outline btn-sm"><%= t('redis.keys.next') %></button>
+    </div>
+  </article>
+  <article class="card">
+    <div class="chart-head">
+      <h3 class="chart-title"><%= t('redis.details.title') %></h3>
+    </div>
+    <div id="keyMeta" class="stat-note"></div>
+    <pre id="keyValue" class="redis-pre"></pre>
+    <button id="deleteBtn" class="btn btn-danger btn-sm" style="display:none"><%= t('redis.details.delete') %></button>
+  </article>
+</div>
 
-    async function scan() {
+<script>
+  const translate = (key, vars) => (window.__ ? window.__(key, vars || {}) : key);
+  const cursorInfoEl = document.getElementById('cursorInfo');
+  const errorInfoEl = document.getElementById('errorInfo');
+  const keysContainer = document.getElementById('keys');
+  const keyMetaEl = document.getElementById('keyMeta');
+  const keyValueEl = document.getElementById('keyValue');
+  const deleteBtn = document.getElementById('deleteBtn');
+  const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+  const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+  let cursor = 0;
+  let keysPages = [];
+  let currentPageIndex = -1;
+  let selectedKey = null;
+
+  const setError = (message) => {
+    errorInfoEl.textContent = translate('redis.controls.error', { message });
+  };
+
+  async function scan() {
+    try {
       const pattern = document.getElementById('pattern').value || '*';
       const count = document.getElementById('count').value || '50';
       const url = `/admin/api/redis/keys?pattern=${encodeURIComponent(pattern)}&count=${encodeURIComponent(count)}&cursor=${cursor}`;
       const res = await fetch(url, { credentials: 'include' });
       if (!res.ok) {
-        let text = '';
-        try { text = await res.text(); } catch {}
-        document.getElementById('errorInfo').textContent = `Scan error (${res.status}): ${text?.slice(0,200)}`;
-        alert('Failed to scan');
+        const text = (await res.text().catch(() => '')) || res.statusText;
+        setError(`${text} (${res.status})`);
+        alert(translate('redis.alerts.scanFailed'));
         return;
       }
       const data = await res.json();
-      cursor = data.cursor;
-      lastCursor = data.cursor;
-      keysPages.push(data.keys);
+      cursor = Number(data.cursor) || 0;
+      const keys = Array.isArray(data.keys) ? data.keys : [];
+      keysPages.push(keys);
       currentPageIndex = keysPages.length - 1;
-      renderKeys(data.keys);
-      document.getElementById('cursorInfo').textContent = `Cursor: ${cursor}`;
-      document.getElementById('errorInfo').textContent = '';
+      renderKeys(keys);
+      cursorInfoEl.textContent = translate('redis.controls.cursor', { value: cursor });
+      errorInfoEl.textContent = '';
+    } catch (error) {
+      setError(error.message || 'scan');
+      alert(translate('redis.alerts.scanFailed'));
     }
+  }
 
-    function renderKeys(keys) {
-      const container = document.getElementById('keys');
-      container.innerHTML = '';
-      if (!keys || keys.length === 0) {
-        container.textContent = '(no keys)';
-        return;
-      }
-      keys.forEach(k => {
-        const div = document.createElement('div');
-        div.className = 'key';
-        div.textContent = k;
-        div.onclick = () => selectKey(k);
-        container.appendChild(div);
-      });
+  function renderKeys(keys) {
+    keysContainer.innerHTML = '';
+    if (!keys || keys.length === 0) {
+      keysContainer.textContent = translate('redis.keys.empty');
+      return;
     }
+    keys.forEach((k) => {
+      const div = document.createElement('div');
+      div.className = 'redis-key-item';
+      div.textContent = k;
+      div.onclick = () => selectKey(k);
+      keysContainer.appendChild(div);
+    });
+  }
 
-    async function selectKey(key) {
+  async function selectKey(key) {
+    try {
       selectedKey = key;
       const res = await fetch(`/admin/api/redis/key/${encodeURIComponent(key)}`, { credentials: 'include' });
       if (!res.ok) {
-        let text = '';
-        try { text = await res.text(); } catch {}
-        document.getElementById('errorInfo').textContent = `Get key error (${res.status}): ${text?.slice(0,200)}`;
-        alert('Failed to get key info');
+        const text = (await res.text().catch(() => '')) || res.statusText;
+        setError(`${text} (${res.status})`);
+        alert(translate('redis.alerts.getFailed'));
         return;
       }
       const data = await res.json();
-      document.getElementById('keyMeta').textContent = `Type: ${data.type} | TTL: ${data.ttl}`;
-      document.getElementById('keyValue').textContent = formatValue(data.value);
-      const delBtn = document.getElementById('deleteBtn');
-      delBtn.style.display = 'inline-block';
-      delBtn.onclick = deleteSelected;
-      document.getElementById('errorInfo').textContent = '';
+      keyMetaEl.textContent = translate('redis.details.meta', { type: data.type, ttl: data.ttl });
+      keyValueEl.textContent = formatValue(data.value);
+      deleteBtn.style.display = 'inline-flex';
+      deleteBtn.onclick = deleteSelected;
+      errorInfoEl.textContent = '';
+    } catch (error) {
+      setError(error.message || 'key');
+      alert(translate('redis.alerts.getFailed'));
     }
+  }
 
-    function formatValue(val) {
-      try { return JSON.stringify(val, null, 2); } catch { return String(val); }
-    }
+  function formatValue(val) {
+    try { return JSON.stringify(val, null, 2); } catch (err) { return String(val); }
+  }
 
-    async function deleteSelected() {
-      if (!selectedKey) return;
-      if (!confirm(`Delete key "${selectedKey}"?`)) return;
-      const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-      const res = await fetch(`/admin/api/redis/key/${encodeURIComponent(selectedKey)}`, { 
-        method: 'DELETE', 
+  async function deleteSelected() {
+    if (!selectedKey) return;
+    if (!confirm(translate('redis.confirmDelete', { key: selectedKey }))) return;
+    try {
+      const res = await fetch(`/admin/api/redis/key/${encodeURIComponent(selectedKey)}`, {
+        method: 'DELETE',
         credentials: 'include',
-        headers: { 'CSRF-Token': token }
+        headers: { 'CSRF-Token': csrfToken }
       });
       if (!res.ok) {
-        let text = '';
-        try { text = await res.text(); } catch {}
-        document.getElementById('errorInfo').textContent = `Delete error (${res.status}): ${text?.slice(0,200)}`;
-        alert('Failed to delete');
+        const text = (await res.text().catch(() => '')) || res.statusText;
+        setError(`${text} (${res.status})`);
+        alert(translate('redis.alerts.deleteFailed'));
         return;
       }
-      alert('Deleted');
-      // Refresh current page by removing the key
-      keysPages[currentPageIndex] = keysPages[currentPageIndex].filter(k => k !== selectedKey);
+      alert(translate('redis.alerts.deleted'));
+      const current = keysPages[currentPageIndex] || [];
+      keysPages[currentPageIndex] = current.filter((k) => k !== selectedKey);
       renderKeys(keysPages[currentPageIndex]);
-      document.getElementById('keyMeta').textContent = '';
-      document.getElementById('keyValue').textContent = '';
-      document.getElementById('deleteBtn').style.display = 'none';
+      keyMetaEl.textContent = '';
+      keyValueEl.textContent = '';
+      deleteBtn.style.display = 'none';
       selectedKey = null;
-      document.getElementById('errorInfo').textContent = '';
+      errorInfoEl.textContent = '';
+    } catch (error) {
+      setError(error.message || 'delete');
+      alert(translate('redis.alerts.deleteFailed'));
     }
+  }
 
-    document.getElementById('scanBtn').onclick = () => { cursor = 0; keysPages = []; currentPageIndex = -1; scan(); };
-    document.getElementById('nextCursor').onclick = () => { scan(); };
-    document.getElementById('prevCursor').onclick = () => {
-      if (currentPageIndex > 0) {
-        currentPageIndex -= 1;
-        renderKeys(keysPages[currentPageIndex]);
-      }
-    };
-
-    // Overview load
-    (async function loadOverview(){
-      try {
-        const rov = await (await fetch('/admin/api/redis/overview', { credentials: 'include' })).json();
-        const el = document.getElementById('ov-content');
-        if (rov && !rov.error) {
-          el.textContent = `Ping: ${rov.ping} | Keys: ${rov.dbsize} | Mem: ${rov.info?.used_memory_human || '-'} | Clients: ${rov.info?.connected_clients || '-'} | Uptime(s): ${rov.info?.uptime_in_seconds || '-'}`;
-        } else {
-          el.textContent = `Overview error: ${rov.error || 'unknown'}`;
-        }
-      } catch (e) {
-        document.getElementById('ov-content').textContent = 'Overview error';
-      }
-    })();
-
-    // Initial scan
+  document.getElementById('scanBtn').onclick = () => {
+    cursor = 0;
+    keysPages = [];
+    currentPageIndex = -1;
+    selectedKey = null;
+    keyMetaEl.textContent = '';
+    keyValueEl.textContent = '';
+    deleteBtn.style.display = 'none';
+    renderKeys([]);
+    cursorInfoEl.textContent = '';
     scan();
-  </script>
-</body>
-</html>
+  };
+  document.getElementById('nextCursor').onclick = () => { scan(); };
+  document.getElementById('prevCursor').onclick = () => {
+    if (currentPageIndex > 0) {
+      currentPageIndex -= 1;
+      renderKeys(keysPages[currentPageIndex]);
+      cursorInfoEl.textContent = translate('redis.controls.cursor', { value: cursor });
+    }
+  };
+
+  (async function loadOverview() {
+    const overviewEl = document.getElementById('ov-content');
+    try {
+      const rov = await (await fetch('/admin/api/redis/overview', { credentials: 'include' })).json();
+      if (rov && !rov.error) {
+        overviewEl.textContent = translate('redis.overview.summary', {
+          ping: rov.ping,
+          keys: rov.dbsize,
+          memory: rov.info?.used_memory_human || '-',
+          clients: rov.info?.connected_clients || '-',
+          uptime: rov.info?.uptime_in_seconds || '-'
+        });
+      } else {
+        overviewEl.textContent = translate('redis.overview.error', { message: rov?.error || 'unknown' });
+      }
+    } catch (error) {
+      overviewEl.textContent = translate('redis.overview.error', { message: error.message || 'network' });
+    }
+  })();
+
+  scan();
+</script>
+
+<%- include('partials/footer') %>

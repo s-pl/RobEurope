@@ -1,0 +1,645 @@
+* bee8aeb (origin/develop) add ldap auth
+| *   4dc8b7f (HEAD -> main, origin/main, origin/HEAD) Merge pull request #291 from s-pl/develop
+| |\  
+| |/  
+|/|   
+* | 713be72 add slashhhhh
+| *   c082ced Merge pull request #290 from s-pl/develop
+| |\  
+| |/  
+|/|   
+* | 979b9ca fix register
+| *   acc24bb Merge pull request #289 from s-pl/develop
+| |\  
+| |/  
+|/|   
+* | 1f3026a import baseurlhelper from frontend lib
+| *   cd42c7f Merge pull request #288 from s-pl/develop
+| |\  
+| |/  
+|/|   
+* | df6b222 fix endpoints, again, again, again, and again
+| *   556e491 Merge pull request #287 from s-pl/develop
+| |\  
+| |/  
+|/|   
+* | 5d99409 fix auth strategy endpoints
+| *   b47dbf6 Merge pull request #286 from s-pl/develop
+| |\  
+| |/  
+|/|   
+* | 4db7027 fix
+| *   9cafdf6 Merge pull request #285 from s-pl/develop
+| |\  
+| |/  
+|/|   
+| * c34b189 Revert "Merge pull request #215 from s-pl/Ángel-Deployment-Guide"
+| *   057778a Merge pull request #215 from s-pl/Ángel-Deployment-Guide
+| |\  
+| | * c3d7420 Enhance deployment guide with Docker and backend setup
+| * |   51b3fc7 Merge pull request #277 from s-pl/develop
+| |\ \  
+| * \ \   41f57f4 Merge pull request #276 from s-pl/develop
+| |\ \ \  
+| * \ \ \   8282e81 Merge pull request #264 from s-pl/develop
+| |\ \ \ \  
+| * \ \ \ \   802523a Merge pull request #259 from s-pl/develop
+| |\ \ \ \ \  
+| * \ \ \ \ \   f25d8ba Merge pull request #258 from s-pl/develop
+| |\ \ \ \ \ \  
+| * \ \ \ \ \ \   eeb534a Merge pull request #257 from s-pl/develop
+| |\ \ \ \ \ \ \  
+| * \ \ \ \ \ \ \   39e5312 Merge pull request #254 from s-pl/develop
+| |\ \ \ \ \ \ \ \  
+| * \ \ \ \ \ \ \ \   a107b9f Merge pull request #251 from s-pl/develop
+| |\ \ \ \ \ \ \ \ \  
+| * \ \ \ \ \ \ \ \ \   cf673ef Merge pull request #247 from s-pl/develop
+| |\ \ \ \ \ \ \ \ \ \  
+| * \ \ \ \ \ \ \ \ \ \   526a902 Merge pull request #235 from s-pl/develop
+| |\ \ \ \ \ \ \ \ \ \ \  
+| * \ \ \ \ \ \ \ \ \ \ \   76abb6f Merge pull request #233 from s-pl/develop
+| |\ \ \ \ \ \ \ \ \ \ \ \  
+| * \ \ \ \ \ \ \ \ \ \ \ \   1202203 Merge pull request #231 from s-pl/develop
+| |\ \ \ \ \ \ \ \ \ \ \ \ \  
+| * \ \ \ \ \ \ \ \ \ \ \ \ \   e1602f3 Merge pull request #229 from s-pl/develop
+| |\ \ \ \ \ \ \ \ \ \ \ \ \ \  
+| * \ \ \ \ \ \ \ \ \ \ \ \ \ \   1ea0b8a Merge pull request #227 from s-pl/develop
+| |\ \ \ \ \ \ \ \ \ \ \ \ \ \ \  
+| * \ \ \ \ \ \ \ \ \ \ \ \ \ \ \   f313f56 Merge pull request #225 from s-pl/develop
+| |\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  
+| * \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \   9f47350 Merge pull request #223 from s-pl/develop
+| |\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  
+| * \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \   f50faf9 Merge pull request #221 from s-pl/develop
+| |\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  
+| | |_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|/  
+| |/| | | | | | | | | | | | | | | | |   
+| * | | | | | | | | | | | | | | | | |   0eb7d65 (tag: prod-v0.0.3) Merge pull request #189 from s-pl/develop
+| |\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  
+| | | | | | | | | | | | | | | | | | | | * 4309bf2 (origin/add-competitions-chat) add-chat-reactions-chat-try1
+| |_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|/  
+|/| | | | | | | | | | | | | | | | | | |   
+* | | | | | | | | | | | | | | | | | | |   1bfc06a Merge pull request #284 from s-pl/add-footer-navegation
+|\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  
+| * | | | | | | | | | | | | | | | | | | | eda119a add-footer-navigation-and-terms-page-fix
+|/ / / / / / / / / / / / / / / / / / / /  
+* | | | | | | | | | | | | | | | | | | |   5864901 Merge pull request #283 from s-pl/add-terms-page
+|\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  
+| * | | | | | | | | | | | | | | | | | | | 8738e24 (origin/add-terms-page) add-terms-page
+|/ / / / / / / / / / / / / / / / / / / /  
+* | | | | | | | | | | | | | | | | | | |   37fc32f Merge pull request #282 from s-pl/add-gallery-feedback-pages
+|\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  
+| * | | | | | | | | | | | | | | | | | | | aa5fcfd add-gallery-feedback-pages-and-traductions
+|/ / / / / / / / / / / / / / / / / / / /  
+* | | | | | | | | | | | | | | | | | | |   cd90ae7 Merge pull request #281 from s-pl/add-contact-de-traduction
+|\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  
+| * | | | | | | | | | | | | | | | | | | | e2bf62b (origin/add-contact-de-traduction) add-contact-de-traduction
+|/ / / / / / / / / / / / / / / / / / / /  
+* | | | | | | | | | | | | | | | | | | |   11ba0f8 Merge pull request #280 from s-pl/add-streaming-de-traductions
+|\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  
+| * | | | | | | | | | | | | | | | | | | | d4d7636 add-streaming-de-traductions
+|/ / / / / / / / / / / / / / / / / / / /  
+* | | | | | | | | | | | | | | | | | | |   a1669ef Merge pull request #279 from s-pl/add-sponsors-de-traduction
+|\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  
+| * | | | | | | | | | | | | | | | | | | | a46332c add-sponsors-de-traductions
+|/ / / / / / / / / / / / / / / / / / / /  
+* | | | | | | | | | | | | | | | | | | |   5344395 Merge pull request #278 from s-pl/add-nav-traductions
+|\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  
+| |_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|/  
+|/| | | | | | | | | | | | | | | | | | |   
+| * | | | | | | | | | | | | | | | | | | 1536923 add-navigation-traducion
+|/ / / / / / / / / / / / / / / / / / /  
+* | | | | | | | | | | | | | | | | | | 10a37d6 feat: update authentication button URLs in Register component to use environment variable for base URL
+* | | | | | | | | | | | | | | | | | | ef68f74 feat: update authentication button URLs in Login component to use environment variable for base URL
+| |_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|/  
+|/| | | | | | | | | | | | | | | | |   
+* | | | | | | | | | | | | | | | | | 95b37e4 feat: update Google and GitHub authentication callback URLs; add console logs for strategy registration and missing credentials
+| |_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|/  
+|/| | | | | | | | | | | | | | | |   
+* | | | | | | | | | | | | | | | | eb6368a feat: implement OAuth authentication with Google, GitHub, and Apple; update user model and migrations for OAuth fields
+* | | | | | | | | | | | | | | | | 2681939 feat: update registration form placeholders to use translation keys for improved localization
+* | | | | | | | | | | | | | | | | 42343e4 feat: update error messages in registration form to use translation keys for improved localization
+* | | | | | | | | | | | | | | | | 3e7340e feat: update login form placeholders to use translation keys for better localization
+* | | | | | | | | | | | | | | | | 9b762e3 feat: add German translations for terms acceptance and password validation messages; include example placeholders for user input
+* | | | | | | | | | | | | | | | | 481245b feat: enhance login and registration forms with password visibility toggle and additional fields; implement terms acceptance in registration
+* | | | | | | | | | | | | | | | | 519a1b7 feat: add CSRF protection to forms and update Redis view for token handling; remove CollaborativeEditor component
+* | | | | | | | | | | | | | | | | b7884e8 feat: enhance accessibility and dark mode support across multiple pages
+| |_|_|_|_|_|_|_|_|_|_|_|_|_|_|/  
+|/| | | | | | | | | | | | | | |   
+* | | | | | | | | | | | | | | | eb9cc97 fixed max mb for uploading files in backend and frontend -> (backend NGINX)
+| |_|_|_|_|_|_|_|_|_|_|_|_|_|/  
+|/| | | | | | | | | | | | | |   
+* | | | | | | | | | | | | | | 340b04b fix cors in chat
+* | | | | | | | | | | | | | | 05afa5e fix: fix swagger routes
+| |_|_|_|_|_|_|_|_|_|_|_|_|/  
+|/| | | | | | | | | | | | |   
+* | | | | | | | | | | | | |   ad1b21a Merge pull request #256 from s-pl/fix-readme-for-sprint-3
+|\ \ \ \ \ \ \ \ \ \ \ \ \ \  
+| |_|_|_|_|_|_|_|_|_|_|_|_|/  
+|/| | | | | | | | | | | | |   
+| * | | | | | | | | | | | | 5f8bd64 (origin/fix-readme-for-sprint-3) better readmes and new documentation for logs
+| | |_|_|_|_|_|_|_|_|_|_|/  
+| |/| | | | | | | | | | |   
+* | | | | | | | | | | | |   1e9b38a Merge pull request #253 from s-pl/fix-post-form
+|\ \ \ \ \ \ \ \ \ \ \ \ \  
+| |/ / / / / / / / / / / /  
+|/| | | | | | | | | | | |   
+| * | | | | | | | | | | | d831a98 (origin/fix-post-form) Enforce maximum content size for posts and provide user feedback on remaining bytes
+|/ / / / / / / / / / / /  
+| | | | | | | | | | | | * 5b8f02d (origin/add-i18n-translations-sponsors) add-i18n-translations-sponsors
+| | | | | | | | | | | | * 3b5daaf (origin/add-i18n-translations-nav-section) add-translations-nav-section
+| | | | | | | | | | | | * 53df620 (origin/add-i18n-translations-streaming) add-streaming-page-translations
+| |_|_|_|_|_|_|_|_|_|_|/  
+|/| | | | | | | | | | |   
+* | | | | | | | | | | |   279bc56 Merge pull request #250 from s-pl/create-new-profile-page
+|\ \ \ \ \ \ \ \ \ \ \ \  
+| |_|_|_|_|_|_|_|_|_|_|/  
+|/| | | | | | | | | | |   
+| * | | | | | | | | | | 36535fa (origin/create-new-profile-page) Add tabbed navigation to Profile page and implement Tabs component
+| * | | | | | | | | | | 570573d add tabbed navigation to profile page and implement tabs component
+|/ / / / / / / / / / /  
+* | | | | | | | | | / a237fea Implement push notifications with VAPID support and service worker integration
+| |_|_|_|_|_|_|_|_|/  
+|/| | | | | | | | |   
+* | | | | | | | | |   9b85101 Merge pull request #234 from s-pl/s-pl-patch-3
+|\ \ \ \ \ \ \ \ \ \  
+| |_|_|_|_|_|_|_|_|/  
+|/| | | | | | | | |   
+| * | | | | | | | | 5abe61d (origin/s-pl-patch-3) Update socket connection URL environment variable
+|/ / / / / / / / /  
+* | | | | | | | |   f68f304 Merge pull request #232 from s-pl/s-pl-patch-3
+|\ \ \ \ \ \ \ \ \  
+| |_|_|_|_|_|_|_|/  
+|/| | | | | | | |   
+| * | | | | | | | 9a16a5d Update index.js
+|/ / / / / / / /  
+* | | | | | | | a2e5ff6 Update README.md
+* | | | | | | | c76cb04 Update README with badges and security information
+* | | | | | | |   527111b Merge pull request #230 from s-pl/s-pl-patch-2
+|\ \ \ \ \ \ \ \  
+| |_|_|_|_|_|_|/  
+|/| | | | | | |   
+| * | | | | | | a6bd784 (origin/s-pl-patch-2) Revise LDAP Bind9 setup documentation
+|/ / / / / / /  
+* | | | | | |   6b30350 Merge pull request #228 from s-pl/s-pl-patch-1
+|\ \ \ \ \ \ \  
+| |_|_|_|_|_|/  
+|/| | | | | |   
+| * | | | | | 565fc1c (origin/s-pl-patch-1) Update README with important info and feature enhancements
+|/ / / / / /  
+* | | | | |   180f38e Merge pull request #226 from s-pl/add-features
+|\ \ \ \ \ \  
+| |_|_|_|_|/  
+|/| | | | |   
+| * | | | | e7ce951 (origin/add-features) hotfix: routes deleted role req admin
+* | | | | | 835e967 Merge pull request #224 from s-pl/add-features
+|\| | | | | 
+| |_|_|_|/  
+|/| | | |   
+| * | | | bea06ab fix package.json
+| * | | | 6024536 hotfix: add secure proxy
+* | | | | df1f1ba Merge pull request #222 from s-pl/add-features
+|\| | | | 
+| |_|_|/  
+|/| | |   
+| * | | 454a583 hotfix: scripts added to helmet and fixed admin role checking for posts
+* | | | 378d33a Merge pull request #220 from s-pl/add-features
+|\| | | 
+| * | | 62a954b added: new redis explorer
+|/ / /  
+| | | * 3ebc8ec (origin/add-competition-chat) add-full-competitions-chat
+| |_|/  
+|/| |   
+| | | * 49f0b98 (origin/add-reactions) add-reactions-chat-messages
+| | | * 1ac96eb add-reactions-to-chat
+| |_|/  
+|/| |   
+* | | cbfd613 feat: update API client to use new base URL and improve media URL resolution
+* | | 90f8f6b feat: add robot file and team log management features
+* | | 81aaf51 Fix: Allow non-admin users to access admin login and show logout link on 403
+* | | 787d200 Fix: Improve Teams page performance and button styling
+* | | c8f45f9 Fix: Handle LDAP connection errors and use IPv4 for LDAP URL
+* | | bfd4e31 Fix: Update session cookie config (24h maxAge, proxy support, dynamic secure flag)
+* | | c7ef35b Fix: Explicitly save session on login and register to prevent session loss
+* | | 612a0ce change Home.jsx
+| |/  
+|/|   
+* | 329d48b Add documentation for HTTPS setup with Vercel and VPS backend; Implement LDAP Bind9 setup with Docker; Enhance Sidebar component with collapsible feature and icons; Revamp Home page layout and content presentation
+* | bded221 Refactor documentation and security overview; remove outdated files and enhance troubleshooting guide
+* | 8add053 feat: add team chat functionality and improve notifications
+| | * 59d9231 (origin/add-missing-pages) add-gallery&feedback
+| | * 75dc8e6 (origin/add-full-navigation-footer) add-social-media-links
+| | * 49a518b footer-navigation
+| | * 19ac715 (origin/add-terms-to-footer) add-terms-footer-navigate
+| |/  
+|/|   
+| | * 419b33c (origin/dark-mode-fixes) Add: dark-mode-fixes
+| | * ad29f5e (origin/traductions) Add: streaming-page-translations including labels and i18n modifications
+| | * 9bddd4e Add: sponsor-translations-components and i18n modifications
+| |/  
+| *   5645697 (tag: prod-v.0.0.3) Merge pull request #153 from s-pl/develop
+| |\  
+| |/  
+|/|   
+* | de3fd39 (tag: dev) feat: update image URLs in Posts and Home components for proper API integration; enhance dropdown menu styling
+* | b67bcd9  feat: add RichTextEditor component with customizable toolbar and formats
+* | dbe04b8 feat: add login and logout buttons to Navbar for authentication management
+* | ff20ce3 fix: navbar dir changed with lucide react
+* | 882e296 feat: enhance Navbar with mobile overlay and language/theme options
+* | 05b0af7 refactor: enhance security by adding authentication and role checks to competition and country routes
+| *   404765c Merge pull request #152 from s-pl/develop
+| |\  
+| |/  
+|/|   
+* | 091ee1b feat: add ThemeContext and related components for theme management
+* | b57f110 Refactor admin dashboard and user management views; introduce header and footer partials for consistent layout
+* | 5523e2c Fix Unknown column 'created_at' error in competitions
+* | 8610e49 Fix EJS syntax errors and invalid HTML attributes
+* | 736022c Fix dashboard script loading and add user editing functionality
+* | 923b4ec Fix error.ejs template to handle undefined status and message variables
+* | 634be9b Fix script loading order by moving page-specific scripts to layout footer
+* | 56bf8c8 Add error.ejs view template for error handling
+* | 98fadc9 Fix JSON parsing error in users.ejs
+* | 0fe20e4 Fix JavaScript dependency loading order for D3.js charts
+* | c371111 feat: Improve admin panel with D3.js charts and CSP compliance
+* | fab4232 fix: better typo
+* | a1bcf1d refactor: remove unused CSS and JavaScript for dashboard chart
+* |   2d3cd2c Merge branch 'develop' of https://github.com/s-pl/RobEurope into develop
+|\ \  
+| * \   df1cb78 Merge pull request #143 from s-pl/add-figma-pages-forntend-126
+| |\ \  
+* | | | 84a93fc feat(admin-ui): improved custom css and local d3 chart (CSP compliant)
+* | | | 8b28025 feat(admin-ui): integrate TailwindCSS and D3 chart on dashboard
+* | | | effd766 fix(admin-login): normalize email (lowercase, trim) and support base64 decoding
+* | | | 33bc67b fix(cors): limit CORS to API routes and allow 127.0.0.1 to unblock admin panel form posts
+* | | | e530bb1 fix(views): correct EJS views path resolution using __dirname
+* | | | 5c0e346 test(admin): add session authentication tests for admin panel
+* | | | e782024 docs(readme): document admin panel routes, credentials, security and roadmap
+* | | | f6c1f97 feat(admin): add requestId middleware, CSRF protection, and improved styling for admin panel
+* | | | accdf1f feat(admin): add EJS view engine, session store, admin routes and basic views
+* | | | 2d276be feat(admin): add dependencies for admin panel (ejs, express-session, connect-session-sequelize, helmet, csurf)
+|/ / /  
+* | |   c2565c4 Merge pull request #144 from s-pl/add-https-swagger-add-deployment-info
+|\ \ \  
+| * | | 25cc996 fix: update README.md to reflect new documentation links and improve clarity
+| * | | 501b5c1 fix: add missing newline and adjust badge formatting in howToHttps.md
+| * | | bf8d97b feat: add howToHttps.md
+| * | | cc2ebbd fix: simplify server creation by removing SSL handling for production
+| * | | 70f90b9 fix: add api.robeurope.samuelponce.es in cors with regex exp.
+| * | | 9c3aa64 fix: added https in swagger
+* | | |   174acdc Merge pull request #142 from s-pl/add-figma-pages-forntend-126
+|\ \ \ \  
+| |/ / /  
+|/| | |   
+* | | |   4b9f857 Merge pull request #134 from s-pl/add-figma-pages-forntend-126
+|\ \ \ \  
+| | | | *   5947f18 Merge pull request #133 from s-pl/develop
+| | | | |\  
+| |_|_|_|/  
+|/| | | |   
+* | | | | 1952321 Add logging for VITE_API_BASE_URL and stored base in resolveDefaultBase function
+| | | | *   2d08cc1 Merge pull request #132 from s-pl/develop
+| | | | |\  
+| |_|_|_|/  
+|/| | | |   
+* | | | | a6930fc fix frontend base url
+| | | | *   7a8af9d Merge pull request #131 from s-pl/develop
+| | | | |\  
+| |_|_|_|/  
+|/| | | |   
+* | | | | e4c688b fix: fallback urls in frontend changed
+* | | | |   0e4ed1b Merge pull request #130 from s-pl/add-figma-pages-forntend-126
+|\ \ \ \ \  
+* \ \ \ \ \   a46cc8a Merge pull request #127 from s-pl/add-figma-pages-forntend-126
+|\ \ \ \ \ \  
+| | | | | | *   e65dbea Merge pull request #122 from s-pl/develop
+| | | | | | |\  
+| | | | | | * \   ca8409b Merge pull request #120 from s-pl/add-deployment-guide-119
+| | | | | | |\ \  
+| | | | | | * \ \   c277ead Merge pull request #111 from s-pl/develop
+| | | | | | |\ \ \  
+| | | | | | * \ \ \   ec571a3 Merge pull request #109 from s-pl/develop
+| | | | | | |\ \ \ \  
+| | | | | | * \ \ \ \   93b36a3 Merge pull request #108 from s-pl/develop
+| | | | | | |\ \ \ \ \  
+| | | | | | * \ \ \ \ \   436f78f Merge pull request #107 from s-pl/develop
+| | | | | | |\ \ \ \ \ \  
+| | | | | | * \ \ \ \ \ \   30c0960 (tag: prod-v.0.02) Merge pull request #106 from s-pl/develop
+| | | | | | |\ \ \ \ \ \ \  
+| | | | | | | | | | | | | | * eadf59f (origin/add-figma-pages-forntend-126) Add files via upload
+| | | | | | | | | | | | | | * 655d94a Add: contact animations and changes
+| | | | | | | | | | | | | | * 5645db3 Add: gallery and feedback pages p2
+| | | | | | | | | | | | | | * b310a99 Add: terms-page using Termly
+| | | | | | | | | | | | | | * b52b9df Add: contact-page and create-terms-page to App
+| | | | | | |_|_|_|_|_|_|_|/  
+| | | | | |/| | | | | | | |   
+| | | | | * | | | | | | | | 7b96dc0 Add: feedback-traduction-i18n
+| | | | | * | | | | | | | | 533d62b Add: gallery-traduction-i18n
+| | | | | * | | | | | | | | 45cd0db Add functional-button & more-image-gaps
+| | | | |/ / / / / / / / /  
+| | | | * | | | | | | | | 79d34d9 Add: showMore-gallery-button
+| | | | * | | | | | | | | 35bae7a Delete: feedback-imports Add: Gallery page-V1
+| | | |/ / / / / / / / /  
+| | | * / / / / / / / / a29e055 Add: feedback-page and feedback-cards
+| | |/ / / / / / / / /  
+| | * / / / / / / / / b20f195 Add: Gallery-example Feedback-example and App configuration for pages
+| |/ / / / / / / / /  
+| * / / / / / / / / 9047adf Add: footer i18n translations and Streaming changes
+|/ / / / / / / / /  
+* | | | | | | | |   e118663 Merge pull request #124 from s-pl/fix-countries
+|\ \ \ \ \ \ \ \ \  
+| |_|_|_|_|_|_|_|/  
+|/| | | | | | | |   
+| * | | | | | | | 204d133 (origin/fix-countries) feat: add sponsors and streams management pages, including hooks for API interactions
+| * | | | | | | | bf0dcbf feat: add Radix UI components and update button styles
+| * | | | | | | | 87fdd85 feat: add Stream table migration and update API documentation for registration approval process
+| * | | | | | | | 4104cde feat: add registration approval and rejection functionality with decision reasons
+| * | | | | | | | cc2e523 fix swagger
+| * | | | | | | | 5d2de32 feat: add leave team functionality to the teams API
+| * | | | | | | | 82b240e feat: add leave team functionality to the teams API
+| * | | | | | | | 911ec12 feat: increase default max requests limit in rate limiter to enhance performance
+| * | | | | | | | 932d213 feat: increase default max requests limit in rate limiter to enhance performance
+| * | | | | | | | 1404e8a feat: update API endpoints for team management; add status checks and invitation handling in frontend
+| * | | | | | | | 6b5e4c9 feat: enhance team management with notifications for team creation, invitations, and join requests; add team status checks in frontend
+| * | | | | | | | 4244f0e feat: integrate Socket.IO for real-time communication and add language support for Teams in navigation
+| * | | | | | | | 4fe7085 feat: add backend quick reference for Teams feature and notifications to development documentation
+| * | | | | | | | 4aa0193 feat: update README with Teams feature and notification system details
+| * | | | | | | | dc6f855 feat: add detailed database schema and notification flow to architecture documentation
+| * | | | | | | | 09428af feat: enhance team management with invitation acceptance and join request functionalities
+| * | | | | | | | 51c2576 feat: add Teams and AcceptInvite pages with routing and functionality for team management
+| * | | | | | | | 370bec5 feat: add NotificationsBell component and useTeams hook for team management notifications
+| * | | | | | | | 22c776c feat: add invitation and join request routes to team management
+| * | | | | | | | 0315d2a feat: enhance team management with invitation and join request functionalities
+| * | | | | | | | d2ab8c8 feat: add team invites/requests migration and constraints
+| * | | | | | | | 71de136 fix: correct path for backend uploads in .gitignore
+| * | | | | | | | bb2af6e feat: add TeamInvite and TeamJoinRequest models
+| * | | | | | | | 169979d fixed countries seeder and improved migrations
+|/ / / / / / / /  
+* | | | | | | |   5513641 Merge pull request #121 from s-pl/add-deployment-guide-119
+|\ \ \ \ \ \ \ \  
+| |_|_|_|_|_|/ /  
+|/| | | | | | /   
+| | |_|_|_|_|/    
+| |/| | | | |     
+| * | | | | | 1a13756 (origin/add-deployment-guide-119) feat: add deployment guide
+|/ / / / / /  
+* | | | | | 363aa23 fix cors, again
+* | | | | | 073578f feat: update CORS and Swagger configurations to include new remote server
+| |_|_|_|/  
+|/| | | |   
+* | | | | 50d380f feat: better index.html add repo info
+* | | | | 940ba96 fix: delete some relationships
+| |_|_|/  
+|/| | |   
+* | | | 8b3df07 fix cors: redo
+| |_|/  
+|/| |   
+* | | 88ee3dd fix cors
+| |/  
+|/|   
+* |   937c6c8 Merge pull request #105 from s-pl/add-auth-context-frontend-94
+|\ \  
+| * | 6b50227 feat: update i18n translations, modify page titles, and enhance error handling in Login, Profile, and Register components; add new image uploads
+| * | 5514304 feat: add utility function for class names, update main entry point to include AuthProvider and i18n, and create new pages for Competitions, Contact, Home, Login, Profile, and Register
+| * | 379d90b chore(frontend): scaffold Vite + Tailwind baseline
+|/ /  
+* | 1d7a481 Remove unused pages and styles: Feedback, Gallery, Home, SignUp, Streaming, Inscription, and global styles; delete Vite configuration.
+* |   3993a38 Merge pull request #101 from s-pl/change-upload-schema
+|\ \  
+| * | cefb2d5 docs: Update diagrams section in README and add Class Diagram to diagrams documentation
+| * | ffabb5f feat: Implement system logging functionality with migration, model, routes, and utility
+| * | 440b11d feat: Implement system logging functionality with migration, model, routes, and utility
+|/ /  
+* |   21aacc2 Merge pull request #91 from s-pl/add-image-multer-78
+|\ \  
+| * | b60d090 feats
+| * | d7c682f Remove POST /users from Swagger, add PUT /users/{id} to routes and Swagger with ownership, add security to protected routes in Swagger.
+| * | faaffd4 Fix import error in media.route.js, add diagrams.md with use case, ERD, architecture, and sequence diagrams, add basic test setup with Jest and user tests.
+| * | 43605a5 Add media endpoints to Swagger and Postman, update permissions with Authorization headers for protected routes.
+| * | 187cbc7 Add media table, relations, controller, and permissions for file uploads. Users can only modify their own data, super admin has full access.
+* | |   bcc340b Merge pull request #89 from s-pl/feature/pages-done1.0
+|\ \ \  
+| |/ /  
+|/| |   
+| * | c8989ce prueba-1
+| * | 6fdf1d3 pages-done-v1.0
+* | | 81b9bca Merge pull request #88 from s-pl/feature/pages
+|\| | 
+| * | 1f63cbc add-pages-and-assets
+|/ /  
+* | 41781c4 Merge pull request #61 from s-pl/main
+|\| 
+| * 5a47639 Refactor code structure for improved readability and maintainability
+| *   e90b296 Merge pull request #64 from s-pl/develop
+| |\  
+| * \   8cc5166 Merge pull request #63 from s-pl/develop
+| |\ \  
+| * \ \   33a868c Merge pull request #62 from s-pl/develop
+| |\ \ \  
+| * \ \ \   fcdb43e Merge pull request #58 from s-pl/develop
+| |\ \ \ \  
+* | \ \ \ \   a4d2617 Merge pull request #68 from s-pl/LXLLXVX-patch-1
+|\ \ \ \ \ \  
+| |_|_|_|_|/  
+|/| | | | |   
+| * | | | | 2ab731f README
+|/ / / / /  
+* | | | / 7f98585 fix: remove redundant import statement and add CORS dependency to .json
+| |_|_|/  
+|/| | |   
+* | | | ab5531a fix: reorder import statements for clarity
+| |_|/  
+|/| |   
+* | | 35f4928 add CORS support and remove health check endpoint from Swagger documentation
+* | | aab81f3 Revert "commit 100 + add cors and update swagger :D"
+* | | 1b10e35 commit 100 + add cors and update swagger :D
+| |/  
+|/|   
+* | 61b1bff fix image links, uploaded to git repo instead
+* |   3253e71 Merge branch 'develop' of https://github.com/s-pl/RobEurope into develop
+|\ \  
+| * \   9f36689 Merge pull request #57 from s-pl/s-pl-patch-5
+| |\ \  
+| | * | a7613b9 Fix image links in README.md
+| |/ /  
+| * | 7244ec4 Merge pull request #56 from s-pl/main
+| |\| 
+| | *   f6de38e Merge pull request #55 from s-pl/develop
+| | |\  
+| | * \   721fe29 Merge pull request #54 from s-pl/develop
+| | |\ \  
+| | * \ \   faf44c3 Merge pull request #47 from s-pl/develop
+| | |\ \ \  
+* | | | | | b7c778c add img
+|/ / / / /  
+* | | | / dd6a8d5 better readme.md
+| |_|_|/  
+|/| | |   
+* | | | 492009c add swagger ui for api docs
+| |_|/  
+|/| |   
+* | |   8de40be Merge pull request #53 from s-pl/s-pl-patch-4
+|\ \ \  
+| * | | da9a778 Update README.md
+|/ / /  
+* | | ed1bac6 Add seeders for notifications, posts, registrations, sponsors, team members, and countries
+* | | 6e7918f Add seeders for notifications, posts, registrations, sponsors, team members, and countries
+* | |   a259dc8 Merge pull request #52 from s-pl/s-pl-patch-3
+|\ \ \  
+| |_|/  
+|/| |   
+| * | c0c639d Revise ERD with updated entities and attributes
+|/ /  
+* |   1ff6b60 Merge pull request #46 from s-pl/s-pl-patch-2
+|\ \  
+| * | 722abad Remove Database Schema and Testing sections from README
+|/ /  
+* | 05978ce Merge pull request #45 from s-pl/main
+|\| 
+| * 11018d8 Update README with API details and setup guide
+| *   b3a081a Merge pull request #43 from s-pl/develop
+| |\  
+| |/  
+|/|   
+* | baff0a2 fix: streams, major changes. added postman collection atc
+* | a98a9e9 fix: streams, major changes. added postman collection atc
+| * 5c246fe Update README.md
+| * 0b2294b Update README.md
+| * 486bf1a Update README.md
+| *   d0876e0 (tag: prod) Merge pull request #42 from s-pl/develop
+| |\  
+| |/  
+|/|   
+* |   be95061 Merge pull request #41 from s-pl/create-migrations-and-seeder
+|\ \  
+| * | 88d2908 create-migrations-and-seeder
+| |/  
+| *   e85b81c Merge pull request #39 from s-pl/develop
+| |\  
+| |/  
+|/|   
+* |   4993785 Merge pull request #38 from s-pl/fix-stream-db
+|\ \  
+| * | ad7dc40 fix: error in db causing stream table not sync up+
+| |/  
+| *   efa6d5c Merge pull request #35 from s-pl/develop
+| |\  
+| |/  
+|/|   
+* | 37825c2 solve merge conflict
+| *   9117fbd Merge pull request #34 from s-pl/develop
+| |\  
+| |/  
+|/|   
+* | 7046fed Merge branch 'main' into develop
+|\| 
+| *   f1bd3d3 Merge pull request #20 from s-pl/crud-streams-10
+| |\  
+| | *   3c0ac34 Merge branch 'main' into crud-streams-10
+| | |\  
+| | |/  
+| |/|   
+| * |   6322e6c Merge pull request #19 from s-pl/develop
+| |\ \  
+| * \ \   94b7ace Merge pull request #17 from s-pl/develop
+| |\ \ \  
+| * \ \ \   799f7e6 Merge pull request #12 from s-pl/develop
+| |\ \ \ \  
+| | | | | * 24ce29c crud-streams
+| | | | | * 9ae349c crud-streams
+| | | |_|/  
+| | |/| |   
+* | | | |   1634502 Merge pull request #33 from s-pl/fix-streams-route
+|\ \ \ \ \  
+| * | | | | f79e3b6 fixed and added better validation
+|/ / / / /  
+* | | | |   efa53a2 Merge pull request #32 from s-pl/add-role-middleware
+|\ \ \ \ \  
+| * | | | | 643555c add role middleware
+|/ / / / /  
+* | | | |   3e826ea Merge pull request #30 from s-pl/add-basic-auth
+|\ \ \ \ \  
+| * | | | | b63c3f8 add basic auth with b64
+* | | | | |   c20bbc4 Merge pull request #27 from s-pl/fix-mermaid
+|\ \ \ \ \ \  
+| |/ / / / /  
+|/| | | | |   
+| * | | | | a527427 Revise database schema and author permissions
+|/ / / / /  
+* | | | | a6533d4 Fix image link for Use Case Diagram in README
+* | | | |   7461071 Merge pull request #26 from s-pl/fix-readme-1
+|\ \ \ \ \  
+| * | | | | 1654099 Fix image link syntax in README.md
+|/ / / / /  
+* | | | |   2cdea3a Merge pull request #25 from s-pl/add-usecase-1
+|\ \ \ \ \  
+| * | | | | dec321e fix readme
+* | | | | | 2855e0b Merge pull request #24 from s-pl/add-usecase-1
+|\| | | | | 
+| |_|_|_|/  
+|/| | | |   
+| * | | | 8ae9b61 fix
+|/ / / /  
+* | | |   78f3ecc Merge pull request #18 from s-pl/add-ssl
+|\ \ \ \  
+| |_|_|/  
+|/| | |   
+| * | | fb5574e add __dirname in es modules
+* | | | ac93912 Merge pull request #16 from s-pl/add-ssl
+|\| | | 
+| |_|/  
+|/| |   
+| * | 729f445 add ssl and better index.html
+|/ /  
+* |   b086109 Merge pull request #11 from s-pl/login-register-JWT
+|\ \  
+* \ \   b31763a Merge pull request #8 from s-pl/login-register-JWT
+|\ \ \  
+* \ \ \   36ad64c Merge pull request #6 from s-pl/crud-countries-1
+|\ \ \ \  
+* \ \ \ \   b6b9396 Merge pull request #5 from s-pl/crud-countries-1
+|\ \ \ \ \  
+| | | | | | * e77a681 (origin/copilot/find-issues) Initial plan
+| | | | | |/  
+| | | | |/|   
+| | | | * | aab592e users crud
+| | | | * | f60c80a add users crud
+| | | |/ /  
+| | | * / 535894f added login and register routes with JWT, upgraded users model.
+| | |/ /  
+| | * / bdd5e61 seeder countries..
+| |/ /  
+| * / 522edff test
+|/ /  
+* | 7f7c03a add
+* | f2a0cc3 update mermaid
+* | 7edeed5 Update README to reflect database schema changes
+* | 76a2121 Update README.md
+* | be993c6 change mermaid
+* | bea207c better readme
+* | 89abdec added jwt sign, health route for db, better logging etc
+* | 0f77328 fix readme
+* |   5f0578e Merge branch 'develop' of https://github.com/s-pl/RobEurope into develop
+|\ \  
+| * | ed0fc07 Update README.md
+| * | 2291cc8 DEL
+| * | 5b6755d Refactor authentication: add user registration and login routes; implement user controller with registration and login logic; update .env.example for JWT_SECRET
+| * | 373b06d Refactor database connection handling: restore db.controller.js with Sequelize setup and SSL configuration; update import paths for consistency
+| * | 24df679 Refactor database configuration: import dotenv for environment variable management; update DB_PASS variable name for consistency; add .env.example file for environment setup
+| * | 7dbb2be Implement logging and error handling with Winston; add timeout middleware and restructure authentication middleware
+| * |   87ce2a6 Merge branch 'develop' of https://github.com/s-pl/RobEurope into develop
+| |\ \  
+| | |/  
+| |/|   
+| | * e5ff0e1 Fix link for Use Case Diagram in README
+| | * 8004a95 Fix link to Use Case Diagram in README
+| | * 1de470f features
+| | * 81fee66 Delete README.md
+| | * 0c552af Delete backend directory
+| * | 40be784 Delete README.md
+| * | 9601677 Delete backend directory
+* | | 75d4aa5 2
+| |/  
+|/|   
+* | 1046a22 test
+|/  
+* 0cdaad3 1st commit

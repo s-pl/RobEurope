@@ -1,20 +1,27 @@
 <%- include('partials/header') %>
 
-<article style="width:100%; max-width:480px;">
-  <header><strong>Admin Login</strong></header>
-  <form method="post" action="/admin/login">
+<article class="auth-card">
+  <header class="auth-card-header">
+    <p class="page-eyebrow"><%= t('auth.eyebrow') %></p>
+    <h2 class="page-title"><%= t('auth.title') %></h2>
+  </header>
+  <form method="post" action="/admin/login" class="form-stack">
     <% if (typeof csrfToken !== 'undefined') { %>
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <% } %>
-    <label>Email
-      <input type="email" name="email" required />
-    </label>
-    <label>Password
-      <input type="password" name="password" required />
-    </label>
-    <button type="submit">Login</button>
+    <div>
+      <label for="login-email"><%= t('auth.email') %></label>
+      <input id="login-email" type="email" name="email" required />
+    </div>
+    <div>
+      <label for="login-password"><%= t('auth.password') %></label>
+      <input id="login-password" type="password" name="password" required />
+    </div>
+    <div class="form-actions form-actions-start">
+      <button type="submit" class="btn btn-primary"><%= t('auth.submit') %></button>
+    </div>
     <% if (typeof error !== 'undefined' && error) { %>
-      <p style="color:#ef4444; margin-top:1rem;"><strong><%= error %></strong></p>
+      <p class="stat-note" style="color: var(--danger);"><%= error %></p>
     <% } %>
   </form>
 </article>

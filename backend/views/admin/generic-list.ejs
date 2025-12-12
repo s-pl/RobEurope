@@ -1,12 +1,12 @@
 <%- include('../partials/header') %>
 
-<h2><%= title %></h2>
-
-<div style="margin-bottom: 1rem; display: flex; justify-content: flex-end;">
-  <a href="/admin/<%= modelName %>/create" class="btn btn-primary">
-    ➕ Crear Nuevo
-  </a>
-</div>
+<section class="page-header">
+  <div>
+    <p class="page-eyebrow"><%= t('generic.eyebrow') %></p>
+    <h2 class="page-title"><%= title %></h2>
+  </div>
+  <a href="/admin/<%= modelName %>/create" class="btn btn-primary"><%= t('generic.create') %></a>
+</section>
 
 <div class="table-container">
   <table>
@@ -15,14 +15,14 @@
         <% config.fields.filter(f => f.list).forEach(field => { %>
           <th><%= field.label %></th>
         <% }) %>
-        <th>Acciones</th>
+        <th><%= t('generic.table.actions') %></th>
       </tr>
     </thead>
     <tbody>
       <% if (items.length === 0) { %>
         <tr>
           <td colspan="<%= config.fields.filter(f => f.list).length + 1 %>" style="text-align: center;">
-            No hay registros encontrados.
+            <%= t('generic.table.empty') %>
           </td>
         </tr>
       <% } else { %>
@@ -31,24 +31,22 @@
             <% config.fields.filter(f => f.list).forEach(field => { %>
               <td>
                 <% if (field.type === 'datetime') { %>
-                  <%= item[field.name] ? new Date(item[field.name]).toLocaleString() : '-' %>
+                  <%= item[field.name] ? new Date(item[field.name]).toLocaleString(locale || 'es-ES') : t('common.notAvailable') %>
                 <% } else if (field.name.includes('url') && item[field.name]) { %>
-                  <a href="<%= item[field.name] %>" target="_blank">Link</a>
+                  <a href="<%= item[field.name] %>" target="_blank"><%= t('generic.link') %></a>
                 <% } else { %>
-                  <%= item[field.name] %>
+                  <%= item[field.name] || t('common.notAvailable') %>
                 <% } %>
               </td>
             <% }) %>
             <td>
-              <div style="display: flex; gap: 0.5rem;">
-                <a href="/admin/<%= modelName %>/edit/<%= item[config.pk] %>" class="btn btn-sm btn-primary">
-                  ✏️ Editar
+              <div class="table-actions">
+                <a href="/admin/<%= modelName %>/edit/<%= item[config.pk] %>" class="btn btn-sm btn-outline">
+                  <%= t('actions.edit') %>
                 </a>
-                <form action="/admin/<%= modelName %>/delete/<%= item[config.pk] %>" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar este registro?');" style="margin: 0;">
+                <form action="/admin/<%= modelName %>/delete/<%= item[config.pk] %>" method="POST" onsubmit="return confirm(<%- JSON.stringify(t('actions.confirmDelete')) %>);" style="margin: 0;">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                  <button type="submit" class="btn btn-sm btn-danger">
-                    🗑️ Eliminar
-                  </button>
+                  <button type="submit" class="btn btn-sm btn-danger"><%= t('actions.delete') %></button>
                 </form>
               </div>
             </td>

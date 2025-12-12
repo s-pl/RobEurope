@@ -4,77 +4,91 @@ const modelConfigs = {
   teams: {
     model: 'Team',
     label: 'Equipos',
+    labelKey: 'crud.teams.label',
     pk: 'id',
     fields: [
-      { name: 'id', label: 'ID', type: 'text', list: true, form: false },
-      { name: 'name', label: 'Nombre', type: 'text', list: true, form: true, required: true },
-      { name: 'country_id', label: 'País ID', type: 'number', list: false, form: true }, // TODO: Select
-      { name: 'city', label: 'Ciudad', type: 'text', list: true, form: true },
-      { name: 'institution', label: 'Institución', type: 'text', list: true, form: true },
-      { name: 'description', label: 'Descripción', type: 'textarea', list: false, form: true },
-      { name: 'website_url', label: 'Sitio Web', type: 'text', list: false, form: true },
-      { name: 'logo_url', label: 'Logo URL', type: 'text', list: false, form: true },
-      { name: 'social_links', label: 'Redes Sociales (JSON)', type: 'textarea', list: false, form: true },
-      { name: 'stream_url', label: 'Stream URL', type: 'text', list: false, form: true },
+      { name: 'id', label: 'ID', labelKey: 'crud.fields.id', type: 'text', list: true, form: false },
+      { name: 'name', label: 'Nombre', labelKey: 'crud.teams.fields.name', type: 'text', list: true, form: true, required: true },
+      { name: 'country_id', label: 'País ID', labelKey: 'crud.teams.fields.countryId', type: 'number', list: false, form: true },
+      { name: 'city', label: 'Ciudad', labelKey: 'crud.teams.fields.city', type: 'text', list: true, form: true },
+      { name: 'institution', label: 'Institución', labelKey: 'crud.teams.fields.institution', type: 'text', list: true, form: true },
+      { name: 'description', label: 'Descripción', labelKey: 'crud.teams.fields.description', type: 'textarea', list: false, form: true },
+      { name: 'website_url', label: 'Sitio Web', labelKey: 'crud.fields.website', type: 'text', list: false, form: true },
+      { name: 'logo_url', label: 'Logo URL', labelKey: 'crud.fields.logo', type: 'text', list: false, form: true },
+      { name: 'social_links', label: 'Redes Sociales (JSON)', labelKey: 'crud.fields.socialLinks', type: 'textarea', list: false, form: true },
+      { name: 'stream_url', label: 'Stream URL', labelKey: 'crud.fields.streamUrl', type: 'text', list: false, form: true },
     ]
   },
   posts: {
     model: 'Post',
     label: 'Posts',
+    labelKey: 'crud.posts.label',
     pk: 'id',
     fields: [
-      { name: 'id', label: 'ID', type: 'text', list: true, form: false },
-      { name: 'title', label: 'Título', type: 'text', list: true, form: true, required: true },
-      { name: 'content', label: 'Contenido', type: 'textarea', list: false, form: true, required: true },
-      { name: 'author_id', label: 'Autor ID', type: 'number', list: true, form: true, required: true },
-      { name: 'media_urls', label: 'Media URLs (JSON)', type: 'textarea', list: false, form: true },
-      { name: 'stats', label: 'Stats (JSON)', type: 'textarea', list: false, form: true },
-      { name: 'created_at', label: 'Creado', type: 'datetime', list: true, form: false },
+      { name: 'id', label: 'ID', labelKey: 'crud.fields.id', type: 'text', list: true, form: false },
+      { name: 'title', label: 'Título', labelKey: 'crud.fields.title', type: 'text', list: true, form: true, required: true },
+      { name: 'content', label: 'Contenido', labelKey: 'crud.posts.fields.content', type: 'textarea', list: false, form: true, required: true },
+      { name: 'author_id', label: 'Autor ID', labelKey: 'crud.posts.fields.authorId', type: 'number', list: true, form: true, required: true },
+      { name: 'media_urls', label: 'Media URLs (JSON)', labelKey: 'crud.fields.mediaUrls', type: 'textarea', list: false, form: true },
+      { name: 'stats', label: 'Stats (JSON)', labelKey: 'crud.fields.stats', type: 'textarea', list: false, form: true },
+      { name: 'created_at', label: 'Creado', labelKey: 'crud.fields.createdAt', type: 'datetime', list: true, form: false },
     ]
   },
   sponsors: {
     model: 'Sponsor',
     label: 'Patrocinadores',
+    labelKey: 'crud.sponsors.label',
     pk: 'id',
     fields: [
-      { name: 'id', label: 'ID', type: 'text', list: true, form: false },
-      { name: 'name', label: 'Nombre', type: 'text', list: true, form: true, required: true },
-      { name: 'logo_url', label: 'Logo URL', type: 'text', list: true, form: true },
-      { name: 'website_url', label: 'Sitio Web', type: 'text', list: true, form: true },
-      { name: 'type', label: 'Tipo', type: 'text', list: true, form: true },
+      { name: 'id', label: 'ID', labelKey: 'crud.fields.id', type: 'text', list: true, form: false },
+      { name: 'name', label: 'Nombre', labelKey: 'crud.sponsors.fields.name', type: 'text', list: true, form: true, required: true },
+      { name: 'logo_url', label: 'Logo URL', labelKey: 'crud.fields.logo', type: 'text', list: true, form: true },
+      { name: 'website_url', label: 'Sitio Web', labelKey: 'crud.fields.website', type: 'text', list: true, form: true },
+      { name: 'type', label: 'Tipo', labelKey: 'crud.sponsors.fields.type', type: 'text', list: true, form: true },
     ]
   },
   countries: {
     model: 'Country',
     label: 'Países',
+    labelKey: 'crud.countries.label',
     pk: 'id',
     fields: [
-      { name: 'id', label: 'ID', type: 'text', list: true, form: false },
-      { name: 'name', label: 'Nombre', type: 'text', list: true, form: true, required: true },
-      { name: 'code', label: 'Código', type: 'text', list: true, form: true, required: true },
-      { name: 'flag_emoji', label: 'Bandera', type: 'text', list: true, form: true },
+      { name: 'id', label: 'ID', labelKey: 'crud.fields.id', type: 'text', list: true, form: false },
+      { name: 'name', label: 'Nombre', labelKey: 'crud.fields.name', type: 'text', list: true, form: true, required: true },
+      { name: 'code', label: 'Código', labelKey: 'crud.countries.fields.code', type: 'text', list: true, form: true, required: true },
+      { name: 'flag_emoji', label: 'Bandera', labelKey: 'crud.countries.fields.flag', type: 'text', list: true, form: true },
     ]
   },
   competitions: {
     model: 'Competition',
     label: 'Competiciones',
+    labelKey: 'crud.competitions.label',
     pk: 'id',
     fields: [
-      { name: 'id', label: 'ID', type: 'text', list: true, form: false },
-      { name: 'title', label: 'Título', type: 'text', list: true, form: true, required: true },
-      { name: 'slug', label: 'Slug', type: 'text', list: true, form: true, required: true },
-      { name: 'description', label: 'Descripción', type: 'textarea', list: false, form: true },
-      { name: 'status', label: 'Estado', type: 'select', options: ['draft', 'published', 'archived'], list: true, form: true },
-      { name: 'location', label: 'Ubicación', type: 'text', list: true, form: true },
-      { name: 'max_teams', label: 'Max Equipos', type: 'number', list: false, form: true },
-      { name: 'start_date', label: 'Fecha Inicio', type: 'datetime', list: true, form: true },
-      { name: 'end_date', label: 'Fecha Fin', type: 'datetime', list: true, form: true },
-      { name: 'registration_start', label: 'Inicio Registro', type: 'datetime', list: false, form: true },
-      { name: 'registration_end', label: 'Fin Registro', type: 'datetime', list: false, form: true },
-      { name: 'stream_url', label: 'Stream URL', type: 'text', list: false, form: true },
+      { name: 'id', label: 'ID', labelKey: 'crud.fields.id', type: 'text', list: true, form: false },
+      { name: 'title', label: 'Título', labelKey: 'crud.fields.title', type: 'text', list: true, form: true, required: true },
+      { name: 'slug', label: 'Slug', labelKey: 'crud.competitions.fields.slug', type: 'text', list: true, form: true, required: true },
+      { name: 'description', label: 'Descripción', labelKey: 'crud.fields.description', type: 'textarea', list: false, form: true },
+      { name: 'status', label: 'Estado', labelKey: 'crud.fields.status', type: 'select', options: ['draft', 'published', 'archived'], list: true, form: true },
+      { name: 'location', label: 'Ubicación', labelKey: 'crud.competitions.fields.location', type: 'text', list: true, form: true },
+      { name: 'max_teams', label: 'Max Equipos', labelKey: 'crud.competitions.fields.maxTeams', type: 'number', list: false, form: true },
+      { name: 'start_date', label: 'Fecha Inicio', labelKey: 'crud.fields.startDate', type: 'datetime', list: true, form: true },
+      { name: 'end_date', label: 'Fecha Fin', labelKey: 'crud.fields.endDate', type: 'datetime', list: true, form: true },
+      { name: 'registration_start', label: 'Inicio Registro', labelKey: 'crud.competitions.fields.registrationStart', type: 'datetime', list: false, form: true },
+      { name: 'registration_end', label: 'Fin Registro', labelKey: 'crud.competitions.fields.registrationEnd', type: 'datetime', list: false, form: true },
+      { name: 'stream_url', label: 'Stream URL', labelKey: 'crud.fields.streamUrl', type: 'text', list: false, form: true },
     ]
   }
 };
+
+const localizeConfig = (config, req) => ({
+  ...config,
+  label: req.__({ phrase: config.labelKey || config.label, defaultValue: config.label }),
+  fields: config.fields.map(field => ({
+    ...field,
+    label: req.__({ phrase: field.labelKey || field.label, defaultValue: field.label })
+  }))
+});
 
 export const list = async (req, res) => {
   const { model } = req.params;
@@ -88,11 +102,13 @@ export const list = async (req, res) => {
     const Model = db[config.model];
     const items = await Model.findAll();
     
+    const localizedConfig = localizeConfig(config, req);
     res.render('admin/generic-list', {
-      title: config.label,
-      config,
+      title: localizedConfig.label,
+      config: localizedConfig,
       items,
       modelName: model,
+      pageKey: model,
       currentUser: req.session.user
     });
   } catch (error) {
@@ -117,11 +133,15 @@ export const form = async (req, res) => {
       if (!item) return res.status(404).send('Item not found');
     }
 
+    const localizedConfig = localizeConfig(config, req);
+    const formTitleKey = id ? 'generic.form.editTitle' : 'generic.form.createTitle';
+    const title = req.__(formTitleKey, { collection: localizedConfig.label });
     res.render('admin/generic-form', {
-      title: id ? `Editar ${config.label}` : `Crear ${config.label}`,
-      config,
+      title,
+      config: localizedConfig,
       item,
       modelName: model,
+      pageKey: model,
       currentUser: req.session.user
     });
   } catch (error) {

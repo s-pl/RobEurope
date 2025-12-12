@@ -1,52 +1,57 @@
 <%- include('partials/header') %>
 
-<h2> Editar Usuario</h2>
+<section class="page-header">
+  <div>
+    <p class="page-eyebrow"><%= t('editUser.eyebrow') %></p>
+    <h2 class="page-title"><%= t('editUser.title') %></h2>
+  </div>
+</section>
 
-<div class="chart-wrapper" style="max-width: 600px; margin: 0 auto;">
-  <form action="/admin/users/<%= user.id %>/edit" method="POST">
+<div class="card" style="max-width: 720px; margin: 0 auto;">
+  <form action="/admin/users/<%= user.id %>/edit" method="POST" class="form-stack">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    
-    <div style="margin-bottom: 1rem;">
-      <label for="username">Usuario</label>
+
+    <div>
+      <label for="username"><%= t('editUser.form.username') %></label>
       <input type="text" id="username" name="username" value="<%= user.username %>" required>
     </div>
 
-    <div style="margin-bottom: 1rem;">
-      <label for="email">Email</label>
+    <div>
+      <label for="email"><%= t('editUser.form.email') %></label>
       <input type="email" id="email" name="email" value="<%= user.email %>" required>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-      <div style="margin-bottom: 1rem;">
-        <label for="first_name">Nombre</label>
+    <div class="form-grid">
+      <div>
+        <label for="first_name"><%= t('editUser.form.firstName') %></label>
         <input type="text" id="first_name" name="first_name" value="<%= user.first_name %>">
       </div>
-
-      <div style="margin-bottom: 1rem;">
-        <label for="last_name">Apellido</label>
+      <div>
+        <label for="last_name"><%= t('editUser.form.lastName') %></label>
         <input type="text" id="last_name" name="last_name" value="<%= user.last_name %>">
       </div>
     </div>
 
-    <div style="margin-bottom: 1rem;">
-      <label for="role">Rol</label>
-      <select id="role" name="role">
-        <option value="user" <%= user.role === 'user' ? 'selected' : '' %>>Usuario</option>
-        <option value="super_admin" <%= user.role === 'super_admin' ? 'selected' : '' %>>Administrador</option>
-      </select>
+    <div class="form-grid">
+      <div>
+        <label for="role"><%= t('editUser.form.role') %></label>
+        <select id="role" name="role">
+          <option value="user" <%= user.role === 'user' ? 'selected' : '' %>><%= t('editUser.form.roleUser') %></option>
+          <option value="super_admin" <%= user.role === 'super_admin' ? 'selected' : '' %>><%= t('editUser.form.roleAdmin') %></option>
+        </select>
+      </div>
+      <div>
+        <label for="is_active"><%= t('editUser.form.status') %></label>
+        <select id="is_active" name="is_active">
+          <option value="true" <%= user.is_active ? 'selected' : '' %>><%= t('editUser.form.statusActive') %></option>
+          <option value="false" <%= !user.is_active ? 'selected' : '' %>><%= t('editUser.form.statusInactive') %></option>
+        </select>
+      </div>
     </div>
 
-    <div style="margin-bottom: 1.5rem;">
-      <label for="is_active">Estado</label>
-      <select id="is_active" name="is_active">
-        <option value="true" <%= user.is_active ? 'selected' : '' %>>Activo</option>
-        <option value="false" <%= !user.is_active ? 'selected' : '' %>>Inactivo</option>
-      </select>
-    </div>
-
-    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-      <a href="/admin/users" role="button" style="background: #64748b; border-color: #64748b; text-decoration: none; padding: 0.5rem 1rem; border-radius: 6px; color: white;">Cancelar</a>
-      <button type="submit">Guardar Cambios</button>
+    <div class="form-actions">
+      <a href="/admin/users" class="btn btn-muted"><%= t('actions.cancel') %></a>
+      <button type="submit" class="btn btn-primary"><%= t('editUser.form.submit') %></button>
     </div>
   </form>
 </div>
