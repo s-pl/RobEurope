@@ -1,4 +1,6 @@
 import ldap from 'ldapjs';
+import attributePkg from '@ldapjs/attribute';
+const Attribute = attributePkg; // CJS default export is the class itself
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -120,7 +122,8 @@ export const renderEditLdapUser = async (req, res) => {
     client.search(dn, { scope: 'base' }, (err, search) => {
       if (err) return res.status(500).json({ error: err.message });
       search.on('searchEntry', (entry) => {
-        res.render('admin/ldap-user-form', { user: entry.object, action: 'edit', title: req.__('ldap.form.editTitle'), pageKey: 'ldap' });
+        // Pass the uid used to reach this page to avoid missing param issues in the form action
+        res.render('admin/ldap-user-form', { user: entry.object, action: 'edit', formUid: uid, title: req.__('ldap.form.editTitle'), pageKey: 'ldap' });
       });
       search.on('error', (err) => {
         res.status(500).json({ error: err.message });
@@ -133,14 +136,18 @@ export const renderEditLdapUser = async (req, res) => {
 
 
 export const updateLdapUser = async (req, res) => {
-  const uid = req.params.uid;
+  const uid = req.params.uid || req.body.uid;
   const { cn, sn, mail, password } = req.body;
   const dn = `uid=${uid},${userDN}`;
+  const toAttr = (type, value) => new Attribute({ type, values: Array.isArray(value) ? value : [value] });
   const changes = [];
-  if (cn) changes.push(new ldap.Change({ operation: 'replace', modification: { cn } }));
-  if (sn) changes.push(new ldap.Change({ operation: 'replace', modification: { sn } }));
-  if (mail) changes.push(new ldap.Change({ operation: 'replace', modification: { mail } }));
-  if (password) changes.push(new ldap.Change({ operation: 'replace', modification: { userPassword: password } }));
+  if (cn) changes.push(new ldap.Change({ operation: 'replace', modification: toAttr('cn', cn) }));
+  if (sn) changes.push(new ldap.Change({ operation: 'replace', modification: toAttr('sn', sn) }));
+  if (mail) changes.push(new ldap.Change({ operation: 'replace', modification: toAttr('mail', mail) }));
+  if (password) changes.push(new ldap.Change({ operation: 'replace', modification: toAttr('userPassword', password) }));
+  if (changes.length === 0) {
+    return res.redirect('/admin/ldap-users');
+  }
   try {
     await bindClient();
     client.modify(dn, changes, (err) => {

@@ -12,7 +12,6 @@ import {
   getUsersTimeline,
   getRegistrationStats,
   getDetailedUsers,
-  // listCompetitions, // Replaced by generic CRUD
   getCompetitionStats,
   listSystemLogs,
   getLogsStats,
@@ -64,6 +63,8 @@ router.get('/ldap-users/add', requireAdminSession, ldapController.renderAddLdapU
 router.post('/ldap-users/add', requireAdminSession, ldapController.addLdapUser);
 router.get('/ldap-users/edit/:uid', requireAdminSession, ldapController.renderEditLdapUser);
 router.post('/ldap-users/edit/:uid', requireAdminSession, ldapController.updateLdapUser);
+// Fallback: allow POST without :uid using body.uid from the form (prevents 'Cannot POST /admin/ldap-users/edit/')
+router.post('/ldap-users/edit', requireAdminSession, ldapController.updateLdapUser);
 router.post('/ldap-users/delete/:uid', requireAdminSession, ldapController.deleteLdapUser);
 
 // Generic CRUD routes (Must be last to avoid conflicts)

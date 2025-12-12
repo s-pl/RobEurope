@@ -46,6 +46,21 @@
         --shadow-soft: 0 35px 80px -50px rgba(0, 0, 0, 0.85);
         --shadow-card: 0 25px 70px -40px rgba(0, 0, 0, 0.85);
       }
+
+      /* Dark mode form inputs: reduce glare and improve contrast */
+      input, select, textarea {
+        background: rgba(2, 6, 23, 0.75);
+        border-color: rgba(148, 163, 184, 0.25);
+        color: var(--card-foreground);
+      }
+      input::placeholder, textarea::placeholder {
+        color: rgba(168, 179, 207, 0.7);
+      }
+      input:focus, select:focus, textarea:focus {
+        border-color: rgba(59, 130, 246, 0.55);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+        background: rgba(2, 6, 23, 0.9);
+      }
     }
 
     *, *::before, *::after {
@@ -770,10 +785,14 @@
             <div class="sidebar-mark">RE</div>
             <div>
               <strong><%= t('common.brand') %></strong>
-              <small style="display:block; color:rgba(226,232,240,0.65); letter-spacing:0.08em; text-transform:uppercase;"><%= t('common.tagline') %></small>
+              <% if (t('common.tagline')) { %>
+                <small style="display:block; color:rgba(226,232,240,0.65); letter-spacing:0.08em; text-transform:uppercase;"><%= t('common.tagline') %></small>
+              <% } %>
             </div>
           </div>
-          <p class="sidebar-hint"><%= t('common.sidebarHint') %></p>
+          <% if (t('common.sidebarHint')) { %>
+            <p class="sidebar-hint"><%= t('common.sidebarHint') %></p>
+          <% } %>
         </div>
 
         <nav class="sidebar-nav">
@@ -834,9 +853,13 @@
       <div class="admin-workspace">
         <header class="workspace-header">
           <div>
-            <p class="workspace-eyebrow"><%= t('common.workspace.eyebrow') %></p>
+            <% if (t('common.workspace.eyebrow')) { %>
+              <p class="workspace-eyebrow"><%= t('common.workspace.eyebrow') %></p>
+            <% } %>
             <h1 class="workspace-title"><%= title || 'Dashboard' %></h1>
-            <p class="workspace-description"><%= t('common.workspace.description') %></p>
+            <% if (t('common.workspace.description')) { %>
+              <p class="workspace-description"><%= t('common.workspace.description') %></p>
+            <% } %>
           </div>
           <div class="workspace-meta">
             <span class="status-dot"></span>

@@ -8,7 +8,12 @@
 </section>
 
 <div class="card" style="max-width: 640px;">
-    <form action="<%= action === 'add' ? '/admin/ldap-users/add' : `/admin/ldap-users/edit/${user ? user.uid : ''}` %>" method="POST" class="form-stack">
+    <form action="<%= action === 'add' 
+        ? '/admin/ldap-users/add' 
+        : `/admin/ldap-users/edit/${(typeof formUid !== 'undefined' && formUid) 
+              ? formUid 
+              : (user ? (Array.isArray(user.uid) ? user.uid[0] : user.uid) : '')}` %>" 
+        method="POST" class="form-stack">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         
         <div>
