@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
@@ -8,6 +8,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { useAuth } from '../hooks/useAuth';
 import { getApiBaseUrl } from '../lib/apiClient';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../components/ui/dialog';
 
 const Login = () => {
   const { login } = useAuth();
@@ -17,6 +18,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [ldapOpen, setLdapOpen] = useState(false);
+  const [ldapForm, setLdapForm] = useState({ username: '', password: '' });
   const { t } = useTranslation();
 
   const handleChange = (event) => {
@@ -39,12 +42,40 @@ const Login = () => {
     }
   };
 
+  const handleLdapLogin = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      // LDAP expects { username, password }
+      const resp = await fetch(`${getApiBaseUrl()}/auth/ldap`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username: ldapForm.username || form.email, password: ldapForm.password || form.password })
+      });
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        throw new Error(data?.error || 'LDAP authentication failed');
+      }
+      const redirect = params.get('redirectTo') || '/';
+      navigate(redirect, { replace: true });
+    } catch (err) {
+      setError(err.message || 'LDAP authentication failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Secret trigger: double-click on the page title to open LDAP dialog
+  const openHiddenLdap = () => setLdapOpen(true);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-12 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
       <Card className="w-full max-w-md border-slate-200 dark:border-slate-800">
         <CardHeader className="space-y-2 text-center">
           <p className="text-xs uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">{t('login.tagline')}</p>
-          <CardTitle as="h1" className="text-3xl">{t('login.title')}</CardTitle>
+          <CardTitle as="h1" className="text-3xl" onDoubleClick={openHiddenLdap}>{t('login.title')}</CardTitle>
           <CardDescription>{t('login.description')}</CardDescription>
         </CardHeader>
 
@@ -118,6 +149,41 @@ const Login = () => {
               Apple
             </Button>
           </div>
+
+          {/* Hidden LDAP dialog, opened via Ctrl+K */}
+          <Dialog open={ldapOpen} onOpenChange={setLdapOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>LDAP Sign in</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleLdapLogin} className="space-y-4 mt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="ldap-username">Username (uid or mail)</Label>
+                  <Input
+                    id="ldap-username"
+                    value={ldapForm.username}
+                    onChange={e => setLdapForm({ ...ldapForm, username: e.target.value })}
+                    placeholder="john.doe or john@domain"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="ldap-password">Password</Label>
+                  <Input
+                    id="ldap-password"
+                    type="password"
+                    value={ldapForm.password}
+                    onChange={e => setLdapForm({ ...ldapForm, password: e.target.value })}
+                    placeholder="••••••••"
+                  />
+                </div>
+                <DialogFooter>
+                  <Button type="submit" disabled={loading} className="w-full">
+                    {loading ? t('buttons.entering') : 'Sign in with LDAP'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
 
           <div className="text-center">
             <Link to="/forgot-password" className="text-xs text-blue-700 hover:underline dark:text-blue-300">

@@ -14,7 +14,7 @@ import { Textarea } from '../components/ui/textarea';
 import { useApi } from '../hooks/useApi';
 import { useAuth } from '../hooks/useAuth';
 
-const CompetitionItem = ({ competition, isFavorite, onToggleFavorite }) => {
+const CompetitionItem = ({ competition, isFavorite, onToggleFavorite, onSetActive, isAdmin }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation();
 
@@ -60,6 +60,18 @@ const CompetitionItem = ({ competition, isFavorite, onToggleFavorite }) => {
               >
                 <Star className="h-5 w-5" fill={isFavorite ? 'currentColor' : 'none'} aria-hidden="true" />
                 <span className="sr-only">{isFavorite ? (t('competitions.removeFavorite')||'Quitar de favoritos') : (t('competitions.addFavorite')||'Añadir a favoritos')}</span>
+              </Button>
+            )}
+            {isAdmin && (
+              <Button
+                type="button"
+                variant={competition.is_active ? 'default' : 'outline'}
+                size="sm"
+                onClick={(e)=>{ e.stopPropagation(); onSetActive?.(competition.id); }}
+                title={competition.is_active ? (t('competitions.active')||'Activa') : (t('competitions.setActive')||'Marcar activa')}
+                className="ml-1"
+              >
+                {competition.is_active ? (t('competitions.active')||'Activa') : (t('competitions.setActive')||'Marcar activa')}
               </Button>
             )}
             <Button variant="ghost" size="icon" className="text-slate-500 dark:text-slate-400">
@@ -211,6 +223,16 @@ const Competitions = () => {
     }
   };
 
+  const setActiveCompetition = async (id) => {
+    try {
+      await api(`/competitions/${id}`, { method: 'PUT', body: { is_active: true } });
+      // Refrescar lista para reflejar que otras pasan a inactivas si el backend lo hace así
+      fetchAll();
+    } catch (err) {
+      alert(err.message || t('competitions.setActiveError') || 'No se pudo marcar como activa');
+    }
+  };
+
   return (
     <div className="space-y-8 container mx-auto px-4 py-8">
       <div className="flex justify-between items-end">
@@ -336,7 +358,14 @@ const Competitions = () => {
 
       <div className="grid gap-4">
         {competitions.map((comp) => (
-          <CompetitionItem key={comp.id} competition={comp} isFavorite={favorites.has(comp.id)} onToggleFavorite={user?.id ? toggleFavorite : undefined} />
+          <CompetitionItem 
+            key={comp.id} 
+            competition={comp} 
+            isFavorite={favorites.has(comp.id)} 
+            onToggleFavorite={user?.id ? toggleFavorite : undefined}
+            onSetActive={isAdmin ? setActiveCompetition : undefined}
+            isAdmin={isAdmin}
+          />
         ))}
         
         {!loading && competitions.length === 0 && (
