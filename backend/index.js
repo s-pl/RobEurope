@@ -47,82 +47,8 @@ app.use(requestId());
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://d3js.org", "https://cdn.tailwindcss.com"],
-        
-     
-        scriptSrc: [
-          "'self'",
-          "'unsafe-inline'", 
-          "'unsafe-eval'",   
-          "https://cdnjs.cloudflare.com",
-          "https://cdn.jsdelivr.net",
-          "https://unpkg.com",
-          "https://d3js.org",
-          "https://cdn.tailwindcss.com",
-          "https://ajax.googleapis.com",
-          "https://www.googletagmanager.com"
-        ],
-        
-      
-        styleSrc: [
-          "'self'",
-          "'unsafe-inline'",
-          "https://cdnjs.cloudflare.com",
-          "https://cdn.jsdelivr.net",
-          "https://unpkg.com",
-          "https://fonts.googleapis.com",
-          "https://cdn.tailwindcss.com",
-          "https://stackpath.bootstrapcdn.com"
-        ],
-        
-      
-        fontSrc: [
-          "'self'",
-          "https://fonts.gstatic.com",
-          "https://cdnjs.cloudflare.com",
-          "https://cdn.jsdelivr.net",
-          "https://unpkg.com"
-        ],
-        
-     
-        connectSrc: [
-          "'self'",
-          "https://cdnjs.cloudflare.com",
-          "https://cdn.jsdelivr.net",
-          "https://unpkg.com",
-          "https://api.github.com",
-          "https://www.googleapis.com",
-          // Allow API calls to the production origin and port used by Swagger UI
-          "https://robeurope.samuelponce.es:85"
-        ],
-        
-       
-        imgSrc: [
-          "'self'",
-          "data:",
-          "https://images.unsplash.com",
-          "https://cdn.jsdelivr.net",
-          "https://cdnjs.cloudflare.com"
-        ],
-        
-      
-        frameSrc: [
-          "https://www.youtube.com",
-          "https://player.vimeo.com",
-          "https://maps.google.com",
-          "https://docs.google.com"
-        ],
-        
-       
-        objectSrc: ["'none'"],  
-        
-    
-        mediaSrc: ["'self'", "https://cdn.jsdelivr.net"],
-        manifestSrc: ["'self'"]
-      }
-    }
+    // Disable Content Security Policy entirely as requested
+    contentSecurityPolicy: false
   })
 );
 
