@@ -120,7 +120,7 @@ const Profile = () => {
   // handlePasswordChange removed
 
   if (!user) {
-    return <p className="text-sm text-slate-500">{t('profile.feedback.error')}</p>;
+    return <p className="text-sm text-slate-500" role="alert">{t('profile.feedback.error')}</p>;
   }
 
   const photoUrl = resolveMediaUrl(user.profile_photo_url);
@@ -143,8 +143,12 @@ const Profile = () => {
                 <span className="text-3xl font-bold text-white">{profileInitials}</span>
               )}
             </div>
-            <label className="absolute bottom-0 right-0 p-2 bg-blue-600 rounded-full cursor-pointer hover:bg-blue-500 transition-colors shadow-lg border-2 border-slate-900">
-              <Camera className="h-4 w-4 text-white" />
+            <label
+              className="absolute bottom-0 right-0 p-2 bg-blue-600 rounded-full cursor-pointer hover:bg-blue-500 transition-colors shadow-lg border-2 border-slate-900 focus-within:outline-none focus-within:ring-2 focus-within:ring-white/70"
+              aria-label={t('buttons.changePhoto') || 'Change photo'}
+              title={t('buttons.changePhoto') || 'Change photo'}
+            >
+              <Camera className="h-4 w-4 text-white" aria-hidden="true" />
               <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} disabled={uploading} />
             </label>
           </div>
@@ -190,7 +194,7 @@ const Profile = () => {
                   <p>{user.first_name} {user.last_name}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-slate-900 dark:text-slate-100">Email</p>
+                  <p className="font-medium text-slate-900 dark:text-slate-100">{t('forms.email')}</p>
                   <p>{user.email}</p>
                 </div>
                 <div>
@@ -220,7 +224,10 @@ const Profile = () => {
               {feedback.message && (
                 <div className={`p-4 rounded-lg mb-6 text-sm font-medium ${
                   feedback.type === 'error' ? 'bg-red-50 text-red-700 border border-red-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                }`}>
+                }`}
+                  role={feedback.type === 'error' ? 'alert' : 'status'}
+                  aria-live={feedback.type === 'error' ? 'assertive' : 'polite'}
+                >
                   {feedback.message}
                 </div>
               )}
@@ -246,7 +253,11 @@ const Profile = () => {
                       onValueChange={(value) => handleChange({ target: { name: 'country_id', value } })}
                       disabled={countriesStatus.loading}
                     >
-                      <SelectTrigger id="country_id">
+                      <SelectTrigger
+                        id="country_id"
+                        aria-invalid={Boolean(countriesStatus.error)}
+                        aria-describedby={countriesStatus.error ? 'countries-error' : undefined}
+                      >
                         <SelectValue placeholder={countriesStatus.loading ? t('general.countriesLoading') : '—'} />
                       </SelectTrigger>
                       <SelectContent>
@@ -258,7 +269,7 @@ const Profile = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                    {countriesStatus.error && <p className="text-xs text-red-500 mt-1">{t('profile.countriesError')}</p>}
+                    {countriesStatus.error && <p id="countries-error" className="text-xs text-red-500 mt-1" role="alert">{t('profile.countriesError')}</p>}
                   </div>
                   <div className="md:col-span-2 space-y-2">
                     <Label htmlFor="bio">{t('profile.bio')}</Label>
