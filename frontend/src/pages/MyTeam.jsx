@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { createElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTeams } from '../hooks/useTeams';
 import { useRegistrations } from '../hooks/useRegistrations';
@@ -27,8 +27,6 @@ const debounce = (fn, ms = 300) => {
 };
 
 const TabButton = ({ id, label, Icon, active, onSelect }) => (
-  // eslint-disable-next-line no-unused-expressions
-  (Icon, (
   <button
     type="button"
     onClick={() => onSelect(id)}
@@ -38,10 +36,9 @@ const TabButton = ({ id, label, Icon, active, onSelect }) => (
         : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
     }`}
   >
-    <Icon className="h-4 w-4" />
+    {createElement(Icon, { className: 'h-4 w-4' })}
     {label}
   </button>
-  ))
 );
 
 const MyTeam = () => {
