@@ -23,21 +23,39 @@ const ResetPassword = () => {
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState(''); // 'success' | 'error'
+  const confirmErrorId = 'reset-confirm-error';
+  const confirmMismatch = Boolean(confirm && confirm !== pw);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
-  if (!token) { setMessage(t('reset.tokenRequired') || 'Token requerido'); return; }
-    if (pw !== confirm) { setMessage(t('forms.passwordsDontMatch') || 'Las contraseñas no coinciden'); return; }
+    setMessageType('');
+    if (!token) {
+      setMessage(t('reset.tokenRequired') || 'Token requerido');
+      setMessageType('error');
+      return;
+    }
+    if (pw !== confirm) {
+      setMessage(t('forms.passwordsDontMatch') || 'Las contraseñas no coinciden');
+      setMessageType('error');
+      return;
+    }
     const { score } = getPasswordStrength(pw);
-    if (score < 2) { setMessage(t('forms.passwordTooWeak') || 'La contraseña es demasiado débil'); return; }
+    if (score < 2) {
+      setMessage(t('forms.passwordTooWeak') || 'La contraseña es demasiado débil');
+      setMessageType('error');
+      return;
+    }
     setLoading(true);
     try {
   await api('/auth/reset-password', { method: 'POST', body: { token, new_password: pw } });
   setMessage(t('reset.done') || 'Contraseña restablecida');
+  setMessageType('success');
   setTimeout(() => navigate('/', { replace: true }), 800);
     } catch (err) {
       setMessage(err.message || (t('reset.error') || 'Error al restablecer'));
+      setMessageType('error');
     } finally {
       setLoading(false);
     }
@@ -56,14 +74,24 @@ const ResetPassword = () => {
 
         <div className="space-y-4 px-6 pb-6">
           {message && (
-            <p className="rounded-2xl border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700 dark:bg-blue-900/20 dark:border-blue-900 dark:text-blue-300">{message}</p>
+            <p
+              role={messageType === 'error' ? 'alert' : 'status'}
+              aria-live={messageType === 'error' ? 'assertive' : 'polite'}
+              className={`rounded-2xl border p-3 text-sm ${
+                messageType === 'error'
+                  ? 'border-red-200 bg-red-50 text-red-700 dark:bg-red-900/20 dark:border-red-900 dark:text-red-400'
+                  : 'border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:border-blue-900 dark:text-blue-300'
+              }`}
+            >
+              {message}
+            </p>
           )}
           <form onSubmit={onSubmit} className="space-y-4">
             {/* Token is taken from URL and is not editable */}
             <input type="hidden" name="token" value={token} />
             <div>
               <Label htmlFor="pw">{t('forms.newPassword') || 'Nueva contraseña'}</Label>
-              <Input id="pw" type="password" required value={pw} onChange={(e)=>setPw(e.target.value)} className="mt-2" />
+              <Input id="pw" type="password" required value={pw} onChange={(e)=>setPw(e.target.value)} className="mt-2" autoComplete="new-password" />
               {pw && (
                 <div className="mt-1">
                   <div className="flex items-center justify-between text-xs text-slate-500">
@@ -76,9 +104,19 @@ const ResetPassword = () => {
             </div>
             <div>
               <Label htmlFor="confirm">{t('forms.repeatPassword') || 'Repetir contraseña'}</Label>
-              <Input id="confirm" type="password" required value={confirm} onChange={(e)=>setConfirm(e.target.value)} className="mt-2" />
-              {confirm && confirm !== pw && (
-                <p className="text-xs text-red-600 mt-1">{t('forms.passwordsDontMatch') || 'Las contraseñas no coinciden'}</p>
+              <Input
+                id="confirm"
+                type="password"
+                required
+                value={confirm}
+                onChange={(e)=>setConfirm(e.target.value)}
+                className="mt-2"
+                autoComplete="new-password"
+                aria-invalid={confirmMismatch}
+                aria-describedby={confirmMismatch ? confirmErrorId : undefined}
+              />
+              {confirmMismatch && (
+                <p id={confirmErrorId} className="text-xs text-red-600 mt-1" role="alert">{t('forms.passwordsDontMatch') || 'Las contraseñas no coinciden'}</p>
               )}
             </div>
             <Button type="submit" disabled={loading} className="w-full">{loading ? (t('buttons.saving') || 'Guardando...') : (t('reset.submit') || 'Restablecer')}</Button>
