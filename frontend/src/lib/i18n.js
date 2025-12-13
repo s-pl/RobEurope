@@ -570,6 +570,11 @@ const resources = {
         chat: {
           tab: 'Chat',
           title: 'Chat de Equipo'
+        },
+        notFound: {
+          subtitle: '¿Estás perdido?',
+          message: 'Parece que la página que buscas no existe. Tal vez escribiste mal la dirección o la página se ha movido.',
+          backHome: 'Volver al inicio'
         }
       }
     }
@@ -1104,6 +1109,11 @@ const resources = {
         chat: {
           tab: 'Chat',
           title: 'Team Chat'
+        },
+        notFound: {
+          subtitle: 'Are you lost?',
+          message: 'It seems the page you are looking for does not exist. Maybe you typed the address wrong or the page has moved.',
+          backHome: 'Back to home'
         }
       }
     }
@@ -1630,6 +1640,11 @@ const resources = {
         chat: {
           tab: 'Chat',
           title: 'Team-Chat'
+        },
+        notFound: {
+          subtitle: 'Bist du verloren?',
+          message: 'Die Seite, die Sie suchen, existiert nicht. Vielleicht haben Sie die Adresse falsch eingegeben oder die Seite wurde verschoben.',
+          backHome: 'Zurück zur Startseite'
         }
       }
     }
