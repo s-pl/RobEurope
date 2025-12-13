@@ -127,7 +127,7 @@ const Navbar = () => {
                 </SheetTitle>
               </SheetHeader>
               
-              <nav className="flex-1 overflow-y-auto p-6 flex flex-col gap-2">
+              <nav aria-label={t('nav.primaryNavigation') || 'Primary navigation'} className="flex-1 overflow-y-auto p-6 flex flex-col gap-2">
                 <NavItems mobile />
                 {!isAuthenticated && (
                   <div className="flex flex-col gap-2 mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
@@ -166,6 +166,8 @@ const Navbar = () => {
                         <button
                           key={lang.code}
                           onClick={() => i18n.changeLanguage(lang.code)}
+                          aria-pressed={i18n.language === lang.code}
+                          type="button"
                           className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                             i18n.language === lang.code
                               ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
@@ -194,7 +196,7 @@ const Navbar = () => {
         </div>
 
         {/* Desktop Nav */}
-        <nav className="hidden items-center gap-6 text-sm font-medium text-blue-600 lg:flex dark:text-slate-300">
+        <nav aria-label={t('nav.primaryNavigation') || 'Primary navigation'} className="hidden items-center gap-6 text-sm font-medium text-blue-600 lg:flex dark:text-slate-300">
           <NavItems />
         </nav>
 

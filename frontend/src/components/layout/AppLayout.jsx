@@ -28,7 +28,7 @@ const AppLayout = () => {
       </a>
       {isAdmin && (
         <div className="bg-red-600 text-white text-xs font-bold text-center py-1 uppercase tracking-widest">
-          Admin Mode Active
+          {t('common.adminModeActive')}
         </div>
       )}
       
@@ -38,7 +38,7 @@ const AppLayout = () => {
           <div className="lg:hidden">
             <Navbar />
           </div>
-          <main id="main-content" className="mx-auto w-full max-w-5xl space-y-10 px-4 pb-16 pt-10 lg:px-8 flex-1">
+          <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-5xl space-y-10 px-4 pb-16 pt-10 lg:px-8 flex-1">
             <Outlet />
           </main>
           <NotificationTestButton />
