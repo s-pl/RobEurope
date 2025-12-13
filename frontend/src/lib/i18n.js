@@ -64,6 +64,7 @@ const resources = {
         login: 'Entrar',
         register: 'Registro',
         logout: 'Cerrar sesión',
+        save: 'Guardar',
         saveChanges: 'Guardar cambios',
         submitDemo: 'Enviar demo',
         send: 'Enviar',
@@ -169,7 +170,8 @@ const resources = {
       auth: {
         orContinueWith: 'O continuar con',
         orSignUpWith: 'O registrarte con',
-        signInWithLdap: 'Iniciar sesión con LDAP'
+        signInWithLdap: 'Iniciar sesión con LDAP',
+        backToLogin: 'Volver al inicio de sesión'
       },
       forgot: {
         tagline: 'RECUPERAR',
@@ -462,6 +464,7 @@ const resources = {
         description: 'Usa las credenciales emitidas por el backend (/auth/login) para generar tu token JWT.',
         noAccount: '¿No tienes cuenta?',
         registerLink: 'Regístrate aquí',
+        forgot: '¿Olvidaste tu contraseña?',
         error: 'Credenciales inválidas'
       },
       register: {
@@ -619,6 +622,7 @@ const resources = {
         login: 'Login',
         register: 'Register',
         logout: 'Log out',
+        save: 'Save',
         saveChanges: 'Save changes',
         submitDemo: 'Send demo',
         send: 'Send',
@@ -724,7 +728,8 @@ const resources = {
       auth: {
         orContinueWith: 'Or continue with',
         orSignUpWith: 'Or sign up with',
-        signInWithLdap: 'Sign in with LDAP'
+        signInWithLdap: 'Sign in with LDAP',
+        backToLogin: 'Back to login'
       },
       forgot: {
         tagline: 'RECOVER',
@@ -1011,6 +1016,7 @@ const resources = {
         description: 'Use the credentials issued by the backend (/auth/login) to generate your JWT token.',
         noAccount: 'Don\'t have an account?',
         registerLink: 'Register here',
+        forgot: 'Forgot your password?',
         error: 'Invalid credentials'
       },
       register: {
@@ -1166,6 +1172,7 @@ const resources = {
         login: 'Login',
         register: 'Registrieren',
         logout: 'Abmelden',
+        save: 'Speichern',
         saveChanges: 'Änderungen speichern',
         submitDemo: 'Demo senden',
         send: 'Senden',
@@ -1271,7 +1278,8 @@ const resources = {
       auth: {
         orContinueWith: 'Oder weiter mit',
         orSignUpWith: 'Oder registrieren mit',
-        signInWithLdap: 'Mit LDAP anmelden'
+        signInWithLdap: 'Mit LDAP anmelden',
+        backToLogin: 'Zurück zur Anmeldung'
       },
       forgot: {
         tagline: 'WIEDERHERSTELLEN',
@@ -1550,6 +1558,7 @@ const resources = {
         description: 'Nutze die Zugangsdaten aus dem Backend (/auth/login), um dein JWT zu erhalten.',
         noAccount: 'Noch kein Konto?',
         registerLink: 'Hier registrieren',
+        forgot: 'Passwort vergessen?',
         error: 'Ungültige Zugangsdaten'
       },
       register: {
