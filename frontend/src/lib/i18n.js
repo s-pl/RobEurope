@@ -171,6 +171,16 @@ const resources = {
         orSignUpWith: 'O registrarte con',
         signInWithLdap: 'Iniciar sesión con LDAP'
       },
+      forgot: {
+        tagline: 'RECUPERAR',
+        title: 'Recuperar contraseña',
+        description: 'Te enviaremos un código de un solo uso para restablecerla.',
+        description2: 'Introduce el código y tu nueva contraseña.',
+        sent: 'Te hemos enviado un código de un solo uso si el correo existe.',
+        error: 'Error al solicitar la recuperación',
+        reset_success: 'Contraseña actualizada correctamente.',
+        reset_error: 'Código inválido o expirado'
+      },
       notFound: {
         subtitle: '¿Estás perdido?',
         message: 'Parece que la página que buscas no existe. Tal vez escribiste mal la dirección o la página se ha movido.',
@@ -715,6 +725,16 @@ const resources = {
         orContinueWith: 'Or continue with',
         orSignUpWith: 'Or sign up with',
         signInWithLdap: 'Sign in with LDAP'
+      },
+      forgot: {
+        tagline: 'RECOVER',
+        title: 'Recover password',
+        description: 'We will send you a one-time code to reset it.',
+        description2: 'Enter the code and your new password.',
+        sent: 'We sent you a one-time code if the email exists.',
+        error: 'Error requesting recovery',
+        reset_success: 'Password updated successfully.',
+        reset_error: 'Invalid or expired code'
       },
       notFound: {
         subtitle: 'Are you lost?',
