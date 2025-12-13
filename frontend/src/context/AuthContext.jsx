@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { apiRequest } from '../lib/apiClient';
 
@@ -27,7 +29,7 @@ export const AuthProvider = ({ children }) => {
       const profile = await apiRequest('/users/me');
       persistSession(profile);
       return profile;
-    } catch (error) {
+    } catch (_ERROR) {
       persistSession(null);
       return null;
     } finally {

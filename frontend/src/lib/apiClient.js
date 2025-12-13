@@ -22,8 +22,10 @@ const readStoredBase = () => {
 };
 
 const resolveDefaultBase = () => {
+  const storedBase = normalizeBase(readStoredBase());
+  if (storedBase) return storedBase;
+
   const envBase = normalizeBase(import.meta.env.VITE_API_BASE_URL || '');
-  console.log('VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL, 'envBase:', envBase);
   if (envBase) return envBase;
 
   return 'https://api.robeurope.samuelponce.es/api';
@@ -90,7 +92,7 @@ const parseResponse = async (response) => {
   return response.text();
 };
 
-export async function apiRequest(path, { method = 'GET', body, token, headers = {}, formData = false } = {}) {
+export async function apiRequest(path, { method = 'GET', body, token: _TOKEN, headers = {}, formData = false } = {}) {
   const finalHeaders = { ...headers };
 
   // Session based auth - no token needed

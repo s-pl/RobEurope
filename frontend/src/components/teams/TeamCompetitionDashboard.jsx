@@ -10,7 +10,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '../ui/badge';
 
 const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
-  const { user } = useAuthContext();
   const [activeTab, setActiveTab] = useState('overview');
   const [streamData, setStreamData] = useState({ title: '', description: '', stream_url: '' });
   const [robotFiles, setRobotFiles] = useState([]);

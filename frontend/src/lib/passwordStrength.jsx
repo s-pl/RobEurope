@@ -1,4 +1,4 @@
-import React from 'react';
+/* eslint-disable react-refresh/only-export-components */
 
 // Simple password strength estimator (score 0-4)
 // Criteria: length, lowercase, uppercase, digits, symbols

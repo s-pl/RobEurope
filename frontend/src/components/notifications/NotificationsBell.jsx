@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Bell, Check } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Bell } from 'lucide-react';
 import io from 'socket.io-client';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
@@ -8,7 +8,6 @@ import { getApiBaseUrl } from '../../lib/apiClient';
 import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { ScrollArea } from '../ui/scroll-area';
-import { Badge } from '../ui/badge';
 import { requestNotificationPermission, showNotification } from '../../lib/notifications';
 import { registerServiceWorker, subscribeToPush } from '../../lib/push';
 
@@ -25,24 +24,32 @@ const NotificationsBell = () => {
     return apiBase.replace(/\/api$/i, '');
   }, []);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
+    if (!user?.id) return;
     try {
       const list = await api(`/notifications?user_id=${encodeURIComponent(user.id)}&limit=20`);
-      setItems(Array.isArray(list) ? list : []);
-      setUnread(list.filter(n => !n.is_read).length);
-    } catch (_) {}
-  };
+      const arr = Array.isArray(list) ? list : [];
+      setItems(arr);
+      setUnread(arr.filter((n) => !n.is_read).length);
+    } catch (_ERROR) {
+      // ignore
+    }
+  }, [api, user?.id]);
 
   useEffect(() => {
     let socket;
-    let alive = true;
 
     const bootstrap = async () => {
-  await fetchNotifications();
-  await requestNotificationPermission();
-  // Push registration
-  const reg = await registerServiceWorker();
-  if (reg) await subscribeToPush(reg);
+      await fetchNotifications();
+      await requestNotificationPermission();
+
+      try {
+        // Push registration
+        const reg = await registerServiceWorker();
+        if (reg) await subscribeToPush(reg);
+      } catch (_ERROR) {
+        // ignore
+      }
 
       try {
         socket = io(socketUrl, { transports: ['websocket', 'polling'] });
@@ -53,22 +60,25 @@ const NotificationsBell = () => {
           // Web notification
           showNotification(notif.title || 'Nueva notificación', { body: notif.message || '', tag: `notif-${notif.id}` });
         });
-      } catch (_) {}
+      } catch (_ERROR) {
+        // ignore
+      }
     };
 
     if (user?.id) bootstrap();
     return () => {
-      alive = false;
       if (socket) socket.disconnect();
     };
-  }, [user?.id, socketUrl, api]);
+  }, [user?.id, socketUrl, fetchNotifications]);
 
   const markAsRead = async (id) => {
     try {
       await api(`/notifications/${id}`, { method: 'PUT', body: { is_read: true } });
       setItems(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
       setUnread(prev => Math.max(0, prev - 1));
-    } catch (_) {}
+    } catch (_ERROR) {
+      // ignore
+    }
   };
 
   const markAllAsRead = async () => {
@@ -78,7 +88,9 @@ const NotificationsBell = () => {
       
       setItems(prev => prev.map(n => ({ ...n, is_read: true })));
       setUnread(0);
-    } catch (_) {}
+    } catch (_ERROR) {
+      // ignore
+    }
   };
 
   return (

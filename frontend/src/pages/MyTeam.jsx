@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTeams } from '../hooks/useTeams';
 import { useRegistrations } from '../hooks/useRegistrations';
@@ -25,6 +25,21 @@ const debounce = (fn, ms = 300) => {
     t = setTimeout(() => fn(...args), ms);
   };
 };
+
+const TabButton = ({ id, label, Icon, active, onSelect }) => (
+  <button
+    type="button"
+    onClick={() => onSelect(id)}
+    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+      active
+        ? 'border-blue-600 text-blue-600'
+        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+    }`}
+  >
+    <Icon className="h-4 w-4" />
+    {label}
+  </button>
+);
 
 const MyTeam = () => {
   const { t } = useTranslation();
@@ -100,7 +115,9 @@ const MyTeam = () => {
       try {
         const comps = await api('/competitions');
         setCompetitions(Array.isArray(comps) ? comps : []);
-      } catch {}
+      } catch (_ERROR) {
+        // ignore
+      }
     };
     load();
   }, []);
@@ -303,20 +320,6 @@ const MyTeam = () => {
     );
   }
 
-  const TabButton = ({ id, label, icon: Icon }) => (
-    <button
-      onClick={() => setActiveTab(id)}
-      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-        activeTab === id
-          ? 'border-blue-600 text-blue-600'
-          : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-      }`}
-    >
-      <Icon className="h-4 w-4" />
-      {label}
-    </button>
-  );
-
   return (
     <div className="space-y-6">
       {feedback && (
@@ -348,11 +351,11 @@ const MyTeam = () => {
 
       {/* Tabs Navigation */}
       <div className="border-b border-slate-200 flex gap-2 overflow-x-auto">
-        <TabButton id="overview" label={t('myTeam.tabs.overview')} icon={Info} />
-        <TabButton id="chat" label={t('team.chat.tab')} icon={MessageCircle} />
-        <TabButton id="members" label={t('myTeam.tabs.members')} icon={Users} />
-        <TabButton id="competitions" label={t('myTeam.tabs.competitions')} icon={Trophy} />
-        {isOwner && <TabButton id="settings" label={t('myTeam.tabs.settings')} icon={Settings} />}
+        <TabButton id="overview" label={t('myTeam.tabs.overview')} Icon={Info} active={activeTab === 'overview'} onSelect={setActiveTab} />
+        <TabButton id="chat" label={t('team.chat.tab')} Icon={MessageCircle} active={activeTab === 'chat'} onSelect={setActiveTab} />
+        <TabButton id="members" label={t('myTeam.tabs.members')} Icon={Users} active={activeTab === 'members'} onSelect={setActiveTab} />
+        <TabButton id="competitions" label={t('myTeam.tabs.competitions')} Icon={Trophy} active={activeTab === 'competitions'} onSelect={setActiveTab} />
+        {isOwner && <TabButton id="settings" label={t('myTeam.tabs.settings')} Icon={Settings} active={activeTab === 'settings'} onSelect={setActiveTab} />}
       </div>
 
       {/* Tab Content */}

@@ -15,7 +15,7 @@ import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 
 const Teams = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { list, create, requestJoin, getMembers } = useTeams();
   const { countries, status: countriesStatus } = useCountries();
   const api = useApi();
@@ -40,7 +40,7 @@ const Teams = () => {
       const results = await Promise.all(memberPromises);
       const map = Object.fromEntries(results);
       setMembersMap(map);
-    } catch (e) {
+    } catch (_ERROR) {
       setTeams([]);
     }
   };
@@ -70,11 +70,6 @@ const Teams = () => {
     fetchStatus();
     return () => { alive = false; };
   }, [isAuthenticated, api]);
-
-  const onSearch = async (e) => {
-    e.preventDefault();
-    await reload();
-  };
 
   const onCreate = async (e) => {
     e.preventDefault();
