@@ -1273,6 +1273,16 @@ const resources = {
         orSignUpWith: 'Oder registrieren mit',
         signInWithLdap: 'Mit LDAP anmelden'
       },
+      forgot: {
+        tagline: 'WIEDERHERSTELLEN',
+        title: 'Passwort wiederherstellen',
+        description: 'Wir senden Ihnen einen Einmalcode zum Zurücksetzen.',
+        description2: 'Geben Sie den Code und Ihr neues Passwort ein.',
+        sent: 'Wir haben Ihnen einen Einmalcode gesendet, falls die E-Mail existiert.',
+        error: 'Fehler beim Anfordern der Wiederherstellung',
+        reset_success: 'Passwort erfolgreich aktualisiert.',
+        reset_error: 'Ungültiger oder abgelaufener Code'
+      },
       notFound: {
         subtitle: 'Bist du verloren?',
         message: 'Die Seite, die Sie suchen, existiert nicht. Vielleicht haben Sie die Adresse falsch eingegeben oder die Seite wurde verschoben.',
