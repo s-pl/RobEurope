@@ -210,7 +210,7 @@ const Register = () => {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-white px-2 text-slate-500 dark:bg-slate-950 dark:text-slate-400">
-                Or sign up with
+                {t('auth.orSignUpWith')}
               </span>
             </div>
           </div>

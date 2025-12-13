@@ -47,7 +47,9 @@ const Sidebar = () => {
         const st = await api('/teams/status');
         if (!alive) return;
         setHasTeam(Boolean(st?.ownedTeamId || st?.memberOfTeamId));
-      } catch {t}
+      } catch (error) {
+        // ignore
+      }
     };
     load();
     return () => { alive = false; };
@@ -122,10 +124,10 @@ const Sidebar = () => {
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-50'
                   } ${collapsed ? 'justify-center px-2' : ''}`
                 }
-                title={collapsed ? 'Mi equipo' : ''}
+                title={collapsed ? t('nav.myTeam') : ''}
               >
                 <Shield className="h-5 w-5 shrink-0" />
-                {!collapsed && <span>Mi equipo</span>}
+                {!collapsed && <span>{t('nav.myTeam')}</span>}
               </NavLink>
             )}
           </>
@@ -156,7 +158,7 @@ const Sidebar = () => {
           <div className={`flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
             <div className="h-10 w-10 overflow-hidden rounded-full border border-blue-200 bg-blue-50 shrink-0">
               {avatarUrl ? (
-                <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" />
+                <img src={avatarUrl} alt={t('profile.avatarAlt') || 'Profile photo'} className="h-full w-full object-cover" />
               ) : (
                 <User className="h-5 w-5 m-auto mt-2 text-blue-400" />
               )}

@@ -1,4 +1,3 @@
-import { Description } from '@radix-ui/react-dialog';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
@@ -25,6 +24,11 @@ const detectLanguage = () => {
   }
 
   return 'es';
+};
+
+const applyDocumentLanguage = (lang) => {
+  if (typeof document === 'undefined') return;
+  document.documentElement.lang = lang || 'es';
 };
 
 const resources = {
@@ -143,7 +147,18 @@ const resources = {
         delete: 'Eliminar',
         cancel: 'Cancelar',
         edit: 'Editar',
-        close: 'Cerrar'
+        close: 'Cerrar',
+        skipToContent: 'Saltar al contenido'
+      },
+      theme: {
+        toggle: 'Cambiar tema',
+        light: 'Claro',
+        dark: 'Oscuro',
+        system: 'Sistema'
+      },
+      auth: {
+        orContinueWith: 'O continuar con',
+        orSignUpWith: 'O registrarte con'
       },
       sponsors: {
         title: 'Sponsors',
@@ -655,7 +670,18 @@ const resources = {
         delete: 'Delete',
         cancel: 'Cancel',
         edit: 'Edit',
-        close: 'Close'
+        close: 'Close',
+        skipToContent: 'Skip to content'
+      },
+      theme: {
+        toggle: 'Toggle theme',
+        light: 'Light',
+        dark: 'Dark',
+        system: 'System'
+      },
+      auth: {
+        orContinueWith: 'Or continue with',
+        orSignUpWith: 'Or sign up with'
       },
       sponsors: {
         title: 'Sponsors',
@@ -1159,7 +1185,18 @@ const resources = {
         delete: 'Löschen',
         cancel: 'Abbrechen',
         edit: 'Bearbeiten',
-        close: 'Schließen'
+        close: 'Schließen',
+        skipToContent: 'Zum Inhalt springen'
+      },
+      theme: {
+        toggle: 'Theme wechseln',
+        light: 'Hell',
+        dark: 'Dunkel',
+        system: 'System'
+      },
+      auth: {
+        orContinueWith: 'Oder weiter mit',
+        orSignUpWith: 'Oder registrieren mit'
       },
       sponsors: {
         title: 'Sponsoren',
@@ -1551,7 +1588,10 @@ i18n.use(initReactI18next).init({
   }
 });
 
+applyDocumentLanguage(i18n.language);
+
 i18n.on('languageChanged', (lng) => {
+  applyDocumentLanguage(lng);
   if (typeof window === 'undefined') return;
   try {
     window.localStorage?.setItem(LANGUAGE_KEY, lng);
