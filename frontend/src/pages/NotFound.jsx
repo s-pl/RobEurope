@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Bot, Home, Radar } from 'lucide-react';
+import { ArrowLeft, Home, Radar } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import NotFoundScene from '../components/notfound/NotFoundScene';
 
 export default function NotFound() {
   const { t } = useTranslation();
@@ -44,22 +45,17 @@ export default function NotFound() {
           <div className="relative">
             <div className="absolute -inset-10 rounded-full bg-blue-100/70 blur-2xl dark:bg-blue-900/20" aria-hidden="true" />
 
-            <div className="relative grid place-items-center rounded-3xl border border-blue-200 bg-white p-10 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-              <div className="relative">
-                <div className="grid h-28 w-28 place-items-center rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white text-blue-700 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-800 dark:text-blue-400">
-                  <Bot className="h-14 w-14 motion-safe:animate-bounce motion-reduce:animate-none" aria-hidden="true" />
-                </div>
+            <div className="relative rounded-3xl border border-blue-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+              <div className="relative aspect-square w-[280px] max-w-full sm:w-[320px]">
+                <NotFoundScene className="absolute inset-0" />
 
                 <div
-                  className="pointer-events-none absolute left-0 top-0 h-full w-full overflow-hidden rounded-2xl"
+                  className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-blue-200/50 dark:ring-slate-800"
                   aria-hidden="true"
-                >
-                  <div className="absolute inset-x-0 top-4 h-0.5 bg-blue-400/70 motion-safe:animate-pulse motion-reduce:animate-none dark:bg-blue-500/50" />
-                </div>
+                />
 
                 <div
-                  className="pointer-events-none absolute -right-4 -top-4 grid h-9 w-9 place-items-center rounded-full border border-blue-200 bg-white text-blue-700 motion-safe:animate-spin motion-reduce:animate-none dark:border-slate-800 dark:bg-slate-950 dark:text-blue-300"
-                  style={{ animationDuration: '6s' }}
+                  className="pointer-events-none absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full border border-blue-200 bg-white/90 text-blue-700 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80 dark:text-blue-300"
                   aria-hidden="true"
                 >
                   <Radar className="h-4 w-4" />

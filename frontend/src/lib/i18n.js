@@ -203,14 +203,6 @@ const resources = {
         subtitle: 'Mantente al día con las últimas actualizaciones',
         search: 'Buscar noticias...',
         create: 'Crear Post',
-      notFound: {
-        badge: 'Page not found',
-        title: 'Oops…',
-        description: "The page you're looking for doesn't exist or has moved. You can go back or return home.",
-        goBack: 'Go back',
-        goHome: 'Go home',
-        robotHint: "My radar can't find that page."
-      },
         createTitle: 'Crear Nuevo Post',
         form: {
           title: 'Título',
@@ -238,14 +230,6 @@ const resources = {
           description: 'Descripción',
           website: 'Sitio Web',
           country: 'País'
-        notFound: {
-          badge: 'Seite nicht gefunden',
-          title: 'Ups…',
-          description: 'Die gesuchte Seite existiert nicht (mehr) oder wurde verschoben. Du kannst zurückgehen oder zur Startseite.',
-          goBack: 'Zurück',
-          goHome: 'Zur Startseite',
-          robotHint: 'Mein Radar findet diese Seite nicht.'
-        },
         },
         searchPlaceholder: 'Buscar equipos...',
         searchButton: 'Buscar',
@@ -728,6 +712,14 @@ const resources = {
         orContinueWith: 'Or continue with',
         orSignUpWith: 'Or sign up with',
         signInWithLdap: 'Sign in with LDAP'
+      },
+      notFound: {
+        badge: 'Page not found',
+        title: 'Oops…',
+        description: "The page you're looking for doesn't exist or has moved. You can go back or return home.",
+        goBack: 'Go back',
+        goHome: 'Go home',
+        robotHint: "My radar can't find that page."
       },
       sponsors: {
         title: 'Sponsors',
@@ -1254,6 +1246,14 @@ const resources = {
         orContinueWith: 'Oder weiter mit',
         orSignUpWith: 'Oder registrieren mit',
         signInWithLdap: 'Mit LDAP anmelden'
+      },
+      notFound: {
+        badge: 'Seite nicht gefunden',
+        title: 'Ups…',
+        description: 'Die gesuchte Seite existiert nicht (mehr) oder wurde verschoben. Du kannst zurückgehen oder zur Startseite.',
+        goBack: 'Zurück',
+        goHome: 'Zur Startseite',
+        robotHint: 'Mein Radar findet diese Seite nicht.'
       },
       sponsors: {
         title: 'Sponsoren',
