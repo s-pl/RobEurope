@@ -100,9 +100,7 @@ function App() {
             </GuestRoute>
           }
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
-        
-        
+
       </Routes>
   <AdminEditButton />
   <Toaster />

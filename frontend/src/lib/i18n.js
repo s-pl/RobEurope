@@ -171,6 +171,14 @@ const resources = {
         orSignUpWith: 'O registrarte con',
         signInWithLdap: 'Iniciar sesión con LDAP'
       },
+      notFound: {
+        badge: 'Página no encontrada',
+        title: 'Ups…',
+        description: 'La ruta que buscas no existe o ha cambiado. Puedes volver atrás o ir al inicio.',
+        goBack: 'Volver',
+        goHome: 'Ir al inicio',
+        robotHint: 'Mi radar no detecta esa página.'
+      },
       sponsors: {
         title: 'Sponsors',
         subtitle: 'Gestiona los sponsors del evento',
@@ -195,6 +203,14 @@ const resources = {
         subtitle: 'Mantente al día con las últimas actualizaciones',
         search: 'Buscar noticias...',
         create: 'Crear Post',
+      notFound: {
+        badge: 'Page not found',
+        title: 'Oops…',
+        description: "The page you're looking for doesn't exist or has moved. You can go back or return home.",
+        goBack: 'Go back',
+        goHome: 'Go home',
+        robotHint: "My radar can't find that page."
+      },
         createTitle: 'Crear Nuevo Post',
         form: {
           title: 'Título',
@@ -222,6 +238,14 @@ const resources = {
           description: 'Descripción',
           website: 'Sitio Web',
           country: 'País'
+        notFound: {
+          badge: 'Seite nicht gefunden',
+          title: 'Ups…',
+          description: 'Die gesuchte Seite existiert nicht (mehr) oder wurde verschoben. Du kannst zurückgehen oder zur Startseite.',
+          goBack: 'Zurück',
+          goHome: 'Zur Startseite',
+          robotHint: 'Mein Radar findet diese Seite nicht.'
+        },
         },
         searchPlaceholder: 'Buscar equipos...',
         searchButton: 'Buscar',
