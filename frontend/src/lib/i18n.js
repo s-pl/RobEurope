@@ -47,6 +47,7 @@ const resources = {
         profile: 'Perfil',
         menu: 'Menú',
         userMenu: 'Menú de usuario',
+        primaryNavigation: 'Navegación principal',
         myTeam: 'Mi equipo',
         theme: 'Tema',
         posts: 'Noticias',
@@ -148,7 +149,8 @@ const resources = {
         cancel: 'Cancelar',
         edit: 'Editar',
         close: 'Cerrar',
-        skipToContent: 'Saltar al contenido'
+        skipToContent: 'Saltar al contenido',
+        adminModeActive: 'Modo admin activo'
       },
       theme: {
         toggle: 'Cambiar tema',
@@ -570,6 +572,7 @@ const resources = {
         profile: 'Profile',
         menu: 'Menu',
         userMenu: 'User menu',
+        primaryNavigation: 'Primary navigation',
         myTeam: 'My Team',
         theme: 'Theme',
         posts: 'News',
@@ -671,7 +674,8 @@ const resources = {
         cancel: 'Cancel',
         edit: 'Edit',
         close: 'Close',
-        skipToContent: 'Skip to content'
+        skipToContent: 'Skip to content',
+        adminModeActive: 'Admin mode active'
       },
       theme: {
         toggle: 'Toggle theme',
@@ -1085,6 +1089,7 @@ const resources = {
         profile: 'Profil',
         menu: 'Menü',
         userMenu: 'Benutzermenü',
+        primaryNavigation: 'Hauptnavigation',
         myTeam: 'Mein Team',
         theme: 'Thema',
         posts: 'Nachrichten',
@@ -1186,7 +1191,8 @@ const resources = {
         cancel: 'Abbrechen',
         edit: 'Bearbeiten',
         close: 'Schließen',
-        skipToContent: 'Zum Inhalt springen'
+        skipToContent: 'Zum Inhalt springen',
+        adminModeActive: 'Admin-Modus aktiv'
       },
       theme: {
         toggle: 'Theme wechseln',
