@@ -112,9 +112,9 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-12 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-4 py-12 text-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:text-slate-50">
       <div ref={containerRef} className="w-full max-w-md">
-        <Card className="border-slate-200 shadow-xl dark:border-slate-800 dark:bg-slate-900/50 backdrop-blur-sm">
+        <Card className="border-slate-200 shadow-2xl dark:border-slate-800 dark:bg-slate-900/80 backdrop-blur-md">
           <CardHeader className="space-y-2 text-center pb-8">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
               {step === 1 ? (
@@ -262,7 +262,7 @@ const ForgotPassword = () => {
                 onClick={() => navigate('/login')}
                 className="text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
               >
-                {t('auth.backToLogin') || 'Volver al inicio de sesión'}
+                {t('auth.backToLogin')}
               </button>
             </div>
           </div>
