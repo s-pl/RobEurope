@@ -47,7 +47,9 @@ const Sidebar = () => {
         const st = await api('/teams/status');
         if (!alive) return;
         setHasTeam(Boolean(st?.ownedTeamId || st?.memberOfTeamId));
-      } catch {t}
+      } catch {
+        // ignore
+      }
     };
     load();
     return () => { alive = false; };
@@ -61,7 +63,7 @@ const Sidebar = () => {
     >
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-9 flex h-6 w-6 items-center justify-center rounded-full border border-blue-200 bg-white text-blue-900 shadow-sm hover:bg-blue-50 dark:border-slate-800 dark:bg-slate-900 dark:text-blue-100 z-50"
+        className="absolute -right-3 top-9 flex h-6 w-6 items-center justify-center rounded-full border border-blue-200 bg-white text-blue-900 shadow-sm hover:bg-blue-50 dark:border-slate-800 dark:bg-slate-900 dark:text-blue-100 z-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
         aria-label={collapsed ? t('common.expand') || 'Expand sidebar' : t('common.collapse') || 'Collapse sidebar'}
       >
         {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
@@ -76,7 +78,7 @@ const Sidebar = () => {
         </Link>
       </div>
 
-      <nav className="flex-1 px-4 space-y-2 overflow-y-auto overflow-x-hidden">
+      <nav aria-label={t('nav.primaryNavigation') || 'Primary navigation'} className="flex-1 px-4 space-y-2 overflow-y-auto overflow-x-hidden">
         {navLinks.map((item) => (
           <NavLink
             key={item.to}
@@ -122,10 +124,10 @@ const Sidebar = () => {
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-50'
                   } ${collapsed ? 'justify-center px-2' : ''}`
                 }
-                title={collapsed ? 'Mi equipo' : ''}
+                title={collapsed ? t('nav.myTeam') : ''}
               >
                 <Shield className="h-5 w-5 shrink-0" />
-                {!collapsed && <span>Mi equipo</span>}
+                {!collapsed && <span>{t('nav.myTeam')}</span>}
               </NavLink>
             )}
           </>
@@ -137,7 +139,8 @@ const Sidebar = () => {
             <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
-                <Globe className="h-5 w-5 text-blue-900 dark:text-blue-400" />
+                <Globe className="h-5 w-5 text-blue-900 dark:text-blue-400" aria-hidden="true" />
+                <span className="sr-only">{t('nav.language')}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" side={collapsed ? "right" : "bottom"}>
@@ -156,7 +159,7 @@ const Sidebar = () => {
           <div className={`flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
             <div className="h-10 w-10 overflow-hidden rounded-full border border-blue-200 bg-blue-50 shrink-0">
               {avatarUrl ? (
-                <img src={avatarUrl} alt="Profile" className="h-full w-full object-cover" />
+                <img src={avatarUrl} alt={t('profile.avatarAlt') || 'Profile photo'} className="h-full w-full object-cover" />
               ) : (
                 <User className="h-5 w-5 m-auto mt-2 text-blue-400" />
               )}

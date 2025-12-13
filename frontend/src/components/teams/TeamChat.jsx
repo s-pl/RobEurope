@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Send, Paperclip, File, Image as ImageIcon, X, Download, FileText } from 'lucide-react';
 import { useApi } from '../../hooks/useApi';
@@ -18,13 +18,23 @@ const TeamChat = ({ teamId }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
   const socketRef = useRef(null);
 
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [typingUsers, setTypingUsers] = useState([]);
   const typingTimeoutRef = useRef(null);
+
+  const scrollToBottom = useCallback(() => {
+    if (scrollRef.current) {
+      const viewport = scrollRef.current.closest('[data-radix-scroll-area-viewport]');
+      if (viewport) {
+        viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+      } else {
+        scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, []);
 
   useEffect(() => {
     // Initialize socket
@@ -60,9 +70,12 @@ const TeamChat = ({ teamId }) => {
     });
 
     return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
       if (socketRef.current) socketRef.current.disconnect();
     };
-  }, [teamId, user]);
+  }, [teamId, user, scrollToBottom]);
 
   const handleTyping = () => {
     if (socketRef.current) {
@@ -77,34 +90,23 @@ const TeamChat = ({ teamId }) => {
   };
 
   useEffect(() => {
-    fetchMessages();
-  }, [teamId]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await api(`/teams/${teamId}/messages`);
+        if (!cancelled) setMessages(data);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [api, teamId]);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
-
-  const fetchMessages = async () => {
-    try {
-      const data = await api(`/teams/${teamId}/messages`);
-      setMessages(data);
-      setLoading(false);
-    } catch (error) {
-      console.error(error);
-      setLoading(false);
-    }
-  };
-
-  const scrollToBottom = () => {
-    if (scrollRef.current) {
-      const viewport = scrollRef.current.closest('[data-radix-scroll-area-viewport]');
-      if (viewport) {
-        viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
-      } else {
-        scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }
-  };
+  }, [messages, scrollToBottom]);
 
   const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB per file limit
 

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, Bot, CircuitBoard, Globe2, ShieldCheck, Users, Trophy, Zap, Calendar, Newspaper, ArrowRight, CheckCircle, UserPlus, Medal, Thermometer } from 'lucide-react';
 import gsap from 'gsap';
 import { useTranslation } from 'react-i18next';
@@ -13,10 +13,8 @@ const Home = () => {
   const { isAuthenticated } = useAuth();
   const api = useApi();
   const [highlights, setHighlights] = useState({ competitions: [], streams: [], posts: [] });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const robotRef = useRef(null);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -47,8 +45,6 @@ const Home = () => {
     let active = true;
 
     const fetchData = async () => {
-      setLoading(true);
-      setError('');
       try {
         const [competitions, streams, posts] = await Promise.all([
           api('/competitions'),
@@ -63,9 +59,7 @@ const Home = () => {
           });
         }
       } catch (err) {
-        if (active) setError(err.message || 'No se pudo cargar la información');
-      } finally {
-        if (active) setLoading(false);
+        console.error(err);
       }
     };
  
