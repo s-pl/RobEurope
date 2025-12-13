@@ -47,7 +47,7 @@ const Sidebar = () => {
         const st = await api('/teams/status');
         if (!alive) return;
         setHasTeam(Boolean(st?.ownedTeamId || st?.memberOfTeamId));
-      } catch (error) {
+      } catch (_error) {
         // ignore
       }
     };

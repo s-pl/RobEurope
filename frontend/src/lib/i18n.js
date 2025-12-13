@@ -66,6 +66,8 @@ const resources = {
         logout: 'Cerrar sesión',
         saveChanges: 'Guardar cambios',
         submitDemo: 'Enviar demo',
+        send: 'Enviar',
+        sending: 'Enviando…',
         createAccount: 'Crear cuenta',
         alreadyAccount: '¿Ya tienes cuenta?',
         noAccount: '¿No tienes cuenta?',
@@ -124,6 +126,10 @@ const resources = {
         phone: 'Teléfono',
         email: 'Email',
         password: 'Contraseña',
+        newPassword: 'Nueva contraseña',
+        new_password: 'Nueva contraseña',
+        confirm_password: 'Confirmar contraseña',
+        code: 'Código',
         organization: 'Organización',
         message: 'Mensaje',
         country: 'País',
@@ -150,7 +156,9 @@ const resources = {
         edit: 'Editar',
         close: 'Cerrar',
         skipToContent: 'Saltar al contenido',
-        adminModeActive: 'Modo admin activo'
+        adminModeActive: 'Modo admin activo',
+        showPassword: 'Mostrar contraseña',
+        hidePassword: 'Ocultar contraseña'
       },
       theme: {
         toggle: 'Cambiar tema',
@@ -160,7 +168,8 @@ const resources = {
       },
       auth: {
         orContinueWith: 'O continuar con',
-        orSignUpWith: 'O registrarte con'
+        orSignUpWith: 'O registrarte con',
+        signInWithLdap: 'Iniciar sesión con LDAP'
       },
       sponsors: {
         title: 'Sponsors',
@@ -591,6 +600,8 @@ const resources = {
         logout: 'Log out',
         saveChanges: 'Save changes',
         submitDemo: 'Send demo',
+        send: 'Send',
+        sending: 'Sending…',
         createAccount: 'Create account',
         alreadyAccount: 'Already have an account?',
         noAccount: 'Don\'t have an account?',
@@ -649,6 +660,10 @@ const resources = {
         phone: 'Phone',
         email: 'Email',
         password: 'Password',
+        newPassword: 'New password',
+        new_password: 'New password',
+        confirm_password: 'Confirm password',
+        code: 'Code',
         organization: 'Organization',
         message: 'Message',
         country: 'Country',
@@ -675,7 +690,9 @@ const resources = {
         edit: 'Edit',
         close: 'Close',
         skipToContent: 'Skip to content',
-        adminModeActive: 'Admin mode active'
+        adminModeActive: 'Admin mode active',
+        showPassword: 'Show password',
+        hidePassword: 'Hide password'
       },
       theme: {
         toggle: 'Toggle theme',
@@ -685,7 +702,8 @@ const resources = {
       },
       auth: {
         orContinueWith: 'Or continue with',
-        orSignUpWith: 'Or sign up with'
+        orSignUpWith: 'Or sign up with',
+        signInWithLdap: 'Sign in with LDAP'
       },
       sponsors: {
         title: 'Sponsors',
@@ -1108,6 +1126,8 @@ const resources = {
         logout: 'Abmelden',
         saveChanges: 'Änderungen speichern',
         submitDemo: 'Demo senden',
+        send: 'Senden',
+        sending: 'Wird gesendet…',
         createAccount: 'Konto erstellen',
         alreadyAccount: 'Hast du schon ein Konto?',
         noAccount: 'Noch kein Konto?',
@@ -1166,6 +1186,10 @@ const resources = {
         phone: 'Telefon',
         email: 'E-Mail',
         password: 'Passwort',
+        newPassword: 'Neues Passwort',
+        new_password: 'Neues Passwort',
+        confirm_password: 'Passwort bestätigen',
+        code: 'Code',
         organization: 'Organisation',
         message: 'Nachricht',
         country: 'Land',
@@ -1192,7 +1216,9 @@ const resources = {
         edit: 'Bearbeiten',
         close: 'Schließen',
         skipToContent: 'Zum Inhalt springen',
-        adminModeActive: 'Admin-Modus aktiv'
+        adminModeActive: 'Admin-Modus aktiv',
+        showPassword: 'Passwort anzeigen',
+        hidePassword: 'Passwort verbergen'
       },
       theme: {
         toggle: 'Theme wechseln',
@@ -1202,7 +1228,8 @@ const resources = {
       },
       auth: {
         orContinueWith: 'Oder weiter mit',
-        orSignUpWith: 'Oder registrieren mit'
+        orSignUpWith: 'Oder registrieren mit',
+        signInWithLdap: 'Mit LDAP anmelden'
       },
       sponsors: {
         title: 'Sponsoren',

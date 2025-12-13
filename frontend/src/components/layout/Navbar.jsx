@@ -29,6 +29,59 @@ const languages = [
   { code: 'de', label: 'DE' }
 ];
 
+const NavItems = ({
+  t,
+  isAuthenticated,
+  hasTeam,
+  onNavigate,
+  mobile = false
+}) => (
+  <>
+    {navLinks.map((item) => (
+      <NavLink
+        key={item.to}
+        to={item.to}
+        onClick={() => mobile && onNavigate?.()}
+        className={({ isActive }) =>
+          `transition hover:text-blue-900 dark:hover:text-blue-100 ${isActive ? 'text-blue-900 font-semibold dark:text-blue-100' : ''} ${mobile ? 'text-lg py-2 border-b border-gray-100 w-full dark:border-slate-800' : ''}`
+        }
+      >
+        {t(item.key)}
+      </NavLink>
+    ))}
+    {isAuthenticated && (
+      <NavLink
+        to="/profile"
+        onClick={() => mobile && onNavigate?.()}
+        className={({ isActive }) =>
+          `rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] transition ${
+            isActive
+              ? 'border-blue-600 text-blue-900 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-100 dark:border-blue-500'
+              : 'border-blue-200 text-blue-600 hover:border-blue-600 hover:text-blue-900 hover:bg-blue-50 dark:border-slate-700 dark:text-blue-400 dark:hover:border-blue-500 dark:hover:text-blue-100 dark:hover:bg-slate-800'
+          } ${mobile ? 'w-fit mt-4' : ''}`
+        }
+      >
+        {t('nav.profile')}
+      </NavLink>
+    )}
+    {isAuthenticated && hasTeam && (
+      <NavLink
+        to="/my-team"
+        onClick={() => mobile && onNavigate?.()}
+        className={({ isActive }) =>
+          `rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] transition ${
+            isActive
+              ? 'border-blue-600 text-blue-900 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-100 dark:border-blue-500'
+              : 'border-blue-200 text-blue-600 hover:border-blue-600 hover:text-blue-900 hover:bg-blue-50 dark:border-slate-700 dark:text-blue-400 dark:hover:border-blue-500 dark:hover:text-blue-100 dark:hover:bg-slate-800'
+          } ${mobile ? 'w-fit mt-2' : ''}`
+        }
+      >
+        {t('nav.myTeam')}
+      </NavLink>
+    )}
+  </>
+);
+
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const { t, i18n } = useTranslation();
@@ -45,65 +98,13 @@ const Navbar = () => {
         const st = await api('/teams/status');
         if (!alive) return;
         setHasTeam(Boolean(st?.ownedTeamId || st?.memberOfTeamId));
-      } catch (error) {
+      } catch (_error) {
         // ignore
       }
     };
     load();
     return () => { alive = false; };
   }, [api, isAuthenticated]);
-
-  const handleLanguageChange = (event) => {
-    const value = event.target.value;
-    i18n.changeLanguage(value);
-  };
-
-  const NavItems = ({ mobile = false }) => (
-    <>
-      {navLinks.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          onClick={() => mobile && setIsOpen(false)}
-          className={({ isActive }) =>
-            `transition hover:text-blue-900 dark:hover:text-blue-100 ${isActive ? 'text-blue-900 font-semibold dark:text-blue-100' : ''} ${mobile ? 'text-lg py-2 border-b border-gray-100 w-full dark:border-slate-800' : ''}`
-          }
-        >
-          {t(item.key)}
-        </NavLink>
-      ))}
-      {isAuthenticated && (
-        <NavLink
-          to="/profile"
-          onClick={() => mobile && setIsOpen(false)}
-          className={({ isActive }) =>
-            `rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] transition ${
-              isActive
-                ? 'border-blue-600 text-blue-900 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-100 dark:border-blue-500'
-                : 'border-blue-200 text-blue-600 hover:border-blue-600 hover:text-blue-900 hover:bg-blue-50 dark:border-slate-700 dark:text-blue-400 dark:hover:border-blue-500 dark:hover:text-blue-100 dark:hover:bg-slate-800'
-            } ${mobile ? 'w-fit mt-4' : ''}`
-          }
-        >
-          {t('nav.profile')}
-        </NavLink>
-      )}
-      {isAuthenticated && hasTeam && (
-        <NavLink
-          to="/my-team"
-          onClick={() => mobile && setIsOpen(false)}
-          className={({ isActive }) =>
-            `rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] transition ${
-              isActive
-                ? 'border-blue-600 text-blue-900 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-100 dark:border-blue-500'
-                : 'border-blue-200 text-blue-600 hover:border-blue-600 hover:text-blue-900 hover:bg-blue-50 dark:border-slate-700 dark:text-blue-400 dark:hover:border-blue-500 dark:hover:text-blue-100 dark:hover:bg-slate-800'
-            } ${mobile ? 'w-fit mt-2' : ''}`
-          }
-        >
-          {t('nav.myTeam')}
-        </NavLink>
-      )}
-    </>
-  );
 
   return (
     <header className="sticky top-0 z-20 border-b border-blue-200 bg-white/95 backdrop-blur shadow-sm dark:bg-slate-950/95 dark:border-slate-800">
@@ -128,7 +129,13 @@ const Navbar = () => {
               </SheetHeader>
               
               <nav aria-label={t('nav.primaryNavigation') || 'Primary navigation'} className="flex-1 overflow-y-auto p-6 flex flex-col gap-2">
-                <NavItems mobile />
+                <NavItems
+                  t={t}
+                  isAuthenticated={isAuthenticated}
+                  hasTeam={hasTeam}
+                  mobile
+                  onNavigate={() => setIsOpen(false)}
+                />
                 {!isAuthenticated && (
                   <div className="flex flex-col gap-2 mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
                     <Link to="/login" onClick={() => setIsOpen(false)}>
@@ -197,7 +204,7 @@ const Navbar = () => {
 
         {/* Desktop Nav */}
         <nav aria-label={t('nav.primaryNavigation') || 'Primary navigation'} className="hidden items-center gap-6 text-sm font-medium text-blue-600 lg:flex dark:text-slate-300">
-          <NavItems />
+          <NavItems t={t} isAuthenticated={isAuthenticated} hasTeam={hasTeam} />
         </nav>
 
         <div className="hidden lg:flex items-center gap-4">
