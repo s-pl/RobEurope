@@ -717,6 +717,9 @@ const resources = {
         signInWithLdap: 'Sign in with LDAP'
       },
       notFound: {
+        subtitle: 'Are you lost?',
+        message: 'It seems the page you are looking for does not exist. Maybe you typed the address wrong or the page has moved.',
+        backHome: 'Back to home',
         badge: 'Page not found',
         title: 'Oops…',
         description: "The page you're looking for doesn't exist or has moved. You can go back or return home.",
@@ -1251,6 +1254,9 @@ const resources = {
         signInWithLdap: 'Mit LDAP anmelden'
       },
       notFound: {
+        subtitle: 'Bist du verloren?',
+        message: 'Die Seite, die Sie suchen, existiert nicht. Vielleicht haben Sie die Adresse falsch eingegeben oder die Seite wurde verschoben.',
+        backHome: 'Zurück zur Startseite',
         badge: 'Seite nicht gefunden',
         title: 'Ups…',
         description: 'Die gesuchte Seite existiert nicht (mehr) oder wurde verschoben. Du kannst zurückgehen oder zur Startseite.',
