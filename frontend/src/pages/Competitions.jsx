@@ -153,7 +153,7 @@ const Competitions = () => {
         try {
           const favs = await api('/competitions/favorites/mine');
           setFavorites(new Set(favs.map(c => c.id)));
-        } catch (_ERROR) {
+        } catch {
           // ignore
         }
       }

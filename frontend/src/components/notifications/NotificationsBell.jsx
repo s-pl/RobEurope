@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Bell } from 'lucide-react';
 import io from 'socket.io-client';
 import { useTranslation } from 'react-i18next';
@@ -24,30 +24,27 @@ const NotificationsBell = () => {
     return apiBase.replace(/\/api$/i, '');
   }, []);
 
-  const fetchNotifications = useCallback(async () => {
-    if (!user?.id) return;
-    try {
-      const list = await api(`/notifications?user_id=${encodeURIComponent(user.id)}&limit=20`);
-      const arr = Array.isArray(list) ? list : [];
-      setItems(arr);
-      setUnread(arr.filter((n) => !n.is_read).length);
-    } catch (_ERROR) {
-      // ignore
-    }
-  }, [api, user?.id]);
-
   useEffect(() => {
     let socket;
 
     const bootstrap = async () => {
-      await fetchNotifications();
+      if (!user?.id) return;
+
+      try {
+        const list = await api(`/notifications?user_id=${encodeURIComponent(user.id)}&limit=20`);
+        const arr = Array.isArray(list) ? list : [];
+        setItems(arr);
+        setUnread(arr.filter((n) => !n.is_read).length);
+      } catch {
+        // ignore
+      }
       await requestNotificationPermission();
 
       try {
         // Push registration
         const reg = await registerServiceWorker();
         if (reg) await subscribeToPush(reg);
-      } catch (_ERROR) {
+      } catch {
         // ignore
       }
 
@@ -60,7 +57,7 @@ const NotificationsBell = () => {
           // Web notification
           showNotification(notif.title || 'Nueva notificación', { body: notif.message || '', tag: `notif-${notif.id}` });
         });
-      } catch (_ERROR) {
+      } catch {
         // ignore
       }
     };
@@ -69,14 +66,14 @@ const NotificationsBell = () => {
     return () => {
       if (socket) socket.disconnect();
     };
-  }, [user?.id, socketUrl, fetchNotifications]);
+  }, [user?.id, socketUrl, api]);
 
   const markAsRead = async (id) => {
     try {
       await api(`/notifications/${id}`, { method: 'PUT', body: { is_read: true } });
       setItems(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
       setUnread(prev => Math.max(0, prev - 1));
-    } catch (_ERROR) {
+    } catch {
       // ignore
     }
   };
@@ -88,7 +85,7 @@ const NotificationsBell = () => {
       
       setItems(prev => prev.map(n => ({ ...n, is_read: true })));
       setUnread(0);
-    } catch (_ERROR) {
+    } catch {
       // ignore
     }
   };

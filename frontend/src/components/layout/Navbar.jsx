@@ -98,7 +98,7 @@ const Navbar = () => {
         const st = await api('/teams/status');
         if (!alive) return;
         setHasTeam(Boolean(st?.ownedTeamId || st?.memberOfTeamId));
-      } catch (_ERROR) {
+      } catch {
         // ignore
       }
     };

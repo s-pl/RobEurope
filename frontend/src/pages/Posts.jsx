@@ -231,7 +231,7 @@ const Posts = () => {
       try {
         await navigator.clipboard.writeText(`${post.title}\n\n${post.content}`);
         toast({ title: 'Copiado al portapapeles', variant: 'success' });
-      } catch (_ERROR) {
+      } catch {
         toast({ title: 'Error al copiar', variant: 'destructive' });
       }
     }

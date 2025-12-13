@@ -92,7 +92,7 @@ const parseResponse = async (response) => {
   return response.text();
 };
 
-export async function apiRequest(path, { method = 'GET', body, token: _TOKEN, headers = {}, formData = false } = {}) {
+export async function apiRequest(path, { method = 'GET', body, headers = {}, formData = false } = {}) {
   const finalHeaders = { ...headers };
 
   // Session based auth - no token needed

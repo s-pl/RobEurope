@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuthContext } from '../../context/AuthContext';
+// import { useAuthContext } from '../../context/AuthContext';
 import { RefreshCw, Video, FileText, Upload, Activity, BarChart2, Eye, EyeOff, Download, Trash2 } from 'lucide-react';
 import { apiRequest, resolveMediaUrl } from '../../lib/apiClient';
 import { Button } from '../ui/button';

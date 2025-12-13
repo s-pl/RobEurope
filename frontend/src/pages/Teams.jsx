@@ -40,7 +40,7 @@ const Teams = () => {
       const results = await Promise.all(memberPromises);
       const map = Object.fromEntries(results);
       setMembersMap(map);
-    } catch (_ERROR) {
+    } catch {
       setTeams([]);
     }
   };

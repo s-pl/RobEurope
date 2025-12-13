@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
       const profile = await apiRequest('/users/me');
       persistSession(profile);
       return profile;
-    } catch (_ERROR) {
+    } catch {
       persistSession(null);
       return null;
     } finally {

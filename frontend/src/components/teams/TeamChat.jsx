@@ -36,15 +36,6 @@ const TeamChat = ({ teamId }) => {
     }
   }, []);
 
-  const fetchMessages = useCallback(async () => {
-    try {
-      const data = await api(`/teams/${teamId}/messages`);
-      setMessages(data);
-    } catch (error) {
-      console.error(error);
-    }
-  }, [api, teamId]);
-
   useEffect(() => {
     // Initialize socket
     const baseUrl = getApiBaseUrl();
@@ -99,12 +90,23 @@ const TeamChat = ({ teamId }) => {
   };
 
   useEffect(() => {
-    fetchMessages();
-  }, [fetchMessages]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await api(`/teams/${teamId}/messages`);
+        if (!cancelled) setMessages(data);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [api, teamId]);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
   const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB per file limit
 

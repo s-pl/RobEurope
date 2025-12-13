@@ -7,20 +7,19 @@ import { getApiBaseUrl } from '../lib/apiClient';
 const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children }) => {
-  const [socket, setSocket] = useState(null);
   const [connected, setConnected] = useState(false);
 
   const socketUrl = useMemo(() => getApiBaseUrl().replace(/\/api$/i, ''), []);
 
+  const socket = useMemo(() => io(socketUrl, { transports: ['websocket', 'polling'] }), [socketUrl]);
+
   useEffect(() => {
-    const s = io(socketUrl, { transports: ['websocket', 'polling'] });
-    setSocket(s);
-    s.on('connect', () => setConnected(true));
-    s.on('disconnect', () => setConnected(false));
+    socket.on('connect', () => setConnected(true));
+    socket.on('disconnect', () => setConnected(false));
     return () => {
-      s.disconnect();
+      socket.disconnect();
     };
-  }, [socketUrl]);
+  }, [socket]);
 
   const value = useMemo(() => ({ socket, connected }), [socket, connected]);
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;

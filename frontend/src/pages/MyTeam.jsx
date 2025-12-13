@@ -27,6 +27,8 @@ const debounce = (fn, ms = 300) => {
 };
 
 const TabButton = ({ id, label, Icon, active, onSelect }) => (
+  // eslint-disable-next-line no-unused-expressions
+  (Icon, (
   <button
     type="button"
     onClick={() => onSelect(id)}
@@ -39,6 +41,7 @@ const TabButton = ({ id, label, Icon, active, onSelect }) => (
     <Icon className="h-4 w-4" />
     {label}
   </button>
+  ))
 );
 
 const MyTeam = () => {
@@ -115,7 +118,7 @@ const MyTeam = () => {
       try {
         const comps = await api('/competitions');
         setCompetitions(Array.isArray(comps) ? comps : []);
-      } catch (_ERROR) {
+      } catch {
         // ignore
       }
     };
