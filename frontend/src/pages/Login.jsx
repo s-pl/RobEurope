@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
@@ -21,6 +21,8 @@ const Login = () => {
   const [ldapOpen, setLdapOpen] = useState(false);
   const [ldapForm, setLdapForm] = useState({ username: '', password: '' });
   const { t } = useTranslation();
+  const errorId = 'login-error';
+  const hasError = Boolean(error);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -80,13 +82,22 @@ const Login = () => {
         </CardHeader>
 
         <div className="space-y-4 px-6 pb-6">
-          {error && <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:border-red-900 dark:text-red-400">{error}</p>}
+          {error && (
+            <p
+              id={errorId}
+              role="alert"
+              aria-live="assertive"
+              className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:border-red-900 dark:text-red-400"
+            >
+              {error}
+            </p>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">{t('forms.email')}</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" aria-hidden="true" />
                 <Input 
                   id="email" 
                   name="email" 
@@ -96,13 +107,16 @@ const Login = () => {
                   onChange={handleChange} 
                   className="pl-10" 
                   placeholder={t('placeholders.emailExample')}
+                  autoComplete="email"
+                  aria-invalid={hasError}
+                  aria-describedby={hasError ? errorId : undefined}
                 />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">{t('forms.password')}</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" aria-hidden="true" />
                 <Input
                   id="password"
                   name="password"
@@ -112,13 +126,18 @@ const Login = () => {
                   onChange={handleChange}
                   className="pl-10 pr-10"
                   placeholder={t('placeholders.passwordExample')}
+                  autoComplete="current-password"
+                  aria-invalid={hasError}
+                  aria-describedby={hasError ? errorId : undefined}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  aria-label={showPassword ? (t('common.hidePassword') || 'Hide password') : (t('common.showPassword') || 'Show password')}
+                  aria-pressed={showPassword}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                 </button>
               </div>
             </div>
@@ -133,7 +152,7 @@ const Login = () => {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-white px-2 text-slate-500 dark:bg-slate-950 dark:text-slate-400">
-                Or continue with
+                {t('auth.orContinueWith')}
               </span>
             </div>
           </div>
@@ -164,6 +183,7 @@ const Login = () => {
                     value={ldapForm.username}
                     onChange={e => setLdapForm({ ...ldapForm, username: e.target.value })}
                     placeholder="john.doe or john@domain"
+                    autoComplete="username"
                   />
                 </div>
                 <div className="space-y-2">
@@ -174,11 +194,12 @@ const Login = () => {
                     value={ldapForm.password}
                     onChange={e => setLdapForm({ ...ldapForm, password: e.target.value })}
                     placeholder="••••••••"
+                    autoComplete="current-password"
                   />
                 </div>
                 <DialogFooter>
                   <Button type="submit" disabled={loading} className="w-full">
-                    {loading ? t('buttons.entering') : 'Sign in with LDAP'}
+                    {loading ? t('buttons.entering') : (t('auth.signInWithLdap') || 'Sign in with LDAP')}
                   </Button>
                 </DialogFooter>
               </form>

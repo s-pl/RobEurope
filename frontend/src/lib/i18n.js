@@ -1,4 +1,3 @@
-import { Description } from '@radix-ui/react-dialog';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
@@ -27,6 +26,11 @@ const detectLanguage = () => {
   return 'es';
 };
 
+const applyDocumentLanguage = (lang) => {
+  if (typeof document === 'undefined') return;
+  document.documentElement.lang = lang || 'es';
+};
+
 const resources = {
   es: {
     translation: {
@@ -43,6 +47,7 @@ const resources = {
         profile: 'Perfil',
         menu: 'Menú',
         userMenu: 'Menú de usuario',
+        primaryNavigation: 'Navegación principal',
         myTeam: 'Mi equipo',
         theme: 'Tema',
         posts: 'Noticias',
@@ -59,8 +64,11 @@ const resources = {
         login: 'Entrar',
         register: 'Registro',
         logout: 'Cerrar sesión',
+        save: 'Guardar',
         saveChanges: 'Guardar cambios',
         submitDemo: 'Enviar demo',
+        send: 'Enviar',
+        sending: 'Enviando…',
         createAccount: 'Crear cuenta',
         alreadyAccount: '¿Ya tienes cuenta?',
         noAccount: '¿No tienes cuenta?',
@@ -119,6 +127,10 @@ const resources = {
         phone: 'Teléfono',
         email: 'Email',
         password: 'Contraseña',
+        newPassword: 'Nueva contraseña',
+        new_password: 'Nueva contraseña',
+        confirm_password: 'Confirmar contraseña',
+        code: 'Código',
         organization: 'Organización',
         message: 'Mensaje',
         country: 'País',
@@ -143,7 +155,44 @@ const resources = {
         delete: 'Eliminar',
         cancel: 'Cancelar',
         edit: 'Editar',
-        close: 'Cerrar'
+        close: 'Cerrar',
+        skipToContent: 'Saltar al contenido',
+        adminModeActive: 'Modo admin activo',
+        showPassword: 'Mostrar contraseña',
+        hidePassword: 'Ocultar contraseña'
+      },
+      theme: {
+        toggle: 'Cambiar tema',
+        light: 'Claro',
+        dark: 'Oscuro',
+        system: 'Sistema'
+      },
+      auth: {
+        orContinueWith: 'O continuar con',
+        orSignUpWith: 'O registrarte con',
+        signInWithLdap: 'Iniciar sesión con LDAP',
+        backToLogin: 'Volver al inicio de sesión'
+      },
+      forgot: {
+        tagline: 'RECUPERAR',
+        title: 'Recuperar contraseña',
+        description: 'Te enviaremos un código de un solo uso para restablecerla.',
+        description2: 'Introduce el código y tu nueva contraseña.',
+        sent: 'Te hemos enviado un código de un solo uso si el correo existe.',
+        error: 'Error al solicitar la recuperación',
+        reset_success: 'Contraseña actualizada correctamente.',
+        reset_error: 'Código inválido o expirado'
+      },
+      notFound: {
+        subtitle: '¿Estás perdido?',
+        message: 'Parece que la página que buscas no existe. Tal vez escribiste mal la dirección o la página se ha movido.',
+        backHome: 'Volver al inicio',
+        badge: 'Página no encontrada',
+        title: 'Ups…',
+        description: 'La ruta que buscas no existe o ha cambiado. Puedes volver atrás o ir al inicio.',
+        goBack: 'Volver',
+        goHome: 'Ir al inicio',
+        robotHint: 'Mi radar no detecta esa página.'
       },
       sponsors: {
         title: 'Sponsors',
@@ -415,6 +464,7 @@ const resources = {
         description: 'Usa las credenciales emitidas por el backend (/auth/login) para generar tu token JWT.',
         noAccount: '¿No tienes cuenta?',
         registerLink: 'Regístrate aquí',
+        forgot: '¿Olvidaste tu contraseña?',
         error: 'Credenciales inválidas'
       },
       register: {
@@ -555,6 +605,7 @@ const resources = {
         profile: 'Profile',
         menu: 'Menu',
         userMenu: 'User menu',
+        primaryNavigation: 'Primary navigation',
         myTeam: 'My Team',
         theme: 'Theme',
         posts: 'News',
@@ -571,8 +622,11 @@ const resources = {
         login: 'Login',
         register: 'Register',
         logout: 'Log out',
+        save: 'Save',
         saveChanges: 'Save changes',
         submitDemo: 'Send demo',
+        send: 'Send',
+        sending: 'Sending…',
         createAccount: 'Create account',
         alreadyAccount: 'Already have an account?',
         noAccount: 'Don\'t have an account?',
@@ -631,6 +685,10 @@ const resources = {
         phone: 'Phone',
         email: 'Email',
         password: 'Password',
+        newPassword: 'New password',
+        new_password: 'New password',
+        confirm_password: 'Confirm password',
+        code: 'Code',
         organization: 'Organization',
         message: 'Message',
         country: 'Country',
@@ -655,7 +713,44 @@ const resources = {
         delete: 'Delete',
         cancel: 'Cancel',
         edit: 'Edit',
-        close: 'Close'
+        close: 'Close',
+        skipToContent: 'Skip to content',
+        adminModeActive: 'Admin mode active',
+        showPassword: 'Show password',
+        hidePassword: 'Hide password'
+      },
+      theme: {
+        toggle: 'Toggle theme',
+        light: 'Light',
+        dark: 'Dark',
+        system: 'System'
+      },
+      auth: {
+        orContinueWith: 'Or continue with',
+        orSignUpWith: 'Or sign up with',
+        signInWithLdap: 'Sign in with LDAP',
+        backToLogin: 'Back to login'
+      },
+      forgot: {
+        tagline: 'RECOVER',
+        title: 'Recover password',
+        description: 'We will send you a one-time code to reset it.',
+        description2: 'Enter the code and your new password.',
+        sent: 'We sent you a one-time code if the email exists.',
+        error: 'Error requesting recovery',
+        reset_success: 'Password updated successfully.',
+        reset_error: 'Invalid or expired code'
+      },
+      notFound: {
+        subtitle: 'Are you lost?',
+        message: 'It seems the page you are looking for does not exist. Maybe you typed the address wrong or the page has moved.',
+        backHome: 'Back to home',
+        badge: 'Page not found',
+        title: 'Oops…',
+        description: "The page you're looking for doesn't exist or has moved. You can go back or return home.",
+        goBack: 'Go back',
+        goHome: 'Go home',
+        robotHint: "My radar can't find that page."
       },
       sponsors: {
         title: 'Sponsors',
@@ -921,6 +1016,7 @@ const resources = {
         description: 'Use the credentials issued by the backend (/auth/login) to generate your JWT token.',
         noAccount: 'Don\'t have an account?',
         registerLink: 'Register here',
+        forgot: 'Forgot your password?',
         error: 'Invalid credentials'
       },
       register: {
@@ -1059,6 +1155,7 @@ const resources = {
         profile: 'Profil',
         menu: 'Menü',
         userMenu: 'Benutzermenü',
+        primaryNavigation: 'Hauptnavigation',
         myTeam: 'Mein Team',
         theme: 'Thema',
         posts: 'Nachrichten',
@@ -1075,8 +1172,11 @@ const resources = {
         login: 'Login',
         register: 'Registrieren',
         logout: 'Abmelden',
+        save: 'Speichern',
         saveChanges: 'Änderungen speichern',
         submitDemo: 'Demo senden',
+        send: 'Senden',
+        sending: 'Wird gesendet…',
         createAccount: 'Konto erstellen',
         alreadyAccount: 'Hast du schon ein Konto?',
         noAccount: 'Noch kein Konto?',
@@ -1135,6 +1235,10 @@ const resources = {
         phone: 'Telefon',
         email: 'E-Mail',
         password: 'Passwort',
+        newPassword: 'Neues Passwort',
+        new_password: 'Neues Passwort',
+        confirm_password: 'Passwort bestätigen',
+        code: 'Code',
         organization: 'Organisation',
         message: 'Nachricht',
         country: 'Land',
@@ -1159,7 +1263,44 @@ const resources = {
         delete: 'Löschen',
         cancel: 'Abbrechen',
         edit: 'Bearbeiten',
-        close: 'Schließen'
+        close: 'Schließen',
+        skipToContent: 'Zum Inhalt springen',
+        adminModeActive: 'Admin-Modus aktiv',
+        showPassword: 'Passwort anzeigen',
+        hidePassword: 'Passwort verbergen'
+      },
+      theme: {
+        toggle: 'Theme wechseln',
+        light: 'Hell',
+        dark: 'Dunkel',
+        system: 'System'
+      },
+      auth: {
+        orContinueWith: 'Oder weiter mit',
+        orSignUpWith: 'Oder registrieren mit',
+        signInWithLdap: 'Mit LDAP anmelden',
+        backToLogin: 'Zurück zur Anmeldung'
+      },
+      forgot: {
+        tagline: 'WIEDERHERSTELLEN',
+        title: 'Passwort wiederherstellen',
+        description: 'Wir senden Ihnen einen Einmalcode zum Zurücksetzen.',
+        description2: 'Geben Sie den Code und Ihr neues Passwort ein.',
+        sent: 'Wir haben Ihnen einen Einmalcode gesendet, falls die E-Mail existiert.',
+        error: 'Fehler beim Anfordern der Wiederherstellung',
+        reset_success: 'Passwort erfolgreich aktualisiert.',
+        reset_error: 'Ungültiger oder abgelaufener Code'
+      },
+      notFound: {
+        subtitle: 'Bist du verloren?',
+        message: 'Die Seite, die Sie suchen, existiert nicht. Vielleicht haben Sie die Adresse falsch eingegeben oder die Seite wurde verschoben.',
+        backHome: 'Zurück zur Startseite',
+        badge: 'Seite nicht gefunden',
+        title: 'Ups…',
+        description: 'Die gesuchte Seite existiert nicht (mehr) oder wurde verschoben. Du kannst zurückgehen oder zur Startseite.',
+        goBack: 'Zurück',
+        goHome: 'Zur Startseite',
+        robotHint: 'Mein Radar findet diese Seite nicht.'
       },
       sponsors: {
         title: 'Sponsoren',
@@ -1417,6 +1558,7 @@ const resources = {
         description: 'Nutze die Zugangsdaten aus dem Backend (/auth/login), um dein JWT zu erhalten.',
         noAccount: 'Noch kein Konto?',
         registerLink: 'Hier registrieren',
+        forgot: 'Passwort vergessen?',
         error: 'Ungültige Zugangsdaten'
       },
       register: {
@@ -1551,7 +1693,10 @@ i18n.use(initReactI18next).init({
   }
 });
 
+applyDocumentLanguage(i18n.language);
+
 i18n.on('languageChanged', (lng) => {
+  applyDocumentLanguage(lng);
   if (typeof window === 'undefined') return;
   try {
     window.localStorage?.setItem(LANGUAGE_KEY, lng);

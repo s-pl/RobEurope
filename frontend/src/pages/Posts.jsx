@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useEditMode } from '../context/EditModeContext';
 import { useTranslation } from 'react-i18next';
 import { Plus, Search, Image as ImageIcon, Heart, MessageCircle, Share2, MoreVertical, Trash2, Edit2, Pin } from 'lucide-react';
@@ -34,7 +34,6 @@ const Posts = () => {
   const usedBytes = (() => {
     try { return new TextEncoder().encode(`${newPost.title}\n${newPost.content || ''}`).length; } catch { return (newPost.title?.length || 0) + (newPost.content?.length || 0); }
   })();
-  const remainingBytes = Math.max(0, MAX_CONTENT_BYTES - usedBytes);
   
   // New state for comments
   const [activePostId, setActivePostId] = useState(null);
@@ -42,7 +41,7 @@ const Posts = () => {
   const [newComment, setNewComment] = useState('');
   const [commentsOpen, setCommentsOpen] = useState(false);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     try {
       setLoading(true);
       const data = await api(`/posts?q=${search}`);
@@ -52,11 +51,11 @@ const Posts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [api, search]);
 
   useEffect(() => {
     fetchPosts();
-  }, [search]);
+  }, [fetchPosts]);
 
   // Realtime subscriptions
   useEffect(() => {
@@ -232,7 +231,7 @@ const Posts = () => {
       try {
         await navigator.clipboard.writeText(`${post.title}\n\n${post.content}`);
         toast({ title: 'Copiado al portapapeles', variant: 'success' });
-      } catch (err) {
+      } catch {
         toast({ title: 'Error al copiar', variant: 'destructive' });
       }
     }

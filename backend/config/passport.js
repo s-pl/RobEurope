@@ -125,9 +125,9 @@ try {
         bindDN: LDAP_BIND_DN,
         bindCredentials: LDAP_BIND_PASSWORD,
         searchBase: LDAP_SEARCH_BASE,
-        // Default filter uses mail or uid
+    
         searchFilter: LDAP_SEARCH_FILTER || '(|(mail={{username}})(uid={{username}}))',
-        // Return raw attributes we care about
+   
         searchAttributes: ['dn', 'cn', 'sn', 'givenName', 'mail', 'uid']
       },
       usernameField: 'username',
@@ -137,20 +137,20 @@ try {
 
     passport.use('ldapauth', new LdapStrategy(OPTS, async (req, user, done) => {
       try {
-        // user contains LDAP attributes per searchAttributes
+       
         const email = user.mail || null;
         const uid = user.uid || null;
         const firstName = user.givenName || 'User';
         const lastName = user.sn || 'LDAP';
         const usernameBase = uid || (email ? String(email).split('@')[0] : `ldap_${Date.now()}`);
 
-        // 1) Try to find existing by email
+     
         let local = email ? await User.findOne({ where: { email } }) : null;
-        // 2) Else by username
+      
         if (!local) local = await User.findOne({ where: { username: usernameBase } });
 
         if (!local) {
-          // Create a local user record linked via username/email; no password hash stored
+          
           let uniqueUsername = usernameBase;
           const exists = await User.findOne({ where: { username: uniqueUsername } });
           if (exists) uniqueUsername = `${uniqueUsername}_${uuidv4().slice(0,4)}`;
@@ -164,7 +164,7 @@ try {
           });
         }
 
-        // Success: create session
+      
         return done(null, local);
       } catch (err) {
         return done(err);

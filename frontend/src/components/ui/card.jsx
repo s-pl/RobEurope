@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 import { cn } from '../../lib/utils';
 
 const Card = ({ className, ...props }) => (
@@ -11,9 +12,11 @@ const CardHeader = ({ className, ...props }) => (
   <div className={cn('mb-4 space-y-1', className)} {...props} />
 );
 
-const CardTitle = ({ className, as: Component = 'h3', ...props }) => (
-  <Component className={cn('text-xl font-semibold tracking-tight text-blue-900 dark:text-blue-100', className)} {...props} />
-);
+const CardTitle = ({ className, as: Component = 'h3', ...props }) =>
+  createElement(Component, {
+    className: cn('text-xl font-semibold tracking-tight text-blue-900 dark:text-blue-100', className),
+    ...props,
+  });
 
 const CardDescription = ({ className, ...props }) => (
   <p className={cn('text-sm text-blue-700 dark:text-blue-400', className)} {...props} />

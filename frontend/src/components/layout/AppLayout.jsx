@@ -4,11 +4,13 @@ import Sidebar from './Sidebar';
 import Footer from './Footer';
 import { useAuth } from '../../hooks/useAuth';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { requestNotificationPermission } from '../../lib/notifications';
 import NotificationTestButton from '../notifications/NotificationTestButton';
 
 const AppLayout = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const isAdmin = user?.role === 'super_admin';
 
   useEffect(() => {
@@ -18,9 +20,15 @@ const AppLayout = () => {
 
   return (
     <div className={`min-h-screen bg-neutral-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50 ${isAdmin ? 'border-t-4 border-red-600' : ''}`}>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-900 focus:shadow dark:focus:bg-slate-900 dark:focus:text-slate-50"
+      >
+        {t('common.skipToContent')}
+      </a>
       {isAdmin && (
         <div className="bg-red-600 text-white text-xs font-bold text-center py-1 uppercase tracking-widest">
-          Admin Mode Active
+          {t('common.adminModeActive')}
         </div>
       )}
       
@@ -30,7 +38,7 @@ const AppLayout = () => {
           <div className="lg:hidden">
             <Navbar />
           </div>
-          <main className="mx-auto w-full max-w-5xl space-y-10 px-4 pb-16 pt-10 lg:px-8 flex-1">
+          <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-5xl space-y-10 px-4 pb-16 pt-10 lg:px-8 flex-1">
             <Outlet />
           </main>
           <NotificationTestButton />

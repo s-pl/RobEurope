@@ -3,8 +3,8 @@ import { showNotification, requestNotificationPermission } from '../../lib/notif
 
 // Dev-only test button for push/web notifications
 export default function NotificationTestButton() {
-  if (!import.meta.env.DEV) return null; // hide in production build
   const [count, setCount] = useState(0);
+  if (!import.meta.env.DEV) return null; // hide in production build
 
   const trigger = async () => {
     await requestNotificationPermission();

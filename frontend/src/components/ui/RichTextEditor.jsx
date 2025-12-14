@@ -62,7 +62,7 @@ export const RichTextEditor = ({ value, onChange, placeholder }) => {
         onChange={(val) => {
           // Strip pasted base64 images to avoid huge content and suggest toolbar upload instead
           if (typeof val === 'string' && val.includes('src="data:')) {
-            const cleaned = val.replace(/<img[^>]+src=\"data:[^\"]+\"[^>]*>/gi, '');
+            const cleaned = val.replace(/<img[^>]+src="data:[^"]+"[^>]*>/gi, '');
             console.warn('Removed base64 images from content. Use the image button to upload.');
             onChange?.(cleaned);
             return;

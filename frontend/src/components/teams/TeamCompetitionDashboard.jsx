@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuthContext } from '../../context/AuthContext';
+// import { useAuthContext } from '../../context/AuthContext';
 import { RefreshCw, Video, FileText, Upload, Activity, BarChart2, Eye, EyeOff, Download, Trash2 } from 'lucide-react';
 import { apiRequest, resolveMediaUrl } from '../../lib/apiClient';
 import { Button } from '../ui/button';
@@ -10,7 +10,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '../ui/badge';
 
 const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
-  const { user } = useAuthContext();
   const [activeTab, setActiveTab] = useState('overview');
   const [streamData, setStreamData] = useState({ title: '', description: '', stream_url: '' });
   const [robotFiles, setRobotFiles] = useState([]);

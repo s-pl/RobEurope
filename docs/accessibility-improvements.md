@@ -213,3 +213,42 @@ Se solucionó un problema crítico de visibilidad en la página de Equipos donde
     *   Se eliminaron clases de color explícitas (`text-blue-900`) en títulos de tarjetas para permitir que los estilos por defecto del componente (compatibles con modo oscuro) funcionen correctamente.
     *   Se añadieron variantes de modo oscuro (`dark:text-slate-400`, `dark:text-blue-100`) a textos descriptivos y encabezados.
     *   Se añadieron `aria-label` a los inputs de búsqueda y selectores de filtro.
+
+## 7. Actualización (Diciembre 2025) - Formularios, Feedback y Navegación
+
+Se añadieron mejoras para que la UI comunique estados y errores de forma fiable a lectores de pantalla y mejore la navegación por teclado.
+
+### Skip Link + Foco al Contenido
+
+*   **AppLayout (`frontend/src/components/layout/AppLayout.jsx`)**: se añadió un “skip link” y un `<main id="main-content" tabIndex={-1}>` para permitir saltar al contenido principal y mover el foco correctamente.
+
+### Landmarks y Navegación
+
+*   **Navbar/Sidebar (`frontend/src/components/layout/Navbar.jsx`, `frontend/src/components/layout/Sidebar.jsx`)**: se añadieron `aria-label` en `<nav>` para identificar la navegación principal.
+
+### Mensajes y Estados (aria-live)
+
+*   **Login/Register/Forgot/Reset/Profile** (`frontend/src/pages/Login.jsx`, `Register.jsx`, `ForgotPassword.jsx`, `ResetPassword.jsx`, `Profile.jsx`):
+  *   Errores: `role="alert"` + `aria-live="assertive"`.
+  *   Éxito/información: `role="status"` + `aria-live="polite"`.
+
+### Validación de Campos (aria-invalid / aria-describedby)
+
+*   **Formularios**: inputs con error usan `aria-invalid` y enlazan el texto de ayuda/error con `aria-describedby`.
+*   **Confirmación de contraseña** (`Register.jsx`, `ResetPassword.jsx`): se anunció el mismatch con `<p role="alert">` y se enlazó al input.
+
+### Botones de “Mostrar/Ocultar” Contraseña
+
+*   **Login/Register**: botones de icono para mostrar/ocultar contraseña ahora tienen nombre accesible (`aria-label`) y estado (`aria-pressed`) usando claves i18n.
+
+### Autocomplete
+
+*   Se añadieron valores de `autoComplete` adecuados (por ejemplo `email`, `current-password`, `new-password`, `given-name`, `family-name`, `tel`, `one-time-code`) en los formularios de autenticación y perfil.
+
+### Traducciones (i18n)
+
+*   **i18n (`frontend/src/lib/i18n.js`)**: se añadieron claves nuevas necesarias para accesibilidad (texto de botones icon-only, LDAP, send/sending, labels de formularios), en `es/en/de`.
+
+### Correcciones JSX en SVG (Feedback)
+
+*   **Feedback (`frontend/src/pages/Feedback.jsx`)**: se corrigieron atributos JSX (`className`, `fillRule`, `clipRule`) para evitar problemas de render/árbol accesible.

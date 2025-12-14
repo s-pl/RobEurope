@@ -1,14 +1,14 @@
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', () => {
   self.clients.claim();
 });
 
 self.addEventListener('push', (event) => {
   let data = {};
-  try { data = event.data ? event.data.json() : {}; } catch (e) {}
+  try { data = event.data ? event.data.json() : {}; } catch { /* ignore */ }
   const title = data.title || 'Nueva notificación';
   const options = {
     body: data.body || '',

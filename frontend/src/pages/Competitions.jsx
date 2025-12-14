@@ -153,7 +153,9 @@ const Competitions = () => {
         try {
           const favs = await api('/competitions/favorites/mine');
           setFavorites(new Set(favs.map(c => c.id)));
-        } catch {}
+        } catch {
+          // ignore
+        }
       }
     } catch (err) {
       setError(err.message || 'Error al cargar competiciones.');

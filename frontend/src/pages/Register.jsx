@@ -29,6 +29,10 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const { t } = useTranslation();
+  const errorId = 'register-error';
+  const hasError = Boolean(error);
+  const confirmMismatch = Boolean(form.confirm_password && form.password !== form.confirm_password);
+  const confirmErrorId = 'confirm-password-error';
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -80,42 +84,51 @@ const Register = () => {
         </CardHeader>
 
         <div className="space-y-4 px-6 pb-6">
-          {error && <p className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:border-red-900 dark:text-red-400">{error}</p>}
+          {error && (
+            <p
+              id={errorId}
+              role="alert"
+              aria-live="assertive"
+              className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:border-red-900 dark:text-red-400"
+            >
+              {error}
+            </p>
+          )}
 
           <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="first_name">{t('forms.firstName')}</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="first_name" name="first_name" required value={form.first_name} onChange={handleChange} className="pl-10" placeholder={t('placeholders.nameExample')} />
+                <Input id="first_name" name="first_name" required value={form.first_name} onChange={handleChange} className="pl-10" placeholder={t('placeholders.nameExample')} autoComplete="given-name" />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="last_name">{t('forms.lastName')}</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="last_name" name="last_name" required value={form.last_name} onChange={handleChange} className="pl-10" placeholder={t('placeholders.lastNameExample')} />
+                <Input id="last_name" name="last_name" required value={form.last_name} onChange={handleChange} className="pl-10" placeholder={t('placeholders.lastNameExample')} autoComplete="family-name" />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="username">{t('forms.username')}</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="username" name="username" required value={form.username} onChange={handleChange} className="pl-10" placeholder={t('placeholders.usernameExample')} />
+                <Input id="username" name="username" required value={form.username} onChange={handleChange} className="pl-10" placeholder={t('placeholders.usernameExample')} autoComplete="username" />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">{t('forms.phone')}</Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="phone" name="phone" value={form.phone} onChange={handleChange} className="pl-10" placeholder={t('placeholders.phoneExample')} />
+                <Input id="phone" name="phone" value={form.phone} onChange={handleChange} className="pl-10" placeholder={t('placeholders.phoneExample')} autoComplete="tel" />
               </div>
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="email">{t('forms.email')}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input id="email" name="email" type="email" required value={form.email} onChange={handleChange} className="pl-10" placeholder={t('placeholders.emailExample')} />
+                <Input id="email" name="email" type="email" required value={form.email} onChange={handleChange} className="pl-10" placeholder={t('placeholders.emailExample')} autoComplete="email" />
               </div>
             </div>
             <div className="space-y-2">
@@ -131,13 +144,18 @@ const Register = () => {
                   onChange={(e) => { handleChange(e); if (!pwTouched) setPwTouched(true); }}
                   className="pl-10 pr-10"
                   placeholder={t('placeholders.passwordExample')}
+                  autoComplete="new-password"
+                  aria-invalid={hasError}
+                  aria-describedby={hasError ? errorId : undefined}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  aria-label={showPassword ? (t('common.hidePassword') || 'Hide password') : (t('common.showPassword') || 'Show password')}
+                  aria-pressed={showPassword}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                 </button>
               </div>
               {pwTouched && (
@@ -168,17 +186,22 @@ const Register = () => {
                   onChange={handleChange}
                   className="pl-10 pr-10"
                   placeholder={t('placeholders.passwordExample')}
+                  autoComplete="new-password"
+                  aria-invalid={confirmMismatch}
+                  aria-describedby={confirmMismatch ? confirmErrorId : undefined}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  aria-label={showConfirmPassword ? (t('common.hidePassword') || 'Hide password') : (t('common.showPassword') || 'Show password')}
+                  aria-pressed={showConfirmPassword}
                 >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                 </button>
               </div>
-              {form.confirm_password && form.password !== form.confirm_password && (
-                <p className="mt-1 text-xs text-red-600">{t('forms.passwordsDontMatch')}</p>
+              {confirmMismatch && (
+                <p id={confirmErrorId} className="mt-1 text-xs text-red-600" role="alert">{t('forms.passwordsDontMatch')}</p>
               )}
             </div>
 
@@ -190,6 +213,8 @@ const Register = () => {
                   checked={acceptedTerms}
                   onChange={(e) => setAcceptedTerms(e.target.checked)}
                   className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-slate-50"
+                  aria-invalid={hasError && error === t('forms.acceptTerms')}
+                  aria-describedby={hasError ? errorId : undefined}
                 />
                 <label htmlFor="terms" className="text-sm text-slate-600 dark:text-slate-400">
                   {t('register.acceptTerms') || 'Acepto los'} <Link to="/terms" className="underline hover:text-slate-900 dark:hover:text-slate-50">{t('nav.terms') || 'Términos y Condiciones'}</Link>
@@ -210,7 +235,7 @@ const Register = () => {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-white px-2 text-slate-500 dark:bg-slate-950 dark:text-slate-400">
-                Or sign up with
+                {t('auth.orSignUpWith')}
               </span>
             </div>
           </div>
