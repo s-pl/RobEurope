@@ -54,7 +54,8 @@ const resources = {
         gallery: 'Galería',
         feedback: 'Opiniones',
         login: 'Iniciar sesión',
-        register: 'Registrarse'
+        register: 'Registrarse',
+        logout: 'Cerrar sesión'
       },
       status: {
         connected: 'Conectado',
@@ -612,7 +613,8 @@ const resources = {
         gallery: 'Gallery',
         feedback: 'Feedback',
         login: 'Log in',
-        register: 'Register'
+        register: 'Register',
+        logout: 'Log out'
       },
       status: {
         connected: 'Online',
@@ -1162,7 +1164,8 @@ const resources = {
         gallery: 'Galerie',
         feedback: 'Feedback',
         login: 'Anmelden',
-        register: 'Registrieren'
+        register: 'Registrieren',
+        logout: 'Abmelden'
       },
       status: {
         connected: 'Verbunden',
