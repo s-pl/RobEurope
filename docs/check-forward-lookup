@@ -19,5 +19,6 @@ You can verify the forward lookup using the following command:
 ```bash
 nslookup robeurope.samuelponce.es
 
-![DNS forward lookup result](docs/img/lookup.png)
+## Forward Lookup Evidence
+   ![Screenshot](lookup.jpg)
 
