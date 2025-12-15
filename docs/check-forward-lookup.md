@@ -15,9 +15,9 @@ This indicates that the domain is hosted on **Vercel**, which manages the final 
 ## How to Perform the Forward Lookup
 
 You can verify the forward lookup using the following command:
-
 ```bash
 nslookup robeurope.samuelponce.es
+```
 
 ## Forward Lookup Evidence
 ![IMAGEN-LOOKUP](https://github.com/s-pl/RobEurope/blob/LXLLXVX-patch-2/img/lookup.png?raw=true)
