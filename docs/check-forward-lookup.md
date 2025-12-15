@@ -19,4 +19,4 @@ nslookup api.robeurope.samuelponce.es
 ```
 
 ## Forward Lookup Evidence
-![IMAGEN-LOOKUP](https://github.com/s-pl/RobEurope/blob/LXLLXVX-patch-2/img/lookup.png?raw=true)
+![IMAGEN-LOOKUP](https://github.com/s-pl/RobEurope/blob/LXLLXVX-patch-2/img/lookup-back.png?raw=true)
