@@ -1,7 +1,7 @@
 # Forward DNS Lookup
 This document describes the **forward DNS lookup** configuration for the domain:
 
-# Forward DNS Lookup
+## Description
 
 This document describes the **forward DNS lookup** configuration for the domain:
 216.198.79.1
