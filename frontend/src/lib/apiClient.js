@@ -1,9 +1,3 @@
-const FALLBACK_BASES = [
-  'https://api.robeurope.samuelponce.es/api',
-  'http://localhost:85/api'
-];
-const STORAGE_KEY = 'robeurope:apiBaseUrl';
-
 const normalizeBase = (url) => {
   if (!url || typeof url !== 'string') return '';
   const trimmed = url.replace(/\/$/, '');
@@ -11,78 +5,19 @@ const normalizeBase = (url) => {
   return `${trimmed}/api`;
 };
 
-const readStoredBase = () => {
-  try {
-    if (typeof window === 'undefined') return '';
-    return window.localStorage?.getItem(STORAGE_KEY) || '';
-  } catch (error) {
-    console.warn('No se pudo leer robeurope:apiBaseUrl', error);
-    return '';
-  }
-};
-
-const resolveDefaultBase = () => {
-  const storedBase = normalizeBase(readStoredBase());
-  if (storedBase) return storedBase;
-
+const requireApiBaseUrl = () => {
   const envBase = normalizeBase(import.meta.env.VITE_API_BASE_URL || '');
-  if (envBase) return envBase;
-
-  return 'https://api.robeurope.samuelponce.es/api';
-};
-
-let apiBaseUrl = resolveDefaultBase();
-
-const getApiBaseUrl = () => apiBaseUrl;
-
-export const setApiBaseUrl = (nextBase) => {
-  const normalized = normalizeBase(nextBase);
-  if (!normalized) return;
-  apiBaseUrl = normalized;
-  if (typeof window !== 'undefined') {
-    try {
-      window.localStorage?.setItem(STORAGE_KEY, normalized);
-    } catch (error) {
-      console.warn('No se pudo guardar robeurope:apiBaseUrl', error);
-    }
+  if (!envBase) {
+    throw new Error(
+      'Falta VITE_API_BASE_URL. Configúralo en frontend/.env (ej: VITE_API_BASE_URL=http://localhost:85/api)'
+    );
   }
+  return envBase;
 };
 
-const getApiOrigin = () => getApiBaseUrl().replace(/\/?api\/?$/, '');
+const getApiBaseUrl = () => requireApiBaseUrl();
 
-const getCandidateBases = () => {
-  const primary = getApiBaseUrl();
-  const seen = new Set([primary]);
-  const candidates = [primary];
-  for (const fallback of FALLBACK_BASES) {
-    const normalized = normalizeBase(fallback);
-    if (normalized && !seen.has(normalized)) {
-      candidates.push(normalized);
-      seen.add(normalized);
-    }
-  }
-  return candidates;
-};
-
-const fetchWithFallback = async (path, options) => {
-  const candidates = getCandidateBases();
-  const primary = candidates[0];
-  let lastError;
-
-  for (const base of candidates) {
-    try {
-      const response = await fetch(`${base}${path}`, options);
-      if (base !== primary) {
-        setApiBaseUrl(base);
-      }
-      return response;
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  throw lastError || new Error('No se pudo conectar con la API configurada');
-};
+export const getApiOrigin = () => getApiBaseUrl().replace(/\/?api\/?$/, '');
 
 const parseResponse = async (response) => {
   const contentType = response.headers.get('content-type');
@@ -117,7 +52,8 @@ export async function apiRequest(path, { method = 'GET', body, headers = {}, for
     }
   }
 
-  const response = await fetchWithFallback(path, options);
+  const baseUrl = getApiBaseUrl();
+  const response = await fetch(`${baseUrl}${path}`, options);
   const payload = await parseResponse(response);
 
   if (!response.ok) {

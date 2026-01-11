@@ -120,7 +120,9 @@ const resources = {
         uploading: 'Subiendo...',
         uploadMissingFile: 'Selecciona una imagen',
         uploadOk: 'Foto subida',
-        loading: 'Cargando...'
+        loading: 'Cargando...',
+        delete: 'Eliminar',
+        deleting: 'Eliminando...'
       },
       feedback: {
         Title: "Opiniones",
@@ -688,7 +690,9 @@ const resources = {
         uploading: 'Uploading...',
         uploadMissingFile: 'Select an image',
         uploadOk: 'Photo uploaded',
-        loading: 'Loading...'
+        loading: 'Loading...',
+        delete: 'Delete',
+        deleting: 'Deleting...'
       },
       feedback: {
         Title: "Feedback",
@@ -1248,7 +1252,9 @@ const resources = {
         uploading: 'Lade hoch...',
         uploadMissingFile: 'Wähle ein Bild aus',
         uploadOk: 'Foto hochgeladen',
-        loading: 'Laden...'
+        loading: 'Laden...',
+        delete: 'Löschen',
+        deleting: 'Wird gelöscht...'
       },
       feedback: {
         Title: "Feedback",

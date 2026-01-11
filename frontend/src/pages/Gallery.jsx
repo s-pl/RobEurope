@@ -13,6 +13,7 @@ const Gallery = () => {
     const [items, setItems] = useState([]);
     const [status, setStatus] = useState({ loading: true, error: '' });
     const [uploadStatus, setUploadStatus] = useState({ loading: false, error: '', ok: '' });
+    const [deleteStatus, setDeleteStatus] = useState({ loadingId: null, error: '' });
     const [form, setForm] = useState({ title: '', description: '', file: null });
 
     const load = async () => {
@@ -59,6 +60,19 @@ const Gallery = () => {
         } catch (e2) {
             setUploadStatus({ loading: false, error: e2?.message || 'Error', ok: '' });
         }
+    };
+
+    const handleDelete = async (id) => {
+        if (!id) return;
+        setDeleteStatus({ loadingId: id, error: '' });
+        try {
+            await apiRequest(`/gallery/${id}`, { method: 'DELETE' });
+            setItems((prev) => prev.filter((it) => it.id !== id));
+        } catch (e) {
+            setDeleteStatus({ loadingId: null, error: e?.message || 'Error' });
+            return;
+        }
+        setDeleteStatus({ loadingId: null, error: '' });
     };
 
     return (
@@ -145,10 +159,27 @@ const Gallery = () => {
                                             loading="lazy"
                                         />
                                     </div>
-                                    {(item.title || item.description) && (
+                                    {(item.title || item.description || (isAuthenticated && isAdmin)) && (
                                         <div className="p-3">
                                             {item.title && <p className="font-semibold text-slate-900 truncate">{item.title}</p>}
                                             {item.description && <p className="text-sm text-slate-600 line-clamp-2">{item.description}</p>}
+
+                                            {isAuthenticated && isAdmin && (
+                                                <div className="mt-3 flex items-center justify-between">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDelete(item.id)}
+                                                        disabled={deleteStatus.loadingId === item.id}
+                                                        className="text-sm font-semibold text-red-700 disabled:opacity-60"
+                                                    >
+                                                        {deleteStatus.loadingId === item.id ? (t('gallery.deleting') || 'Eliminando...') : (t('gallery.delete') || 'Eliminar')}
+                                                    </button>
+
+                                                    {deleteStatus.error && (
+                                                        <span className="text-xs text-red-600" role="alert">{deleteStatus.error}</span>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>

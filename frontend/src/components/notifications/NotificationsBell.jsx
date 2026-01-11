@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useApi } from '../../hooks/useApi';
-import { getApiBaseUrl } from '../../lib/apiClient';
+import { getApiOrigin } from '../../lib/apiClient';
 import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { ScrollArea } from '../ui/scroll-area';
@@ -20,8 +20,7 @@ const NotificationsBell = () => {
   const [unread, setUnread] = useState(0);
 
   const socketUrl = useMemo(() => {
-    const apiBase = getApiBaseUrl();
-    return apiBase.replace(/\/api$/i, '');
+    return getApiOrigin();
   }, []);
 
   useEffect(() => {

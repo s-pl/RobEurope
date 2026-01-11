@@ -7,7 +7,7 @@ import { useToast } from '../../hooks/useToast';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
-import { resolveMediaUrl, getApiBaseUrl } from '../../lib/apiClient';
+import { resolveMediaUrl, getApiOrigin } from '../../lib/apiClient';
 import { io } from 'socket.io-client';
 
 const TeamChat = ({ teamId }) => {
@@ -38,8 +38,7 @@ const TeamChat = ({ teamId }) => {
 
   useEffect(() => {
     // Initialize socket
-    const baseUrl = getApiBaseUrl();
-    const socketUrl = baseUrl.replace(/\/api$/, '');
+    const socketUrl = getApiOrigin();
     socketRef.current = io(socketUrl);
 
     // Send user info when joining

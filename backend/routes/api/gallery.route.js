@@ -1,7 +1,7 @@
 import express from 'express';
 import authenticateToken from '../../middleware/auth.middleware.js';
 import { uploadMiddleware } from '../../middleware/upload.middleware.js';
-import { listGallery, createGalleryItem } from '../../controller/gallery.controller.js';
+import { listGallery, createGalleryItem, deleteGalleryItem } from '../../controller/gallery.controller.js';
 
 const router = express.Router();
 
@@ -19,5 +19,8 @@ router.post(
   }),
   createGalleryItem
 );
+
+// Admin: delete gallery item
+router.delete('/:id', authenticateToken, deleteGalleryItem);
 
 export default router;

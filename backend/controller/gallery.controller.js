@@ -1,5 +1,7 @@
 import db from '../models/index.js';
 import { getFileInfo } from '../middleware/upload.middleware.js';
+import fs from 'fs';
+import path from 'path';
 
 const { Gallery, User } = db;
 
@@ -61,5 +63,35 @@ export const createGalleryItem = async (req, res) => {
   } catch (error) {
     console.error('Error creating gallery item:', error);
     return res.status(500).json({ error: 'Failed to upload gallery image' });
+  }
+};
+
+export const deleteGalleryItem = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized: Session required' });
+    }
+
+    if (!isAdminUser(req.user)) {
+      return res.status(403).json({ error: 'Se requiere rol: admin' });
+    }
+
+    const { id } = req.params;
+    const item = await Gallery.findByPk(id);
+
+    if (!item) {
+      return res.status(404).json({ error: 'Gallery item not found' });
+    }
+
+    const filePath = path.join(process.cwd(), 'uploads', item.filename);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    await item.destroy();
+    return res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting gallery item:', error);
+    return res.status(500).json({ error: 'Failed to delete gallery item' });
   }
 };

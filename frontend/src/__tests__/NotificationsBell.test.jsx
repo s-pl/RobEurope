@@ -10,17 +10,17 @@ vi.mock('../hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'u1' } }) }))
 const mockApi = vi.fn(() => Promise.resolve([]));
 vi.mock('../hooks/useApi', () => ({ useApi: () => mockApi }));
 
-vi.mock('../../lib/notifications', () => ({
+vi.mock('../lib/notifications', () => ({
   requestNotificationPermission: vi.fn(() => Promise.resolve()),
   showNotification: vi.fn(),
 }));
 
-vi.mock('../../lib/push', () => ({
+vi.mock('../lib/push', () => ({
   registerServiceWorker: vi.fn(() => Promise.resolve(null)),
   subscribeToPush: vi.fn(() => Promise.resolve()),
 }));
 
-vi.mock('../../lib/apiClient', () => ({ getApiBaseUrl: () => 'http://api.example.com/api' }));
+vi.mock('../lib/apiClient', () => ({ getApiOrigin: () => 'http://api.example.com' }));
 
 vi.mock('socket.io-client', () => ({ default: vi.fn(() => ({ on: vi.fn(), disconnect: vi.fn() })) }));
 

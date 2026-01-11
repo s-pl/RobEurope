@@ -2,14 +2,14 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import io from 'socket.io-client';
-import { getApiBaseUrl } from '../lib/apiClient';
+import { getApiOrigin } from '../lib/apiClient';
 
 const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
 
-  const socketUrl = useMemo(() => getApiBaseUrl().replace(/\/api$/i, ''), []);
+  const socketUrl = useMemo(() => getApiOrigin(), []);
 
   const socket = useMemo(() => io(socketUrl, { transports: ['websocket', 'polling'] }), [socketUrl]);
 

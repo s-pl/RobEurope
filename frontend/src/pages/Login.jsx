@@ -7,7 +7,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from '../components/ui/c
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { useAuth } from '../hooks/useAuth';
-import { getApiBaseUrl } from '../lib/apiClient';
+import { apiRequest, getApiBaseUrl } from '../lib/apiClient';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../components/ui/dialog';
 
 const Login = () => {
@@ -50,16 +50,13 @@ const Login = () => {
     setError('');
     try {
       // LDAP expects { username, password }
-      const resp = await fetch(`${getApiBaseUrl()}/auth/ldap`, {
+      await apiRequest('/auth/ldap', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ username: ldapForm.username || form.email, password: ldapForm.password || form.password })
+        body: {
+          username: ldapForm.username || form.email,
+          password: ldapForm.password || form.password
+        }
       });
-      if (!resp.ok) {
-        const data = await resp.json().catch(() => ({}));
-        throw new Error(data?.error || 'LDAP authentication failed');
-      }
       const redirect = params.get('redirectTo') || '/';
       navigate(redirect, { replace: true });
     } catch (err) {
