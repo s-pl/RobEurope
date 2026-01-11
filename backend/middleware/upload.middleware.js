@@ -14,7 +14,11 @@ import { v4 as uuidv4 } from 'uuid';
 /**
  * @typedef {Object} UploadOptions
  * @property {'single'|'array'|'fields'} [type='single'] Upload strategy.
- * @property {string|Array<{name: string, maxCount?: number}>} [fieldName='file'] Field name(s).
+ * @typedef {Object} UploadFieldDefinition
+ * @property {string} name Field name.
+ * @property {number} [maxCount] Maximum number of files for that field.
+ *
+ * @property {string|UploadFieldDefinition[]} [fieldName='file'] Field name(s).
  * @property {number} [maxSize] Maximum file size in bytes.
  * @property {RegExp} [allowedTypes] Allowed MIME type regex (tested against `file.mimetype`).
  */
@@ -37,7 +41,7 @@ import { v4 as uuidv4 } from 'uuid';
  * - Always returns an array `[multerMiddleware, handleUploadErrors]`.
  *
  * @param {UploadOptions} [options]
- * @returns {Array<import('express').RequestHandler>} Express middleware chain.
+ * @returns {Function[]} Express middleware chain.
  */
 export const uploadMiddleware = (options = {}) => {
   const {
@@ -106,9 +110,9 @@ export const uploadMiddleware = (options = {}) => {
  * Translates common Multer errors to consistent HTTP responses.
  *
  * @param {Error} error Error thrown by multer.
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
- * @param {import('express').NextFunction} next Express next.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @param {Express.NextFunction} next Express next.
  * @returns {any}
  */
 export const handleUploadErrors = (error, req, res, next) => {
@@ -148,8 +152,8 @@ export const handleUploadErrors = (error, req, res, next) => {
  * - For `upload.fields`, returns a record of arrays keyed by field name.
  * - Returns `null` when no file data is present.
  *
- * @param {import('express').Request} req Express request.
- * @returns {UploadedFileInfo | Record<string, UploadedFileInfo[]> | null}
+ * @param {Express.Request} req Express request.
+ * @returns {UploadedFileInfo|Object.<string, UploadedFileInfo[]>|null}
  */
 export const getFileInfo = (req) => {
   if (req.file) {

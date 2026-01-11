@@ -61,8 +61,8 @@ function validatePasswordStrength(password) {
  * Registers a new user and creates a session.
  *
  * @route POST /api/auth/register
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const register = async (req, res) => {
@@ -140,8 +140,8 @@ export const register = async (req, res) => {
  * Includes basic throttling/lockout via Redis.
  *
  * @route POST /api/auth/login
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const login = async (req, res) => {
@@ -214,8 +214,8 @@ export const login = async (req, res) => {
 /**
  * Destroys the current session.
  * @route POST /api/auth/logout
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {void}
  */
 export const logout = (req, res) => {
@@ -229,8 +229,8 @@ export const logout = (req, res) => {
 /**
  * Returns the current authenticated user session payload.
  * @route GET /api/auth/me
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {any}
  */
 export const me = (req, res) => {
@@ -244,8 +244,8 @@ export const me = (req, res) => {
  * Changes the current user's password.
  *
  * @route POST /api/auth/change-password
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const changePassword = async (req, res) => {
@@ -288,8 +288,8 @@ export const changePassword = async (req, res) => {
  * This endpoint is designed to not reveal whether a user exists.
  *
  * @route POST /api/auth/forgot-password
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const forgotPassword = async (req, res) => {
@@ -317,8 +317,8 @@ export const forgotPassword = async (req, res) => {
  * Completes a password reset given a valid token.
  *
  * @route POST /api/auth/reset-password
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const resetPassword = async (req, res) => {

@@ -5,8 +5,8 @@
 
 /**
  * Apply migration.
- * @param {import('sequelize').QueryInterface} queryInterface Sequelize query interface.
- * @param {typeof import('sequelize')} Sequelize Sequelize library.
+ * @param {QueryInterface} queryInterface Sequelize query interface.
+ * @param {object} Sequelize Sequelize library.
  * @returns {Promise<void>}
  */
 export const up = async (queryInterface, Sequelize) => {
@@ -23,7 +23,7 @@ export const up = async (queryInterface, Sequelize) => {
 
 /**
  * Revert migration.
- * @param {import('sequelize').QueryInterface} queryInterface Sequelize query interface.
+ * @param {QueryInterface} queryInterface Sequelize query interface.
  * @returns {Promise<void>}
  */
 export const down = async (queryInterface) => {

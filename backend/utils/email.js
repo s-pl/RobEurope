@@ -30,8 +30,19 @@ export function getResendClient() {
 /**
  * Sends a password reset email containing a reset link.
  *
- * @param {{ to: string, token: string, appUrl?: string }} params
- * @returns {Promise<{ sent: boolean, id?: string, reason?: string, error?: any }>} Result.
+ * @typedef {Object} PasswordResetEmailParams
+ * @property {string} to Recipient email.
+ * @property {string} token Password reset token.
+ * @property {string} [appUrl] Optional web app base URL.
+ *
+ * @typedef {Object} SendEmailResult
+ * @property {boolean} sent Whether the email was sent.
+ * @property {string} [id] Provider message id.
+ * @property {string} [reason] Failure reason code.
+ * @property {*} [error] Provider error payload.
+ *
+ * @param {PasswordResetEmailParams} params
+ * @returns {Promise<SendEmailResult>} Result.
  */
 export async function sendPasswordResetEmail({ to, token, appUrl }) {
   const resend = getResendClient();
@@ -74,7 +85,7 @@ export async function sendPasswordResetEmail({ to, token, appUrl }) {
  * Sends a password reset email containing a one-time code.
  *
  * @param {{ to: string, code: string }} params
- * @returns {Promise<{ sent: boolean, id?: string, reason?: string, error?: any }>} Result.
+ * @returns {Promise<SendEmailResult>} Result.
  */
 export async function sendPasswordResetCodeEmail({ to, code }) {
   const resend = getResendClient();

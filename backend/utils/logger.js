@@ -47,6 +47,6 @@ const logger = winston.createLogger({
 
 /**
  * Shared logger instance.
- * @type {import('winston').Logger}
+ * @type {object}
  */
 export default logger;

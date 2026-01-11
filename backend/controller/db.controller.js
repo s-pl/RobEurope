@@ -81,6 +81,6 @@ sequelize
 
 /**
  * Shared Sequelize instance used throughout the backend.
- * @type {import('sequelize').Sequelize}
+ * @type {Sequelize}
  */
 export default sequelize;

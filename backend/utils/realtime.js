@@ -19,7 +19,7 @@ import { sendPushToUser } from './push.js';
 
 /**
  * Sets the global Socket.IO server instance.
- * @param {import('socket.io').Server} io Socket.IO server.
+ * @param {object} io Socket.IO server.
  */
 export function setIO(io) {
   ioInstance = io;
@@ -27,7 +27,7 @@ export function setIO(io) {
 
 /**
  * Returns the current Socket.IO server instance.
- * @returns {import('socket.io').Server|null}
+ * @returns {object|null}
  */
 export function getIO() {
   return ioInstance;

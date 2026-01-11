@@ -1,22 +1,15 @@
 {
   "source": {
     "include": ["backend", "frontend/src"],
-    "exclude": [
-      "**/node_modules/**",
-      "**/__tests__/**",
-      "backend/public/**",
-      "backend/logs/**",
-      "backend/uploads/**",
-      "frontend/dist/**"
-    ],
-    "includePattern": ".+\\.(js|jsx|mjs)$"
+    "includePattern": ".+\\.(js|jsx|mjs)$",
+    "excludePattern": "(\\\\|/)(node_modules|__tests__|uploads|logs|dist)(\\\\|/)|(^|\\\\|/)backend(\\\\|/)public(\\\\|/)"
   },
   "plugins": ["plugins/markdown"],
   "opts": {
     "encoding": "utf8",
     "destination": "docs/generated",
     "recurse": true,
-    "template": "default"
+    "private": false
   },
   "templates": {
     "cleverLinks": true,

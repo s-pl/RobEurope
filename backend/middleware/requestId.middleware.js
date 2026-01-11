@@ -12,7 +12,7 @@ import { randomUUID } from 'crypto';
  * - Sets `res.locals.requestId`
  * - Adds `X-Request-Id` response header
  *
- * @returns {import('express').RequestHandler}
+ * @returns {Express.RequestHandler}
  */
 export default function requestId() {
   return (req, res, next) => {

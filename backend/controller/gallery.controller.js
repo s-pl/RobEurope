@@ -7,7 +7,10 @@ const { Gallery, User } = db;
 
 /**
  * Checks whether a session user should be treated as admin for gallery operations.
- * @param {{ role?: string } | null | undefined} user Session user.
+ * @typedef {Object} SessionUser
+ * @property {string} [role] User role.
+ *
+ * @param {SessionUser|null|undefined} user Session user.
  * @returns {boolean}
  */
 const isAdminUser = (user) => {
@@ -19,8 +22,8 @@ const isAdminUser = (user) => {
  * Lists gallery items (public).
  *
  * @route GET /api/gallery
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const listGallery = async (req, res) => {
@@ -51,8 +54,8 @@ export const listGallery = async (req, res) => {
  * - optional `title` and `description`
  *
  * @route POST /api/gallery
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const createGalleryItem = async (req, res) => {
@@ -94,8 +97,8 @@ export const createGalleryItem = async (req, res) => {
 /**
  * Deletes a gallery item and its stored file (admin-only).
  * @route DELETE /api/gallery/:id
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const deleteGalleryItem = async (req, res) => {

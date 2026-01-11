@@ -20,6 +20,6 @@ await redisClient.connect();
 
 /**
  * Connected Redis client instance.
- * @type {import('redis').RedisClientType}
+ * @type {object}
  */
 export default redisClient;

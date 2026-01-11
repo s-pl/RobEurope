@@ -7,9 +7,9 @@
  *
  * On success, populates `req.user` from `req.session.user`.
  *
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
- * @param {import('express').NextFunction} next Express next.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @param {Express.NextFunction} next Express next.
  * @returns {void}
  */
 export default function authenticateToken(req, res, next) {

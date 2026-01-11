@@ -12,8 +12,12 @@ const stores = new Map();
 /**
  * Creates a simple IP-based rate limiter.
  *
- * @param {{ windowMs?: number, max?: number }} [options]
- * @returns {import('express').RequestHandler}
+ * @typedef {Object} RateLimitOptions
+ * @property {number} [windowMs] Window length in ms.
+ * @property {number} [max] Max requests per window.
+ *
+ * @param {RateLimitOptions} [options]
+ * @returns {Express.RequestHandler}
  */
 export default function rateLimit(options = {}) {
   const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes

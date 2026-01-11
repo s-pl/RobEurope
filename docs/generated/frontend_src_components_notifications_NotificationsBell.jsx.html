@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: frontend/src/components/notifications/NotificationsBell.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: frontend/src/components/notifications/NotificationsBell.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { useEffect, useMemo, useState } from 'react';
+import { Bell } from 'lucide-react';
+import io from 'socket.io-client';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../hooks/useAuth';
+import { useApi } from '../../hooks/useApi';
+import { getApiOrigin } from '../../lib/apiClient';
+import { Button } from '../ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { ScrollArea } from '../ui/scroll-area';
+import { requestNotificationPermission, showNotification } from '../../lib/notifications';
+import { registerServiceWorker, subscribeToPush } from '../../lib/push';
+
+/**
+ * Notifications dropdown (bell icon).
+ *
+ * Responsibilities:
+ * - Fetches latest notifications for the current user.
+ * - Connects to Socket.IO to receive realtime notifications.
+ * - Handles marking notifications as read (single/all).
+ * - Renders actionable invite notifications when `notification.meta.invite_token` is present.
+ * - Uses lightweight CSS-only animations for smooth open/close and a responsive feel.
+ *
+ * @returns {JSX.Element}
+ */
+
+const NotificationsBell = () => {
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const api = useApi();
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState([]);
+  const [unread, setUnread] = useState(0);
+  const [busyId, setBusyId] = useState(null);
+
+  const socketUrl = useMemo(() => {
+    return getApiOrigin();
+  }, []);
+
+  useEffect(() => {
+    let socket;
+
+    const bootstrap = async () => {
+      if (!user?.id) return;
+
+      try {
+        const list = await api(`/notifications?user_id=${encodeURIComponent(user.id)}&amp;limit=20`);
+        const arr = Array.isArray(list) ? list : [];
+        setItems(arr);
+        setUnread(arr.filter((n) => !n.is_read).length);
+      } catch {
+        // ignore
+      }
+      await requestNotificationPermission();
+
+      try {
+        // Push registration
+        const reg = await registerServiceWorker();
+        if (reg) await subscribeToPush(reg);
+      } catch {
+        // ignore
+      }
+
+      try {
+        socket = io(socketUrl, { transports: ['websocket', 'polling'] });
+        const channel = `notification:${user.id}`;
+        socket.on(channel, (notif) => {
+          setItems((prev) => [notif, ...prev].slice(0, 20));
+          setUnread((x) => x + 1);
+          // Web notification
+          showNotification(notif.title || 'Nueva notificación', { body: notif.message || '', tag: `notif-${notif.id}` });
+        });
+      } catch {
+        // ignore
+      }
+    };
+
+    if (user?.id) bootstrap();
+    return () => {
+      if (socket) socket.disconnect();
+    };
+  }, [user?.id, socketUrl, api]);
+
+  const markAsRead = async (id) => {
+    try {
+      await api(`/notifications/${id}`, { method: 'PUT', body: { is_read: true } });
+      setItems(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+      setUnread(prev => Math.max(0, prev - 1));
+    } catch {
+      // ignore
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const unreadIds = items.filter(n => !n.is_read).map(n => n.id);
+      await Promise.all(unreadIds.map(id => api(`/notifications/${id}`, { method: 'PUT', body: { is_read: true } })));
+      
+      setItems(prev => prev.map(n => ({ ...n, is_read: true })));
+      setUnread(0);
+    } catch {
+      // ignore
+    }
+  };
+
+  const runInviteAction = async (notification, action) => {
+    const token = notification?.meta?.invite_token;
+    if (!token) return;
+
+    setBusyId(notification.id);
+    try {
+      if (action === 'accept') {
+        await api('/teams/invitations/accept', { method: 'POST', body: { token } });
+      } else if (action === 'decline') {
+        await api('/teams/invitations/decline', { method: 'POST', body: { token } });
+      }
+
+      // Mark as read locally to keep UX snappy
+      setItems((prev) => prev.map((n) => (n.id === notification.id ? { ...n, is_read: true } : n)));
+      setUnread((prev) => Math.max(0, prev - 1));
+      // Best-effort persist read state
+      try {
+        await api(`/notifications/${notification.id}`, { method: 'PUT', body: { is_read: true } });
+      } catch {
+        // ignore
+      }
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  return (
+    &lt;Popover open={open} onOpenChange={setOpen}>
+      &lt;PopoverTrigger asChild>
+        &lt;Button variant="ghost" size="icon" className="relative">
+          &lt;Bell className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+          {unread > 0 &amp;&amp; (
+            &lt;span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-slate-950" />
+          )}
+          &lt;span className="sr-only">{t('nav.notifications') || 'Notifications'}&lt;/span>
+        &lt;/Button>
+      &lt;/PopoverTrigger>
+      &lt;PopoverContent
+        className="w-80 p-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+        align="end"
+      >
+        &lt;div className="flex items-center justify-between border-b border-slate-100 p-4 dark:border-slate-800">
+          &lt;h4 className="font-semibold text-slate-900 dark:text-slate-100">Notificaciones&lt;/h4>
+          {unread > 0 &amp;&amp; (
+            &lt;Button variant="ghost" size="sm" className="h-auto px-2 text-xs" onClick={markAllAsRead}>
+              Marcar todo leído
+            &lt;/Button>
+          )}
+        &lt;/div>
+        &lt;ScrollArea className="h-[300px]">
+          {items.length === 0 ? (
+            &lt;div className="p-4 text-center text-sm text-slate-500 dark:text-slate-400">
+              No tienes notificaciones
+            &lt;/div>
+          ) : (
+            &lt;div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {items.map((item) => (
+                &lt;div
+                  key={item.id}
+                  className={`flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-900 ${
+                    !item.is_read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                  }`}
+                  onClick={() => !item.is_read &amp;&amp; markAsRead(item.id)}
+                >
+                  &lt;div className="flex-1 space-y-1">
+                    &lt;p className={`text-sm font-medium leading-none ${!item.is_read ? 'text-blue-900 dark:text-blue-100' : 'text-slate-700 dark:text-slate-300'}`}>
+                      {item.title}
+                    &lt;/p>
+                    &lt;p className="text-xs text-slate-500 dark:text-slate-400">
+                      {item.message}
+                    &lt;/p>
+
+                    {item.type === 'team_invite' &amp;&amp; item?.meta?.invite_token &amp;&amp; (
+                      &lt;div className="flex gap-2 pt-1" onClick={(e) => e.stopPropagation()}>
+                        &lt;Button
+                          variant="secondary"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          disabled={busyId === item.id}
+                          onClick={() => runInviteAction(item, 'accept')}
+                        >
+                          Accept
+                        &lt;/Button>
+                        &lt;Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          disabled={busyId === item.id}
+                          onClick={() => runInviteAction(item, 'decline')}
+                        >
+                          Decline
+                        &lt;/Button>
+                      &lt;/div>
+                    )}
+                    
+                  &lt;/div>
+                  {!item.is_read &amp;&amp; (
+                    &lt;div className="h-2 w-2 rounded-full bg-blue-500" />
+                  )}
+                &lt;/div>
+              ))}
+            &lt;/div>
+          )}
+        &lt;/ScrollArea>
+      &lt;/PopoverContent>
+    &lt;/Popover>
+  );
+};
+
+export default NotificationsBell;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SystemLogger.html">SystemLogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#NotificationsBell">NotificationsBell</a></li><li><a href="global.html#acceptInvite">acceptInvite</a></li><li><a href="global.html#apiRequest">apiRequest</a></li><li><a href="global.html#changePassword">changePassword</a></li><li><a href="global.html#createGalleryItem">createGalleryItem</a></li><li><a href="global.html#createNotification">createNotification</a></li><li><a href="global.html#declineInvite">declineInvite</a></li><li><a href="global.html#decodeIfBase64">decodeIfBase64</a></li><li><a href="global.html#deleteGalleryItem">deleteGalleryItem</a></li><li><a href="global.html#deleteNotification">deleteNotification</a></li><li><a href="global.html#down">down</a></li><li><a href="global.html#emitToUser">emitToUser</a></li><li><a href="global.html#forgotPassword">forgotPassword</a></li><li><a href="global.html#getApiOrigin">getApiOrigin</a></li><li><a href="global.html#getFileInfo">getFileInfo</a></li><li><a href="global.html#getIO">getIO</a></li><li><a href="global.html#getNotificationById">getNotificationById</a></li><li><a href="global.html#getNotifications">getNotifications</a></li><li><a href="global.html#getResendClient">getResendClient</a></li><li><a href="global.html#handleUploadErrors">handleUploadErrors</a></li><li><a href="global.html#inviteToTeam">inviteToTeam</a></li><li><a href="global.html#listGallery">listGallery</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#me">me</a></li><li><a href="global.html#normalizeBase">normalizeBase</a></li><li><a href="global.html#parseResponse">parseResponse</a></li><li><a href="global.html#redirectIfAuthenticated">redirectIfAuthenticated</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#requireAdminSession">requireAdminSession</a></li><li><a href="global.html#requireOwnership">requireOwnership</a></li><li><a href="global.html#requireRole">requireRole</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#resolveMediaUrl">resolveMediaUrl</a></li><li><a href="global.html#sendPasswordResetCodeEmail">sendPasswordResetCodeEmail</a></li><li><a href="global.html#setIO">setIO</a></li><li><a href="global.html#up">up</a></li><li><a href="global.html#updateNotification">updateNotification</a></li><li><a href="global.html#uploadMiddleware">uploadMiddleware</a></li><li><a href="global.html#validatePasswordStrength">validatePasswordStrength</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Jan 12 2026 00:44:31 GMT+0100 (hora estándar de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

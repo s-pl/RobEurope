@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: backend/migrations/20251113-drop-media-table.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: backend/migrations/20251113-drop-media-table.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Migration: drop media table
+ * Exports up and down functions for use with QueryInterface
+ */
+export async function up(queryInterface, Sequelize) {
+  // Check if table exists before dropping (MySQL)
+  const rows = await queryInterface.sequelize.query(
+    "SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Media' LIMIT 1;",
+    { type: Sequelize.QueryTypes.SELECT }
+  );
+
+  if (rows.length > 0) {
+    await queryInterface.dropTable('Media');
+  } else {
+    // no-op if table doesn't exist
+  }
+}
+
+export async function down(queryInterface, Sequelize) {
+  // Recreate the Media table if needed for rollback
+  await queryInterface.createTable('Media', {
+    id: {
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    media_type: {
+      type: Sequelize.ENUM('user', 'team', 'post', 'sponsor'),
+      allowNull: false
+    },
+    media_id: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
+    filename: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
+    path: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
+    url: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
+    mime_type: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
+    size: {
+      type: Sequelize.INTEGER,
+      allowNull: false
+    },
+    uploaded_by: {
+      type: Sequelize.UUID,
+      allowNull: false,
+      references: { model: 'User', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
+    },
+    created_at: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+    }
+  });
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SystemLogger.html">SystemLogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#NotificationsBell">NotificationsBell</a></li><li><a href="global.html#acceptInvite">acceptInvite</a></li><li><a href="global.html#apiRequest">apiRequest</a></li><li><a href="global.html#changePassword">changePassword</a></li><li><a href="global.html#createGalleryItem">createGalleryItem</a></li><li><a href="global.html#createNotification">createNotification</a></li><li><a href="global.html#declineInvite">declineInvite</a></li><li><a href="global.html#decodeIfBase64">decodeIfBase64</a></li><li><a href="global.html#deleteGalleryItem">deleteGalleryItem</a></li><li><a href="global.html#deleteNotification">deleteNotification</a></li><li><a href="global.html#down">down</a></li><li><a href="global.html#emitToUser">emitToUser</a></li><li><a href="global.html#forgotPassword">forgotPassword</a></li><li><a href="global.html#getApiOrigin">getApiOrigin</a></li><li><a href="global.html#getFileInfo">getFileInfo</a></li><li><a href="global.html#getIO">getIO</a></li><li><a href="global.html#getNotificationById">getNotificationById</a></li><li><a href="global.html#getNotifications">getNotifications</a></li><li><a href="global.html#getResendClient">getResendClient</a></li><li><a href="global.html#handleUploadErrors">handleUploadErrors</a></li><li><a href="global.html#inviteToTeam">inviteToTeam</a></li><li><a href="global.html#listGallery">listGallery</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#me">me</a></li><li><a href="global.html#normalizeBase">normalizeBase</a></li><li><a href="global.html#parseResponse">parseResponse</a></li><li><a href="global.html#redirectIfAuthenticated">redirectIfAuthenticated</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#requireAdminSession">requireAdminSession</a></li><li><a href="global.html#requireOwnership">requireOwnership</a></li><li><a href="global.html#requireRole">requireRole</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#resolveMediaUrl">resolveMediaUrl</a></li><li><a href="global.html#sendPasswordResetCodeEmail">sendPasswordResetCodeEmail</a></li><li><a href="global.html#setIO">setIO</a></li><li><a href="global.html#up">up</a></li><li><a href="global.html#updateNotification">updateNotification</a></li><li><a href="global.html#uploadMiddleware">uploadMiddleware</a></li><li><a href="global.html#validatePasswordStrength">validatePasswordStrength</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Jan 12 2026 00:44:31 GMT+0100 (hora estándar de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

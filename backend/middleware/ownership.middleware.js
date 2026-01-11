@@ -14,7 +14,7 @@
  * - For the `User` model, the record id is the owner.
  *
  * @param {string} modelName Sequelize model name in the model registry.
- * @returns {import('express').RequestHandler}
+ * @returns {Express.RequestHandler}
  */
 export function requireOwnership(modelName) {
   return async (req, res, next) => {

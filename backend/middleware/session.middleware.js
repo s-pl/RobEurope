@@ -12,9 +12,9 @@
  * - Redirects unauthenticated users to `/admin/login`.
  * - Enforces `super_admin` role.
  *
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
- * @param {import('express').NextFunction} next Express next.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @param {Express.NextFunction} next Express next.
  * @returns {any}
  */
 export function requireAdminSession(req, res, next) {
@@ -34,9 +34,9 @@ export function requireAdminSession(req, res, next) {
 /**
  * Redirects authenticated super admins away from the login page.
  *
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
- * @param {import('express').NextFunction} next Express next.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @param {Express.NextFunction} next Express next.
  * @returns {any}
  */
 export function redirectIfAuthenticated(req, res, next) {

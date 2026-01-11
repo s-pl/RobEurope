@@ -15,8 +15,8 @@ import { Op } from 'sequelize';
  * Creates a notification.
  *
  * @route POST /api/notifications
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const createNotification = async (req, res) => {
@@ -37,8 +37,8 @@ export const createNotification = async (req, res) => {
  * - `limit`, `offset`: pagination
  *
  * @route GET /api/notifications
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const getNotifications = async (req, res) => {
@@ -58,8 +58,8 @@ export const getNotifications = async (req, res) => {
 /**
  * Retrieves a single notification by id.
  * @route GET /api/notifications/:id
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const getNotificationById = async (req, res) => {
@@ -78,8 +78,8 @@ export const getNotificationById = async (req, res) => {
  * Common usage is to set `{ is_read: true }`.
  *
  * @route PUT /api/notifications/:id
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const updateNotification = async (req, res) => {
@@ -96,8 +96,8 @@ export const updateNotification = async (req, res) => {
 /**
  * Deletes a notification.
  * @route DELETE /api/notifications/:id
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const deleteNotification = async (req, res) => {

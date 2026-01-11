@@ -131,8 +131,8 @@ export const deleteTeam = async (req, res) => {
  * so the invite can be accepted/declined from the UI.
  *
  * @route POST /api/teams/:id/invite
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const inviteToTeam = async (req, res) => {
@@ -200,8 +200,8 @@ export const inviteToTeam = async (req, res) => {
  * If the invitation is bound to a specific `user_id`, the authenticated user must match.
  *
  * @route POST /api/teams/invitations/decline
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const declineInvite = async (req, res) => {
@@ -249,8 +249,8 @@ export const declineInvite = async (req, res) => {
  * Enforces the single-team membership rule.
  *
  * @route POST /api/teams/invitations/accept
- * @param {import('express').Request} req Express request.
- * @param {import('express').Response} res Express response.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
  * @returns {Promise<void>}
  */
 export const acceptInvite = async (req, res) => {

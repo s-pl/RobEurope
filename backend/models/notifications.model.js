@@ -16,9 +16,9 @@
  * Notifications are stored for a specific recipient user and can optionally carry a
  * JSON `meta` payload for actionable notifications.
  *
- * @param {import('sequelize').Sequelize} sequelize Sequelize instance.
- * @param {import('sequelize').DataTypes} DataTypes Sequelize DataTypes.
- * @returns {import('sequelize').Model} Notification model.
+ * @param {Sequelize} sequelize Sequelize instance.
+ * @param {DataTypes} DataTypes Sequelize DataTypes.
+ * @returns {Model} Notification model.
  */
 export default async function defineNotificationModel(sequelize, DataTypes) {
     const Notification = sequelize.define('Notification', {

@@ -9,7 +9,7 @@
  * This project primarily uses `user` and `super_admin` roles.
  *
  * @param {string} role Required role.
- * @returns {import('express').RequestHandler}
+ * @returns {Express.RequestHandler}
  */
 export function requireRole(role) {
   return (req, res, next) => {

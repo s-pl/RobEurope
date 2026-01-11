@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: backend/migrations/20251031-create-initial-tables.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: backend/migrations/20251031-create-initial-tables.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Migration: create initial tables based on models in backend/models
+ * Exports up and down functions for use with QueryInterface
+ */
+export async function up(queryInterface, Sequelize) {
+  // Create User table (UUID primary key)
+  await queryInterface.createTable('User', {
+    id: {
+      type: Sequelize.UUID,
+      defaultValue: Sequelize.UUIDV4,
+      allowNull: false,
+      primaryKey: true
+    },
+    first_name: { type: Sequelize.STRING, allowNull: false },
+    last_name: { type: Sequelize.STRING, allowNull: false },
+    username: { type: Sequelize.STRING, allowNull: false, unique: true },
+    email: { type: Sequelize.STRING, allowNull: false, unique: true },
+    password_hash: { type: Sequelize.STRING, allowNull: false },
+    phone: { type: Sequelize.STRING, allowNull: true },
+    profile_photo_url: { type: Sequelize.STRING, allowNull: true },
+    role: { type: Sequelize.ENUM('user', 'super_admin'), defaultValue: 'user' },
+    is_active: { type: Sequelize.BOOLEAN, defaultValue: true },
+    created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
+  });
+
+  // Country table
+  await queryInterface.createTable('Country', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    name: { type: Sequelize.STRING, allowNull: false },
+    code: { type: Sequelize.STRING, allowNull: false },
+    flag_emoji: { type: Sequelize.STRING, allowNull: true }
+  });
+
+  // Competition table
+  await queryInterface.createTable('Competition', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    title: { type: Sequelize.STRING, allowNull: false },
+    slug: { type: Sequelize.STRING, allowNull: false },
+    description: { type: Sequelize.STRING, allowNull: true },
+    registration_start: { type: Sequelize.DATE, allowNull: true },
+    registration_end: { type: Sequelize.DATE, allowNull: true },
+    start_date: { type: Sequelize.DATE, allowNull: true },
+    end_date: { type: Sequelize.DATE, allowNull: true },
+    rules_url: { type: Sequelize.STRING, allowNull: true },
+    stream_url: { type: Sequelize.JSON, allowNull: true }
+  });
+
+  // Team table
+  await queryInterface.createTable('Team', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    name: { type: Sequelize.STRING, allowNull: false },
+    country_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: { model: 'Country', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
+    city: { type: Sequelize.STRING, allowNull: true },
+    institution: { type: Sequelize.STRING, allowNull: true },
+    logo_url: { type: Sequelize.STRING, allowNull: true },
+    social_links: { type: Sequelize.JSON, allowNull: true },
+    created_by_user_id: {
+      type: Sequelize.UUID,
+      allowNull: true,
+      references: { model: 'User', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
+    created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+    updated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
+  });
+
+  // TeamMembers table (note: model references were inconsistent; FK points to Team table)
+  await queryInterface.createTable('TeamMembers', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    team_id: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      references: { model: 'Team', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
+    },
+    user_id: {
+      type: Sequelize.UUID,
+      allowNull: false,
+      references: { model: 'User', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
+    },
+    role: { type: Sequelize.STRING, allowNull: false },
+    joined_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+    left_at: { type: Sequelize.DATE, allowNull: true }
+  });
+
+  // Registration table
+  await queryInterface.createTable('Registration', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    team_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: { model: 'Team', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
+    competition_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: { model: 'Competition', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
+    status: { type: Sequelize.ENUM('pending', 'approved', 'rejected'), allowNull: false, defaultValue: 'pending' },
+    registration_date: { type: Sequelize.DATE, allowNull: false }
+  });
+
+  // Post table
+  await queryInterface.createTable('Post', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    title: { type: Sequelize.STRING, allowNull: false },
+    content: { type: Sequelize.TEXT, allowNull: false },
+    author_id: {
+      type: Sequelize.UUID,
+      allowNull: true,
+      references: { model: 'User', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
+    media_urls: { type: Sequelize.JSON, allowNull: true },
+    likes_count: { type: Sequelize.INTEGER, defaultValue: 0 },
+    views_count: { type: Sequelize.INTEGER, defaultValue: 0 },
+    created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+    updated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
+  });
+
+  // Sponsor table
+  await queryInterface.createTable('Sponsor', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    name: { type: Sequelize.STRING, allowNull: false },
+    logo_url: { type: Sequelize.STRING, allowNull: true },
+    website_url: { type: Sequelize.STRING, allowNull: true },
+    created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+    updated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
+  });
+
+  // Stream table
+  await queryInterface.createTable('Stream', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    title: { type: Sequelize.STRING, allowNull: false },
+    description: { type: Sequelize.TEXT, allowNull: true },
+    stream_url: { type: Sequelize.STRING, allowNull: true },
+    status: { type: Sequelize.ENUM('offline', 'scheduled', 'live'), defaultValue: 'offline', allowNull: false },
+    competition_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: { model: 'Competition', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    },
+    team_id: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      references: { model: 'Team', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
+    },
+    created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+    updated_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
+  });
+
+  // Notification table
+  await queryInterface.createTable('Notification', {
+    id: { type: Sequelize.UUID, defaultValue: Sequelize.UUIDV4, primaryKey: true },
+    user_id: {
+      type: Sequelize.UUID,
+      allowNull: false,
+      references: { model: 'User', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
+    },
+    title: { type: Sequelize.STRING, allowNull: false },
+    message: { type: Sequelize.STRING, allowNull: false },
+    type: { type: Sequelize.ENUM('registration_team_status', 'team_invite', 'mention'), allowNull: false },
+    is_read: { type: Sequelize.BOOLEAN, defaultValue: false },
+    created_at: { type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') }
+  });
+
+  // SystemLog table for auditing all system operations
+  await queryInterface.createTable('SystemLog', {
+    id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    user_id: {
+      type: Sequelize.UUID,
+      allowNull: true,
+      references: { model: 'User', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+      comment: 'User who performed the action (null for system actions)'
+    },
+    action: {
+      type: Sequelize.ENUM('CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 'REGISTER', 'UPLOAD', 'DOWNLOAD'),
+      allowNull: false
+    },
+    entity_type: {
+      type: Sequelize.ENUM('User', 'Team', 'Post', 'Competition', 'Sponsor', 'Stream', 'Registration', 'Notification', 'Country', 'TeamMember', 'System'),
+      allowNull: false,
+      comment: 'Type of entity being acted upon'
+    },
+    entity_id: {
+      type: Sequelize.STRING,
+      allowNull: true,
+      comment: 'ID of the entity (string to accommodate UUID and integer IDs)'
+    },
+    old_values: {
+      type: Sequelize.JSON,
+      allowNull: true,
+      comment: 'Previous values (for UPDATE operations)'
+    },
+    new_values: {
+      type: Sequelize.JSON,
+      allowNull: true,
+      comment: 'New values (for CREATE and UPDATE operations)'
+    },
+    ip_address: {
+      type: Sequelize.STRING,
+      allowNull: true,
+      comment: 'IP address of the user'
+    },
+    user_agent: {
+      type: Sequelize.STRING,
+      allowNull: true,
+      comment: 'User agent string from browser/device'
+    },
+    details: {
+      type: Sequelize.TEXT,
+      allowNull: true,
+      comment: 'Additional details about the operation'
+    },
+    created_at: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      allowNull: false
+    }
+  });
+}
+
+export async function down(queryInterface, Sequelize) {
+  // Drop in reverse order to satisfy foreign key constraints
+  await queryInterface.dropTable('SystemLog');
+  await queryInterface.dropTable('Notification');
+  await queryInterface.dropTable('Stream');
+  await queryInterface.dropTable('Sponsor');
+  await queryInterface.dropTable('Post');
+  await queryInterface.dropTable('Registration');
+  await queryInterface.dropTable('TeamMembers');
+  await queryInterface.dropTable('Team');
+  await queryInterface.dropTable('Competition');
+  await queryInterface.dropTable('Country');
+  // Note: ENUM types created by Sequelize will be removed automatically when the table is dropped in MySQL.
+  await queryInterface.dropTable('User');
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SystemLogger.html">SystemLogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#NotificationsBell">NotificationsBell</a></li><li><a href="global.html#acceptInvite">acceptInvite</a></li><li><a href="global.html#apiRequest">apiRequest</a></li><li><a href="global.html#changePassword">changePassword</a></li><li><a href="global.html#createGalleryItem">createGalleryItem</a></li><li><a href="global.html#createNotification">createNotification</a></li><li><a href="global.html#declineInvite">declineInvite</a></li><li><a href="global.html#decodeIfBase64">decodeIfBase64</a></li><li><a href="global.html#deleteGalleryItem">deleteGalleryItem</a></li><li><a href="global.html#deleteNotification">deleteNotification</a></li><li><a href="global.html#down">down</a></li><li><a href="global.html#emitToUser">emitToUser</a></li><li><a href="global.html#forgotPassword">forgotPassword</a></li><li><a href="global.html#getApiOrigin">getApiOrigin</a></li><li><a href="global.html#getFileInfo">getFileInfo</a></li><li><a href="global.html#getIO">getIO</a></li><li><a href="global.html#getNotificationById">getNotificationById</a></li><li><a href="global.html#getNotifications">getNotifications</a></li><li><a href="global.html#getResendClient">getResendClient</a></li><li><a href="global.html#handleUploadErrors">handleUploadErrors</a></li><li><a href="global.html#inviteToTeam">inviteToTeam</a></li><li><a href="global.html#listGallery">listGallery</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#me">me</a></li><li><a href="global.html#normalizeBase">normalizeBase</a></li><li><a href="global.html#parseResponse">parseResponse</a></li><li><a href="global.html#redirectIfAuthenticated">redirectIfAuthenticated</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#requireAdminSession">requireAdminSession</a></li><li><a href="global.html#requireOwnership">requireOwnership</a></li><li><a href="global.html#requireRole">requireRole</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#resolveMediaUrl">resolveMediaUrl</a></li><li><a href="global.html#sendPasswordResetCodeEmail">sendPasswordResetCodeEmail</a></li><li><a href="global.html#setIO">setIO</a></li><li><a href="global.html#up">up</a></li><li><a href="global.html#updateNotification">updateNotification</a></li><li><a href="global.html#uploadMiddleware">uploadMiddleware</a></li><li><a href="global.html#validatePasswordStrength">validatePasswordStrength</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Jan 12 2026 00:44:31 GMT+0100 (hora estándar de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
