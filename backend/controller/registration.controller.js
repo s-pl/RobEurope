@@ -3,6 +3,24 @@ const { Registration, Team, Notification } = db;
 import { Op } from 'sequelize';
 import { Parser as Json2CsvParser } from 'json2csv';
 
+/**
+ * @fileoverview
+ * API handlers for competition registrations.
+ *
+ * Registrations are protected by session auth at the API router level.
+ * Admin actions (approve/reject/export) are further protected via `requireRole('super_admin')`.
+ */
+
+/**
+ * Creates a registration.
+ *
+ * Sets `registration_date` and forces `status = 'pending'`.
+ *
+ * @route POST /api/registrations
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const createRegistration = async (req, res) => {
   try {
     const payload = {
@@ -17,6 +35,18 @@ export const createRegistration = async (req, res) => {
   }
 };
 
+/**
+ * Lists registrations.
+ *
+ * Query params:
+ * - `competition_id`, `team_id`, `status`
+ * - `limit`, `offset`
+ *
+ * @route GET /api/registrations
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const getRegistrations = async (req, res) => {
   try {
     const { competition_id, team_id, status, limit = 50, offset = 0 } = req.query;
@@ -38,6 +68,13 @@ export const getRegistrations = async (req, res) => {
   }
 };
 
+/**
+ * Exports registrations as a CSV.
+ * @route GET /api/registrations/export
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<any>}
+ */
 export const exportRegistrationsCSV = async (req, res) => {
   try {
     const { competition_id, status } = req.query;
@@ -71,6 +108,13 @@ export const exportRegistrationsCSV = async (req, res) => {
   }
 };
 
+/**
+ * Retrieves a registration by id.
+ * @route GET /api/registrations/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const getRegistrationById = async (req, res) => {
   try {
     const item = await Registration.findByPk(req.params.id);
@@ -81,6 +125,13 @@ export const getRegistrationById = async (req, res) => {
   }
 };
 
+/**
+ * Updates a registration by id.
+ * @route PUT /api/registrations/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const updateRegistration = async (req, res) => {
   try {
     const [updated] = await Registration.update(req.body, { where: { id: req.params.id } });
@@ -92,6 +143,13 @@ export const updateRegistration = async (req, res) => {
   }
 };
 
+/**
+ * Deletes a registration by id.
+ * @route DELETE /api/registrations/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const deleteRegistration = async (req, res) => {
   try {
     const deleted = await Registration.destroy({ where: { id: req.params.id } });
@@ -102,7 +160,13 @@ export const deleteRegistration = async (req, res) => {
   }
 };
 
-// Approve registration (admin only)
+/**
+ * Approves a pending registration.
+ * @route POST /api/registrations/:id/approve
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const approveRegistration = async (req, res) => {
   try {
     const id = req.params.id;
@@ -129,7 +193,13 @@ export const approveRegistration = async (req, res) => {
   }
 };
 
-// Reject registration (admin only)
+/**
+ * Rejects a pending registration.
+ * @route POST /api/registrations/:id/reject
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const rejectRegistration = async (req, res) => {
   try {
     const id = req.params.id;

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: backend/models/index.js</title>
+    <title>JSDoc: Source: backend/controller/sponsors.controller.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: backend/models/index.js</h1>
+    <h1 class="page-title">Source: backend/controller/sponsors.controller.js</h1>
 
     
 
@@ -26,48 +26,121 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import fs from 'fs';
-import path from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
-
-import { DataTypes } from 'sequelize';
-import sequelize from '../controller/db.controller.js';
+            <pre class="prettyprint source linenums"><code>import db from '../models/index.js';
+const { Sponsor } = db;
+import { Op } from 'sequelize';
+import { getFileInfo } from '../middleware/upload.middleware.js';
 
 /**
  * @fileoverview
- * Sequelize model registry.
+ * Sponsor API handlers.
  *
- * This module:
- * - Dynamically imports all `*.model.js` files in this folder.
- * - Instantiates each model using the shared Sequelize instance.
- * - Invokes `model.associate(db)` when present.
- *
- * Exported as a single `db` object containing models and the sequelize instance.
+ * Sponsors support optional logo upload (multipart/form-data).
  */
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+/**
+ * Creates a sponsor.
+ * @route POST /api/sponsors
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise&lt;void>}
+ */
+export const createSponsor = async (req, res) => {
+  try {
+    const sponsorData = { ...req.body };
 
-const db = {};
-db.sequelize = sequelize;
-db.DataTypes = DataTypes;
+    // Handle file upload
+    const fileInfo = getFileInfo(req);
+    if (fileInfo) {
+      sponsorData.logo_url = fileInfo.url;
+    }
 
-const files = fs
-  .readdirSync(__dirname)
-  .filter((f) => f.endsWith('.model.js') &amp;&amp; f !== 'index.js');
+    const item = await Sponsor.create(sponsorData);
+    res.status(201).json(item);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-for (const file of files) {
-  const modelPath = path.join(__dirname, file);
-  const modelDef = (await import(pathToFileURL(modelPath).href)).default;
-  const model = await modelDef(sequelize, DataTypes);
-  db[model.name] = model;
-}
+/**
+ * Lists sponsors.
+ * @route GET /api/sponsors
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise&lt;void>}
+ */
+export const getSponsors = async (req, res) => {
+  try {
+    const { q, limit = 50, offset = 0 } = req.query;
+    const where = {};
+    if (q) where.name = { [Op.like]: `%${q}%` };
+    const items = await Sponsor.findAll({ where, limit: Number(limit), offset: Number(offset), order: [['name', 'ASC']] });
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-Object.keys(db).forEach((name) => {
-  if (db[name].associate) db[name].associate(db);
-});
+/**
+ * Retrieves a sponsor by id.
+ * @route GET /api/sponsors/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise&lt;void>}
+ */
+export const getSponsorById = async (req, res) => {
+  try {
+    const item = await Sponsor.findByPk(req.params.id);
+    if (!item) return res.status(404).json({ error: 'Sponsor not found' });
+    res.json(item);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-export default db;</code></pre>
+/**
+ * Updates a sponsor.
+ * @route PUT /api/sponsors/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise&lt;void>}
+ */
+export const updateSponsor = async (req, res) => {
+  try {
+    const updates = { ...req.body };
+
+    // Handle file upload
+    const fileInfo = getFileInfo(req);
+    if (fileInfo) {
+      updates.logo_url = fileInfo.url;
+    }
+
+    const [updated] = await Sponsor.update(updates, { where: { id: req.params.id } });
+    if (!updated) return res.status(404).json({ error: 'Sponsor not found' });
+    const updatedItem = await Sponsor.findByPk(req.params.id);
+    res.json(updatedItem);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Deletes a sponsor.
+ * @route DELETE /api/sponsors/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise&lt;void>}
+ */
+export const deleteSponsor = async (req, res) => {
+  try {
+    const deleted = await Sponsor.destroy({ where: { id: req.params.id } });
+    if (!deleted) return res.status(404).json({ error: 'Sponsor not found' });
+    res.json({ message: 'Sponsor deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+</code></pre>
         </article>
     </section>
 

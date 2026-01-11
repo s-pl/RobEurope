@@ -3,6 +3,20 @@ const { Sponsor } = db;
 import { Op } from 'sequelize';
 import { getFileInfo } from '../middleware/upload.middleware.js';
 
+/**
+ * @fileoverview
+ * Sponsor API handlers.
+ *
+ * Sponsors support optional logo upload (multipart/form-data).
+ */
+
+/**
+ * Creates a sponsor.
+ * @route POST /api/sponsors
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const createSponsor = async (req, res) => {
   try {
     const sponsorData = { ...req.body };
@@ -20,6 +34,13 @@ export const createSponsor = async (req, res) => {
   }
 };
 
+/**
+ * Lists sponsors.
+ * @route GET /api/sponsors
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const getSponsors = async (req, res) => {
   try {
     const { q, limit = 50, offset = 0 } = req.query;
@@ -32,6 +53,13 @@ export const getSponsors = async (req, res) => {
   }
 };
 
+/**
+ * Retrieves a sponsor by id.
+ * @route GET /api/sponsors/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const getSponsorById = async (req, res) => {
   try {
     const item = await Sponsor.findByPk(req.params.id);
@@ -42,6 +70,13 @@ export const getSponsorById = async (req, res) => {
   }
 };
 
+/**
+ * Updates a sponsor.
+ * @route PUT /api/sponsors/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const updateSponsor = async (req, res) => {
   try {
     const updates = { ...req.body };
@@ -61,6 +96,13 @@ export const updateSponsor = async (req, res) => {
   }
 };
 
+/**
+ * Deletes a sponsor.
+ * @route DELETE /api/sponsors/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const deleteSponsor = async (req, res) => {
   try {
     const deleted = await Sponsor.destroy({ where: { id: req.params.id } });

@@ -1,4 +1,32 @@
-import db from '../models/index.js';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: backend/controller/user.controller.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: backend/controller/user.controller.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import db from '../models/index.js';
 const { User, Country } = db;
 
 import bcrypt from 'bcryptjs';
@@ -22,7 +50,7 @@ import { getFileInfo } from '../middleware/upload.middleware.js';
  *
  * @param {Express.Request} req Express request.
  * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
+ * @returns {Promise&lt;void>}
  */
 export const createUser = async (req, res) => {
   try {
@@ -42,7 +70,7 @@ export const createUser = async (req, res) => {
  * Note: This handler is not currently exposed in the API router.
  * @param {Express.Request} req Express request.
  * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
+ * @returns {Promise&lt;void>}
  */
 export const getUsers = async (req, res) => {
   try {
@@ -63,7 +91,7 @@ export const getUsers = async (req, res) => {
  * @route GET /api/users/:id
  * @param {Express.Request} req Express request.
  * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
+ * @returns {Promise&lt;void>}
  */
 export const getUserById = async (req, res) => {
   try {
@@ -84,7 +112,7 @@ export const getUserById = async (req, res) => {
  * @route PUT /api/users/:id
  * @param {Express.Request} req Express request.
  * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
+ * @returns {Promise&lt;void>}
  */
 export const updateUser = async (req, res) => {
   try {
@@ -113,7 +141,7 @@ export const updateUser = async (req, res) => {
  * @route GET /api/users?q=...
  * @param {Express.Request} req Express request.
  * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
+ * @returns {Promise&lt;void>}
  */
 export const searchUsers = async (req, res) => {
   try {
@@ -143,11 +171,11 @@ export const searchUsers = async (req, res) => {
  * @route GET /api/users/me
  * @param {Express.Request} req Express request.
  * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
+ * @returns {Promise&lt;void>}
  */
 export const getSelf = async (req, res) => {
   try {
-    const id = req.user && req.user.id;
+    const id = req.user &amp;&amp; req.user.id;
     if (!id) return res.status(401).json({ error: 'No autorizado' });
     const user = await User.findByPk(id, { attributes: { exclude: ['password_hash'] } });
     if (!user) return res.status(404).json({ error: 'User not found' });
@@ -166,11 +194,11 @@ export const getSelf = async (req, res) => {
  * @route PATCH /api/users/me
  * @param {Express.Request} req Express request.
  * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
+ * @returns {Promise&lt;void>}
  */
 export const updateSelf = async (req, res) => {
   try {
-    const id = req.user && req.user.id;
+    const id = req.user &amp;&amp; req.user.id;
     if (!id) return res.status(401).json({ error: 'No autorizado' });
 
     // Allowed fields to update by user themselves
@@ -214,7 +242,7 @@ export const updateSelf = async (req, res) => {
  * @route DELETE /api/users/me
  * @param {Express.Request} req Express request.
  * @param {Express.Response} res Express response.
- * @returns {Promise<any>}
+ * @returns {Promise&lt;any>}
  */
 export const deleteSelf = async (req, res) => {
   try {
@@ -237,7 +265,7 @@ export const deleteSelf = async (req, res) => {
  * @route DELETE /api/users/:id
  * @param {Express.Request} req Express request.
  * @param {Express.Response} res Express response.
- * @returns {Promise<any>}
+ * @returns {Promise&lt;any>}
  */
 export const deleteUser = async (req, res) => {
   try {
@@ -246,7 +274,7 @@ export const deleteUser = async (req, res) => {
     if (idParam === 'me') return res.status(400).json({ error: "Use /me endpoint to delete your own account" });
 
     const id = Number(idParam);
-    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid user id' });
+    if (!Number.isInteger(id) || id &lt;= 0) return res.status(400).json({ error: 'Invalid user id' });
 
     const user = await User.findByPk(id);
     if (!user) return res.status(404).json({ error: 'User not found' });
@@ -257,3 +285,26 @@ export const deleteUser = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SystemLogger.html">SystemLogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#NotificationsBell">NotificationsBell</a></li><li><a href="global.html#acceptInvite">acceptInvite</a></li><li><a href="global.html#addComment">addComment</a></li><li><a href="global.html#apiRequest">apiRequest</a></li><li><a href="global.html#approveRegistration">approveRegistration</a></li><li><a href="global.html#changePassword">changePassword</a></li><li><a href="global.html#createGalleryItem">createGalleryItem</a></li><li><a href="global.html#createNotification">createNotification</a></li><li><a href="global.html#createPost">createPost</a></li><li><a href="global.html#createRegistration">createRegistration</a></li><li><a href="global.html#createSponsor">createSponsor</a></li><li><a href="global.html#createStream">createStream</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#declineInvite">declineInvite</a></li><li><a href="global.html#decodeIfBase64">decodeIfBase64</a></li><li><a href="global.html#deleteGalleryItem">deleteGalleryItem</a></li><li><a href="global.html#deleteNotification">deleteNotification</a></li><li><a href="global.html#deletePost">deletePost</a></li><li><a href="global.html#deleteRegistration">deleteRegistration</a></li><li><a href="global.html#deleteSelf">deleteSelf</a></li><li><a href="global.html#deleteSponsor">deleteSponsor</a></li><li><a href="global.html#deleteStream">deleteStream</a></li><li><a href="global.html#deleteUser">deleteUser</a></li><li><a href="global.html#down">down</a></li><li><a href="global.html#emitToUser">emitToUser</a></li><li><a href="global.html#exportRegistrationsCSV">exportRegistrationsCSV</a></li><li><a href="global.html#forgotPassword">forgotPassword</a></li><li><a href="global.html#getApiOrigin">getApiOrigin</a></li><li><a href="global.html#getComments">getComments</a></li><li><a href="global.html#getFileInfo">getFileInfo</a></li><li><a href="global.html#getIO">getIO</a></li><li><a href="global.html#getNotificationById">getNotificationById</a></li><li><a href="global.html#getNotifications">getNotifications</a></li><li><a href="global.html#getPostById">getPostById</a></li><li><a href="global.html#getPosts">getPosts</a></li><li><a href="global.html#getRegistrationById">getRegistrationById</a></li><li><a href="global.html#getRegistrations">getRegistrations</a></li><li><a href="global.html#getResendClient">getResendClient</a></li><li><a href="global.html#getSelf">getSelf</a></li><li><a href="global.html#getSponsorById">getSponsorById</a></li><li><a href="global.html#getSponsors">getSponsors</a></li><li><a href="global.html#getStreamById">getStreamById</a></li><li><a href="global.html#getStreams">getStreams</a></li><li><a href="global.html#getUserById">getUserById</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#handleUploadErrors">handleUploadErrors</a></li><li><a href="global.html#inviteToTeam">inviteToTeam</a></li><li><a href="global.html#listGallery">listGallery</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#me">me</a></li><li><a href="global.html#normalizeBase">normalizeBase</a></li><li><a href="global.html#parseResponse">parseResponse</a></li><li><a href="global.html#redirectIfAuthenticated">redirectIfAuthenticated</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#rejectRegistration">rejectRegistration</a></li><li><a href="global.html#requireAdminSession">requireAdminSession</a></li><li><a href="global.html#requireOwnership">requireOwnership</a></li><li><a href="global.html#requireRole">requireRole</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#resolveMediaUrl">resolveMediaUrl</a></li><li><a href="global.html#searchUsers">searchUsers</a></li><li><a href="global.html#sendPasswordResetCodeEmail">sendPasswordResetCodeEmail</a></li><li><a href="global.html#setIO">setIO</a></li><li><a href="global.html#toggleLike">toggleLike</a></li><li><a href="global.html#togglePin">togglePin</a></li><li><a href="global.html#up">up</a></li><li><a href="global.html#updateNotification">updateNotification</a></li><li><a href="global.html#updatePost">updatePost</a></li><li><a href="global.html#updateRegistration">updateRegistration</a></li><li><a href="global.html#updateSelf">updateSelf</a></li><li><a href="global.html#updateSponsor">updateSponsor</a></li><li><a href="global.html#updateStream">updateStream</a></li><li><a href="global.html#updateUser">updateUser</a></li><li><a href="global.html#uploadMiddleware">uploadMiddleware</a></li><li><a href="global.html#validatePasswordStrength">validatePasswordStrength</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Jan 12 2026 00:47:33 GMT+0100 (hora estándar de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
