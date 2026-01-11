@@ -20,6 +20,7 @@ import * as addAttachmentsToTeamMessages from '../migrations/20251130-add-attach
 import * as addIsPublicToRobotFiles from '../migrations/20251130-add-is-public-to-robot-files.js';
 import * as addOauthFieldsToUsers from '../migrations/20251123215620-add-oauth-fields-to-users.js';
 import * as createGalleryTable from '../migrations/20260111-create-gallery-table.js';
+import * as addMetaToNotifications from '../migrations/20260112-add-meta-to-notifications.js';
 async function run() {
   try {
     await sequelize.authenticate();
@@ -153,6 +154,14 @@ async function run() {
       console.log('Updated Notification type ENUM');
     } catch (e) {
       console.log('Skipping updateNotificationTypeEnum:', e.message);
+    }
+
+    // Add meta payload to Notification
+    try {
+      await addMetaToNotifications.up(qi, Sequelize);
+      console.log('Added meta column to Notification');
+    } catch (e) {
+      console.log('Skipping addMetaToNotifications:', e.message);
     }
 
     // Create RobotFiles table

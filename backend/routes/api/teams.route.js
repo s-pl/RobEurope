@@ -1,5 +1,5 @@
 import express from 'express';
-import { createTeam, getTeams, getTeamById, updateTeam, deleteTeam, inviteToTeam, acceptInvite, requestJoinTeam, approveJoinRequest, registerTeamInCompetition, getMyTeam, listJoinRequests, getMembershipStatus, leaveTeam } from '../../controller/teams.controller.js';
+import { createTeam, getTeams, getTeamById, updateTeam, deleteTeam, inviteToTeam, acceptInvite, declineInvite, requestJoinTeam, approveJoinRequest, registerTeamInCompetition, getMyTeam, listJoinRequests, getMembershipStatus, leaveTeam } from '../../controller/teams.controller.js';
 import { getMessages, sendMessage } from '../../controller/team_chat.controller.js';
 import authenticateToken from '../../middleware/auth.middleware.js';
 import { requireOwnership } from '../../middleware/ownership.middleware.js';
@@ -18,6 +18,7 @@ router.delete('/:id', authenticateToken, requireOwnership('Team'), deleteTeam);
 // invitations
 router.post('/:id/invite', authenticateToken, requireOwnership('Team'), inviteToTeam);
 router.post('/invitations/accept', authenticateToken, acceptInvite);
+router.post('/invitations/decline', authenticateToken, declineInvite);
 
 // join requests
 router.post('/:id/requests', authenticateToken, requestJoinTeam);

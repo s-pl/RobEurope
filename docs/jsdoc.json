@@ -1,0 +1,25 @@
+{
+  "source": {
+    "include": ["backend", "frontend/src"],
+    "exclude": [
+      "**/node_modules/**",
+      "**/__tests__/**",
+      "backend/public/**",
+      "backend/logs/**",
+      "backend/uploads/**",
+      "frontend/dist/**"
+    ],
+    "includePattern": ".+\\.(js|jsx|mjs)$"
+  },
+  "plugins": ["plugins/markdown"],
+  "opts": {
+    "encoding": "utf8",
+    "destination": "docs/generated",
+    "recurse": true,
+    "template": "default"
+  },
+  "templates": {
+    "cleverLinks": true,
+    "monospaceLinks": true
+  }
+}
