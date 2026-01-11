@@ -9,7 +9,7 @@ const requireApiBaseUrl = () => {
   const envBase = normalizeBase(import.meta.env.VITE_API_BASE_URL || '');
   if (!envBase) {
     throw new Error(
-      'Falta VITE_API_BASE_URL. Configúralo en frontend/.env (ej: VITE_API_BASE_URL=http://localhost:85/api)'
+      'Falta VITE_API_BASE_URL. Configúralo en frontend/.env (ej: VITE_API_BASE_URL=http://localhost:85 o http://localhost:85/api)'
     );
   }
   return envBase;
