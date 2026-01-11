@@ -112,6 +112,15 @@ const resources = {
       gallery: {
         galleryTitle: "Galería",
         galleryDescription: "Una colección de momentos de nuestro evento de robótica",
+        adminUploadTitle: 'Subir foto a la galería',
+        uploadImage: 'Imagen',
+        uploadTitle: 'Título (opcional)',
+        uploadDescription: 'Descripción (opcional)',
+        uploadCta: 'Subir',
+        uploading: 'Subiendo...',
+        uploadMissingFile: 'Selecciona una imagen',
+        uploadOk: 'Foto subida',
+        loading: 'Cargando...'
       },
       feedback: {
         Title: "Opiniones",
@@ -671,6 +680,15 @@ const resources = {
       gallery: {
         galleryTitle: "Gallery",
         galleryDescription: "A collection of our robotics event moments",
+        adminUploadTitle: 'Upload photo to gallery',
+        uploadImage: 'Image',
+        uploadTitle: 'Title (optional)',
+        uploadDescription: 'Description (optional)',
+        uploadCta: 'Upload',
+        uploading: 'Uploading...',
+        uploadMissingFile: 'Select an image',
+        uploadOk: 'Photo uploaded',
+        loading: 'Loading...'
       },
       feedback: {
         Title: "Feedback",
@@ -1222,6 +1240,15 @@ const resources = {
       gallery: {
         galleryTitle: "Galerie",
         galleryDescription: "Eine Sammlung unserer Roboterveranstaltungsmomente",
+        adminUploadTitle: 'Foto in die Galerie hochladen',
+        uploadImage: 'Bild',
+        uploadTitle: 'Titel (optional)',
+        uploadDescription: 'Beschreibung (optional)',
+        uploadCta: 'Hochladen',
+        uploading: 'Lade hoch...',
+        uploadMissingFile: 'Wähle ein Bild aus',
+        uploadOk: 'Foto hochgeladen',
+        loading: 'Laden...'
       },
       feedback: {
         Title: "Feedback",
