@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: backend/middleware/rateLimit.middleware.js</title>
+    <title>JSDoc: Source: backend/controller/media.controller.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: backend/middleware/rateLimit.middleware.js</h1>
+    <h1 class="page-title">Source: backend/controller/media.controller.js</h1>
 
     
 
@@ -26,59 +26,220 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-const stores = new Map();
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Authenticated media library endpoints.
+ *
+ * Supports listing media (with pagination and optional uploader filter), reading
+ * a single media record, uploading a file to `/uploads`, and deleting media.
+ */
+
+import db from '../models/index.js';
+const { Media, User } = db;
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 /**
- * @fileoverview
- * Lightweight in-memory rate limiter.
- *
- * Note: This is process-local and is not shared across multiple instances.
- * For production horizontal scaling, replace with a shared store (Redis).
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} params
+ * @property {object} query
+ * @property {object} body
+ * @property {object} user
+ * @property {number} user.id
+ * @property {string} [user.role]
+ * @property {any} [file]
  */
 
 /**
- * Creates a simple IP-based rate limiter.
- *
- * @typedef {Object} RateLimitOptions
- * @property {number} [windowMs] Window length in ms.
- * @property {number} [max] Max requests per window.
- *
- * @param {RateLimitOptions} [options]
- * @returns {Express.RequestHandler}
+ * Express response.
+ * @typedef {object} Response
+ * @property {Function} status
+ * @property {Function} json
+ * @property {Function} send
  */
-export default function rateLimit(options = {}) {
-  const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes
-  const max = options.max || 1e100; // (no limit by default)
 
-  return (req, res, next) => {
-    try {
-      const ip = req.ip || req.connection.remoteAddress || 'unknown';
-      const now = Date.now();
-      let entry = stores.get(ip);
-      if (!entry || entry.resetAt &lt;= now) {
-        entry = { count: 1, resetAt: now + windowMs };
-        stores.set(ip, entry);
-      } else {
-        entry.count += 1;
-      }
-
-      res.setHeader('X-RateLimit-Limit', String(max));
-      res.setHeader('X-RateLimit-Remaining', String(Math.max(0, max - entry.count)));
-      res.setHeader('X-RateLimit-Reset', String(Math.floor(entry.resetAt / 1000)));
-
-      if (entry.count > max) {
-        res.status(429).json({ error: 'Too many requests' });
-        return;
-      }
-
-      next();
-    } catch (err) {
-      next();
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(process.cwd(), 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
     }
-  };
-}
-</code></pre>
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|webp|pdf|doc|docx/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+
+    if (mimetype &amp;&amp; extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Invalid file type'));
+    }
+  }
+});
+
+export const getAllMedia = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, uploaded_by } = req.query;
+    const offset = (page - 1) * limit;
+
+    const where = {};
+    if (uploaded_by) where.uploaded_by = uploaded_by;
+
+    const media = await Media.findAndCountAll({
+      where,
+      include: [{
+        model: User,
+        as: 'uploader',
+        attributes: ['id', 'username', 'first_name', 'last_name']
+      }],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['created_at', 'DESC']]
+    });
+
+    res.json({
+      media: media.rows,
+      pagination: {
+        total: media.count,
+        page: parseInt(page),
+        pages: Math.ceil(media.count / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching media:', error);
+    res.status(500).json({ error: 'Failed to fetch media' });
+  }
+};
+
+/**
+ * Get a page of media.
+ *
+ * @route GET /api/media
+ * @param {Request} req
+ * @param {Response} res
+ */
+// (implementation above)
+
+/**
+ * Get a single media record by id.
+ *
+ * @route GET /api/media/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const getMediaById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const media = await Media.findByPk(id, {
+      include: [{
+        model: User,
+        as: 'uploader',
+        attributes: ['id', 'username', 'first_name', 'last_name']
+      }]
+    });
+
+    if (!media) {
+      return res.status(404).json({ error: 'Media not found' });
+    }
+
+    res.json(media);
+  } catch (error) {
+    console.error('Error fetching media:', error);
+    res.status(500).json({ error: 'Failed to fetch media' });
+  }
+};
+
+/**
+ * Upload a media file.
+ *
+ * Uses `multer` to store the file under the server `uploads/` directory and
+ * persists the record in the Media table.
+ *
+ * @route POST /api/media
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const uploadMedia = [
+  upload.single('file'),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      const { originalname, filename, mimetype, size } = req.file;
+      const url = `/uploads/${filename}`;
+
+      const media = await Media.create({
+        filename,
+        original_name: originalname,
+        mime_type: mimetype,
+        size,
+        url,
+        uploaded_by: req.user.id
+      });
+
+      res.status(201).json(media);
+    } catch (error) {
+      console.error('Error uploading media:', error);
+      res.status(500).json({ error: 'Failed to upload media' });
+    }
+  }
+];
+
+/**
+ * Delete a media record and its file on disk.
+ * Allowed for the uploader or a `super_admin`.
+ *
+ * @route DELETE /api/media/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const deleteMedia = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const media = await Media.findByPk(id);
+
+    if (!media) {
+      return res.status(404).json({ error: 'Media not found' });
+    }
+
+    // Check if user owns the media or is admin
+    if (media.uploaded_by !== req.user.id &amp;&amp; req.user.role !== 'super_admin') {
+      return res.status(403).json({ error: 'Not authorized to delete this media' });
+    }
+
+    // Delete file from filesystem
+    const filePath = path.join(process.cwd(), 'uploads', media.filename);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    await media.destroy();
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting media:', error);
+    res.status(500).json({ error: 'Failed to delete media' });
+  }
+};
+
+// Middleware for handling file uploads
+export const uploadMiddleware = upload;</code></pre>
         </article>
     </section>
 

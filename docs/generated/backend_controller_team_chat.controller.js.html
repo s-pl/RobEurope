@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: backend/middleware/rateLimit.middleware.js</title>
+    <title>JSDoc: Source: backend/controller/team_chat.controller.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: backend/middleware/rateLimit.middleware.js</h1>
+    <h1 class="page-title">Source: backend/controller/team_chat.controller.js</h1>
 
     
 
@@ -26,58 +26,200 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-const stores = new Map();
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Team chat endpoints (messages + attachments).
+ *
+ * Provides message history for a team and allows posting messages (text and/or
+ * attachments). Messages are emitted via Socket.IO to the `team_&lt;teamId>` room
+ * and create notifications for other team members.
+ */
+
+import db from '../models/index.js';
+import { getIO } from '../utils/realtime.js';
+import { getFileInfo } from '../middleware/upload.middleware.js';
+
+const { TeamMessage, TeamMembers, User, Notification } = db;
 
 /**
- * @fileoverview
- * Lightweight in-memory rate limiter.
- *
- * Note: This is process-local and is not shared across multiple instances.
- * For production horizontal scaling, replace with a shared store (Redis).
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} params
+ * @property {object} query
+ * @property {object} body
+ * @property {object} user
+ * @property {number} user.id
+ * @property {string} [user.role]
+ * @property {string} [user.first_name]
+ * @property {Array&lt;any>} [files]
  */
 
 /**
- * Creates a simple IP-based rate limiter.
- *
- * @typedef {Object} RateLimitOptions
- * @property {number} [windowMs] Window length in ms.
- * @property {number} [max] Max requests per window.
- *
- * @param {RateLimitOptions} [options]
- * @returns {Express.RequestHandler}
+ * Express response.
+ * @typedef {object} Response
+ * @property {Function} status
+ * @property {Function} json
  */
-export default function rateLimit(options = {}) {
-  const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes
-  const max = options.max || 1e100; // (no limit by default)
 
-  return (req, res, next) => {
+/**
+ * Get message history for a team.
+ *
+ * Requires team membership (unless admin).
+ *
+ * @route GET /api/teams/:teamId/messages
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const getMessages = async (req, res) => {
     try {
-      const ip = req.ip || req.connection.remoteAddress || 'unknown';
-      const now = Date.now();
-      let entry = stores.get(ip);
-      if (!entry || entry.resetAt &lt;= now) {
-        entry = { count: 1, resetAt: now + windowMs };
-        stores.set(ip, entry);
-      } else {
-        entry.count += 1;
-      }
+        const { teamId } = req.params;
+        const { limit = 50, offset = 0 } = req.query;
 
-      res.setHeader('X-RateLimit-Limit', String(max));
-      res.setHeader('X-RateLimit-Remaining', String(Math.max(0, max - entry.count)));
-      res.setHeader('X-RateLimit-Reset', String(Math.floor(entry.resetAt / 1000)));
+        // Check if user is member of the team
+        const isMember = await TeamMembers.findOne({
+            where: { 
+                team_id: Number(teamId), 
+                user_id: req.user.id, 
+                left_at: null 
+            }
+        });
 
-      if (entry.count > max) {
-        res.status(429).json({ error: 'Too many requests' });
-        return;
-      }
+        console.log(`Checking membership for user ${req.user.id} in team ${teamId}: ${!!isMember}`);
 
-      next();
-    } catch (err) {
-      next();
+        if (!isMember &amp;&amp; req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Not a member of this team' });
+        }
+
+        const messages = await TeamMessage.findAll({
+            where: { team_id: teamId },
+            include: [{
+                model: User,
+                attributes: ['id', 'first_name', 'last_name', 'profile_photo_url']
+            }],
+            order: [['created_at', 'DESC']],
+            limit: Number(limit),
+            offset: Number(offset)
+        });
+
+        res.json(messages.reverse()); // Return oldest first for chat history
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
     }
-  };
-}
+};
+
+/**
+ * Send a message to a team.
+ *
+ * Accepts `content` and/or attachments. Attachments may be provided by the route
+ * upload middleware as `req.files` (array). Creates notifications for other team
+ * members and emits the message via Socket.IO.
+ *
+ * @route POST /api/teams/:teamId/messages
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const sendMessage = async (req, res) => {
+    try {
+        const { teamId } = req.params;
+        const { content } = req.body;
+        const userId = req.user.id;
+
+        // Check if user is member
+        const isMember = await TeamMembers.findOne({
+            where: { 
+                team_id: Number(teamId), 
+                user_id: userId, 
+                left_at: null 
+            }
+        });
+
+        if (!isMember &amp;&amp; req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Not a member of this team' });
+        }
+
+        let type = 'text';
+        let fileUrl = null;
+        let attachments = [];
+
+        if (req.files &amp;&amp; req.files.length > 0) {
+            attachments = req.files.map(file => ({
+                url: `/uploads/${file.filename}`,
+                name: file.originalname,
+                type: file.mimetype.startsWith('image/') ? 'image' : 'file',
+                mimetype: file.mimetype
+            }));
+            type = attachments[0].type; // Main type based on first file
+            fileUrl = attachments[0].url; // Backward compatibility
+        } else {
+            const fileInfo = getFileInfo(req);
+            if (fileInfo &amp;&amp; fileInfo.url) {
+                fileUrl = fileInfo.url;
+                type = fileInfo.mimetype.startsWith('image/') ? 'image' : 'file';
+                attachments.push({
+                    url: fileUrl,
+                    name: fileInfo.originalname,
+                    type: type,
+                    mimetype: fileInfo.mimetype
+                });
+            }
+        }
+
+        if (!content &amp;&amp; attachments.length === 0) {
+            return res.status(400).json({ error: 'Message content or file required' });
+        }
+
+        const message = await TeamMessage.create({
+            team_id: teamId,
+            user_id: userId,
+            content,
+            type,
+            file_url: fileUrl,
+            attachments
+        });
+
+        // Fetch full message with user info
+        const fullMessage = await TeamMessage.findByPk(message.id, {
+            include: [{
+                model: User,
+                attributes: ['id', 'first_name', 'last_name', 'profile_photo_url']
+            }]
+        });
+
+        // Emit to socket room
+        const io = getIO();
+        if (io) {
+            io.to(`team_${teamId}`).emit('team_message', fullMessage);
+        }
+
+        // Create notifications for other members
+        const members = await TeamMembers.findAll({
+            where: { team_id: teamId, left_at: null }
+        });
+
+        const notifications = members
+            .filter(m => m.user_id !== userId)
+            .map(m => ({
+                user_id: m.user_id,
+                type: 'team_message',
+                title: 'Nuevo mensaje de equipo',
+                message: `${req.user.first_name}: ${type === 'text' ? (content.substring(0, 30) + (content.length > 30 ? '...' : '')) : 'Archivo adjunto'}`,
+                data: { team_id: teamId, message_id: message.id }
+            }));
+
+        if (notifications.length > 0) {
+            await Notification.bulkCreate(notifications);
+            // Emit notifications
+            notifications.forEach(n => {
+                if (io) io.emit(`notification:${n.user_id}`, n);
+            });
+        }
+
+        res.status(201).json(fullMessage);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+};
 </code></pre>
         </article>
     </section>

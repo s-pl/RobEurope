@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: backend/middleware/rateLimit.middleware.js</title>
+    <title>JSDoc: Source: backend/controller/competitions.controller.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: backend/middleware/rateLimit.middleware.js</h1>
+    <h1 class="page-title">Source: backend/controller/competitions.controller.js</h1>
 
     
 
@@ -26,58 +26,268 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-const stores = new Map();
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Competition CRUD and discovery endpoints.
+ *
+ * Includes listing/searching competitions, reading a competition (with access-based
+ * hiding of sensitive fields), admin-only CRUD, and per-user favorites stored in Redis.
+ */
+
+import db from '../models/index.js';
+const { Competition, Registration, TeamMembers } = db;
+import { Op } from 'sequelize';
+import redisClient from '../utils/redis.js';
+import { getIO } from '../utils/realtime.js';
 
 /**
- * @fileoverview
- * Lightweight in-memory rate limiter.
- *
- * Note: This is process-local and is not shared across multiple instances.
- * For production horizontal scaling, replace with a shared store (Redis).
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} [user]
+ * @property {number} [user.id]
+ * @property {string} [user.role]
+ * @property {object} [session]
+ * @property {object} [session.user]
  */
 
 /**
- * Creates a simple IP-based rate limiter.
- *
- * @typedef {Object} RateLimitOptions
- * @property {number} [windowMs] Window length in ms.
- * @property {number} [max] Max requests per window.
- *
- * @param {RateLimitOptions} [options]
- * @returns {Express.RequestHandler}
+ * Express response.
+ * @typedef {object} Response
+ * @property {Function} status
+ * @property {Function} json
  */
-export default function rateLimit(options = {}) {
-  const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes
-  const max = options.max || 1e100; // (no limit by default)
 
-  return (req, res, next) => {
-    try {
-      const ip = req.ip || req.connection.remoteAddress || 'unknown';
-      const now = Date.now();
-      let entry = stores.get(ip);
-      if (!entry || entry.resetAt &lt;= now) {
-        entry = { count: 1, resetAt: now + windowMs };
-        stores.set(ip, entry);
-      } else {
-        entry.count += 1;
-      }
+const generateSlug = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')     // Replace spaces with -
+    .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+    .replace(/\-\-+/g, '-');  // Replace multiple - with single -
+};
 
-      res.setHeader('X-RateLimit-Limit', String(max));
-      res.setHeader('X-RateLimit-Remaining', String(Math.max(0, max - entry.count)));
-      res.setHeader('X-RateLimit-Reset', String(Math.floor(entry.resetAt / 1000)));
-
-      if (entry.count > max) {
-        res.status(429).json({ error: 'Too many requests' });
-        return;
-      }
-
-      next();
-    } catch (err) {
-      next();
+export const createCompetition = async (req, res) => {
+  try {
+    if (req.body.is_active) {
+      await Competition.update({ is_active: false }, { where: {} });
     }
-  };
-}
+
+    let slug = req.body.slug;
+    if (!slug &amp;&amp; req.body.title) {
+      slug = generateSlug(req.body.title);
+    }
+    
+    if (slug) {
+      // Ensure uniqueness
+      let uniqueSlug = slug;
+      let counter = 1;
+      while (await Competition.findOne({ where: { slug: uniqueSlug } })) {
+        uniqueSlug = `${slug}-${counter}`;
+        counter++;
+      }
+      req.body.slug = uniqueSlug;
+    }
+
+  const comp = await Competition.create(req.body);
+  getIO()?.emit('competition_created', comp);
+  res.status(201).json(comp);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * List competitions with optional filtering.
+ *
+ * @route GET /api/competitions
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const getCompetitions = async (req, res) => {
+  try {
+    const { q, country_id, limit = 50, offset = 0, sort = 'id', order = 'ASC', is_active, start_date_from, start_date_to, withCount } = req.query;
+    const where = {};
+    if (q) where.title = { [Op.like]: `%${q}%` };
+    if (country_id) where.country_id = country_id;
+    if (typeof is_active !== 'undefined') where.is_active = String(is_active) === 'true';
+    if (start_date_from || start_date_to) {
+      where.start_date = {};
+      if (start_date_from) where.start_date[Op.gte] = new Date(start_date_from);
+      if (start_date_to) where.start_date[Op.lte] = new Date(start_date_to);
+    }
+
+    const opts = {
+      where,
+      limit: Number(limit),
+      offset: Number(offset),
+      order: [[sort, String(order).toUpperCase() === 'DESC' ? 'DESC' : 'ASC']]
+    };
+
+    if (String(withCount) === 'true') {
+      const { count, rows } = await Competition.findAndCountAll(opts);
+      return res.json({ items: rows, total: count });
+    }
+
+    const items = await Competition.findAll(opts);
+    return res.json(items);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// --- Favorites (stored in Redis set per user) ---
+const favKey = (userId) => `user:${userId}:favorites:competitions`;
+
+/**
+ * Add a competition to the current user's favorites (Redis set).
+ *
+ * @route POST /api/competitions/:id/favorite
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const addFavoriteCompetition = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'No autorizado' });
+    const compId = String(req.params.id);
+    await redisClient.sAdd(favKey(userId), compId);
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Remove a competition from the current user's favorites (Redis set).
+ *
+ * @route DELETE /api/competitions/:id/favorite
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const removeFavoriteCompetition = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'No autorizado' });
+    const compId = String(req.params.id);
+    await redisClient.sRem(favKey(userId), compId);
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * List the current user's favorite competitions.
+ *
+ * @route GET /api/competitions/favorites/mine
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const listFavoriteCompetitions = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'No autorizado' });
+    const ids = await redisClient.sMembers(favKey(userId));
+    if (!ids || !ids.length) return res.json([]);
+    const items = await Competition.findAll({ where: { id: { [Op.in]: ids.map((s) => Number(s)) } } });
+    return res.json(items);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Get a competition by id.
+ *
+ * If the requesting user is not approved (via an approved team registration),
+ * sensitive fields like `stream_url` are omitted.
+ *
+ * @route GET /api/competitions/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const getCompetitionById = async (req, res) => {
+  try {
+    const item = await Competition.findByPk(req.params.id);
+    if (!item) return res.status(404).json({ error: 'Competition not found' });
+
+    // Check if user is approved for this competition
+    let isApproved = false;
+    const currentUser = req.user || req.session?.user;
+    
+    if (currentUser) {
+      const userTeams = await TeamMembers.findAll({ where: { user_id: currentUser.id, left_at: null } });
+      const teamIds = userTeams.map(tm => tm.team_id);
+      
+      if (teamIds.length > 0) {
+        const registration = await Registration.findOne({
+          where: {
+            competition_id: item.id,
+            team_id: { [Op.in]: teamIds },
+            status: 'approved'
+          }
+        });
+        if (registration) isApproved = true;
+      }
+    }
+
+    const result = item.toJSON();
+    result.is_approved = isApproved;
+
+    // Hide sensitive info if not approved
+    if (!isApproved) {
+      delete result.stream_url;
+    }
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Update a competition (super_admin only).
+ *
+ * When `is_active` is set true, this deactivates any other active competition.
+ * Emits `competition_updated` via Socket.IO.
+ *
+ * @route PUT /api/competitions/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const updateCompetition = async (req, res) => {
+  try {
+    if (req.body.is_active) {
+      await Competition.update({ is_active: false }, { where: { id: { [Op.ne]: req.params.id } } });
+    }
+    const [updated] = await Competition.update(req.body, { where: { id: req.params.id } });
+    if (!updated) return res.status(404).json({ error: 'Competition not found' });
+  const updatedItem = await Competition.findByPk(req.params.id);
+  getIO()?.emit('competition_updated', updatedItem);
+  res.json(updatedItem);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Delete a competition (super_admin only).
+ * Emits `competition_deleted` via Socket.IO.
+ *
+ * @route DELETE /api/competitions/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const deleteCompetition = async (req, res) => {
+  try {
+  const deleted = await Competition.destroy({ where: { id: req.params.id } });
+    if (!deleted) return res.status(404).json({ error: 'Competition not found' });
+  if (deleted) getIO()?.emit('competition_deleted', { id: req.params.id });
+  res.json({ message: 'Competition deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 </code></pre>
         </article>
     </section>

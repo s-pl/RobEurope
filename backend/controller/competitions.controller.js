@@ -24,8 +24,8 @@ import { getIO } from '../utils/realtime.js';
 /**
  * Express response.
  * @typedef {object} Response
- * @property {(status:number)=>Response} status
- * @property {(body:any)=>void} json
+ * @property {Function} status
+ * @property {Function} json
  */
 
 const generateSlug = (text) => {

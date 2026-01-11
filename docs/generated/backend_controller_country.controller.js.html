@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: backend/middleware/rateLimit.middleware.js</title>
+    <title>JSDoc: Source: backend/controller/country.controller.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: backend/middleware/rateLimit.middleware.js</h1>
+    <h1 class="page-title">Source: backend/controller/country.controller.js</h1>
 
     
 
@@ -26,58 +26,120 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-const stores = new Map();
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Country CRUD endpoints.
+ *
+ * Public read endpoints return the country list / details.
+ * Write endpoints are intended to be protected by route middleware (super_admin).
+ */
+
+import db from '../models/index.js';
+const { Country } = db;
 
 /**
- * @fileoverview
- * Lightweight in-memory rate limiter.
- *
- * Note: This is process-local and is not shared across multiple instances.
- * For production horizontal scaling, replace with a shared store (Redis).
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} params
+ * @property {object} query
+ * @property {object} body
  */
 
 /**
- * Creates a simple IP-based rate limiter.
- *
- * @typedef {Object} RateLimitOptions
- * @property {number} [windowMs] Window length in ms.
- * @property {number} [max] Max requests per window.
- *
- * @param {RateLimitOptions} [options]
- * @returns {Express.RequestHandler}
+ * Express response.
+ * @typedef {object} Response
+ * @property {Function} status
+ * @property {Function} json
  */
-export default function rateLimit(options = {}) {
-  const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes
-  const max = options.max || 1e100; // (no limit by default)
 
-  return (req, res, next) => {
-    try {
-      const ip = req.ip || req.connection.remoteAddress || 'unknown';
-      const now = Date.now();
-      let entry = stores.get(ip);
-      if (!entry || entry.resetAt &lt;= now) {
-        entry = { count: 1, resetAt: now + windowMs };
-        stores.set(ip, entry);
-      } else {
-        entry.count += 1;
-      }
+/**
+ * List all countries.
+ *
+ * @route GET /api/country
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const getCountries = async (req, res) => {
+  try {
+    const countries = await Country.findAll({ order: [['name', 'ASC']] });
+    res.json(countries);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
-      res.setHeader('X-RateLimit-Limit', String(max));
-      res.setHeader('X-RateLimit-Remaining', String(Math.max(0, max - entry.count)));
-      res.setHeader('X-RateLimit-Reset', String(Math.floor(entry.resetAt / 1000)));
 
-      if (entry.count > max) {
-        res.status(429).json({ error: 'Too many requests' });
-        return;
-      }
+/**
+ * Get a country by id.
+ *
+ * @route GET /api/country/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const getCountryById = async (req, res) => {
+  try {
+    const country = await Country.findByPk(req.params.id);
+    if (!country) return res.status(404).json({ error: 'Country not found' });
+    res.json(country);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
-      next();
-    } catch (err) {
-      next();
-    }
-  };
-}
+
+/**
+ * Create a new country (super_admin).
+ *
+ * @route POST /api/country
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const createCountry = async (req, res) => {
+  try {
+    const { code, name, flag_emoji } = req.body;
+    const country = await Country.create({ code, name, flag_emoji });
+    res.status(201).json(country);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+/**
+ * Update a country by id (super_admin).
+ *
+ * @route PUT /api/country/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const updateCountry = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [updated] = await Country.update(req.body, { where: { id } });
+    if (!updated) return res.status(404).json({ error: 'Country not found' });
+    const updatedCountry = await Country.findByPk(id);
+    res.json(updatedCountry);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+/**
+ * Delete a country by id (super_admin).
+ *
+ * @route DELETE /api/country/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const deleteCountry = async (req, res) => {
+  try {
+    const deleted = await Country.destroy({ where: { id: req.params.id } });
+    if (!deleted) return res.status(404).json({ error: 'Country not found' });
+    res.json({ message: 'Country deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 </code></pre>
         </article>
     </section>

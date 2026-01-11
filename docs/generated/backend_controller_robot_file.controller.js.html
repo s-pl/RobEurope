@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: backend/middleware/rateLimit.middleware.js</title>
+    <title>JSDoc: Source: backend/controller/robot_file.controller.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: backend/middleware/rateLimit.middleware.js</h1>
+    <h1 class="page-title">Source: backend/controller/robot_file.controller.js</h1>
 
     
 
@@ -26,58 +26,195 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-const stores = new Map();
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Robot file upload/list/delete endpoints.
+ *
+ * Robot files are uploaded for a team and competition and can be toggled public.
+ * Access checks are enforced for team members (or admins).
+ */
+
+import db from '../models/index.js';
+const { RobotFile, TeamMembers, Registration } = db;
+import { getFileInfo } from '../middleware/upload.middleware.js';
 
 /**
- * @fileoverview
- * Lightweight in-memory rate limiter.
- *
- * Note: This is process-local and is not shared across multiple instances.
- * For production horizontal scaling, replace with a shared store (Redis).
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} params
+ * @property {object} query
+ * @property {object} body
+ * @property {object} user
+ * @property {number} user.id
+ * @property {string} [user.role]
  */
 
 /**
- * Creates a simple IP-based rate limiter.
- *
- * @typedef {Object} RateLimitOptions
- * @property {number} [windowMs] Window length in ms.
- * @property {number} [max] Max requests per window.
- *
- * @param {RateLimitOptions} [options]
- * @returns {Express.RequestHandler}
+ * Express response.
+ * @typedef {object} Response
+ * @property {Function} status
+ * @property {Function} json
  */
-export default function rateLimit(options = {}) {
-  const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes
-  const max = options.max || 1e100; // (no limit by default)
 
-  return (req, res, next) => {
+/**
+ * Upload a robot file.
+ *
+ * Requires membership in the given team (unless admin). The file is provided by
+ * route-level upload middleware and inspected via `getFileInfo`.
+ *
+ * @route POST /api/robot_file
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const uploadRobotFile = async (req, res) => {
     try {
-      const ip = req.ip || req.connection.remoteAddress || 'unknown';
-      const now = Date.now();
-      let entry = stores.get(ip);
-      if (!entry || entry.resetAt &lt;= now) {
-        entry = { count: 1, resetAt: now + windowMs };
-        stores.set(ip, entry);
-      } else {
-        entry.count += 1;
-      }
+        const { team_id, competition_id, description } = req.body;
+        const fileInfo = getFileInfo(req);
 
-      res.setHeader('X-RateLimit-Limit', String(max));
-      res.setHeader('X-RateLimit-Remaining', String(Math.max(0, max - entry.count)));
-      res.setHeader('X-RateLimit-Reset', String(Math.floor(entry.resetAt / 1000)));
+        if (!fileInfo) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
 
-      if (entry.count > max) {
-        res.status(429).json({ error: 'Too many requests' });
-        return;
-      }
+        // Check permissions
+        const membership = await TeamMembers.findOne({
+            where: {
+                team_id,
+                user_id: req.user.id,
+                left_at: null
+            }
+        });
 
-      next();
+        if (!membership &amp;&amp; req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Not a member of this team' });
+        }
+
+        const newFile = await RobotFile.create({
+            team_id,
+            competition_id,
+            file_url: fileInfo.url,
+            file_name: fileInfo.originalname,
+            file_type: fileInfo.mimetype,
+            description,
+            uploaded_by: req.user.id
+        });
+
+        res.status(201).json(newFile);
     } catch (err) {
-      next();
+        res.status(500).json({ error: err.message });
     }
-  };
-}
+};
+
+/**
+ * List robot files.
+ *
+ * - When `competition_id` is provided without `team_id`, returns public files for that competition.
+ * - When both are provided, returns files for that team+competition.
+ *
+ * @route GET /api/robot_file
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const getRobotFiles = async (req, res) => {
+    try {
+        const { team_id, competition_id } = req.query;
+        
+       
+        if (competition_id &amp;&amp; !team_id) {
+            const files = await RobotFile.findAll({
+                where: { 
+                    competition_id,
+                    is_public: true
+                },
+                include: [
+                    { model: db.User, as: 'uploader', attributes: ['username'] },
+                    { model: db.Team, attributes: ['name', 'id'] }
+                ],
+                order: [['created_at', 'DESC']]
+            });
+            return res.json(files);
+        }
+
+   
+        if (!team_id || !competition_id) {
+            return res.status(400).json({ error: 'team_id and competition_id are required' });
+        }
+
+        const files = await RobotFile.findAll({
+            where: { team_id, competition_id },
+            include: [{ model: db.User, as: 'uploader', attributes: ['username'] }],
+            order: [['created_at', 'DESC']]
+        });
+
+        res.json(files);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+/**
+ * Delete a robot file.
+ * Requires team membership or admin.
+ *
+ * @route DELETE /api/robot_file/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const deleteRobotFile = async (req, res) => {
+    try {
+        const file = await RobotFile.findByPk(req.params.id);
+        if (!file) return res.status(404).json({ error: 'File not found' });
+
+        // Check permissions
+        if (req.user.role !== 'admin') {
+             const membership = await TeamMembers.findOne({
+                where: {
+                    team_id: file.team_id,
+                    user_id: req.user.id,
+                    left_at: null
+                }
+            });
+            if (!membership) return res.status(403).json({ error: 'Permission denied' });
+        }
+
+        await file.destroy();
+        res.json({ message: 'File deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+/**
+ * Toggle a robot file's public visibility.
+ * Requires team membership or admin.
+ *
+ * @route PUT /api/robot_file/:id/visibility
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const toggleFileVisibility = async (req, res) => {
+    try {
+        const file = await RobotFile.findByPk(req.params.id);
+        if (!file) return res.status(404).json({ error: 'File not found' });
+
+        // Check permissions (Admin or Team Member)
+        if (req.user.role !== 'admin') {
+             const membership = await TeamMembers.findOne({
+                where: {
+                    team_id: file.team_id,
+                    user_id: req.user.id,
+                    left_at: null
+                }
+            });
+            if (!membership) return res.status(403).json({ error: 'Permission denied' });
+        }
+
+        file.is_public = !file.is_public;
+        await file.save();
+
+        res.json(file);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 </code></pre>
         </article>
     </section>

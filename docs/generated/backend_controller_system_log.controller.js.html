@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: backend/middleware/rateLimit.middleware.js</title>
+    <title>JSDoc: Source: backend/controller/system_log.controller.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: backend/middleware/rateLimit.middleware.js</h1>
+    <h1 class="page-title">Source: backend/controller/system_log.controller.js</h1>
 
     
 
@@ -26,59 +26,274 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-const stores = new Map();
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview System log querying and stats endpoints.
+ *
+ * These endpoints are intended to be protected by route-level middleware
+ * (authentication + `super_admin`).
+ */
+
+import db from '../models/index.js';
+const { SystemLog, User } = db;
+import { Op } from 'sequelize';
+import { Sequelize } from 'sequelize';
 
 /**
- * @fileoverview
- * Lightweight in-memory rate limiter.
- *
- * Note: This is process-local and is not shared across multiple instances.
- * For production horizontal scaling, replace with a shared store (Redis).
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} params
+ * @property {object} query
  */
 
 /**
- * Creates a simple IP-based rate limiter.
- *
- * @typedef {Object} RateLimitOptions
- * @property {number} [windowMs] Window length in ms.
- * @property {number} [max] Max requests per window.
- *
- * @param {RateLimitOptions} [options]
- * @returns {Express.RequestHandler}
+ * Express response.
+ * @typedef {object} Response
+ * @property {Function} status
+ * @property {Function} json
  */
-export default function rateLimit(options = {}) {
-  const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes
-  const max = options.max || 1e100; // (no limit by default)
 
-  return (req, res, next) => {
-    try {
-      const ip = req.ip || req.connection.remoteAddress || 'unknown';
-      const now = Date.now();
-      let entry = stores.get(ip);
-      if (!entry || entry.resetAt &lt;= now) {
-        entry = { count: 1, resetAt: now + windowMs };
-        stores.set(ip, entry);
-      } else {
-        entry.count += 1;
-      }
+/**
+ * Get system logs with filtering and pagination.
+ *
+ * Supports filters: `user_id`, `action`, `entity_type`, `entity_id`, `date_from`, `date_to`.
+ *
+ * @route GET /api/system_log
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const getSystemLogs = async (req, res) => {
+  try {
+    const {
+      user_id,
+      action,
+      entity_type,
+      entity_id,
+      date_from,
+      date_to,
+      limit = 50,
+      offset = 0,
+      sort = 'created_at',
+      order = 'DESC'
+    } = req.query;
 
-      res.setHeader('X-RateLimit-Limit', String(max));
-      res.setHeader('X-RateLimit-Remaining', String(Math.max(0, max - entry.count)));
-      res.setHeader('X-RateLimit-Reset', String(Math.floor(entry.resetAt / 1000)));
+    const where = {};
 
-      if (entry.count > max) {
-        res.status(429).json({ error: 'Too many requests' });
-        return;
-      }
+    // Apply filters
+    if (user_id) where.user_id = user_id;
+    if (action) where.action = action;
+    if (entity_type) where.entity_type = entity_type;
+    if (entity_id) where.entity_id = entity_id;
 
-      next();
-    } catch (err) {
-      next();
+    // Date range filter
+    if (date_from || date_to) {
+      where.created_at = {};
+      if (date_from) where.created_at[Op.gte] = new Date(date_from);
+      if (date_to) where.created_at[Op.lte] = new Date(date_to);
     }
-  };
-}
-</code></pre>
+
+    const logs = await SystemLog.findAll({
+      where,
+      limit: Number(limit),
+      offset: Number(offset),
+      order: [[sort, order.toUpperCase()]],
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'first_name', 'last_name', 'username', 'email', 'role']
+        }
+      ]
+    });
+
+    // Get total count for pagination
+    const total = await SystemLog.count({ where });
+
+    res.json({
+      logs,
+      pagination: {
+        total,
+        limit: Number(limit),
+        offset: Number(offset),
+        hasMore: (Number(offset) + logs.length) &lt; total
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Get a single system log entry by id.
+ *
+ * @route GET /api/system_log/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const getSystemLogById = async (req, res) => {
+  try {
+    const log = await SystemLog.findByPk(req.params.id, {
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'first_name', 'last_name', 'username', 'email', 'role']
+        }
+      ]
+    });
+
+    if (!log) return res.status(404).json({ error: 'System log not found' });
+    res.json(log);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Get aggregated system log statistics.
+ *
+ * Returns action counts, entity-type counts, daily counts, and top users.
+ *
+ * @route GET /api/system_log/stats
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const getSystemStats = async (req, res) => {
+  try {
+    const { date_from, date_to } = req.query;
+
+    // Build date filter
+    const dateWhere = {};
+    if (date_from || date_to) {
+      dateWhere.created_at = {};
+      if (date_from) dateWhere.created_at[Op.gte] = new Date(date_from);
+      if (date_to) dateWhere.created_at[Op.lte] = new Date(date_to);
+    }
+
+    // Get action counts
+    const actionStats = await SystemLog.findAll({
+      attributes: [
+        'action',
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
+      ],
+      where: dateWhere,
+      group: ['action'],
+      raw: true
+    });
+
+    // Get entity type counts
+    const entityStats = await SystemLog.findAll({
+      attributes: [
+        'entity_type',
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
+      ],
+      where: dateWhere,
+      group: ['entity_type'],
+      raw: true
+    });
+
+    // Get daily activity for the last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const dailyStats = await SystemLog.findAll({
+      attributes: [
+        [Sequelize.literal('DATE(created_at)'), 'date'],
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
+      ],
+      where: {
+        created_at: {
+          [Op.gte]: thirtyDaysAgo
+        },
+        ...dateWhere
+      },
+      group: [Sequelize.literal('DATE(created_at)')],
+      order: [[Sequelize.literal('DATE(created_at)'), 'ASC']],
+      raw: true
+    });
+
+    // Get top active users
+    const userWhere = {
+      user_id: { [Op.ne]: null }
+    };
+    if (dateWhere.created_at) {
+      userWhere.created_at = dateWhere.created_at;
+    }
+
+    const userStatsRaw = await SystemLog.findAll({
+      attributes: [
+        'user_id',
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
+      ],
+      where: userWhere,
+      group: ['user_id'],
+      order: [[Sequelize.literal('COUNT(id)'), 'DESC']],
+      limit: 10,
+      raw: true
+    });
+
+    // Get user details for the top users
+    const userIds = userStatsRaw.map(stat => stat.user_id);
+    const users = await User.findAll({
+      where: { id: userIds },
+      attributes: ['id', 'first_name', 'last_name', 'username', 'email']
+    });
+
+    // Combine the stats with user info
+    const userStats = userStatsRaw.map(stat => {
+      const user = users.find(u => u.id === stat.user_id);
+      return {
+        ...stat,
+        user: user ? {
+          id: user.id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          username: user.username,
+          email: user.email
+        } : null
+      };
+    });
+
+    res.json({
+      actionStats,
+      entityStats,
+      dailyStats,
+      userStats
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Delete system logs older than N days.
+ *
+ * @route DELETE /api/system_log/cleanup
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const deleteOldLogs = async (req, res) => {
+  try {
+    const { days_old = 90 } = req.query;
+
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - Number(days_old));
+
+    const deletedCount = await SystemLog.destroy({
+      where: {
+        created_at: {
+          [Op.lt]: cutoffDate
+        }
+      }
+    });
+
+    res.json({
+      message: `Deleted ${deletedCount} old system logs`,
+      deletedCount
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};</code></pre>
         </article>
     </section>
 

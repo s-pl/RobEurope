@@ -54,6 +54,102 @@
 
 <header>
     
+        <h2>backend/controller/admin.controller.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Admin dashboard controllers.</p>
+<p>This file contains both server-rendered admin pages and JSON API endpoints
+used by the admin dashboard (charts/stats). API routes are protected by
+authentication and <code>super_admin</code> role at the router level.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_admin.controller.js.html">backend/controller/admin.controller.js</a>, <a href="backend_controller_admin.controller.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
         <h2>backend/controller/auth.controller.js</h2>
         
     
@@ -101,6 +197,196 @@ These handlers set/clear <code>req.session.user</code>.</p></div>
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_auth.controller.js.html">backend/controller/auth.controller.js</a>, <a href="backend_controller_auth.controller.js.html#line10">line 10</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>backend/controller/competitions.controller.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Competition CRUD and discovery endpoints.</p>
+<p>Includes listing/searching competitions, reading a competition (with access-based
+hiding of sensitive fields), admin-only CRUD, and per-user favorites stored in Redis.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_competitions.controller.js.html">backend/controller/competitions.controller.js</a>, <a href="backend_controller_competitions.controller.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>backend/controller/country.controller.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Country CRUD endpoints.</p>
+<p>Public read endpoints return the country list / details.
+Write endpoints are intended to be protected by route middleware (super_admin).</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_country.controller.js.html">backend/controller/country.controller.js</a>, <a href="backend_controller_country.controller.js.html#line1">line 1</a>
     </li></ul></dd>
     
 
@@ -197,6 +483,101 @@ models explicitly define <code>created_at</code>/<code>updated_at</code> fields.
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_db.controller.js.html">backend/controller/db.controller.js</a>, <a href="backend_controller_db.controller.js.html#line10">line 10</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>backend/controller/media.controller.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Authenticated media library endpoints.</p>
+<p>Supports listing media (with pagination and optional uploader filter), reading
+a single media record, uploading a file to <code>/uploads</code>, and deleting media.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_media.controller.js.html">backend/controller/media.controller.js</a>, <a href="backend_controller_media.controller.js.html#line1">line 1</a>
     </li></ul></dd>
     
 
@@ -442,6 +823,101 @@ models explicitly define <code>created_at</code>/<code>updated_at</code> fields.
 
 <header>
     
+        <h2>backend/controller/push.controller.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Web Push subscription and test endpoints.</p>
+<p>Exposes the VAPID public key and authenticated endpoints to subscribe/unsubscribe
+push subscriptions, plus a test-send helper.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_push.controller.js.html">backend/controller/push.controller.js</a>, <a href="backend_controller_push.controller.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
         <h2>backend/controller/registration.controller.js</h2>
         
     
@@ -489,6 +965,101 @@ Admin actions (approve/reject/export) are further protected via <code>requireRol
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_registration.controller.js.html">backend/controller/registration.controller.js</a>, <a href="backend_controller_registration.controller.js.html#line6">line 6</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>backend/controller/robot_file.controller.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Robot file upload/list/delete endpoints.</p>
+<p>Robot files are uploaded for a team and competition and can be toggled public.
+Access checks are enforced for team members (or admins).</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_robot_file.controller.js.html">backend/controller/robot_file.controller.js</a>, <a href="backend_controller_robot_file.controller.js.html#line1">line 1</a>
     </li></ul></dd>
     
 
@@ -683,6 +1254,387 @@ Access rules:</p>
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_stream.controller.js.html">backend/controller/stream.controller.js</a>, <a href="backend_controller_stream.controller.js.html#line5">line 5</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>backend/controller/system_log.controller.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>System log querying and stats endpoints.</p>
+<p>These endpoints are intended to be protected by route-level middleware
+(authentication + <code>super_admin</code>).</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_system_log.controller.js.html">backend/controller/system_log.controller.js</a>, <a href="backend_controller_system_log.controller.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>backend/controller/team_chat.controller.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Team chat endpoints (messages + attachments).</p>
+<p>Provides message history for a team and allows posting messages (text and/or
+attachments). Messages are emitted via Socket.IO to the <code>team_&lt;teamId&gt;</code> room
+and create notifications for other team members.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_team_chat.controller.js.html">backend/controller/team_chat.controller.js</a>, <a href="backend_controller_team_chat.controller.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>backend/controller/team_log.controller.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Team log endpoints.</p>
+<p>Team logs are internal notes/entries associated with a team and competition.
+Only team members (or admins) can create/read/delete entries.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_team_log.controller.js.html">backend/controller/team_log.controller.js</a>, <a href="backend_controller_team_log.controller.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>backend/controller/team_members.controller.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Team membership CRUD endpoints.</p>
+<p>Supports creating, listing, reading, updating, and deleting team membership records.
+Routes apply authentication for mutating endpoints.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_team_members.controller.js.html">backend/controller/team_members.controller.js</a>, <a href="backend_controller_team_members.controller.js.html#line1">line 1</a>
     </li></ul></dd>
     
 
@@ -2340,13 +3292,13 @@ The application uses cookie-based sessions, so requests are sent with <code>cred
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SystemLogger.html">SystemLogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#NotificationsBell">NotificationsBell</a></li><li><a href="global.html#acceptInvite">acceptInvite</a></li><li><a href="global.html#addComment">addComment</a></li><li><a href="global.html#apiRequest">apiRequest</a></li><li><a href="global.html#approveRegistration">approveRegistration</a></li><li><a href="global.html#changePassword">changePassword</a></li><li><a href="global.html#createGalleryItem">createGalleryItem</a></li><li><a href="global.html#createNotification">createNotification</a></li><li><a href="global.html#createPost">createPost</a></li><li><a href="global.html#createRegistration">createRegistration</a></li><li><a href="global.html#createSponsor">createSponsor</a></li><li><a href="global.html#createStream">createStream</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#declineInvite">declineInvite</a></li><li><a href="global.html#decodeIfBase64">decodeIfBase64</a></li><li><a href="global.html#deleteGalleryItem">deleteGalleryItem</a></li><li><a href="global.html#deleteNotification">deleteNotification</a></li><li><a href="global.html#deletePost">deletePost</a></li><li><a href="global.html#deleteRegistration">deleteRegistration</a></li><li><a href="global.html#deleteSelf">deleteSelf</a></li><li><a href="global.html#deleteSponsor">deleteSponsor</a></li><li><a href="global.html#deleteStream">deleteStream</a></li><li><a href="global.html#deleteUser">deleteUser</a></li><li><a href="global.html#down">down</a></li><li><a href="global.html#emitToUser">emitToUser</a></li><li><a href="global.html#exportRegistrationsCSV">exportRegistrationsCSV</a></li><li><a href="global.html#forgotPassword">forgotPassword</a></li><li><a href="global.html#getApiOrigin">getApiOrigin</a></li><li><a href="global.html#getComments">getComments</a></li><li><a href="global.html#getFileInfo">getFileInfo</a></li><li><a href="global.html#getIO">getIO</a></li><li><a href="global.html#getNotificationById">getNotificationById</a></li><li><a href="global.html#getNotifications">getNotifications</a></li><li><a href="global.html#getPostById">getPostById</a></li><li><a href="global.html#getPosts">getPosts</a></li><li><a href="global.html#getRegistrationById">getRegistrationById</a></li><li><a href="global.html#getRegistrations">getRegistrations</a></li><li><a href="global.html#getResendClient">getResendClient</a></li><li><a href="global.html#getSelf">getSelf</a></li><li><a href="global.html#getSponsorById">getSponsorById</a></li><li><a href="global.html#getSponsors">getSponsors</a></li><li><a href="global.html#getStreamById">getStreamById</a></li><li><a href="global.html#getStreams">getStreams</a></li><li><a href="global.html#getUserById">getUserById</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#handleUploadErrors">handleUploadErrors</a></li><li><a href="global.html#inviteToTeam">inviteToTeam</a></li><li><a href="global.html#listGallery">listGallery</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#me">me</a></li><li><a href="global.html#normalizeBase">normalizeBase</a></li><li><a href="global.html#parseResponse">parseResponse</a></li><li><a href="global.html#redirectIfAuthenticated">redirectIfAuthenticated</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#rejectRegistration">rejectRegistration</a></li><li><a href="global.html#requireAdminSession">requireAdminSession</a></li><li><a href="global.html#requireOwnership">requireOwnership</a></li><li><a href="global.html#requireRole">requireRole</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#resolveMediaUrl">resolveMediaUrl</a></li><li><a href="global.html#searchUsers">searchUsers</a></li><li><a href="global.html#sendPasswordResetCodeEmail">sendPasswordResetCodeEmail</a></li><li><a href="global.html#setIO">setIO</a></li><li><a href="global.html#toggleLike">toggleLike</a></li><li><a href="global.html#togglePin">togglePin</a></li><li><a href="global.html#up">up</a></li><li><a href="global.html#updateNotification">updateNotification</a></li><li><a href="global.html#updatePost">updatePost</a></li><li><a href="global.html#updateRegistration">updateRegistration</a></li><li><a href="global.html#updateSelf">updateSelf</a></li><li><a href="global.html#updateSponsor">updateSponsor</a></li><li><a href="global.html#updateStream">updateStream</a></li><li><a href="global.html#updateUser">updateUser</a></li><li><a href="global.html#uploadMiddleware">uploadMiddleware</a></li><li><a href="global.html#validatePasswordStrength">validatePasswordStrength</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SystemLogger.html">SystemLogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#NotificationsBell">NotificationsBell</a></li><li><a href="global.html#acceptInvite">acceptInvite</a></li><li><a href="global.html#addComment">addComment</a></li><li><a href="global.html#addFavoriteCompetition">addFavoriteCompetition</a></li><li><a href="global.html#apiRequest">apiRequest</a></li><li><a href="global.html#approveRegistration">approveRegistration</a></li><li><a href="global.html#changePassword">changePassword</a></li><li><a href="global.html#createCountry">createCountry</a></li><li><a href="global.html#createGalleryItem">createGalleryItem</a></li><li><a href="global.html#createLogEntry">createLogEntry</a></li><li><a href="global.html#createNotification">createNotification</a></li><li><a href="global.html#createPost">createPost</a></li><li><a href="global.html#createRegistration">createRegistration</a></li><li><a href="global.html#createSponsor">createSponsor</a></li><li><a href="global.html#createStream">createStream</a></li><li><a href="global.html#createTeamMember">createTeamMember</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#declineInvite">declineInvite</a></li><li><a href="global.html#decodeIfBase64">decodeIfBase64</a></li><li><a href="global.html#deleteCompetition">deleteCompetition</a></li><li><a href="global.html#deleteCountry">deleteCountry</a></li><li><a href="global.html#deleteGalleryItem">deleteGalleryItem</a></li><li><a href="global.html#deleteLogEntry">deleteLogEntry</a></li><li><a href="global.html#deleteMedia">deleteMedia</a></li><li><a href="global.html#deleteNotification">deleteNotification</a></li><li><a href="global.html#deleteOldLogs">deleteOldLogs</a></li><li><a href="global.html#deletePost">deletePost</a></li><li><a href="global.html#deleteRegistration">deleteRegistration</a></li><li><a href="global.html#deleteRobotFile">deleteRobotFile</a></li><li><a href="global.html#deleteSelf">deleteSelf</a></li><li><a href="global.html#deleteSponsor">deleteSponsor</a></li><li><a href="global.html#deleteStream">deleteStream</a></li><li><a href="global.html#deleteTeamMember">deleteTeamMember</a></li><li><a href="global.html#deleteUser">deleteUser</a></li><li><a href="global.html#down">down</a></li><li><a href="global.html#emitToUser">emitToUser</a></li><li><a href="global.html#exportRegistrationsCSV">exportRegistrationsCSV</a></li><li><a href="global.html#forgotPassword">forgotPassword</a></li><li><a href="global.html#getApiOrigin">getApiOrigin</a></li><li><a href="global.html#getComments">getComments</a></li><li><a href="global.html#getCompetitionById">getCompetitionById</a></li><li><a href="global.html#getCompetitions">getCompetitions</a></li><li><a href="global.html#getCountries">getCountries</a></li><li><a href="global.html#getCountryById">getCountryById</a></li><li><a href="global.html#getFileInfo">getFileInfo</a></li><li><a href="global.html#getIO">getIO</a></li><li><a href="global.html#getMediaById">getMediaById</a></li><li><a href="global.html#getMessages">getMessages</a></li><li><a href="global.html#getNotificationById">getNotificationById</a></li><li><a href="global.html#getNotifications">getNotifications</a></li><li><a href="global.html#getPostById">getPostById</a></li><li><a href="global.html#getPosts">getPosts</a></li><li><a href="global.html#getRegistrationById">getRegistrationById</a></li><li><a href="global.html#getRegistrationStats">getRegistrationStats</a></li><li><a href="global.html#getRegistrations">getRegistrations</a></li><li><a href="global.html#getResendClient">getResendClient</a></li><li><a href="global.html#getRobotFiles">getRobotFiles</a></li><li><a href="global.html#getSelf">getSelf</a></li><li><a href="global.html#getSponsorById">getSponsorById</a></li><li><a href="global.html#getSponsors">getSponsors</a></li><li><a href="global.html#getStreamById">getStreamById</a></li><li><a href="global.html#getStreams">getStreams</a></li><li><a href="global.html#getSystemLogById">getSystemLogById</a></li><li><a href="global.html#getSystemLogs">getSystemLogs</a></li><li><a href="global.html#getSystemStats">getSystemStats</a></li><li><a href="global.html#getTeamLogs">getTeamLogs</a></li><li><a href="global.html#getTeamMemberById">getTeamMemberById</a></li><li><a href="global.html#getTeamMembers">getTeamMembers</a></li><li><a href="global.html#getUserById">getUserById</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#getUsersByRole">getUsersByRole</a></li><li><a href="global.html#getUsersTimeline">getUsersTimeline</a></li><li><a href="global.html#getVapidPublicKey">getVapidPublicKey</a></li><li><a href="global.html#handleUploadErrors">handleUploadErrors</a></li><li><a href="global.html#inviteToTeam">inviteToTeam</a></li><li><a href="global.html#listFavoriteCompetitions">listFavoriteCompetitions</a></li><li><a href="global.html#listGallery">listGallery</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#me">me</a></li><li><a href="global.html#normalizeBase">normalizeBase</a></li><li><a href="global.html#parseResponse">parseResponse</a></li><li><a href="global.html#redirectIfAuthenticated">redirectIfAuthenticated</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#rejectRegistration">rejectRegistration</a></li><li><a href="global.html#removeFavoriteCompetition">removeFavoriteCompetition</a></li><li><a href="global.html#requireAdminSession">requireAdminSession</a></li><li><a href="global.html#requireOwnership">requireOwnership</a></li><li><a href="global.html#requireRole">requireRole</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#resolveMediaUrl">resolveMediaUrl</a></li><li><a href="global.html#searchUsers">searchUsers</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#sendPasswordResetCodeEmail">sendPasswordResetCodeEmail</a></li><li><a href="global.html#sendTestPush">sendTestPush</a></li><li><a href="global.html#setIO">setIO</a></li><li><a href="global.html#subscribePush">subscribePush</a></li><li><a href="global.html#toggleFileVisibility">toggleFileVisibility</a></li><li><a href="global.html#toggleLike">toggleLike</a></li><li><a href="global.html#togglePin">togglePin</a></li><li><a href="global.html#unsubscribePush">unsubscribePush</a></li><li><a href="global.html#up">up</a></li><li><a href="global.html#updateCompetition">updateCompetition</a></li><li><a href="global.html#updateCountry">updateCountry</a></li><li><a href="global.html#updateNotification">updateNotification</a></li><li><a href="global.html#updatePost">updatePost</a></li><li><a href="global.html#updateRegistration">updateRegistration</a></li><li><a href="global.html#updateSelf">updateSelf</a></li><li><a href="global.html#updateSponsor">updateSponsor</a></li><li><a href="global.html#updateStream">updateStream</a></li><li><a href="global.html#updateTeamMember">updateTeamMember</a></li><li><a href="global.html#updateUser">updateUser</a></li><li><a href="global.html#uploadMedia">uploadMedia</a></li><li><a href="global.html#uploadMiddleware">uploadMiddleware</a></li><li><a href="global.html#uploadRobotFile">uploadRobotFile</a></li><li><a href="global.html#validatePasswordStrength">validatePasswordStrength</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Jan 12 2026 00:47:33 GMT+0100 (hora estándar de Europa central)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Jan 12 2026 00:52:34 GMT+0100 (hora estándar de Europa central)
 </footer>
 
 <script> prettyPrint(); </script>

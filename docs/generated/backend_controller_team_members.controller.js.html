@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: backend/middleware/rateLimit.middleware.js</title>
+    <title>JSDoc: Source: backend/controller/team_members.controller.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: backend/middleware/rateLimit.middleware.js</h1>
+    <h1 class="page-title">Source: backend/controller/team_members.controller.js</h1>
 
     
 
@@ -26,58 +26,148 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-const stores = new Map();
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Team membership CRUD endpoints.
+ *
+ * Supports creating, listing, reading, updating, and deleting team membership records.
+ * Routes apply authentication for mutating endpoints.
+ */
+
+import db from '../models/index.js';
+const { TeamMembers, User, Team } = db;
+import { Op } from 'sequelize';
 
 /**
- * @fileoverview
- * Lightweight in-memory rate limiter.
- *
- * Note: This is process-local and is not shared across multiple instances.
- * For production horizontal scaling, replace with a shared store (Redis).
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} params
+ * @property {object} query
+ * @property {object} body
  */
 
 /**
- * Creates a simple IP-based rate limiter.
- *
- * @typedef {Object} RateLimitOptions
- * @property {number} [windowMs] Window length in ms.
- * @property {number} [max] Max requests per window.
- *
- * @param {RateLimitOptions} [options]
- * @returns {Express.RequestHandler}
+ * Express response.
+ * @typedef {object} Response
+ * @property {Function} status
+ * @property {Function} json
  */
-export default function rateLimit(options = {}) {
-  const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes
-  const max = options.max || 1e100; // (no limit by default)
 
-  return (req, res, next) => {
-    try {
-      const ip = req.ip || req.connection.remoteAddress || 'unknown';
-      const now = Date.now();
-      let entry = stores.get(ip);
-      if (!entry || entry.resetAt &lt;= now) {
-        entry = { count: 1, resetAt: now + windowMs };
-        stores.set(ip, entry);
-      } else {
-        entry.count += 1;
-      }
+/**
+ * Create a team member record.
+ *
+ * @route POST /api/team_members
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const createTeamMember = async (req, res) => {
+  try {
+    const item = await TeamMembers.create(req.body);
+    res.status(201).json(item);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-      res.setHeader('X-RateLimit-Limit', String(max));
-      res.setHeader('X-RateLimit-Remaining', String(Math.max(0, max - entry.count)));
-      res.setHeader('X-RateLimit-Reset', String(Math.floor(entry.resetAt / 1000)));
+/**
+ * List team members.
+ *
+ * Optional query filters: `team_id`, `user_id`.
+ *
+ * @route GET /api/team_members
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const getTeamMembers = async (req, res) => {
+  try {
+    const { team_id, user_id, limit = 50, offset = 0 } = req.query;
+    const where = {};
+    if (team_id) where.team_id = team_id;
+    if (user_id) where.user_id = user_id;
 
-      if (entry.count > max) {
-        res.status(429).json({ error: 'Too many requests' });
-        return;
-      }
-
-      next();
-    } catch (err) {
-      next();
+    const items = await TeamMembers.findAll({ 
+      where, 
+      limit: Number(limit), 
+      offset: Number(offset), 
+      order: [['joined_at', 'DESC']],
+      include: [
+        { model: Team, as: 'team', attributes: ['id', 'name', 'logo_url'] }
+      ]
+    });
+    // Enrich with user basic info
+    const userIds = [...new Set(items.map(i => i.user_id))];
+    let usersById = {};
+    if (userIds.length) {
+      const users = await User.findAll({ where: { id: userIds }, attributes: ['id','username','email','first_name','last_name', 'profile_photo_url'] });
+      usersById = Object.fromEntries(users.map(u => [u.id, u]));
     }
-  };
-}
+    const enriched = items.map(i => {
+      const u = usersById[i.user_id];
+      const plain = i.toJSON();
+      return { 
+        ...plain, 
+        user_username: u?.username || null, 
+        user_email: u?.email || null, 
+        user_name: u ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : null,
+        user_photo: u?.profile_photo_url || null
+      };
+    });
+    res.json(enriched);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Get a team member record by id.
+ *
+ * @route GET /api/team_members/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const getTeamMemberById = async (req, res) => {
+  try {
+    const item = await TeamMembers.findByPk(req.params.id);
+    if (!item) return res.status(404).json({ error: 'TeamMember not found' });
+    res.json(item);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Update a team member record by id.
+ *
+ * @route PUT /api/team_members/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const updateTeamMember = async (req, res) => {
+  try {
+    const [updated] = await TeamMembers.update(req.body, { where: { id: req.params.id } });
+    if (!updated) return res.status(404).json({ error: 'TeamMember not found' });
+    const updatedItem = await TeamMembers.findByPk(req.params.id);
+    res.json(updatedItem);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Delete a team member record by id.
+ *
+ * @route DELETE /api/team_members/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const deleteTeamMember = async (req, res) => {
+  try {
+    const deleted = await TeamMembers.destroy({ where: { id: req.params.id } });
+    if (!deleted) return res.status(404).json({ error: 'TeamMember not found' });
+    res.json({ message: 'TeamMember deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 </code></pre>
         </article>
     </section>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: backend/middleware/rateLimit.middleware.js</title>
+    <title>JSDoc: Source: backend/controller/push.controller.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: backend/middleware/rateLimit.middleware.js</h1>
+    <h1 class="page-title">Source: backend/controller/push.controller.js</h1>
 
     
 
@@ -26,58 +26,102 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-const stores = new Map();
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Web Push subscription and test endpoints.
+ *
+ * Exposes the VAPID public key and authenticated endpoints to subscribe/unsubscribe
+ * push subscriptions, plus a test-send helper.
+ */
+
+import { getPublicKey, saveSubscription, removeSubscription, sendPushToUser } from '../utils/push.js';
 
 /**
- * @fileoverview
- * Lightweight in-memory rate limiter.
- *
- * Note: This is process-local and is not shared across multiple instances.
- * For production horizontal scaling, replace with a shared store (Redis).
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} [user]
+ * @property {number} [user.id]
+ * @property {object} body
  */
 
 /**
- * Creates a simple IP-based rate limiter.
- *
- * @typedef {Object} RateLimitOptions
- * @property {number} [windowMs] Window length in ms.
- * @property {number} [max] Max requests per window.
- *
- * @param {RateLimitOptions} [options]
- * @returns {Express.RequestHandler}
+ * Express response.
+ * @typedef {object} Response
+ * @property {Function} status
+ * @property {Function} json
  */
-export default function rateLimit(options = {}) {
-  const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes
-  const max = options.max || 1e100; // (no limit by default)
 
-  return (req, res, next) => {
-    try {
-      const ip = req.ip || req.connection.remoteAddress || 'unknown';
-      const now = Date.now();
-      let entry = stores.get(ip);
-      if (!entry || entry.resetAt &lt;= now) {
-        entry = { count: 1, resetAt: now + windowMs };
-        stores.set(ip, entry);
-      } else {
-        entry.count += 1;
-      }
+/**
+ * Get the VAPID public key used by the browser to subscribe.
+ *
+ * @route GET /api/push/vapidPublicKey
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const getVapidPublicKey = async (req, res) => {
+  res.json({ publicKey: getPublicKey() });
+};
 
-      res.setHeader('X-RateLimit-Limit', String(max));
-      res.setHeader('X-RateLimit-Remaining', String(Math.max(0, max - entry.count)));
-      res.setHeader('X-RateLimit-Reset', String(Math.floor(entry.resetAt / 1000)));
+/**
+ * Save a push subscription for the authenticated user.
+ *
+ * @route POST /api/push/subscribe
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const subscribePush = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    const subscription = req.body;
+    await saveSubscription(userId, subscription);
+    res.status(201).json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-      if (entry.count > max) {
-        res.status(429).json({ error: 'Too many requests' });
-        return;
-      }
+/**
+ * Remove a push subscription for the authenticated user.
+ *
+ * @route POST /api/push/unsubscribe
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const unsubscribePush = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    const { endpoint } = req.body;
+    if (!endpoint) return res.status(400).json({ error: 'endpoint required' });
+    await removeSubscription(userId, endpoint);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-      next();
-    } catch (err) {
-      next();
-    }
-  };
-}
+/**
+ * Send a test push notification to the authenticated user.
+ *
+ * @route POST /api/push/test
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const sendTestPush = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    const payload = {
+      title: 'Test push',
+      body: 'Esto es una notificación push de prueba',
+      data: { ts: Date.now() }
+    };
+    const result = await sendPushToUser(userId, payload);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 </code></pre>
         </article>
     </section>

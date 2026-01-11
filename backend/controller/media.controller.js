@@ -26,9 +26,9 @@ import fs from 'fs';
 /**
  * Express response.
  * @typedef {object} Response
- * @property {(status:number)=>Response} status
- * @property {(body:any)=>void} json
- * @property {()=>void} send
+ * @property {Function} status
+ * @property {Function} json
+ * @property {Function} send
  */
 
 // Configure multer for file uploads

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: backend/middleware/rateLimit.middleware.js</title>
+    <title>JSDoc: Source: backend/controller/team_log.controller.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: backend/middleware/rateLimit.middleware.js</h1>
+    <h1 class="page-title">Source: backend/controller/team_log.controller.js</h1>
 
     
 
@@ -26,59 +26,133 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>
-const stores = new Map();
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Team log endpoints.
+ *
+ * Team logs are internal notes/entries associated with a team and competition.
+ * Only team members (or admins) can create/read/delete entries.
+ */
+
+import db from '../models/index.js';
+const { TeamLog, TeamMembers } = db;
 
 /**
- * @fileoverview
- * Lightweight in-memory rate limiter.
- *
- * Note: This is process-local and is not shared across multiple instances.
- * For production horizontal scaling, replace with a shared store (Redis).
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} params
+ * @property {object} query
+ * @property {object} body
+ * @property {object} user
+ * @property {number} user.id
+ * @property {string} [user.role]
  */
 
 /**
- * Creates a simple IP-based rate limiter.
- *
- * @typedef {Object} RateLimitOptions
- * @property {number} [windowMs] Window length in ms.
- * @property {number} [max] Max requests per window.
- *
- * @param {RateLimitOptions} [options]
- * @returns {Express.RequestHandler}
+ * Express response.
+ * @typedef {object} Response
+ * @property {Function} status
+ * @property {Function} json
  */
-export default function rateLimit(options = {}) {
-  const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes
-  const max = options.max || 1e100; // (no limit by default)
 
-  return (req, res, next) => {
+/**
+ * Create a team log entry.
+ *
+ * @route POST /api/team_log
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const createLogEntry = async (req, res) => {
     try {
-      const ip = req.ip || req.connection.remoteAddress || 'unknown';
-      const now = Date.now();
-      let entry = stores.get(ip);
-      if (!entry || entry.resetAt &lt;= now) {
-        entry = { count: 1, resetAt: now + windowMs };
-        stores.set(ip, entry);
-      } else {
-        entry.count += 1;
-      }
+        const { team_id, competition_id, content } = req.body;
 
-      res.setHeader('X-RateLimit-Limit', String(max));
-      res.setHeader('X-RateLimit-Remaining', String(Math.max(0, max - entry.count)));
-      res.setHeader('X-RateLimit-Reset', String(Math.floor(entry.resetAt / 1000)));
+        // Check permissions
+        const membership = await TeamMembers.findOne({
+            where: {
+                team_id,
+                user_id: req.user.id,
+                left_at: null
+            }
+        });
 
-      if (entry.count > max) {
-        res.status(429).json({ error: 'Too many requests' });
-        return;
-      }
+        if (!membership &amp;&amp; req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Not a member of this team' });
+        }
 
-      next();
+        const log = await TeamLog.create({
+            team_id,
+            competition_id,
+            content,
+            author_id: req.user.id
+        });
+
+        const logWithAuthor = await TeamLog.findByPk(log.id, {
+             include: [{ model: db.User, as: 'author', attributes: ['username'] }]
+        });
+
+        res.status(201).json(logWithAuthor);
     } catch (err) {
-      next();
+        res.status(500).json({ error: err.message });
     }
-  };
-}
-</code></pre>
+};
+
+/**
+ * Get team log entries for a team and competition.
+ *
+ * @route GET /api/team_log
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const getTeamLogs = async (req, res) => {
+    try {
+        const { team_id, competition_id } = req.query;
+
+        if (!team_id || !competition_id) {
+            return res.status(400).json({ error: 'team_id and competition_id are required' });
+        }
+
+        const logs = await TeamLog.findAll({
+            where: { team_id, competition_id },
+            include: [{ model: db.User, as: 'author', attributes: ['username'] }],
+            order: [['created_at', 'DESC']]
+        });
+
+        res.json(logs);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+/**
+ * Delete a team log entry.
+ *
+ * @route DELETE /api/team_log/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const deleteLogEntry = async (req, res) => {
+    try {
+        const logId = req.params.id;
+        const log = await TeamLog.findByPk(logId);
+        if (!log) {
+            return res.status(404).json({ error: 'Log entry not found' });
+        }
+        // Check permissions
+        const membership = await TeamMembers.findOne({
+            where: {
+                team_id: log.team_id,
+                user_id: req.user.id,
+                left_at: null
+            }
+        });
+        if (!membership &amp;&amp; req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Not a member of this team' });
+        }
+        await log.destroy();
+        res.json({ message: 'Log entry deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};</code></pre>
         </article>
     </section>
 
