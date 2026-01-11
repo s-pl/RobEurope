@@ -7,6 +7,15 @@ import logger from '../utils/logger.js';
 import dbConfig from "../config/db.config.js";
 dotenv.config();
 
+/**
+ * @fileoverview
+ * Sequelize database connection factory.
+ *
+ * This project uses ESM modules and MySQL via `mysql2`.
+ * Tables are configured with `freezeTableName: true` and `timestamps: false` because
+ * models explicitly define `created_at`/`updated_at` fields.
+ */
+
 // Resolve __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -70,4 +79,8 @@ sequelize
     logger.error({ sequelize: true, event: 'authenticate', message: error.message, stack: error.stack, errors: error.errors });
   });
 
+/**
+ * Shared Sequelize instance used throughout the backend.
+ * @type {import('sequelize').Sequelize}
+ */
 export default sequelize;

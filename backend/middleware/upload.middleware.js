@@ -3,7 +3,42 @@ import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * @fileoverview
+ * Multer-based upload middleware.
+ *
+ * Files are stored on disk under the project `uploads/` folder.
+ * The backend typically serves these as static files from `/uploads`.
+ */
 
+/**
+ * @typedef {Object} UploadOptions
+ * @property {'single'|'array'|'fields'} [type='single'] Upload strategy.
+ * @property {string|Array<{name: string, maxCount?: number}>} [fieldName='file'] Field name(s).
+ * @property {number} [maxSize] Maximum file size in bytes.
+ * @property {RegExp} [allowedTypes] Allowed MIME type regex (tested against `file.mimetype`).
+ */
+
+/**
+ * @typedef {Object} UploadedFileInfo
+ * @property {string} filename Stored filename.
+ * @property {string} originalname Original client filename.
+ * @property {string} mimetype MIME type.
+ * @property {number} size File size in bytes.
+ * @property {string} path Server filesystem path.
+ * @property {string} url Public URL path under `/uploads`.
+ */
+
+/**
+ * Creates a multer middleware chain based on the given options.
+ *
+ * Notes:
+ * - Defaults are inferred from the field name (e.g. `video` increases max size).
+ * - Always returns an array `[multerMiddleware, handleUploadErrors]`.
+ *
+ * @param {UploadOptions} [options]
+ * @returns {Array<import('express').RequestHandler>} Express middleware chain.
+ */
 export const uploadMiddleware = (options = {}) => {
   const {
     type = 'single',
@@ -66,7 +101,15 @@ export const uploadMiddleware = (options = {}) => {
 };
 
 /**
- * Error handler for upload middleware
+ * Express error handler for upload middleware.
+ *
+ * Translates common Multer errors to consistent HTTP responses.
+ *
+ * @param {Error} error Error thrown by multer.
+ * @param {import('express').Request} req Express request.
+ * @param {import('express').Response} res Express response.
+ * @param {import('express').NextFunction} next Express next.
+ * @returns {any}
  */
 export const handleUploadErrors = (error, req, res, next) => {
   if (error instanceof multer.MulterError) {
@@ -98,7 +141,16 @@ export const handleUploadErrors = (error, req, res, next) => {
   });
 };
 
-
+/**
+ * Extracts normalized file info from a request after multer has run.
+ *
+ * - For `upload.single`, returns a single {@link UploadedFileInfo}.
+ * - For `upload.fields`, returns a record of arrays keyed by field name.
+ * - Returns `null` when no file data is present.
+ *
+ * @param {import('express').Request} req Express request.
+ * @returns {UploadedFileInfo | Record<string, UploadedFileInfo[]> | null}
+ */
 export const getFileInfo = (req) => {
   if (req.file) {
     return {
