@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: backend/migrations/20251201-expand-systemlog-action.js</title>
+    <title>JSDoc: Source: frontend/src/context/AuthContext.jsx</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: backend/migrations/20251201-expand-systemlog-action.js</h1>
+    <h1 class="page-title">Source: frontend/src/context/AuthContext.jsx</h1>
 
     
 
@@ -26,24 +26,157 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * Migration to expand SystemLog.action column length to prevent truncation errors.
+            <pre class="prettyprint source linenums"><code>/* eslint-disable react-refresh/only-export-components */
+
+/**
+ * @fileoverview Authentication session context.
+ *
+ * The frontend uses cookie-based sessions. This provider keeps the current user
+ * in memory, refreshes `/users/me` on mount, and exposes helpers for login,
+ * register, logout, profile updates, and password changes.
  */
 
-export async function up({ context: queryInterface, Sequelize }) {
-  // Adjust table/column names based on your model mapping. Assuming table is `SystemLog` and column `action` VARCHAR(16)
-  await queryInterface.changeColumn('SystemLog', 'action', {
-    type: Sequelize.STRING(32),
-    allowNull: false,
-  });
-}
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { apiRequest } from '../lib/apiClient';
 
-export async function down({ context: queryInterface, Sequelize }) {
-  await queryInterface.changeColumn('SystemLog', 'action', {
-    type: Sequelize.STRING(16),
-    allowNull: false,
-  });
-}
+const AuthContext = createContext(null);
+
+// Use cookie-based session on server; avoid localStorage persistence
+
+/**
+ * @typedef {object} AuthContextValue
+ * @property {any} user
+ * @property {boolean} isAuthenticated
+ * @property {boolean} loading
+ * @property {Function} login
+ * @property {Function} register
+ * @property {Function} logout
+ * @property {Function} refreshProfile
+ * @property {Function} updateProfile
+ * @property {Function} uploadProfilePhoto
+ * @property {Function} changePassword
+ */
+
+/**
+ * Auth provider.
+ *
+ * @param {object} props
+ * @param {any} props.children
+ * @returns {JSX.Element}
+ */
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const persistSession = (nextUser) => {
+    setUser(nextUser || null);
+  };
+
+  const logout = useCallback(async () => {
+    try {
+      await apiRequest('/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('Logout failed', e);
+    }
+    persistSession(null);
+  }, []);
+
+  const refreshProfile = useCallback(async () => {
+    try {
+      const profile = await apiRequest('/users/me');
+      persistSession(profile);
+      return profile;
+    } catch {
+      persistSession(null);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshProfile();
+  }, [refreshProfile]);
+
+  const login = useCallback(async ({ email, password }) => {
+    const data = await apiRequest('/auth/login', {
+      method: 'POST',
+      body: { email, password }
+    });
+
+    persistSession(data.user);
+    return data.user;
+  }, []);
+
+  const register = useCallback(async (payload) => {
+    const data = await apiRequest('/auth/register', {
+      method: 'POST',
+      body: payload
+    });
+
+    persistSession(data.user);
+    return data.user;
+  }, []);
+
+  const updateProfile = useCallback(async (updates) => {
+    const updatedUser = await apiRequest('/users/me', {
+      method: 'PATCH',
+      body: updates
+    });
+    persistSession(updatedUser);
+    return updatedUser;
+  }, []);
+
+  const uploadProfilePhoto = useCallback(async (file) => {
+    const formData = new FormData();
+    formData.append('profile_photo', file);
+
+    const updatedUser = await apiRequest('/users/me', {
+      method: 'PATCH',
+      body: formData,
+      formData: true
+    });
+
+    persistSession(updatedUser);
+    return updatedUser;
+  }, []);
+
+  const changePassword = useCallback(async ({ current_password, new_password }) => {
+    await apiRequest('/auth/change-password', {
+      method: 'POST',
+      body: { current_password, new_password }
+    });
+    return true;
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      user,
+      isAuthenticated: Boolean(user),
+      loading,
+      login,
+      register,
+      logout,
+      refreshProfile,
+      updateProfile,
+      uploadProfilePhoto,
+      changePassword
+    }),
+    [user, loading, login, register, logout, refreshProfile, updateProfile, uploadProfilePhoto, changePassword]
+  );
+
+  return &lt;AuthContext.Provider value={value}>{children}&lt;/AuthContext.Provider>;
+};
+
+/**
+ * Access the authentication context.
+ * @returns {AuthContextValue}
+ */
+export const useAuthContext = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuthContext must be used within AuthProvider');
+  return ctx;
+};
 </code></pre>
         </article>
     </section>

@@ -150,6 +150,195 @@ authentication and <code>super_admin</code> role at the router level.</p></div>
 
 <header>
     
+        <h2>backend/controller/admin.crud.controller.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Generic admin CRUD controllers (server-rendered).</p>
+<p>Used by the admin panel to render list and form pages for a small set of
+whitelisted models. Model configuration (fields, labels) is defined in this file.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_admin.crud.controller.js.html">backend/controller/admin.crud.controller.js</a>, <a href="backend_controller_admin.crud.controller.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>backend/controller/admin.redis.controller.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Redis explorer controllers (server-rendered + JSON).</p>
+<p>These endpoints are mounted under <code>/admin/redis</code> and <code>/admin/api/redis/*</code>.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_admin.redis.controller.js.html">backend/controller/admin.redis.controller.js</a>, <a href="backend_controller_admin.redis.controller.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
         <h2>backend/controller/auth.controller.js</h2>
         
     
@@ -483,6 +672,102 @@ models explicitly define <code>created_at</code>/<code>updated_at</code> fields.
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_db.controller.js.html">backend/controller/db.controller.js</a>, <a href="backend_controller_db.controller.js.html#line10">line 10</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>backend/controller/ldap.controller.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Admin-only LDAP management controllers (server-rendered).</p>
+<p>These handlers are mounted under the admin panel routes (see <code>backend/routes/admin.route.js</code>).
+They bind with the configured service account and allow listing/adding/editing/deleting users
+in the LDAP directory.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_ldap.controller.js.html">backend/controller/ldap.controller.js</a>, <a href="backend_controller_ldap.controller.js.html#line1">line 1</a>
     </li></ul></dd>
     
 
@@ -1635,6 +1920,101 @@ Routes apply authentication for mutating endpoints.</p></div>
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_team_members.controller.js.html">backend/controller/team_members.controller.js</a>, <a href="backend_controller_team_members.controller.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>backend/controller/teams.controller.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Team management endpoints.</p>
+<p>Includes team CRUD, invitations (accept/decline), join requests, membership
+status helpers, and competition registration.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line1">line 1</a>
     </li></ul></dd>
     
 
@@ -3201,6 +3581,197 @@ where explicitly required.</p></div>
 
 <header>
     
+        <h2>frontend/src/context/AuthContext.jsx</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Authentication session context.</p>
+<p>The frontend uses cookie-based sessions. This provider keeps the current user
+in memory, refreshes <code>/users/me</code> on mount, and exposes helpers for login,
+register, logout, profile updates, and password changes.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="frontend_src_context_AuthContext.jsx.html">frontend/src/context/AuthContext.jsx</a>, <a href="frontend_src_context_AuthContext.jsx.html#line3">line 3</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>frontend/src/context/SocketContext.jsx</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Socket.IO context provider.</p>
+<p>Creates a single Socket.IO client pointing at the backend origin derived from
+<code>VITE_API_BASE_URL</code> and exposes <code>{ socket, connected }</code> via React context.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="frontend_src_context_SocketContext.jsx.html">frontend/src/context/SocketContext.jsx</a>, <a href="frontend_src_context_SocketContext.jsx.html#line3">line 3</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
         <h2>frontend/src/lib/apiClient.js</h2>
         
     
@@ -3289,16 +3860,207 @@ The application uses cookie-based sessions, so requests are sent with <code>cred
 
 
 
+
+
+
+<section>
+
+<header>
+    
+        <h2>frontend/src/lib/i18n.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Frontend i18n initialization.</p>
+<p>Configures <code>i18next</code> + <code>react-i18next</code>, loads translation resources, detects
+and persists the selected language, and applies the <code>lang</code> attribute on the
+document root.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="frontend_src_lib_i18n.js.html">frontend/src/lib/i18n.js</a>, <a href="frontend_src_lib_i18n.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>frontend/src/lib/push.js</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Browser Push Notification helpers.</p>
+<p>Registers the service worker and manages Web Push subscriptions.
+Uses the backend notification push endpoints under <code>/api/notifications/push/*</code>.</p></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="frontend_src_lib_push.js.html">frontend/src/lib/push.js</a>, <a href="frontend_src_lib_push.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SystemLogger.html">SystemLogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#NotificationsBell">NotificationsBell</a></li><li><a href="global.html#acceptInvite">acceptInvite</a></li><li><a href="global.html#addComment">addComment</a></li><li><a href="global.html#addFavoriteCompetition">addFavoriteCompetition</a></li><li><a href="global.html#apiRequest">apiRequest</a></li><li><a href="global.html#approveRegistration">approveRegistration</a></li><li><a href="global.html#changePassword">changePassword</a></li><li><a href="global.html#createCountry">createCountry</a></li><li><a href="global.html#createGalleryItem">createGalleryItem</a></li><li><a href="global.html#createLogEntry">createLogEntry</a></li><li><a href="global.html#createNotification">createNotification</a></li><li><a href="global.html#createPost">createPost</a></li><li><a href="global.html#createRegistration">createRegistration</a></li><li><a href="global.html#createSponsor">createSponsor</a></li><li><a href="global.html#createStream">createStream</a></li><li><a href="global.html#createTeamMember">createTeamMember</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#declineInvite">declineInvite</a></li><li><a href="global.html#decodeIfBase64">decodeIfBase64</a></li><li><a href="global.html#deleteCompetition">deleteCompetition</a></li><li><a href="global.html#deleteCountry">deleteCountry</a></li><li><a href="global.html#deleteGalleryItem">deleteGalleryItem</a></li><li><a href="global.html#deleteLogEntry">deleteLogEntry</a></li><li><a href="global.html#deleteMedia">deleteMedia</a></li><li><a href="global.html#deleteNotification">deleteNotification</a></li><li><a href="global.html#deleteOldLogs">deleteOldLogs</a></li><li><a href="global.html#deletePost">deletePost</a></li><li><a href="global.html#deleteRegistration">deleteRegistration</a></li><li><a href="global.html#deleteRobotFile">deleteRobotFile</a></li><li><a href="global.html#deleteSelf">deleteSelf</a></li><li><a href="global.html#deleteSponsor">deleteSponsor</a></li><li><a href="global.html#deleteStream">deleteStream</a></li><li><a href="global.html#deleteTeamMember">deleteTeamMember</a></li><li><a href="global.html#deleteUser">deleteUser</a></li><li><a href="global.html#down">down</a></li><li><a href="global.html#emitToUser">emitToUser</a></li><li><a href="global.html#exportRegistrationsCSV">exportRegistrationsCSV</a></li><li><a href="global.html#forgotPassword">forgotPassword</a></li><li><a href="global.html#getApiOrigin">getApiOrigin</a></li><li><a href="global.html#getComments">getComments</a></li><li><a href="global.html#getCompetitionById">getCompetitionById</a></li><li><a href="global.html#getCompetitions">getCompetitions</a></li><li><a href="global.html#getCountries">getCountries</a></li><li><a href="global.html#getCountryById">getCountryById</a></li><li><a href="global.html#getFileInfo">getFileInfo</a></li><li><a href="global.html#getIO">getIO</a></li><li><a href="global.html#getMediaById">getMediaById</a></li><li><a href="global.html#getMessages">getMessages</a></li><li><a href="global.html#getNotificationById">getNotificationById</a></li><li><a href="global.html#getNotifications">getNotifications</a></li><li><a href="global.html#getPostById">getPostById</a></li><li><a href="global.html#getPosts">getPosts</a></li><li><a href="global.html#getRegistrationById">getRegistrationById</a></li><li><a href="global.html#getRegistrationStats">getRegistrationStats</a></li><li><a href="global.html#getRegistrations">getRegistrations</a></li><li><a href="global.html#getResendClient">getResendClient</a></li><li><a href="global.html#getRobotFiles">getRobotFiles</a></li><li><a href="global.html#getSelf">getSelf</a></li><li><a href="global.html#getSponsorById">getSponsorById</a></li><li><a href="global.html#getSponsors">getSponsors</a></li><li><a href="global.html#getStreamById">getStreamById</a></li><li><a href="global.html#getStreams">getStreams</a></li><li><a href="global.html#getSystemLogById">getSystemLogById</a></li><li><a href="global.html#getSystemLogs">getSystemLogs</a></li><li><a href="global.html#getSystemStats">getSystemStats</a></li><li><a href="global.html#getTeamLogs">getTeamLogs</a></li><li><a href="global.html#getTeamMemberById">getTeamMemberById</a></li><li><a href="global.html#getTeamMembers">getTeamMembers</a></li><li><a href="global.html#getUserById">getUserById</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#getUsersByRole">getUsersByRole</a></li><li><a href="global.html#getUsersTimeline">getUsersTimeline</a></li><li><a href="global.html#getVapidPublicKey">getVapidPublicKey</a></li><li><a href="global.html#handleUploadErrors">handleUploadErrors</a></li><li><a href="global.html#inviteToTeam">inviteToTeam</a></li><li><a href="global.html#listFavoriteCompetitions">listFavoriteCompetitions</a></li><li><a href="global.html#listGallery">listGallery</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#me">me</a></li><li><a href="global.html#normalizeBase">normalizeBase</a></li><li><a href="global.html#parseResponse">parseResponse</a></li><li><a href="global.html#redirectIfAuthenticated">redirectIfAuthenticated</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#rejectRegistration">rejectRegistration</a></li><li><a href="global.html#removeFavoriteCompetition">removeFavoriteCompetition</a></li><li><a href="global.html#requireAdminSession">requireAdminSession</a></li><li><a href="global.html#requireOwnership">requireOwnership</a></li><li><a href="global.html#requireRole">requireRole</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#resolveMediaUrl">resolveMediaUrl</a></li><li><a href="global.html#searchUsers">searchUsers</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#sendPasswordResetCodeEmail">sendPasswordResetCodeEmail</a></li><li><a href="global.html#sendTestPush">sendTestPush</a></li><li><a href="global.html#setIO">setIO</a></li><li><a href="global.html#subscribePush">subscribePush</a></li><li><a href="global.html#toggleFileVisibility">toggleFileVisibility</a></li><li><a href="global.html#toggleLike">toggleLike</a></li><li><a href="global.html#togglePin">togglePin</a></li><li><a href="global.html#unsubscribePush">unsubscribePush</a></li><li><a href="global.html#up">up</a></li><li><a href="global.html#updateCompetition">updateCompetition</a></li><li><a href="global.html#updateCountry">updateCountry</a></li><li><a href="global.html#updateNotification">updateNotification</a></li><li><a href="global.html#updatePost">updatePost</a></li><li><a href="global.html#updateRegistration">updateRegistration</a></li><li><a href="global.html#updateSelf">updateSelf</a></li><li><a href="global.html#updateSponsor">updateSponsor</a></li><li><a href="global.html#updateStream">updateStream</a></li><li><a href="global.html#updateTeamMember">updateTeamMember</a></li><li><a href="global.html#updateUser">updateUser</a></li><li><a href="global.html#uploadMedia">uploadMedia</a></li><li><a href="global.html#uploadMiddleware">uploadMiddleware</a></li><li><a href="global.html#uploadRobotFile">uploadRobotFile</a></li><li><a href="global.html#validatePasswordStrength">validatePasswordStrength</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SystemLogger.html">SystemLogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AuthProvider">AuthProvider</a></li><li><a href="global.html#NotificationsBell">NotificationsBell</a></li><li><a href="global.html#SocketProvider">SocketProvider</a></li><li><a href="global.html#acceptInvite">acceptInvite</a></li><li><a href="global.html#addComment">addComment</a></li><li><a href="global.html#addFavoriteCompetition">addFavoriteCompetition</a></li><li><a href="global.html#addLdapUser">addLdapUser</a></li><li><a href="global.html#apiRequest">apiRequest</a></li><li><a href="global.html#approveJoinRequest">approveJoinRequest</a></li><li><a href="global.html#approveRegistration">approveRegistration</a></li><li><a href="global.html#changePassword">changePassword</a></li><li><a href="global.html#createCountry">createCountry</a></li><li><a href="global.html#createGalleryItem">createGalleryItem</a></li><li><a href="global.html#createLogEntry">createLogEntry</a></li><li><a href="global.html#createNotification">createNotification</a></li><li><a href="global.html#createPost">createPost</a></li><li><a href="global.html#createRegistration">createRegistration</a></li><li><a href="global.html#createSponsor">createSponsor</a></li><li><a href="global.html#createStream">createStream</a></li><li><a href="global.html#createTeam">createTeam</a></li><li><a href="global.html#createTeamMember">createTeamMember</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#declineInvite">declineInvite</a></li><li><a href="global.html#decodeIfBase64">decodeIfBase64</a></li><li><a href="global.html#deleteCompetition">deleteCompetition</a></li><li><a href="global.html#deleteCountry">deleteCountry</a></li><li><a href="global.html#deleteGalleryItem">deleteGalleryItem</a></li><li><a href="global.html#deleteKey">deleteKey</a></li><li><a href="global.html#deleteLdapUser">deleteLdapUser</a></li><li><a href="global.html#deleteLogEntry">deleteLogEntry</a></li><li><a href="global.html#deleteMedia">deleteMedia</a></li><li><a href="global.html#deleteNotification">deleteNotification</a></li><li><a href="global.html#deleteOldLogs">deleteOldLogs</a></li><li><a href="global.html#deletePost">deletePost</a></li><li><a href="global.html#deleteRegistration">deleteRegistration</a></li><li><a href="global.html#deleteRobotFile">deleteRobotFile</a></li><li><a href="global.html#deleteSelf">deleteSelf</a></li><li><a href="global.html#deleteSponsor">deleteSponsor</a></li><li><a href="global.html#deleteStream">deleteStream</a></li><li><a href="global.html#deleteTeam">deleteTeam</a></li><li><a href="global.html#deleteTeamMember">deleteTeamMember</a></li><li><a href="global.html#deleteUser">deleteUser</a></li><li><a href="global.html#down">down</a></li><li><a href="global.html#emitToUser">emitToUser</a></li><li><a href="global.html#exportRegistrationsCSV">exportRegistrationsCSV</a></li><li><a href="global.html#forgotPassword">forgotPassword</a></li><li><a href="global.html#form">form</a></li><li><a href="global.html#getApiOrigin">getApiOrigin</a></li><li><a href="global.html#getComments">getComments</a></li><li><a href="global.html#getCompetitionById">getCompetitionById</a></li><li><a href="global.html#getCompetitions">getCompetitions</a></li><li><a href="global.html#getCountries">getCountries</a></li><li><a href="global.html#getCountryById">getCountryById</a></li><li><a href="global.html#getFileInfo">getFileInfo</a></li><li><a href="global.html#getIO">getIO</a></li><li><a href="global.html#getKeyInfo">getKeyInfo</a></li><li><a href="global.html#getMediaById">getMediaById</a></li><li><a href="global.html#getMembershipStatus">getMembershipStatus</a></li><li><a href="global.html#getMessages">getMessages</a></li><li><a href="global.html#getMyTeam">getMyTeam</a></li><li><a href="global.html#getNotificationById">getNotificationById</a></li><li><a href="global.html#getNotifications">getNotifications</a></li><li><a href="global.html#getOverview">getOverview</a></li><li><a href="global.html#getPostById">getPostById</a></li><li><a href="global.html#getPosts">getPosts</a></li><li><a href="global.html#getRegistrationById">getRegistrationById</a></li><li><a href="global.html#getRegistrationStats">getRegistrationStats</a></li><li><a href="global.html#getRegistrations">getRegistrations</a></li><li><a href="global.html#getResendClient">getResendClient</a></li><li><a href="global.html#getRobotFiles">getRobotFiles</a></li><li><a href="global.html#getSelf">getSelf</a></li><li><a href="global.html#getSponsorById">getSponsorById</a></li><li><a href="global.html#getSponsors">getSponsors</a></li><li><a href="global.html#getStreamById">getStreamById</a></li><li><a href="global.html#getStreams">getStreams</a></li><li><a href="global.html#getSystemLogById">getSystemLogById</a></li><li><a href="global.html#getSystemLogs">getSystemLogs</a></li><li><a href="global.html#getSystemStats">getSystemStats</a></li><li><a href="global.html#getTeamById">getTeamById</a></li><li><a href="global.html#getTeamLogs">getTeamLogs</a></li><li><a href="global.html#getTeamMemberById">getTeamMemberById</a></li><li><a href="global.html#getTeamMembers">getTeamMembers</a></li><li><a href="global.html#getTeams">getTeams</a></li><li><a href="global.html#getUserById">getUserById</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#getUsersByRole">getUsersByRole</a></li><li><a href="global.html#getUsersTimeline">getUsersTimeline</a></li><li><a href="global.html#getVapidPublicKey">getVapidPublicKey</a></li><li><a href="global.html#handleUploadErrors">handleUploadErrors</a></li><li><a href="global.html#inviteToTeam">inviteToTeam</a></li><li><a href="global.html#leaveTeam">leaveTeam</a></li><li><a href="global.html#list">list</a></li><li><a href="global.html#listFavoriteCompetitions">listFavoriteCompetitions</a></li><li><a href="global.html#listGallery">listGallery</a></li><li><a href="global.html#listJoinRequests">listJoinRequests</a></li><li><a href="global.html#listKeys">listKeys</a></li><li><a href="global.html#listLdapUsers">listLdapUsers</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#me">me</a></li><li><a href="global.html#normalizeBase">normalizeBase</a></li><li><a href="global.html#parseResponse">parseResponse</a></li><li><a href="global.html#redirectIfAuthenticated">redirectIfAuthenticated</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerTeamInCompetition">registerTeamInCompetition</a></li><li><a href="global.html#rejectRegistration">rejectRegistration</a></li><li><a href="global.html#remove">remove</a></li><li><a href="global.html#removeFavoriteCompetition">removeFavoriteCompetition</a></li><li><a href="global.html#renderAddLdapUser">renderAddLdapUser</a></li><li><a href="global.html#renderEditLdapUser">renderEditLdapUser</a></li><li><a href="global.html#requestJoinTeam">requestJoinTeam</a></li><li><a href="global.html#requireAdminSession">requireAdminSession</a></li><li><a href="global.html#requireOwnership">requireOwnership</a></li><li><a href="global.html#requireRole">requireRole</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#resolveMediaUrl">resolveMediaUrl</a></li><li><a href="global.html#save">save</a></li><li><a href="global.html#searchUsers">searchUsers</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#sendPasswordResetCodeEmail">sendPasswordResetCodeEmail</a></li><li><a href="global.html#sendTestPush">sendTestPush</a></li><li><a href="global.html#setIO">setIO</a></li><li><a href="global.html#subscribePush">subscribePush</a></li><li><a href="global.html#subscribeToPush">subscribeToPush</a></li><li><a href="global.html#toggleFileVisibility">toggleFileVisibility</a></li><li><a href="global.html#toggleLike">toggleLike</a></li><li><a href="global.html#togglePin">togglePin</a></li><li><a href="global.html#unsubscribeFromPush">unsubscribeFromPush</a></li><li><a href="global.html#unsubscribePush">unsubscribePush</a></li><li><a href="global.html#up">up</a></li><li><a href="global.html#updateCompetition">updateCompetition</a></li><li><a href="global.html#updateCountry">updateCountry</a></li><li><a href="global.html#updateLdapUser">updateLdapUser</a></li><li><a href="global.html#updateNotification">updateNotification</a></li><li><a href="global.html#updatePost">updatePost</a></li><li><a href="global.html#updateRegistration">updateRegistration</a></li><li><a href="global.html#updateSelf">updateSelf</a></li><li><a href="global.html#updateSponsor">updateSponsor</a></li><li><a href="global.html#updateStream">updateStream</a></li><li><a href="global.html#updateTeam">updateTeam</a></li><li><a href="global.html#updateTeamMember">updateTeamMember</a></li><li><a href="global.html#updateUser">updateUser</a></li><li><a href="global.html#uploadMedia">uploadMedia</a></li><li><a href="global.html#uploadMiddleware">uploadMiddleware</a></li><li><a href="global.html#uploadRobotFile">uploadRobotFile</a></li><li><a href="global.html#useAuthContext">useAuthContext</a></li><li><a href="global.html#useSocket">useSocket</a></li><li><a href="global.html#validatePasswordStrength">validatePasswordStrength</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Jan 12 2026 00:52:34 GMT+0100 (hora estándar de Europa central)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Jan 12 2026 00:55:47 GMT+0100 (hora estándar de Europa central)
 </footer>
 
 <script> prettyPrint(); </script>

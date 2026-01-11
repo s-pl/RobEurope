@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: backend/migrations/20251201-expand-systemlog-action.js</title>
+    <title>JSDoc: Source: frontend/src/context/SocketContext.jsx</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: backend/migrations/20251201-expand-systemlog-action.js</h1>
+    <h1 class="page-title">Source: frontend/src/context/SocketContext.jsx</h1>
 
     
 
@@ -26,24 +26,62 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * Migration to expand SystemLog.action column length to prevent truncation errors.
+            <pre class="prettyprint source linenums"><code>/* eslint-disable react-refresh/only-export-components */
+
+/**
+ * @fileoverview Socket.IO context provider.
+ *
+ * Creates a single Socket.IO client pointing at the backend origin derived from
+ * `VITE_API_BASE_URL` and exposes `{ socket, connected }` via React context.
  */
 
-export async function up({ context: queryInterface, Sequelize }) {
-  // Adjust table/column names based on your model mapping. Assuming table is `SystemLog` and column `action` VARCHAR(16)
-  await queryInterface.changeColumn('SystemLog', 'action', {
-    type: Sequelize.STRING(32),
-    allowNull: false,
-  });
-}
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import io from 'socket.io-client';
+import { getApiOrigin } from '../lib/apiClient';
 
-export async function down({ context: queryInterface, Sequelize }) {
-  await queryInterface.changeColumn('SystemLog', 'action', {
-    type: Sequelize.STRING(16),
-    allowNull: false,
-  });
-}
+const SocketContext = createContext(null);
+
+/**
+ * @typedef {object} SocketContextValue
+ * @property {object} socket
+ * @property {boolean} connected
+ */
+
+/**
+ * Provides a Socket.IO client and connection status.
+ *
+ * @param {object} props
+ * @param {any} props.children
+ * @returns {JSX.Element}
+ */
+export const SocketProvider = ({ children }) => {
+  const [connected, setConnected] = useState(false);
+
+  const socketUrl = useMemo(() => getApiOrigin(), []);
+
+  const socket = useMemo(() => io(socketUrl, { transports: ['websocket', 'polling'] }), [socketUrl]);
+
+  useEffect(() => {
+    socket.on('connect', () => setConnected(true));
+    socket.on('disconnect', () => setConnected(false));
+    return () => {
+      socket.disconnect();
+    };
+  }, [socket]);
+
+  const value = useMemo(() => ({ socket, connected }), [socket, connected]);
+  return &lt;SocketContext.Provider value={value}>{children}&lt;/SocketContext.Provider>;
+};
+
+/**
+ * Access the Socket.IO context.
+ * @returns {SocketContextValue}
+ */
+export const useSocket = () => {
+  const ctx = useContext(SocketContext);
+  if (!ctx) throw new Error('useSocket must be used within SocketProvider');
+  return ctx;
+};
 </code></pre>
         </article>
     </section>

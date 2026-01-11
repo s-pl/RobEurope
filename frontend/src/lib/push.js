@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Browser Push Notification helpers.
+ *
+ * Registers the service worker and manages Web Push subscriptions.
+ * Uses the backend notification push endpoints under `/api/notifications/push/*`.
+ */
+
 import { apiRequest } from '../lib/apiClient';
 
 function urlBase64ToUint8Array(base64String) {
@@ -20,6 +27,17 @@ export async function registerServiceWorker() {
   }
 }
 
+/**
+ * Subscribe the current browser to push notifications.
+ *
+ * Preconditions:
+ * - a valid ServiceWorker registration
+ * - secure context (HTTPS) unless localhost
+ * - Notifications permission granted
+ *
+ * @param {ServiceWorkerRegistration} registration
+ * @returns {Promise<PushSubscription|null>}
+ */
 export async function subscribeToPush(registration) {
   if (!registration || !('pushManager' in registration)) return null;
   // Must be secure context unless localhost
@@ -58,6 +76,12 @@ export async function subscribeToPush(registration) {
   }
 }
 
+/**
+ * Unsubscribe the current browser from push notifications.
+ *
+ * @param {ServiceWorkerRegistration} registration
+ * @returns {Promise<void>}
+ */
 export async function unsubscribeFromPush(registration) {
   try {
     const sub = await registration.pushManager.getSubscription();

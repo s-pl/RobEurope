@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Generic admin CRUD controllers (server-rendered).
+ *
+ * Used by the admin panel to render list and form pages for a small set of
+ * whitelisted models. Model configuration (fields, labels) is defined in this file.
+ */
+
 import db from '../models/index.js';
 
 const modelConfigs = {
@@ -90,6 +97,14 @@ const localizeConfig = (config, req) => ({
   }))
 });
 
+/**
+ * Render a list view for a configured model.
+ *
+ * @route GET /admin/:model
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const list = async (req, res) => {
   const { model } = req.params;
   const config = modelConfigs[model];
@@ -117,6 +132,15 @@ export const list = async (req, res) => {
   }
 };
 
+/**
+ * Render the create/edit form for a configured model.
+ *
+ * @route GET /admin/:model/create
+ * @route GET /admin/:model/edit/:id
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const form = async (req, res) => {
   const { model, id } = req.params;
   const config = modelConfigs[model];
@@ -150,6 +174,15 @@ export const form = async (req, res) => {
   }
 };
 
+/**
+ * Create or update a record for a configured model.
+ *
+ * @route POST /admin/:model/save
+ * @route POST /admin/:model/save/:id
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const save = async (req, res) => {
   const { model, id } = req.params;
   const config = modelConfigs[model];
@@ -189,6 +222,14 @@ export const save = async (req, res) => {
   }
 };
 
+/**
+ * Delete a record for a configured model.
+ *
+ * @route POST /admin/:model/delete/:id
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const remove = async (req, res) => {
   const { model, id } = req.params;
   const config = modelConfigs[model];

@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Redis explorer controllers (server-rendered + JSON).
+ *
+ * These endpoints are mounted under `/admin/redis` and `/admin/api/redis/*`.
+ */
+
 import redisClient from '../utils/redis.js';
 
 // Helpers
@@ -12,6 +18,15 @@ export async function renderRedisExplorer(req, res) {
     pageKey: 'redis'
   });
 }
+
+/**
+ * Render the Redis explorer page.
+ *
+ * @route GET /admin/redis
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ */
+// (implementation above)
 
 // List keys using SCAN to avoid blocking Redis
 export async function listKeys(req, res) {
@@ -41,6 +56,20 @@ export async function listKeys(req, res) {
     res.status(500).json({ error: 'Failed to scan keys', details: err.message });
   }
 }
+
+/**
+ * List keys using SCAN.
+ *
+ * Query params:
+ * - `pattern` (default `*`)
+ * - `count` (default 50, max 500)
+ * - `cursor` (default 0)
+ *
+ * @route GET /admin/api/redis/keys
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ */
+// (implementation above)
 
 export async function getKeyInfo(req, res) {
   try {
@@ -75,6 +104,15 @@ export async function getKeyInfo(req, res) {
   }
 }
 
+/**
+ * Get key type, ttl, and value.
+ *
+ * @route GET /admin/api/redis/key/:key
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ */
+// (implementation above)
+
 export async function deleteKey(req, res) {
   try {
     const key = req.params.key;
@@ -85,6 +123,15 @@ export async function deleteKey(req, res) {
     res.status(500).json({ error: 'Failed to delete key', details: err.message });
   }
 }
+
+/**
+ * Delete a key.
+ *
+ * @route DELETE /admin/api/redis/key/:key
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ */
+// (implementation above)
 
 export async function getOverview(req, res) {
   try {
@@ -115,3 +162,12 @@ export async function getOverview(req, res) {
     res.status(500).json({ error: 'Failed to get overview', details: err.message });
   }
 }
+
+/**
+ * Return a lightweight Redis overview (ping/dbsize/basic INFO fields).
+ *
+ * @route GET /admin/api/redis/overview
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ */
+// (implementation above)

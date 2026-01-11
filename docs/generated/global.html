@@ -98,6 +98,130 @@
 
         
             
+<h4 class="name" id="AuthProvider"><span class="type-signature">(constant) </span>AuthProvider<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Auth provider.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="frontend_src_context_AuthContext.jsx.html">frontend/src/context/AuthContext.jsx</a>, <a href="frontend_src_context_AuthContext.jsx.html#line39">line 39</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="SocketProvider"><span class="type-signature">(constant) </span>SocketProvider<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Provides a Socket.IO client and connection status.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="frontend_src_context_SocketContext.jsx.html">frontend/src/context/SocketContext.jsx</a>, <a href="frontend_src_context_SocketContext.jsx.html#line29">line 29</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
 <h4 class="name" id="acceptInvite"><span class="type-signature">(constant) </span>acceptInvite<span class="type-signature"></span></h4>
 
 
@@ -143,7 +267,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line256">line 256</a>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line308">line 308</a>
     </li></ul></dd>
     
 
@@ -268,6 +392,130 @@
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_competitions.controller.js.html">backend/controller/competitions.controller.js</a>, <a href="backend_controller_competitions.controller.js.html#line120">line 120</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="addLdapUser"><span class="type-signature">(constant) </span>addLdapUser<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Create a new LDAP user.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_ldap.controller.js.html">backend/controller/ldap.controller.js</a>, <a href="backend_controller_ldap.controller.js.html#line117">line 117</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="approveJoinRequest"><span class="type-signature">(constant) </span>approveJoinRequest<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Approve a join request (team owner only).</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line394">line 394</a>
     </li></ul></dd>
     
 
@@ -912,6 +1160,70 @@
 
         
             
+<h4 class="name" id="createTeam"><span class="type-signature">(constant) </span>createTeam<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Create a new team (authenticated).</p>
+<p>Enforces the single-team membership rule for the creator. Also creates the
+creator's <code>TeamMembers</code> record with role <code>owner</code>.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line26">line 26</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
 <h4 class="name" id="createTeamMember"><span class="type-signature">(constant) </span>createTeamMember<span class="type-signature"></span></h4>
 
 
@@ -1082,7 +1394,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line207">line 207</a>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line259">line 259</a>
     </li></ul></dd>
     
 
@@ -1270,6 +1582,68 @@ Emits <code>competition_deleted</code> via Socket.IO.</p>
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_gallery.controller.js.html">backend/controller/gallery.controller.js</a>, <a href="backend_controller_gallery.controller.js.html#line104">line 104</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="deleteLdapUser"><span class="type-signature">(constant) </span>deleteLdapUser<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Delete an LDAP user.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_ldap.controller.js.html">backend/controller/ldap.controller.js</a>, <a href="backend_controller_ldap.controller.js.html#line222">line 222</a>
     </li></ul></dd>
     
 
@@ -1909,6 +2283,68 @@ Requires team membership or admin.</p>
 
         
             
+<h4 class="name" id="deleteTeam"><span class="type-signature">(constant) </span>deleteTeam<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Delete a team by id (owner only via middleware).</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line168">line 168</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
 <h4 class="name" id="deleteTeamMember"><span class="type-signature">(constant) </span>deleteTeamMember<span class="type-signature"></span></h4>
 
 
@@ -2204,6 +2640,68 @@ Requires team membership or admin.</p>
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_auth.controller.js.html">backend/controller/auth.controller.js</a>, <a href="backend_controller_auth.controller.js.html#line295">line 295</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="form"><span class="type-signature">(constant) </span>form<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Render the create/edit form for a configured model.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_admin.crud.controller.js.html">backend/controller/admin.crud.controller.js</a>, <a href="backend_controller_admin.crud.controller.js.html#line144">line 144</a>
     </li></ul></dd>
     
 
@@ -2725,6 +3223,68 @@ sensitive fields like <code>stream_url</code> are omitted.</p>
 
         
             
+<h4 class="name" id="getMembershipStatus"><span class="type-signature">(constant) </span>getMembershipStatus<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Get the current user's membership/ownership status.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line554">line 554</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
 <h4 class="name" id="getMessages"><span class="type-signature">(constant) </span>getMessages<span class="type-signature"></span></h4>
 
 
@@ -2771,6 +3331,68 @@ sensitive fields like <code>stream_url</code> are omitted.</p>
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_team_chat.controller.js.html">backend/controller/team_chat.controller.js</a>, <a href="backend_controller_team_chat.controller.js.html#line44">line 44</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="getMyTeam"><span class="type-signature">(constant) </span>getMyTeam<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Return the team the current user belongs to (or null).</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line469">line 469</a>
     </li></ul></dd>
     
 
@@ -3741,6 +4363,68 @@ sensitive fields like <code>stream_url</code> are omitted.</p>
 
         
             
+<h4 class="name" id="getTeamById"><span class="type-signature">(constant) </span>getTeamById<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Get a team by id.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line119">line 119</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
 <h4 class="name" id="getTeamLogs"><span class="type-signature">(constant) </span>getTeamLogs<span class="type-signature"></span></h4>
 
 
@@ -3911,6 +4595,68 @@ sensitive fields like <code>stream_url</code> are omitted.</p>
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_team_members.controller.js.html">backend/controller/team_members.controller.js</a>, <a href="backend_controller_team_members.controller.js.html#line52">line 52</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="getTeams"><span class="type-signature">(constant) </span>getTeams<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>List teams with optional filtering.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line85">line 85</a>
     </li></ul></dd>
     
 
@@ -4225,7 +4971,131 @@ so the invite can be accepted/declined from the UI.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line138">line 138</a>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line190">line 190</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="leaveTeam"><span class="type-signature">(constant) </span>leaveTeam<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Leave the current team (non-owner only).</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line530">line 530</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="list"><span class="type-signature">(constant) </span>list<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Render a list view for a configured model.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_admin.crud.controller.js.html">backend/controller/admin.crud.controller.js</a>, <a href="backend_controller_admin.crud.controller.js.html#line108">line 108</a>
     </li></ul></dd>
     
 
@@ -4350,6 +5220,130 @@ so the invite can be accepted/declined from the UI.</p>
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_gallery.controller.js.html">backend/controller/gallery.controller.js</a>, <a href="backend_controller_gallery.controller.js.html#line29">line 29</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="listJoinRequests"><span class="type-signature">(constant) </span>listJoinRequests<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>List join requests for a team (owner only via middleware).</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line501">line 501</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="listLdapUsers"><span class="type-signature">(constant) </span>listLdapUsers<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Render the LDAP user list page.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_ldap.controller.js.html">backend/controller/ldap.controller.js</a>, <a href="backend_controller_ldap.controller.js.html#line46">line 46</a>
     </li></ul></dd>
     
 
@@ -4616,6 +5610,69 @@ Includes basic throttling/lockout via Redis.</p>
 
         
             
+<h4 class="name" id="registerTeamInCompetition"><span class="type-signature">(constant) </span>registerTeamInCompetition<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Register a team into a competition.</p>
+<p>Creates a <code>Registration</code> row with status <code>pending</code>.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line440">line 440</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
 <h4 class="name" id="rejectRegistration"><span class="type-signature">(constant) </span>rejectRegistration<span class="type-signature"></span></h4>
 
 
@@ -4678,6 +5735,68 @@ Includes basic throttling/lockout via Redis.</p>
 
         
             
+<h4 class="name" id="remove"><span class="type-signature">(constant) </span>remove<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Delete a record for a configured model.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_admin.crud.controller.js.html">backend/controller/admin.crud.controller.js</a>, <a href="backend_controller_admin.crud.controller.js.html#line233">line 233</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
 <h4 class="name" id="removeFavoriteCompetition"><span class="type-signature">(constant) </span>removeFavoriteCompetition<span class="type-signature"></span></h4>
 
 
@@ -4723,6 +5842,192 @@ Includes basic throttling/lockout via Redis.</p>
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_competitions.controller.js.html">backend/controller/competitions.controller.js</a>, <a href="backend_controller_competitions.controller.js.html#line139">line 139</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="renderAddLdapUser"><span class="type-signature">(constant) </span>renderAddLdapUser<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Render the LDAP user creation form.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_ldap.controller.js.html">backend/controller/ldap.controller.js</a>, <a href="backend_controller_ldap.controller.js.html#line104">line 104</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="renderEditLdapUser"><span class="type-signature">(constant) </span>renderEditLdapUser<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Render the LDAP user edit form for the given uid.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_ldap.controller.js.html">backend/controller/ldap.controller.js</a>, <a href="backend_controller_ldap.controller.js.html#line156">line 156</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="requestJoinTeam"><span class="type-signature">(constant) </span>requestJoinTeam<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Create a request to join a team.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line354">line 354</a>
     </li></ul></dd>
     
 
@@ -4851,6 +6156,68 @@ Includes basic throttling/lockout via Redis.</p>
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="frontend_src_lib_apiClient.js.html">frontend/src/lib/apiClient.js</a>, <a href="frontend_src_lib_apiClient.js.html#line122">line 122</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="save"><span class="type-signature">(constant) </span>save<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Create or update a record for a configured model.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_admin.crud.controller.js.html">backend/controller/admin.crud.controller.js</a>, <a href="backend_controller_admin.crud.controller.js.html#line186">line 186</a>
     </li></ul></dd>
     
 
@@ -5556,6 +6923,70 @@ Emits <code>competition_updated</code> via Socket.IO.</p>
 
         
             
+<h4 class="name" id="updateLdapUser"><span class="type-signature">(constant) </span>updateLdapUser<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Update an LDAP user.</p>
+<p>Note: admin routes allow both <code>POST /admin/ldap-users/edit/:uid</code> and a fallback
+<code>POST /admin/ldap-users/edit</code> where <code>uid</code> is taken from the body.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_ldap.controller.js.html">backend/controller/ldap.controller.js</a>, <a href="backend_controller_ldap.controller.js.html#line189">line 189</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
 <h4 class="name" id="updateNotification"><span class="type-signature">(constant) </span>updateNotification<span class="type-signature"></span></h4>
 
 
@@ -5931,6 +7362,69 @@ Emits <code>competition_updated</code> via Socket.IO.</p>
 
         
             
+<h4 class="name" id="updateTeam"><span class="type-signature">(constant) </span>updateTeam<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Update a team by id (owner only via middleware).</p>
+<p>Supports optional logo upload.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_teams.controller.js.html">backend/controller/teams.controller.js</a>, <a href="backend_controller_teams.controller.js.html#line139">line 139</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
 <h4 class="name" id="updateTeamMember"><span class="type-signature">(constant) </span>updateTeamMember<span class="type-signature"></span></h4>
 
 
@@ -6234,6 +7728,130 @@ route-level upload middleware and inspected via <code>getFileInfo</code>.</p>
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_robot_file.controller.js.html">backend/controller/robot_file.controller.js</a>, <a href="backend_controller_robot_file.controller.js.html#line40">line 40</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="useAuthContext"><span class="type-signature">(constant) </span>useAuthContext<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Access the authentication context.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="frontend_src_context_AuthContext.jsx.html">frontend/src/context/AuthContext.jsx</a>, <a href="frontend_src_context_AuthContext.jsx.html#line147">line 147</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="useSocket"><span class="type-signature">(constant) </span>useSocket<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Access the Socket.IO context.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="frontend_src_context_SocketContext.jsx.html">frontend/src/context/SocketContext.jsx</a>, <a href="frontend_src_context_SocketContext.jsx.html#line52">line 52</a>
     </li></ul></dd>
     
 
@@ -6927,6 +8545,166 @@ route-level upload middleware and inspected via <code>getFileInfo</code>.</p>
     
 
     
+    <h4 class="name" id="deleteKey"><span class="type-signature"></span>deleteKey<span class="signature">(req, res)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Get key type, ttl, and value.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Express.Request</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Express.Response</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_admin.redis.controller.js.html">backend/controller/admin.redis.controller.js</a>, <a href="backend_controller_admin.redis.controller.js.html#line116">line 116</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="emitToUser"><span class="type-signature"></span>emitToUser<span class="signature">(userId, eventName, payload)</span><span class="type-signature"></span></h4>
     
 
@@ -7211,6 +8989,332 @@ notification (best-effort).</p>
 </dl>
 
     
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getKeyInfo"><span class="type-signature"></span>getKeyInfo<span class="signature">(req, res)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>List keys using SCAN.</p>
+<p>Query params:</p>
+<ul>
+<li><code>pattern</code> (default <code>*</code>)</li>
+<li><code>count</code> (default 50, max 500)</li>
+<li><code>cursor</code> (default 0)</li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Express.Request</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Express.Response</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_admin.redis.controller.js.html">backend/controller/admin.redis.controller.js</a>, <a href="backend_controller_admin.redis.controller.js.html#line74">line 74</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getOverview"><span class="type-signature"></span>getOverview<span class="signature">(req, res)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Delete a key.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Express.Request</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Express.Response</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_admin.redis.controller.js.html">backend/controller/admin.redis.controller.js</a>, <a href="backend_controller_admin.redis.controller.js.html#line136">line 136</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -7777,6 +9881,166 @@ notification (best-effort).</p>
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
         <a href="backend_controller_admin.controller.js.html">backend/controller/admin.controller.js</a>, <a href="backend_controller_admin.controller.js.html#line226">line 226</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="listKeys"><span class="type-signature"></span>listKeys<span class="signature">(req, res)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Render the Redis explorer page.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Express.Request</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Express.Response</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="backend_controller_admin.redis.controller.js.html">backend/controller/admin.redis.controller.js</a>, <a href="backend_controller_admin.redis.controller.js.html#line32">line 32</a>
     </li></ul></dd>
     
 
@@ -9159,6 +11423,322 @@ notification (best-effort).</p>
     
 
     
+    <h4 class="name" id="subscribeToPush"><span class="type-signature"></span>subscribeToPush<span class="signature">(registration)</span><span class="type-signature"> &rarr; {Promise.&lt;(PushSubscription|null)>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Subscribe the current browser to push notifications.</p>
+<p>Preconditions:</p>
+<ul>
+<li>a valid ServiceWorker registration</li>
+<li>secure context (HTTPS) unless localhost</li>
+<li>Notifications permission granted</li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>registration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">ServiceWorkerRegistration</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="frontend_src_lib_push.js.html">frontend/src/lib/push.js</a>, <a href="frontend_src_lib_push.js.html#line41">line 41</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;(PushSubscription|null)></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="unsubscribeFromPush"><span class="type-signature"></span>unsubscribeFromPush<span class="signature">(registration)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Unsubscribe the current browser from push notifications.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>registration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">ServiceWorkerRegistration</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="frontend_src_lib_push.js.html">frontend/src/lib/push.js</a>, <a href="frontend_src_lib_push.js.html#line85">line 85</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;void></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="up"><span class="type-signature"></span>up<span class="signature">()</span><span class="type-signature"></span></h4>
     
 
@@ -9588,6 +12168,333 @@ Exports up and down functions for use with QueryInterface</p>
         <h3 class="subsection-title">Type Definitions</h3>
 
         
+                
+<h4 class="name" id="AuthContextValue">AuthContextValue</h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>user</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">any</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>isAuthenticated</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>loading</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>login</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>register</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>logout</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>refreshProfile</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>updateProfile</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>uploadProfilePhoto</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>changePassword</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="frontend_src_context_AuthContext.jsx.html">frontend/src/context/AuthContext.jsx</a>, <a href="frontend_src_context_AuthContext.jsx.html#line18">line 18</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
                 
 <h4 class="name" id="NotificationMeta">NotificationMeta</h4>
 
@@ -14832,6 +17739,149 @@ Exports up and down functions for use with QueryInterface</p>
 
             
                 
+<h4 class="name" id="SocketContextValue">SocketContextValue</h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>socket</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>connected</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="frontend_src_context_SocketContext.jsx.html">frontend/src/context/SocketContext.jsx</a>, <a href="frontend_src_context_SocketContext.jsx.html#line16">line 16</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
 <h4 class="name" id="UploadFieldDefinition">UploadFieldDefinition</h4>
 
 
@@ -15401,13 +18451,13 @@ Exports up and down functions for use with QueryInterface</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SystemLogger.html">SystemLogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#NotificationsBell">NotificationsBell</a></li><li><a href="global.html#acceptInvite">acceptInvite</a></li><li><a href="global.html#addComment">addComment</a></li><li><a href="global.html#addFavoriteCompetition">addFavoriteCompetition</a></li><li><a href="global.html#apiRequest">apiRequest</a></li><li><a href="global.html#approveRegistration">approveRegistration</a></li><li><a href="global.html#changePassword">changePassword</a></li><li><a href="global.html#createCountry">createCountry</a></li><li><a href="global.html#createGalleryItem">createGalleryItem</a></li><li><a href="global.html#createLogEntry">createLogEntry</a></li><li><a href="global.html#createNotification">createNotification</a></li><li><a href="global.html#createPost">createPost</a></li><li><a href="global.html#createRegistration">createRegistration</a></li><li><a href="global.html#createSponsor">createSponsor</a></li><li><a href="global.html#createStream">createStream</a></li><li><a href="global.html#createTeamMember">createTeamMember</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#declineInvite">declineInvite</a></li><li><a href="global.html#decodeIfBase64">decodeIfBase64</a></li><li><a href="global.html#deleteCompetition">deleteCompetition</a></li><li><a href="global.html#deleteCountry">deleteCountry</a></li><li><a href="global.html#deleteGalleryItem">deleteGalleryItem</a></li><li><a href="global.html#deleteLogEntry">deleteLogEntry</a></li><li><a href="global.html#deleteMedia">deleteMedia</a></li><li><a href="global.html#deleteNotification">deleteNotification</a></li><li><a href="global.html#deleteOldLogs">deleteOldLogs</a></li><li><a href="global.html#deletePost">deletePost</a></li><li><a href="global.html#deleteRegistration">deleteRegistration</a></li><li><a href="global.html#deleteRobotFile">deleteRobotFile</a></li><li><a href="global.html#deleteSelf">deleteSelf</a></li><li><a href="global.html#deleteSponsor">deleteSponsor</a></li><li><a href="global.html#deleteStream">deleteStream</a></li><li><a href="global.html#deleteTeamMember">deleteTeamMember</a></li><li><a href="global.html#deleteUser">deleteUser</a></li><li><a href="global.html#down">down</a></li><li><a href="global.html#emitToUser">emitToUser</a></li><li><a href="global.html#exportRegistrationsCSV">exportRegistrationsCSV</a></li><li><a href="global.html#forgotPassword">forgotPassword</a></li><li><a href="global.html#getApiOrigin">getApiOrigin</a></li><li><a href="global.html#getComments">getComments</a></li><li><a href="global.html#getCompetitionById">getCompetitionById</a></li><li><a href="global.html#getCompetitions">getCompetitions</a></li><li><a href="global.html#getCountries">getCountries</a></li><li><a href="global.html#getCountryById">getCountryById</a></li><li><a href="global.html#getFileInfo">getFileInfo</a></li><li><a href="global.html#getIO">getIO</a></li><li><a href="global.html#getMediaById">getMediaById</a></li><li><a href="global.html#getMessages">getMessages</a></li><li><a href="global.html#getNotificationById">getNotificationById</a></li><li><a href="global.html#getNotifications">getNotifications</a></li><li><a href="global.html#getPostById">getPostById</a></li><li><a href="global.html#getPosts">getPosts</a></li><li><a href="global.html#getRegistrationById">getRegistrationById</a></li><li><a href="global.html#getRegistrationStats">getRegistrationStats</a></li><li><a href="global.html#getRegistrations">getRegistrations</a></li><li><a href="global.html#getResendClient">getResendClient</a></li><li><a href="global.html#getRobotFiles">getRobotFiles</a></li><li><a href="global.html#getSelf">getSelf</a></li><li><a href="global.html#getSponsorById">getSponsorById</a></li><li><a href="global.html#getSponsors">getSponsors</a></li><li><a href="global.html#getStreamById">getStreamById</a></li><li><a href="global.html#getStreams">getStreams</a></li><li><a href="global.html#getSystemLogById">getSystemLogById</a></li><li><a href="global.html#getSystemLogs">getSystemLogs</a></li><li><a href="global.html#getSystemStats">getSystemStats</a></li><li><a href="global.html#getTeamLogs">getTeamLogs</a></li><li><a href="global.html#getTeamMemberById">getTeamMemberById</a></li><li><a href="global.html#getTeamMembers">getTeamMembers</a></li><li><a href="global.html#getUserById">getUserById</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#getUsersByRole">getUsersByRole</a></li><li><a href="global.html#getUsersTimeline">getUsersTimeline</a></li><li><a href="global.html#getVapidPublicKey">getVapidPublicKey</a></li><li><a href="global.html#handleUploadErrors">handleUploadErrors</a></li><li><a href="global.html#inviteToTeam">inviteToTeam</a></li><li><a href="global.html#listFavoriteCompetitions">listFavoriteCompetitions</a></li><li><a href="global.html#listGallery">listGallery</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#me">me</a></li><li><a href="global.html#normalizeBase">normalizeBase</a></li><li><a href="global.html#parseResponse">parseResponse</a></li><li><a href="global.html#redirectIfAuthenticated">redirectIfAuthenticated</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#rejectRegistration">rejectRegistration</a></li><li><a href="global.html#removeFavoriteCompetition">removeFavoriteCompetition</a></li><li><a href="global.html#requireAdminSession">requireAdminSession</a></li><li><a href="global.html#requireOwnership">requireOwnership</a></li><li><a href="global.html#requireRole">requireRole</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#resolveMediaUrl">resolveMediaUrl</a></li><li><a href="global.html#searchUsers">searchUsers</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#sendPasswordResetCodeEmail">sendPasswordResetCodeEmail</a></li><li><a href="global.html#sendTestPush">sendTestPush</a></li><li><a href="global.html#setIO">setIO</a></li><li><a href="global.html#subscribePush">subscribePush</a></li><li><a href="global.html#toggleFileVisibility">toggleFileVisibility</a></li><li><a href="global.html#toggleLike">toggleLike</a></li><li><a href="global.html#togglePin">togglePin</a></li><li><a href="global.html#unsubscribePush">unsubscribePush</a></li><li><a href="global.html#up">up</a></li><li><a href="global.html#updateCompetition">updateCompetition</a></li><li><a href="global.html#updateCountry">updateCountry</a></li><li><a href="global.html#updateNotification">updateNotification</a></li><li><a href="global.html#updatePost">updatePost</a></li><li><a href="global.html#updateRegistration">updateRegistration</a></li><li><a href="global.html#updateSelf">updateSelf</a></li><li><a href="global.html#updateSponsor">updateSponsor</a></li><li><a href="global.html#updateStream">updateStream</a></li><li><a href="global.html#updateTeamMember">updateTeamMember</a></li><li><a href="global.html#updateUser">updateUser</a></li><li><a href="global.html#uploadMedia">uploadMedia</a></li><li><a href="global.html#uploadMiddleware">uploadMiddleware</a></li><li><a href="global.html#uploadRobotFile">uploadRobotFile</a></li><li><a href="global.html#validatePasswordStrength">validatePasswordStrength</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SystemLogger.html">SystemLogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AuthProvider">AuthProvider</a></li><li><a href="global.html#NotificationsBell">NotificationsBell</a></li><li><a href="global.html#SocketProvider">SocketProvider</a></li><li><a href="global.html#acceptInvite">acceptInvite</a></li><li><a href="global.html#addComment">addComment</a></li><li><a href="global.html#addFavoriteCompetition">addFavoriteCompetition</a></li><li><a href="global.html#addLdapUser">addLdapUser</a></li><li><a href="global.html#apiRequest">apiRequest</a></li><li><a href="global.html#approveJoinRequest">approveJoinRequest</a></li><li><a href="global.html#approveRegistration">approveRegistration</a></li><li><a href="global.html#changePassword">changePassword</a></li><li><a href="global.html#createCountry">createCountry</a></li><li><a href="global.html#createGalleryItem">createGalleryItem</a></li><li><a href="global.html#createLogEntry">createLogEntry</a></li><li><a href="global.html#createNotification">createNotification</a></li><li><a href="global.html#createPost">createPost</a></li><li><a href="global.html#createRegistration">createRegistration</a></li><li><a href="global.html#createSponsor">createSponsor</a></li><li><a href="global.html#createStream">createStream</a></li><li><a href="global.html#createTeam">createTeam</a></li><li><a href="global.html#createTeamMember">createTeamMember</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#declineInvite">declineInvite</a></li><li><a href="global.html#decodeIfBase64">decodeIfBase64</a></li><li><a href="global.html#deleteCompetition">deleteCompetition</a></li><li><a href="global.html#deleteCountry">deleteCountry</a></li><li><a href="global.html#deleteGalleryItem">deleteGalleryItem</a></li><li><a href="global.html#deleteKey">deleteKey</a></li><li><a href="global.html#deleteLdapUser">deleteLdapUser</a></li><li><a href="global.html#deleteLogEntry">deleteLogEntry</a></li><li><a href="global.html#deleteMedia">deleteMedia</a></li><li><a href="global.html#deleteNotification">deleteNotification</a></li><li><a href="global.html#deleteOldLogs">deleteOldLogs</a></li><li><a href="global.html#deletePost">deletePost</a></li><li><a href="global.html#deleteRegistration">deleteRegistration</a></li><li><a href="global.html#deleteRobotFile">deleteRobotFile</a></li><li><a href="global.html#deleteSelf">deleteSelf</a></li><li><a href="global.html#deleteSponsor">deleteSponsor</a></li><li><a href="global.html#deleteStream">deleteStream</a></li><li><a href="global.html#deleteTeam">deleteTeam</a></li><li><a href="global.html#deleteTeamMember">deleteTeamMember</a></li><li><a href="global.html#deleteUser">deleteUser</a></li><li><a href="global.html#down">down</a></li><li><a href="global.html#emitToUser">emitToUser</a></li><li><a href="global.html#exportRegistrationsCSV">exportRegistrationsCSV</a></li><li><a href="global.html#forgotPassword">forgotPassword</a></li><li><a href="global.html#form">form</a></li><li><a href="global.html#getApiOrigin">getApiOrigin</a></li><li><a href="global.html#getComments">getComments</a></li><li><a href="global.html#getCompetitionById">getCompetitionById</a></li><li><a href="global.html#getCompetitions">getCompetitions</a></li><li><a href="global.html#getCountries">getCountries</a></li><li><a href="global.html#getCountryById">getCountryById</a></li><li><a href="global.html#getFileInfo">getFileInfo</a></li><li><a href="global.html#getIO">getIO</a></li><li><a href="global.html#getKeyInfo">getKeyInfo</a></li><li><a href="global.html#getMediaById">getMediaById</a></li><li><a href="global.html#getMembershipStatus">getMembershipStatus</a></li><li><a href="global.html#getMessages">getMessages</a></li><li><a href="global.html#getMyTeam">getMyTeam</a></li><li><a href="global.html#getNotificationById">getNotificationById</a></li><li><a href="global.html#getNotifications">getNotifications</a></li><li><a href="global.html#getOverview">getOverview</a></li><li><a href="global.html#getPostById">getPostById</a></li><li><a href="global.html#getPosts">getPosts</a></li><li><a href="global.html#getRegistrationById">getRegistrationById</a></li><li><a href="global.html#getRegistrationStats">getRegistrationStats</a></li><li><a href="global.html#getRegistrations">getRegistrations</a></li><li><a href="global.html#getResendClient">getResendClient</a></li><li><a href="global.html#getRobotFiles">getRobotFiles</a></li><li><a href="global.html#getSelf">getSelf</a></li><li><a href="global.html#getSponsorById">getSponsorById</a></li><li><a href="global.html#getSponsors">getSponsors</a></li><li><a href="global.html#getStreamById">getStreamById</a></li><li><a href="global.html#getStreams">getStreams</a></li><li><a href="global.html#getSystemLogById">getSystemLogById</a></li><li><a href="global.html#getSystemLogs">getSystemLogs</a></li><li><a href="global.html#getSystemStats">getSystemStats</a></li><li><a href="global.html#getTeamById">getTeamById</a></li><li><a href="global.html#getTeamLogs">getTeamLogs</a></li><li><a href="global.html#getTeamMemberById">getTeamMemberById</a></li><li><a href="global.html#getTeamMembers">getTeamMembers</a></li><li><a href="global.html#getTeams">getTeams</a></li><li><a href="global.html#getUserById">getUserById</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#getUsersByRole">getUsersByRole</a></li><li><a href="global.html#getUsersTimeline">getUsersTimeline</a></li><li><a href="global.html#getVapidPublicKey">getVapidPublicKey</a></li><li><a href="global.html#handleUploadErrors">handleUploadErrors</a></li><li><a href="global.html#inviteToTeam">inviteToTeam</a></li><li><a href="global.html#leaveTeam">leaveTeam</a></li><li><a href="global.html#list">list</a></li><li><a href="global.html#listFavoriteCompetitions">listFavoriteCompetitions</a></li><li><a href="global.html#listGallery">listGallery</a></li><li><a href="global.html#listJoinRequests">listJoinRequests</a></li><li><a href="global.html#listKeys">listKeys</a></li><li><a href="global.html#listLdapUsers">listLdapUsers</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#me">me</a></li><li><a href="global.html#normalizeBase">normalizeBase</a></li><li><a href="global.html#parseResponse">parseResponse</a></li><li><a href="global.html#redirectIfAuthenticated">redirectIfAuthenticated</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerTeamInCompetition">registerTeamInCompetition</a></li><li><a href="global.html#rejectRegistration">rejectRegistration</a></li><li><a href="global.html#remove">remove</a></li><li><a href="global.html#removeFavoriteCompetition">removeFavoriteCompetition</a></li><li><a href="global.html#renderAddLdapUser">renderAddLdapUser</a></li><li><a href="global.html#renderEditLdapUser">renderEditLdapUser</a></li><li><a href="global.html#requestJoinTeam">requestJoinTeam</a></li><li><a href="global.html#requireAdminSession">requireAdminSession</a></li><li><a href="global.html#requireOwnership">requireOwnership</a></li><li><a href="global.html#requireRole">requireRole</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#resolveMediaUrl">resolveMediaUrl</a></li><li><a href="global.html#save">save</a></li><li><a href="global.html#searchUsers">searchUsers</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#sendPasswordResetCodeEmail">sendPasswordResetCodeEmail</a></li><li><a href="global.html#sendTestPush">sendTestPush</a></li><li><a href="global.html#setIO">setIO</a></li><li><a href="global.html#subscribePush">subscribePush</a></li><li><a href="global.html#subscribeToPush">subscribeToPush</a></li><li><a href="global.html#toggleFileVisibility">toggleFileVisibility</a></li><li><a href="global.html#toggleLike">toggleLike</a></li><li><a href="global.html#togglePin">togglePin</a></li><li><a href="global.html#unsubscribeFromPush">unsubscribeFromPush</a></li><li><a href="global.html#unsubscribePush">unsubscribePush</a></li><li><a href="global.html#up">up</a></li><li><a href="global.html#updateCompetition">updateCompetition</a></li><li><a href="global.html#updateCountry">updateCountry</a></li><li><a href="global.html#updateLdapUser">updateLdapUser</a></li><li><a href="global.html#updateNotification">updateNotification</a></li><li><a href="global.html#updatePost">updatePost</a></li><li><a href="global.html#updateRegistration">updateRegistration</a></li><li><a href="global.html#updateSelf">updateSelf</a></li><li><a href="global.html#updateSponsor">updateSponsor</a></li><li><a href="global.html#updateStream">updateStream</a></li><li><a href="global.html#updateTeam">updateTeam</a></li><li><a href="global.html#updateTeamMember">updateTeamMember</a></li><li><a href="global.html#updateUser">updateUser</a></li><li><a href="global.html#uploadMedia">uploadMedia</a></li><li><a href="global.html#uploadMiddleware">uploadMiddleware</a></li><li><a href="global.html#uploadRobotFile">uploadRobotFile</a></li><li><a href="global.html#useAuthContext">useAuthContext</a></li><li><a href="global.html#useSocket">useSocket</a></li><li><a href="global.html#validatePasswordStrength">validatePasswordStrength</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Jan 12 2026 00:52:34 GMT+0100 (hora estándar de Europa central)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Jan 12 2026 00:55:47 GMT+0100 (hora estándar de Europa central)
 </footer>
 
 <script> prettyPrint(); </script>
