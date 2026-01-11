@@ -1,7 +1,36 @@
+/**
+ * @fileoverview Team membership CRUD endpoints.
+ *
+ * Supports creating, listing, reading, updating, and deleting team membership records.
+ * Routes apply authentication for mutating endpoints.
+ */
+
 import db from '../models/index.js';
 const { TeamMembers, User, Team } = db;
 import { Op } from 'sequelize';
 
+/**
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} params
+ * @property {object} query
+ * @property {object} body
+ */
+
+/**
+ * Express response.
+ * @typedef {object} Response
+ * @property {(status:number)=>Response} status
+ * @property {(body:any)=>void} json
+ */
+
+/**
+ * Create a team member record.
+ *
+ * @route POST /api/team_members
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const createTeamMember = async (req, res) => {
   try {
     const item = await TeamMembers.create(req.body);
@@ -11,6 +40,15 @@ export const createTeamMember = async (req, res) => {
   }
 };
 
+/**
+ * List team members.
+ *
+ * Optional query filters: `team_id`, `user_id`.
+ *
+ * @route GET /api/team_members
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const getTeamMembers = async (req, res) => {
   try {
     const { team_id, user_id, limit = 50, offset = 0 } = req.query;
@@ -51,6 +89,13 @@ export const getTeamMembers = async (req, res) => {
   }
 };
 
+/**
+ * Get a team member record by id.
+ *
+ * @route GET /api/team_members/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const getTeamMemberById = async (req, res) => {
   try {
     const item = await TeamMembers.findByPk(req.params.id);
@@ -61,6 +106,13 @@ export const getTeamMemberById = async (req, res) => {
   }
 };
 
+/**
+ * Update a team member record by id.
+ *
+ * @route PUT /api/team_members/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const updateTeamMember = async (req, res) => {
   try {
     const [updated] = await TeamMembers.update(req.body, { where: { id: req.params.id } });
@@ -72,6 +124,13 @@ export const updateTeamMember = async (req, res) => {
   }
 };
 
+/**
+ * Delete a team member record by id.
+ *
+ * @route DELETE /api/team_members/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const deleteTeamMember = async (req, res) => {
   try {
     const deleted = await TeamMembers.destroy({ where: { id: req.params.id } });

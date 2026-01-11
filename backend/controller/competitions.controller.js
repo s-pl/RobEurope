@@ -1,8 +1,32 @@
+/**
+ * @fileoverview Competition CRUD and discovery endpoints.
+ *
+ * Includes listing/searching competitions, reading a competition (with access-based
+ * hiding of sensitive fields), admin-only CRUD, and per-user favorites stored in Redis.
+ */
+
 import db from '../models/index.js';
 const { Competition, Registration, TeamMembers } = db;
 import { Op } from 'sequelize';
 import redisClient from '../utils/redis.js';
 import { getIO } from '../utils/realtime.js';
+
+/**
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} [user]
+ * @property {number} [user.id]
+ * @property {string} [user.role]
+ * @property {object} [session]
+ * @property {object} [session.user]
+ */
+
+/**
+ * Express response.
+ * @typedef {object} Response
+ * @property {(status:number)=>Response} status
+ * @property {(body:any)=>void} json
+ */
 
 const generateSlug = (text) => {
   return text
@@ -44,6 +68,13 @@ export const createCompetition = async (req, res) => {
   }
 };
 
+/**
+ * List competitions with optional filtering.
+ *
+ * @route GET /api/competitions
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const getCompetitions = async (req, res) => {
   try {
     const { q, country_id, limit = 50, offset = 0, sort = 'id', order = 'ASC', is_active, start_date_from, start_date_to, withCount } = req.query;
@@ -79,6 +110,13 @@ export const getCompetitions = async (req, res) => {
 // --- Favorites (stored in Redis set per user) ---
 const favKey = (userId) => `user:${userId}:favorites:competitions`;
 
+/**
+ * Add a competition to the current user's favorites (Redis set).
+ *
+ * @route POST /api/competitions/:id/favorite
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const addFavoriteCompetition = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -91,6 +129,13 @@ export const addFavoriteCompetition = async (req, res) => {
   }
 };
 
+/**
+ * Remove a competition from the current user's favorites (Redis set).
+ *
+ * @route DELETE /api/competitions/:id/favorite
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const removeFavoriteCompetition = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -103,6 +148,13 @@ export const removeFavoriteCompetition = async (req, res) => {
   }
 };
 
+/**
+ * List the current user's favorite competitions.
+ *
+ * @route GET /api/competitions/favorites/mine
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const listFavoriteCompetitions = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -116,6 +168,16 @@ export const listFavoriteCompetitions = async (req, res) => {
   }
 };
 
+/**
+ * Get a competition by id.
+ *
+ * If the requesting user is not approved (via an approved team registration),
+ * sensitive fields like `stream_url` are omitted.
+ *
+ * @route GET /api/competitions/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const getCompetitionById = async (req, res) => {
   try {
     const item = await Competition.findByPk(req.params.id);
@@ -155,6 +217,16 @@ export const getCompetitionById = async (req, res) => {
   }
 };
 
+/**
+ * Update a competition (super_admin only).
+ *
+ * When `is_active` is set true, this deactivates any other active competition.
+ * Emits `competition_updated` via Socket.IO.
+ *
+ * @route PUT /api/competitions/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const updateCompetition = async (req, res) => {
   try {
     if (req.body.is_active) {
@@ -170,6 +242,14 @@ export const updateCompetition = async (req, res) => {
   }
 };
 
+/**
+ * Delete a competition (super_admin only).
+ * Emits `competition_deleted` via Socket.IO.
+ *
+ * @route DELETE /api/competitions/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const deleteCompetition = async (req, res) => {
   try {
   const deleted = await Competition.destroy({ where: { id: req.params.id } });

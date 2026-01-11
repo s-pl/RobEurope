@@ -1,9 +1,45 @@
+/**
+ * @fileoverview Web Push subscription and test endpoints.
+ *
+ * Exposes the VAPID public key and authenticated endpoints to subscribe/unsubscribe
+ * push subscriptions, plus a test-send helper.
+ */
+
 import { getPublicKey, saveSubscription, removeSubscription, sendPushToUser } from '../utils/push.js';
 
+/**
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} [user]
+ * @property {number} [user.id]
+ * @property {object} body
+ */
+
+/**
+ * Express response.
+ * @typedef {object} Response
+ * @property {(status:number)=>Response} status
+ * @property {(body:any)=>void} json
+ */
+
+/**
+ * Get the VAPID public key used by the browser to subscribe.
+ *
+ * @route GET /api/push/vapidPublicKey
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const getVapidPublicKey = async (req, res) => {
   res.json({ publicKey: getPublicKey() });
 };
 
+/**
+ * Save a push subscription for the authenticated user.
+ *
+ * @route POST /api/push/subscribe
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const subscribePush = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -16,6 +52,13 @@ export const subscribePush = async (req, res) => {
   }
 };
 
+/**
+ * Remove a push subscription for the authenticated user.
+ *
+ * @route POST /api/push/unsubscribe
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const unsubscribePush = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -29,6 +72,13 @@ export const unsubscribePush = async (req, res) => {
   }
 };
 
+/**
+ * Send a test push notification to the authenticated user.
+ *
+ * @route POST /api/push/test
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const sendTestPush = async (req, res) => {
   try {
     const userId = req.user?.id;

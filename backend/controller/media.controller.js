@@ -1,8 +1,35 @@
+/**
+ * @fileoverview Authenticated media library endpoints.
+ *
+ * Supports listing media (with pagination and optional uploader filter), reading
+ * a single media record, uploading a file to `/uploads`, and deleting media.
+ */
+
 import db from '../models/index.js';
 const { Media, User } = db;
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+
+/**
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} params
+ * @property {object} query
+ * @property {object} body
+ * @property {object} user
+ * @property {number} user.id
+ * @property {string} [user.role]
+ * @property {any} [file]
+ */
+
+/**
+ * Express response.
+ * @typedef {object} Response
+ * @property {(status:number)=>Response} status
+ * @property {(body:any)=>void} json
+ * @property {()=>void} send
+ */
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -71,6 +98,22 @@ export const getAllMedia = async (req, res) => {
   }
 };
 
+/**
+ * Get a page of media.
+ *
+ * @route GET /api/media
+ * @param {Request} req
+ * @param {Response} res
+ */
+// (implementation above)
+
+/**
+ * Get a single media record by id.
+ *
+ * @route GET /api/media/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const getMediaById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -93,6 +136,16 @@ export const getMediaById = async (req, res) => {
   }
 };
 
+/**
+ * Upload a media file.
+ *
+ * Uses `multer` to store the file under the server `uploads/` directory and
+ * persists the record in the Media table.
+ *
+ * @route POST /api/media
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const uploadMedia = [
   upload.single('file'),
   async (req, res) => {
@@ -121,6 +174,14 @@ export const uploadMedia = [
   }
 ];
 
+/**
+ * Delete a media record and its file on disk.
+ * Allowed for the uploader or a `super_admin`.
+ *
+ * @route DELETE /api/media/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const deleteMedia = async (req, res) => {
   try {
     const { id } = req.params;
