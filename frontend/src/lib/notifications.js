@@ -1,8 +1,23 @@
+/**
+ * @fileoverview Web Notifications helper.
+ *
+ * Provides small wrappers for checking browser support, requesting permission,
+ * and showing notifications.
+ */
+
 // Simple Web Notifications helper
+/**
+ * Whether the current runtime supports the Web Notifications API.
+ * @returns {boolean}
+ */
 export function canUseNotifications() {
   return typeof window !== 'undefined' && 'Notification' in window;
 }
 
+/**
+ * Request notifications permission.
+ * @returns {Promise<string>} Permission value.
+ */
 export async function requestNotificationPermission() {
   if (!canUseNotifications()) return 'denied';
   if (Notification.permission === 'granted') return 'granted';
@@ -15,6 +30,12 @@ export async function requestNotificationPermission() {
   }
 }
 
+/**
+ * Show a browser notification.
+ * @param {string} title
+ * @param {object} [options]
+ * @returns {boolean}
+ */
 export function showNotification(title, options = {}) {
   if (!canUseNotifications()) return false;
   if (Notification.permission !== 'granted') return false;

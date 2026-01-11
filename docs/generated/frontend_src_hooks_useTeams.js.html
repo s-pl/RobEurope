@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: backend/middleware/ownership.middleware.js</title>
+    <title>JSDoc: Source: frontend/src/hooks/useTeams.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: backend/middleware/ownership.middleware.js</h1>
+    <h1 class="page-title">Source: frontend/src/hooks/useTeams.js</h1>
 
     
 
@@ -27,66 +27,62 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @fileoverview
- * Ownership enforcement middleware.
+ * @fileoverview Teams API hook.
+ *
+ * Provides thin wrappers around `/api/teams` endpoints.
+ */
+
+import { useApi } from './useApi';
+import { useCallback } from 'react';
+
+/**
+ * @typedef {object} UseTeamsApi
+ * @property {Function} list
+ * @property {Function} create
+ * @property {Function} invite
+ * @property {Function} acceptInvite
+ * @property {Function} requestJoin
+ * @property {Function} approveRequest
+ * @property {Function} registerInCompetition
+ * @property {Function} mine
+ * @property {Function} update
+ * @property {Function} remove
+ * @property {Function} listRequests
+ * @property {Function} getMembers
+ * @property {Function} removeMember
+ * @property {Function} leave
  */
 
 /**
- * Creates a middleware that ensures the authenticated user owns the record referenced by `req.params.id`.
- *
- * Rules:
- * - `super_admin` bypasses ownership checks.
- * - Ownership is inferred from common column names:
- *   - `created_by_user_id`
- *   - `author_id`
- * - For the `User` model, the record id is the owner.
- *
- * @param {string} modelName Sequelize model name in the model registry.
- * @returns {Express.RequestHandler}
+ * Returns team-related API helpers.
+ * @returns {UseTeamsApi}
  */
-export function requireOwnership(modelName) {
-  return async (req, res, next) => {
-    const user = req.user;
-    if (!user) return res.status(401).json({ error: 'No autorizado' });
+export const useTeams = () => {
+  const api = useApi();
 
-    // Super admin can do all actions
-    if (user.role === 'super_admin') {
-      return next();
-    }
+  const list = useCallback((q = '', country_id = '') => {
+    const params = new URLSearchParams();
+    if (q) params.append('q', q);
+    if (country_id) params.append('country_id', country_id);
+    return api(`/teams?${params.toString()}`);
+  }, [api]);
+  const create = useCallback((payload) => api('/teams', { method: 'POST', body: payload }), [api]);
+  const invite = useCallback((teamId, payload) => api(`/teams/${teamId}/invite`, { method: 'POST', body: payload }), [api]);
+  const acceptInvite = useCallback((token) => api('/teams/invitations/accept', { method: 'POST', body: { token } }), [api]);
+  const requestJoin = useCallback((teamId) => api(`/teams/${teamId}/requests`, { method: 'POST' }), [api]);
+  const approveRequest = useCallback((requestId) => api(`/teams/requests/${requestId}/approve`, { method: 'POST' }), [api]);
+  const registerInCompetition = useCallback((teamId, competition_id) => api(`/teams/${teamId}/register-competition`, { method: 'POST', body: { competition_id } }), [api]);
+  const mine = useCallback(() => api('/teams/mine'), [api]);
+  const update = useCallback((teamId, payload) => api(`/teams/${teamId}`, { method: 'PUT', body: payload }), [api]);
+  const remove = useCallback((teamId) => api(`/teams/${teamId}`, { method: 'DELETE' }), [api]);
+  const listRequests = useCallback((teamId) => api(`/teams/${teamId}/requests`), [api]);
+  const getMembers = useCallback((teamId) => api(`/team-members?team_id=${teamId}`), [api]);
+  const removeMember = useCallback((memberId) => api(`/team-members/${memberId}`, { method: 'DELETE' }), [api]);
+  const leave = useCallback(() => api('/teams/leave', { method: 'POST' }), [api]);
 
-    const id = req.params.id;
-    if (!id) return res.status(400).json({ error: 'ID requerido' });
-
-    try {
-      const db = await import('../models/index.js');
-      const Model = db.default[modelName];
-      if (!Model) return res.status(500).json({ error: 'Modelo no encontrado' });
-
-      const record = await Model.findByPk(id);
-      if (!record) return res.status(404).json({ error: 'Registro no encontrado' });
-
-      // Check ownership based on model
-      let ownerId;
-      if (modelName === 'User') {
-        ownerId = record.id;
-      } else if (record.created_by_user_id) {
-        ownerId = record.created_by_user_id;
-      } else if (record.author_id) {
-        ownerId = record.author_id;
-      } else {
-        return res.status(403).json({ error: 'No se puede verificar propiedad' });
-      }
-
-      if (ownerId !== user.id) {
-        return res.status(403).json({ error: 'Solo puedes modificar tus propios registros' });
-      }
-
-      next();
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  };
-}</code></pre>
+  return { list, create, invite, acceptInvite, requestJoin, approveRequest, registerInCompetition, mine, update, remove, listRequests, getMembers, removeMember, leave };
+};
+</code></pre>
         </article>
     </section>
 

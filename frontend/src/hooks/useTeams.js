@@ -1,6 +1,34 @@
+/**
+ * @fileoverview Teams API hook.
+ *
+ * Provides thin wrappers around `/api/teams` endpoints.
+ */
+
 import { useApi } from './useApi';
 import { useCallback } from 'react';
 
+/**
+ * @typedef {object} UseTeamsApi
+ * @property {Function} list
+ * @property {Function} create
+ * @property {Function} invite
+ * @property {Function} acceptInvite
+ * @property {Function} requestJoin
+ * @property {Function} approveRequest
+ * @property {Function} registerInCompetition
+ * @property {Function} mine
+ * @property {Function} update
+ * @property {Function} remove
+ * @property {Function} listRequests
+ * @property {Function} getMembers
+ * @property {Function} removeMember
+ * @property {Function} leave
+ */
+
+/**
+ * Returns team-related API helpers.
+ * @returns {UseTeamsApi}
+ */
 export const useTeams = () => {
   const api = useApi();
 

@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Toast state store + hook.
+ *
+ * Implements a small in-memory toast store with subscribe/update/dismiss helpers.
+ */
+
 import * as React from "react"
 
 const TOAST_LIMIT = 1
@@ -28,6 +34,12 @@ const addToRemoveQueue = (toastId) => {
   toastTimeouts.set(toastId, timeout)
 }
 
+/**
+ * Reducer for toast actions.
+ * @param {any} state
+ * @param {any} action
+ * @returns {any}
+ */
 export const reducer = (state, action) => {
   switch (action.type) {
     case "ADD_TOAST":
@@ -121,6 +133,11 @@ function toast({ ...props }) {
   }
 }
 
+/**
+ * React hook exposing toast state and actions.
+ *
+ * @returns {{ toasts: any[], toast: Function, dismiss: Function }}
+ */
 function useToast() {
   const [state, setState] = React.useState(memoryState)
 

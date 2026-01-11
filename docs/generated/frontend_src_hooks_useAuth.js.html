@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: backend/middleware/ownership.middleware.js</title>
+    <title>JSDoc: Source: frontend/src/hooks/useAuth.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: backend/middleware/ownership.middleware.js</h1>
+    <h1 class="page-title">Source: frontend/src/hooks/useAuth.js</h1>
 
     
 
@@ -27,66 +27,17 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @fileoverview
- * Ownership enforcement middleware.
+ * @fileoverview Convenience hook for accessing the AuthContext.
  */
+
+import { useAuthContext } from '../context/AuthContext';
 
 /**
- * Creates a middleware that ensures the authenticated user owns the record referenced by `req.params.id`.
- *
- * Rules:
- * - `super_admin` bypasses ownership checks.
- * - Ownership is inferred from common column names:
- *   - `created_by_user_id`
- *   - `author_id`
- * - For the `User` model, the record id is the owner.
- *
- * @param {string} modelName Sequelize model name in the model registry.
- * @returns {Express.RequestHandler}
+ * Shortcut to `useAuthContext()`.
+ * @returns {any}
  */
-export function requireOwnership(modelName) {
-  return async (req, res, next) => {
-    const user = req.user;
-    if (!user) return res.status(401).json({ error: 'No autorizado' });
-
-    // Super admin can do all actions
-    if (user.role === 'super_admin') {
-      return next();
-    }
-
-    const id = req.params.id;
-    if (!id) return res.status(400).json({ error: 'ID requerido' });
-
-    try {
-      const db = await import('../models/index.js');
-      const Model = db.default[modelName];
-      if (!Model) return res.status(500).json({ error: 'Modelo no encontrado' });
-
-      const record = await Model.findByPk(id);
-      if (!record) return res.status(404).json({ error: 'Registro no encontrado' });
-
-      // Check ownership based on model
-      let ownerId;
-      if (modelName === 'User') {
-        ownerId = record.id;
-      } else if (record.created_by_user_id) {
-        ownerId = record.created_by_user_id;
-      } else if (record.author_id) {
-        ownerId = record.author_id;
-      } else {
-        return res.status(403).json({ error: 'No se puede verificar propiedad' });
-      }
-
-      if (ownerId !== user.id) {
-        return res.status(403).json({ error: 'Solo puedes modificar tus propios registros' });
-      }
-
-      next();
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  };
-}</code></pre>
+export const useAuth = () => useAuthContext();
+</code></pre>
         </article>
     </section>
 
