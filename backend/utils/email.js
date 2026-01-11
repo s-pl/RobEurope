@@ -2,6 +2,19 @@ import { Resend } from 'resend';
 
 let resendClient = null;
 
+/**
+ * @fileoverview
+ * Email helpers (Resend).
+ */
+
+/**
+ * Lazily initializes and returns the shared Resend client.
+ *
+ * If `RESEND_API_KEY` is not configured, returns null and email sending is disabled.
+ *
+ * @returns {Resend|null}
+ */
+
 export function getResendClient() {
   if (!resendClient) {
     const apiKey = process.env.RESEND_API_KEY;
@@ -14,6 +27,12 @@ export function getResendClient() {
   return resendClient;
 }
 
+/**
+ * Sends a password reset email containing a reset link.
+ *
+ * @param {{ to: string, token: string, appUrl?: string }} params
+ * @returns {Promise<{ sent: boolean, id?: string, reason?: string, error?: any }>} Result.
+ */
 export async function sendPasswordResetEmail({ to, token, appUrl }) {
   const resend = getResendClient();
   if (!resend) return { sent: false, reason: 'missing_api_key' };
@@ -51,6 +70,12 @@ export async function sendPasswordResetEmail({ to, token, appUrl }) {
   }
 }
 
+/**
+ * Sends a password reset email containing a one-time code.
+ *
+ * @param {{ to: string, code: string }} params
+ * @returns {Promise<{ sent: boolean, id?: string, reason?: string, error?: any }>} Result.
+ */
 export async function sendPasswordResetCodeEmail({ to, code }) {
   const resend = getResendClient();
   if (!resend) return { sent: false, reason: 'missing_api_key' };

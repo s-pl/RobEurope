@@ -7,9 +7,26 @@ import { sendPasswordResetEmail, sendPasswordResetCodeEmail } from '../utils/ema
 
 const { User } = db;
 
+/**
+ * @fileoverview
+ * Authentication and account management handlers.
+ *
+ * The backend uses cookie-based sessions (`express-session`).
+ * These handlers set/clear `req.session.user`.
+ */
+
 function isBase64(str) {
   return typeof str === 'string' && /^[A-Za-z0-9+/=]+$/.test(str) && (str.length % 4 === 0); // got it from stackoverflow, rlly dont know how it works
 }
+
+/**
+ * Decodes a value if it appears to be base64.
+ *
+ * Some clients may send credentials encoded; this keeps the API tolerant.
+ *
+ * @param {string} value Input value.
+ * @returns {string} Decoded or original value.
+ */
 function decodeIfBase64(value) {
   try {
     if (!value || typeof value !== 'string') return value;
@@ -22,6 +39,12 @@ function decodeIfBase64(value) {
   }
 }
 
+/**
+ * Validates password strength.
+ *
+ * @param {string} password Raw password.
+ * @returns {string|null} Returns a localized error message or null when valid.
+ */
 function validatePasswordStrength(password) {
   if (typeof password !== 'string') return 'Password inválida';
   if (password.length < 8) return 'La contraseña debe tener al menos 8 caracteres';
@@ -34,6 +57,14 @@ function validatePasswordStrength(password) {
   return null;
 }
 
+/**
+ * Registers a new user and creates a session.
+ *
+ * @route POST /api/auth/register
+ * @param {import('express').Request} req Express request.
+ * @param {import('express').Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const register = async (req, res) => {
   try {
     // Expect username instead of country_id (models use username)
@@ -104,6 +135,15 @@ export const register = async (req, res) => {
   }
 };
 
+/**
+ * Logs a user in by email/password and creates a session.
+ * Includes basic throttling/lockout via Redis.
+ *
+ * @route POST /api/auth/login
+ * @param {import('express').Request} req Express request.
+ * @param {import('express').Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const login = async (req, res) => {
   try {
     let { email, password } = req.body;
@@ -171,6 +211,13 @@ export const login = async (req, res) => {
   }
 };
 
+/**
+ * Destroys the current session.
+ * @route POST /api/auth/logout
+ * @param {import('express').Request} req Express request.
+ * @param {import('express').Response} res Express response.
+ * @returns {void}
+ */
 export const logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) return res.status(500).json({ error: 'Could not log out' });
@@ -179,6 +226,13 @@ export const logout = (req, res) => {
   });
 };
 
+/**
+ * Returns the current authenticated user session payload.
+ * @route GET /api/auth/me
+ * @param {import('express').Request} req Express request.
+ * @param {import('express').Response} res Express response.
+ * @returns {any}
+ */
 export const me = (req, res) => {
   if (req.session && req.session.user) {
     return res.json(req.session.user);
@@ -186,6 +240,14 @@ export const me = (req, res) => {
   return res.status(401).json({ error: 'Not authenticated' });
 };
 
+/**
+ * Changes the current user's password.
+ *
+ * @route POST /api/auth/change-password
+ * @param {import('express').Request} req Express request.
+ * @param {import('express').Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const changePassword = async (req, res) => {
   try {
     if (!req.session?.user?.id) return res.status(401).json({ error: 'Not authenticated' });
@@ -220,6 +282,16 @@ export const changePassword = async (req, res) => {
   }
 };
 
+/**
+ * Initiates a password reset using a one-time code.
+ *
+ * This endpoint is designed to not reveal whether a user exists.
+ *
+ * @route POST /api/auth/forgot-password
+ * @param {import('express').Request} req Express request.
+ * @param {import('express').Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const forgotPassword = async (req, res) => {
   try {
     let { email } = req.body || {};
@@ -241,6 +313,14 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
+/**
+ * Completes a password reset given a valid token.
+ *
+ * @route POST /api/auth/reset-password
+ * @param {import('express').Request} req Express request.
+ * @param {import('express').Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const resetPassword = async (req, res) => {
   try {
     let { token, new_password } = req.body || {};

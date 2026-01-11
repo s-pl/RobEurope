@@ -2,6 +2,16 @@ import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import path from 'path';
 
+/**
+ * @fileoverview
+ * Central Winston logger configuration.
+ *
+ * Logs:
+ * - Rotating access logs (info)
+ * - Rotating error logs (error)
+ * - Console logs (debug)
+ */
+
 const logDir = path.resolve('logs');
 
 const commonFormat = winston.format.combine(
@@ -35,4 +45,8 @@ const logger = winston.createLogger({
   ]
 });
 
+/**
+ * Shared logger instance.
+ * @type {import('winston').Logger}
+ */
 export default logger;

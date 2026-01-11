@@ -1,5 +1,19 @@
 import { randomUUID } from 'crypto';
 
+/**
+ * @fileoverview
+ * Request id middleware.
+ */
+
+/**
+ * Adds a unique request id to each incoming request.
+ *
+ * - Sets `req.id`
+ * - Sets `res.locals.requestId`
+ * - Adds `X-Request-Id` response header
+ *
+ * @returns {import('express').RequestHandler}
+ */
 export default function requestId() {
   return (req, res, next) => {
     const id = randomUUID();
