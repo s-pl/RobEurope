@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Frontend i18n initialization.
+ *
+ * Configures `i18next` + `react-i18next`, loads translation resources, detects
+ * and persists the selected language, and applies the `lang` attribute on the
+ * document root.
+ */
+
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
@@ -54,7 +62,8 @@ const resources = {
         gallery: 'Galería',
         feedback: 'Opiniones',
         login: 'Iniciar sesión',
-        register: 'Registrarse'
+        register: 'Registrarse',
+        logout: 'Cerrar sesión'
       },
       status: {
         connected: 'Conectado',
@@ -111,6 +120,17 @@ const resources = {
       gallery: {
         galleryTitle: "Galería",
         galleryDescription: "Una colección de momentos de nuestro evento de robótica",
+        adminUploadTitle: 'Subir foto a la galería',
+        uploadImage: 'Imagen',
+        uploadTitle: 'Título (opcional)',
+        uploadDescription: 'Descripción (opcional)',
+        uploadCta: 'Subir',
+        uploading: 'Subiendo...',
+        uploadMissingFile: 'Selecciona una imagen',
+        uploadOk: 'Foto subida',
+        loading: 'Cargando...',
+        delete: 'Eliminar',
+        deleting: 'Eliminando...'
       },
       feedback: {
         Title: "Opiniones",
@@ -612,7 +632,8 @@ const resources = {
         gallery: 'Gallery',
         feedback: 'Feedback',
         login: 'Log in',
-        register: 'Register'
+        register: 'Register',
+        logout: 'Log out'
       },
       status: {
         connected: 'Online',
@@ -669,6 +690,17 @@ const resources = {
       gallery: {
         galleryTitle: "Gallery",
         galleryDescription: "A collection of our robotics event moments",
+        adminUploadTitle: 'Upload photo to gallery',
+        uploadImage: 'Image',
+        uploadTitle: 'Title (optional)',
+        uploadDescription: 'Description (optional)',
+        uploadCta: 'Upload',
+        uploading: 'Uploading...',
+        uploadMissingFile: 'Select an image',
+        uploadOk: 'Photo uploaded',
+        loading: 'Loading...',
+        delete: 'Delete',
+        deleting: 'Deleting...'
       },
       feedback: {
         Title: "Feedback",
@@ -1162,7 +1194,8 @@ const resources = {
         gallery: 'Galerie',
         feedback: 'Feedback',
         login: 'Anmelden',
-        register: 'Registrieren'
+        register: 'Registrieren',
+        logout: 'Abmelden'
       },
       status: {
         connected: 'Verbunden',
@@ -1219,6 +1252,17 @@ const resources = {
       gallery: {
         galleryTitle: "Galerie",
         galleryDescription: "Eine Sammlung unserer Roboterveranstaltungsmomente",
+        adminUploadTitle: 'Foto in die Galerie hochladen',
+        uploadImage: 'Bild',
+        uploadTitle: 'Titel (optional)',
+        uploadDescription: 'Beschreibung (optional)',
+        uploadCta: 'Hochladen',
+        uploading: 'Lade hoch...',
+        uploadMissingFile: 'Wähle ein Bild aus',
+        uploadOk: 'Foto hochgeladen',
+        loading: 'Laden...',
+        delete: 'Löschen',
+        deleting: 'Wird gelöscht...'
       },
       feedback: {
         Title: "Feedback",

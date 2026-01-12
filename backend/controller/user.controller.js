@@ -5,6 +5,25 @@ import bcrypt from 'bcryptjs';
 import { Op } from 'sequelize';
 import { getFileInfo } from '../middleware/upload.middleware.js';
 
+/**
+ * @fileoverview
+ * User API handlers.
+ *
+ * Routes:
+ * - Public search: GET /api/users?q=...
+ * - Authenticated self endpoints: GET/PATCH/DELETE /api/users/me
+ * - By-id endpoints require ownership checks at the router level.
+ */
+
+/**
+ * Creates a user.
+ *
+ * Note: This handler is not currently exposed in the API router.
+ *
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const createUser = async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -17,6 +36,14 @@ export const createUser = async (req, res) => {
 };
 
 
+/**
+ * Lists users.
+ *
+ * Note: This handler is not currently exposed in the API router.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const getUsers = async (req, res) => {
   try {
     const users = await User.findAll();
@@ -31,6 +58,13 @@ export const getUsers = async (req, res) => {
 };
 
 
+/**
+ * Retrieves a user by id.
+ * @route GET /api/users/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const getUserById = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
@@ -42,6 +76,16 @@ export const getUserById = async (req, res) => {
 };
 
 
+/**
+ * Updates a user by id.
+ *
+ * Supports optional profile photo upload via multipart/form-data.
+ *
+ * @route PUT /api/users/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const updateUser = async (req, res) => {
   try {
     const updates = { ...req.body };
@@ -64,6 +108,13 @@ export const updateUser = async (req, res) => {
 };
 
 
+/**
+ * Searches users by query string.
+ * @route GET /api/users?q=...
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const searchUsers = async (req, res) => {
   try {
     const q = (req.query.q || '').trim();
@@ -87,6 +138,13 @@ export const searchUsers = async (req, res) => {
 };
 
 
+/**
+ * Returns the current authenticated user.
+ * @route GET /api/users/me
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const getSelf = async (req, res) => {
   try {
     const id = req.user && req.user.id;
@@ -100,6 +158,16 @@ export const getSelf = async (req, res) => {
 };
 
 
+/**
+ * Updates the current authenticated user.
+ *
+ * Supports optional profile photo upload via multipart/form-data.
+ *
+ * @route PATCH /api/users/me
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const updateSelf = async (req, res) => {
   try {
     const id = req.user && req.user.id;
@@ -141,6 +209,13 @@ export const updateSelf = async (req, res) => {
 };
 
 
+/**
+ * Deletes the current authenticated user.
+ * @route DELETE /api/users/me
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<any>}
+ */
 export const deleteSelf = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -154,7 +229,16 @@ export const deleteSelf = async (req, res) => {
   }
 };
 
-// delete by id (admin-style) — validate numeric id
+/**
+ * Deletes a user by numeric id.
+ *
+ * Note: Ownership enforcement is performed in the router.
+ *
+ * @route DELETE /api/users/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<any>}
+ */
 export const deleteUser = async (req, res) => {
   try {
     const idParam = req.params.id;

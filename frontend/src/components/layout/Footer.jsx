@@ -1,15 +1,23 @@
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { Bot } from 'lucide-react';
 
 const Footer = () => {
     const { t } = useTranslation();
     return (
-        <footer className="px-6 md:px-16 lg:px-24 xl:px-32 w-full">
-            <div className="flex flex-col md:flex-row items-start justify-center gap-10 py-10 border-b border-gray-500/30">
+        <footer className="w-full border-t border-slate-200 bg-white/60 dark:border-slate-800 dark:bg-slate-950/40">
+            <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row items-start justify-between gap-10 py-10 border-b border-slate-200/70 dark:border-slate-800">
 
-                <div className="max-w-96">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" color="blue" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bot h-5 w-5" aria-hidden="true"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
-                    <p className="mt-6 text-sm text-gray-500 dark:text-slate-400">
-                        {t("footer.description")}
+                <div className="max-w-md">
+                    <div className="flex items-center gap-2">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white text-blue-700 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-800 dark:text-blue-400">
+                            <Bot className="h-5 w-5" aria-hidden="true" />
+                        </span>
+                        <span className="text-sm font-semibold text-slate-900 dark:text-slate-50">RobEurope</span>
+                    </div>
+                    <p className="mt-6 text-sm text-slate-600 dark:text-slate-400">
+                        {t('footer.description')}
                     </p>
                     <div className="flex items-center gap-2 mt-3">
                         <a href="https://x.com/robeurope-robotics" aria-label={t('footer.social.twitter')}>
@@ -30,36 +38,37 @@ const Footer = () => {
                     </div>
                 </div>
 
-                <div className="w-1/2 flex flex-wrap md:flex-nowrap justify-between">
+                <div className="w-full md:w-1/2 flex flex-wrap md:flex-nowrap justify-between gap-10 md:gap-6">
                     <div>
-                        <h2 className="font-semibold text-gray-900 dark:text-slate-50 mb-5">{t("footer.projects")}
+                        <h2 className="font-semibold text-slate-900 dark:text-slate-50 mb-5">{t('footer.projects')}
                         </h2>
-                        <ul className="text-sm text-gray-500 dark:text-slate-400 space-y-2 list-none">
-                            <li><a href="/competitions">{t("footer.competitions")}</a></li>
-                            <li><a href="/teams">{t("footer.teams")}</a></li>
-                            <li><a href="/streams">{t("footer.streaming")}</a></li>
+                        <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2 list-none">
+                            <li><Link to="/competitions" className="hover:text-slate-900 dark:hover:text-slate-100">{t('footer.competitions')}</Link></li>
+                            <li><Link to="/teams" className="hover:text-slate-900 dark:hover:text-slate-100">{t('footer.teams')}</Link></li>
+                            <li><Link to="/streams" className="hover:text-slate-900 dark:hover:text-slate-100">{t('footer.streaming')}</Link></li>
                         </ul>
                     </div>
                     <div>
-                        <h2 className="font-semibold text-gray-900 dark:text-slate-50 mb-5">{t("footer.resources")}</h2>
-                        <ul className="text-sm text-gray-500 dark:text-slate-400 space-y-2 list-none">
-                            <li><a href="/sponsors">{t("footer.sponsors")}</a></li>
+                        <h2 className="font-semibold text-slate-900 dark:text-slate-50 mb-5">{t('footer.resources')}</h2>
+                        <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2 list-none">
+                            <li><Link to="/sponsors" className="hover:text-slate-900 dark:hover:text-slate-100">{t('footer.sponsors')}</Link></li>
                         </ul>
                     </div>
                     <div>
-                        <h2 className="font-semibold text-gray-900 dark:text-slate-50 mb-5">{t("footer.company")}</h2>
-                        <ul className="text-sm text-gray-500 dark:text-slate-400 space-y-2 list-none">
-                            <li><a href="#">{t("footer.about")}</a></li>
-                            <li><a href="/contact">{t("footer.contact")}</a></li>
-                            <li><a href="/terms">{t("footer.terms")}</a></li>
+                        <h2 className="font-semibold text-slate-900 dark:text-slate-50 mb-5">{t('footer.company')}</h2>
+                        <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2 list-none">
+                            <li><a href="#" className="hover:text-slate-900 dark:hover:text-slate-100">{t('footer.about')}</a></li>
+                            <li><Link to="/contact" className="hover:text-slate-900 dark:hover:text-slate-100">{t('footer.contact')}</Link></li>
+                            <li><Link to="/terms" className="hover:text-slate-900 dark:hover:text-slate-100">{t('footer.terms')}</Link></li>
                         </ul>
                     </div>
                 </div>
 
             </div>
-            <p className="py-4 text-center text-xs md:text-sm text-gray-500 dark:text-slate-400">
+            <p className="py-4 text-center text-xs md:text-sm text-slate-500 dark:text-slate-400">
                 Copyright {new Date().getFullYear()} © <a href="#">Samuel Ponce Luna & Angel Lallave Herrera</a>. {t('footer.copyright')}
             </p>
+            </div>
         </footer>
     );
 };

@@ -5,6 +5,18 @@ import { fileURLToPath, pathToFileURL } from 'url';
 import { DataTypes } from 'sequelize';
 import sequelize from '../controller/db.controller.js';
 
+/**
+ * @fileoverview
+ * Sequelize model registry.
+ *
+ * This module:
+ * - Dynamically imports all `*.model.js` files in this folder.
+ * - Instantiates each model using the shared Sequelize instance.
+ * - Invokes `model.associate(db)` when present.
+ *
+ * Exported as a single `db` object containing models and the sequelize instance.
+ */
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

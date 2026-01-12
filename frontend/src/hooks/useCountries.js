@@ -1,6 +1,15 @@
+/**
+ * @fileoverview Countries hook.
+ *
+ * Fetches `/api/countries` and returns list + loading/error state.
+ */
+
 import { useState, useEffect } from 'react';
 import { useApi } from './useApi';
 
+/**
+ * @returns {{ countries: any[], loading: boolean, error: string|null }}
+ */
 export const useCountries = () => {
   const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(true);

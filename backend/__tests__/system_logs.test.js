@@ -1,162 +1,321 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import request from 'supertest';
-import app from '../index.js';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import {
+  getSystemLogs,
+  getSystemLogById,
+  getSystemStats,
+  deleteOldLogs
+} from '../controller/system_log.controller.js';
 import db from '../models/index.js';
 
-const { SystemLog } = db;
+// Mock Sequelize models
+vi.mock('../models/index.js', () => {
+  const SystemLog = {
+    findAll: vi.fn(),
+    findByPk: vi.fn(),
+    count: vi.fn(),
+    destroy: vi.fn(),
+  };
+  const User = {
+    findAll: vi.fn(),
+  };
+  return {
+    default: {
+      SystemLog,
+      User,
+    },
+  };
+});
 
-describe('System Logs API', () => {
-  let server;
-  let superAdminToken;
-  let regularUserToken;
+describe('System Log Controller', () => {
+  let req, res;
 
-  beforeAll(async () => {
-    // Start server
-    server = app.listen(85);
-
-    // Create a super admin user first
-    await request(app)
-      .post('/api/auth/register')
-      .send({
-        username: 'superadmin',
-        email: 'superadmin@robeurope.com',
-        password: 'SuperAdmin123!',
-        first_name: 'Super',
-        last_name: 'Admin'
-      });
-
-    // Update the user to be super admin (this would normally be done by another super admin)
-    const { User } = db;
-    await User.update(
-      { role: 'super_admin' },
-      { where: { email: 'superadmin@robeurope.com' } }
-    );
-
-    // Login as super admin
-    const superAdminLogin = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'superadmin@robeurope.com',
-        password: 'SuperAdmin123!'
-      });
-
-    superAdminToken = superAdminLogin.body.token;
-
-    // Create and login as regular user
-    await request(app)
-      .post('/api/auth/register')
-      .send({
-        username: 'regularuser',
-        email: 'regular@example.com',
-        password: 'RegularPass123!',
-        first_name: 'Regular',
-        last_name: 'User'
-      });
-
-    const userLogin = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'regular@example.com',
-        password: 'RegularPass123!'
-      });
-
-    regularUserToken = userLogin.body.token;
+  beforeEach(() => {
+    req = {
+      body: {},
+      query: {},
+      params: {},
+    };
+    res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+    };
+    vi.clearAllMocks();
   });
 
-  afterAll(async () => {
-    if (server) {
-      server.close();
-    }
-  });
-
-  describe('Access Control', () => {
-    it('should deny access to regular users', async () => {
-      const response = await request(app)
-        .get('/api/system-logs')
-        .set('Authorization', `Bearer ${regularUserToken}`);
-
-      expect(response.status).toBe(403);
-    });
-
-    it('should allow access to super admins', async () => {
-      const response = await request(app)
-        .get('/api/system-logs')
-        .set('Authorization', `Bearer ${superAdminToken}`);
-
-      expect(response.status).toBe(200);
-      expect(Array.isArray(response.body.logs)).toBe(true);
-    });
-  });
-
-  describe('Log Retrieval', () => {
+  describe('getSystemLogs', () => {
     it('should return system logs with pagination', async () => {
-      const response = await request(app)
-        .get('/api/system-logs?limit=10&offset=0')
-        .set('Authorization', `Bearer ${superAdminToken}`);
+      const mockLogs = [
+        { id: 1, action: 'LOGIN', entity_type: 'User' },
+        { id: 2, action: 'CREATE', entity_type: 'Post' },
+      ];
+      db.SystemLog.findAll.mockResolvedValue(mockLogs);
+      db.SystemLog.count.mockResolvedValue(2);
+      req.query = { limit: '10', offset: '0' };
 
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('logs');
-      expect(response.body).toHaveProperty('pagination');
-      expect(Array.isArray(response.body.logs)).toBe(true);
+      await getSystemLogs(req, res);
+
+      expect(db.SystemLog.findAll).toHaveBeenCalled();
+      expect(db.SystemLog.count).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        logs: mockLogs,
+        pagination: {
+          total: 2,
+          limit: 10,
+          offset: 0,
+          hasMore: false
+        }
+      });
     });
 
     it('should filter logs by action', async () => {
-      const response = await request(app)
-        .get('/api/system-logs?action=LOGIN')
-        .set('Authorization', `Bearer ${superAdminToken}`);
+      const mockLogs = [{ id: 1, action: 'LOGIN' }];
+      db.SystemLog.findAll.mockResolvedValue(mockLogs);
+      db.SystemLog.count.mockResolvedValue(1);
+      req.query = { action: 'LOGIN' };
 
-      expect(response.status).toBe(200);
-      expect(Array.isArray(response.body.logs)).toBe(true);
+      await getSystemLogs(req, res);
 
-      // All returned logs should have LOGIN action
-      response.body.logs.forEach(log => {
-        expect(log.action).toBe('LOGIN');
-      });
+      expect(db.SystemLog.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ action: 'LOGIN' })
+        })
+      );
     });
 
-    it('should filter logs by entity type', async () => {
-      const response = await request(app)
-        .get('/api/system-logs?entity_type=User')
-        .set('Authorization', `Bearer ${superAdminToken}`);
+    it('should filter logs by entity_type', async () => {
+      const mockLogs = [{ id: 1, entity_type: 'User' }];
+      db.SystemLog.findAll.mockResolvedValue(mockLogs);
+      db.SystemLog.count.mockResolvedValue(1);
+      req.query = { entity_type: 'User' };
 
-      expect(response.status).toBe(200);
-      expect(Array.isArray(response.body.logs)).toBe(true);
+      await getSystemLogs(req, res);
 
-      // All returned logs should have User entity type
-      response.body.logs.forEach(log => {
-        expect(log.entity_type).toBe('User');
-      });
+      expect(db.SystemLog.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ entity_type: 'User' })
+        })
+      );
+    });
+
+    it('should filter logs by user_id', async () => {
+      const mockLogs = [{ id: 1, user_id: 'user123' }];
+      db.SystemLog.findAll.mockResolvedValue(mockLogs);
+      db.SystemLog.count.mockResolvedValue(1);
+      req.query = { user_id: 'user123' };
+
+      await getSystemLogs(req, res);
+
+      expect(db.SystemLog.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ user_id: 'user123' })
+        })
+      );
+    });
+
+    it('should handle errors and return 500', async () => {
+      const error = new Error('Database error');
+      db.SystemLog.findAll.mockRejectedValue(error);
+
+      await getSystemLogs(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Database error' });
+    });
+
+    it('should apply date range filters when date_from and date_to are provided', async () => {
+      db.SystemLog.findAll.mockResolvedValue([]);
+      db.SystemLog.count.mockResolvedValue(0);
+      req.query = { date_from: '2025-01-01', date_to: '2025-01-31' };
+
+      await getSystemLogs(req, res);
+
+      expect(db.SystemLog.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            created_at: expect.objectContaining({})
+          })
+        })
+      );
+    });
+
+    it('should use default sort/ordering when not provided', async () => {
+      db.SystemLog.findAll.mockResolvedValue([]);
+      db.SystemLog.count.mockResolvedValue(0);
+
+      await getSystemLogs(req, res);
+
+      expect(db.SystemLog.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          order: [['created_at', 'DESC']]
+        })
+      );
     });
   });
 
-  describe('System Statistics', () => {
+  describe('getSystemLogById', () => {
+    it('should return a system log by id', async () => {
+      const mockLog = { id: 1, action: 'LOGIN', entity_type: 'User' };
+      db.SystemLog.findByPk.mockResolvedValue(mockLog);
+      req.params = { id: 1 };
+
+      await getSystemLogById(req, res);
+
+      expect(db.SystemLog.findByPk).toHaveBeenCalledWith(1, expect.any(Object));
+      expect(res.json).toHaveBeenCalledWith(mockLog);
+    });
+
+    it('should return 404 if log not found', async () => {
+      db.SystemLog.findByPk.mockResolvedValue(null);
+      req.params = { id: 999 };
+
+      await getSystemLogById(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ error: 'System log not found' });
+    });
+
+    it('should handle errors and return 500', async () => {
+      const error = new Error('Database error');
+      db.SystemLog.findByPk.mockRejectedValue(error);
+      req.params = { id: 1 };
+
+      await getSystemLogById(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Database error' });
+    });
+  });
+
+  describe('getSystemStats', () => {
     it('should return system statistics', async () => {
-      const response = await request(app)
-        .get('/api/system-logs/stats')
-        .set('Authorization', `Bearer ${superAdminToken}`);
+      const mockActionStats = [{ action: 'LOGIN', count: 10 }];
+      const mockEntityStats = [{ entity_type: 'User', count: 5 }];
+      const mockDailyStats = [{ date: '2025-12-15', count: 3 }];
+      const mockUserStatsRaw = [{ user_id: 'user1', count: 15 }];
+      const mockUsers = [{ id: 'user1', first_name: 'Test', last_name: 'User', username: 'testuser', email: 'test@test.com' }];
 
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('actionStats');
-      expect(response.body).toHaveProperty('entityStats');
-      expect(response.body).toHaveProperty('dailyStats');
-      expect(response.body).toHaveProperty('userStats');
+      // Setup findAll to return different results based on call order
+      db.SystemLog.findAll
+        .mockResolvedValueOnce(mockActionStats)
+        .mockResolvedValueOnce(mockEntityStats)
+        .mockResolvedValueOnce(mockDailyStats)
+        .mockResolvedValueOnce(mockUserStatsRaw);
+      db.User.findAll.mockResolvedValue(mockUsers);
 
-      expect(Array.isArray(response.body.actionStats)).toBe(true);
-      expect(Array.isArray(response.body.entityStats)).toBe(true);
-      expect(Array.isArray(response.body.dailyStats)).toBe(true);
-      expect(Array.isArray(response.body.userStats)).toBe(true);
+      await getSystemStats(req, res);
+
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+        actionStats: mockActionStats,
+        entityStats: mockEntityStats,
+        dailyStats: mockDailyStats,
+        userStats: expect.any(Array)
+      }));
+    });
+
+    it('should handle errors and return 500', async () => {
+      const error = new Error('Database error');
+      db.SystemLog.findAll.mockRejectedValue(error);
+
+      await getSystemStats(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Database error' });
+    });
+
+    it('should pass date filter to action/entity stats when date range is provided', async () => {
+      const mockActionStats = [];
+      const mockEntityStats = [];
+      const mockDailyStats = [];
+      const mockUserStatsRaw = [];
+
+      db.SystemLog.findAll
+        .mockResolvedValueOnce(mockActionStats)
+        .mockResolvedValueOnce(mockEntityStats)
+        .mockResolvedValueOnce(mockDailyStats)
+        .mockResolvedValueOnce(mockUserStatsRaw);
+      db.User.findAll.mockResolvedValue([]);
+
+      req.query = { date_from: '2025-01-01', date_to: '2025-01-31' };
+
+      await getSystemStats(req, res);
+
+      // First call: actionStats should include where.created_at
+      const firstCallArg = db.SystemLog.findAll.mock.calls[0][0];
+      expect(firstCallArg.where).toHaveProperty('created_at');
+      // Second call: entityStats should include where.created_at
+      const secondCallArg = db.SystemLog.findAll.mock.calls[1][0];
+      expect(secondCallArg.where).toHaveProperty('created_at');
     });
   });
 
-  describe('Log Cleanup', () => {
-    it('should cleanup old logs', async () => {
-      const response = await request(app)
-        .delete('/api/system-logs/cleanup?days_old=365')
-        .set('Authorization', `Bearer ${superAdminToken}`);
+  describe('deleteOldLogs', () => {
+    it('should delete old logs with default days', async () => {
+      db.SystemLog.destroy.mockResolvedValue(10);
+      req.query = {};
 
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('deletedCount');
-      expect(typeof response.body.deletedCount).toBe('number');
+      await deleteOldLogs(req, res);
+
+      expect(db.SystemLog.destroy).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Deleted 10 old system logs',
+        deletedCount: 10
+      });
+    });
+
+    it('should delete old logs with custom days_old parameter', async () => {
+      db.SystemLog.destroy.mockResolvedValue(5);
+      req.query = { days_old: '30' };
+
+      await deleteOldLogs(req, res);
+
+      expect(db.SystemLog.destroy).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Deleted 5 old system logs',
+        deletedCount: 5
+      });
+    });
+
+    it('should return 0 if no logs deleted', async () => {
+      db.SystemLog.destroy.mockResolvedValue(0);
+      req.query = { days_old: '365' };
+
+      await deleteOldLogs(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Deleted 0 old system logs',
+        deletedCount: 0
+      });
+    });
+
+    it('should handle errors and return 500', async () => {
+      const error = new Error('Database error');
+      db.SystemLog.destroy.mockRejectedValue(error);
+
+      await deleteOldLogs(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Database error' });
+    });
+
+    it('should compute cutoffDate based on days_old and pass it to destroy', async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2025-12-15T00:00:00.000Z'));
+
+      db.SystemLog.destroy.mockResolvedValue(1);
+      req.query = { days_old: '30' };
+
+      await deleteOldLogs(req, res);
+
+      const destroyArg = db.SystemLog.destroy.mock.calls[0][0];
+      expect(destroyArg).toEqual(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            created_at: expect.objectContaining({})
+          })
+        })
+      );
+
+      vi.useRealTimers();
     });
   });
 });

@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ThemeProvider } from '../context/ThemeContext';
+import { render, screen } from '@testing-library/react';
 vi.mock('../context/ThemeContext', () => ({ useTheme: () => ({ theme: 'dark', setTheme: vi.fn() }) }));
 import { ThemeToggle } from '../components/ui/theme-toggle';
 

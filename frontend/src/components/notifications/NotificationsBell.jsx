@@ -4,12 +4,25 @@ import io from 'socket.io-client';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useApi } from '../../hooks/useApi';
-import { getApiBaseUrl } from '../../lib/apiClient';
+import { getApiOrigin } from '../../lib/apiClient';
 import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { ScrollArea } from '../ui/scroll-area';
 import { requestNotificationPermission, showNotification } from '../../lib/notifications';
 import { registerServiceWorker, subscribeToPush } from '../../lib/push';
+
+/**
+ * Notifications dropdown (bell icon).
+ *
+ * Responsibilities:
+ * - Fetches latest notifications for the current user.
+ * - Connects to Socket.IO to receive realtime notifications.
+ * - Handles marking notifications as read (single/all).
+ * - Renders actionable invite notifications when `notification.meta.invite_token` is present.
+ * - Uses lightweight CSS-only animations for smooth open/close and a responsive feel.
+ *
+ * @returns {JSX.Element}
+ */
 
 const NotificationsBell = () => {
   const { t } = useTranslation();
@@ -18,10 +31,10 @@ const NotificationsBell = () => {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [unread, setUnread] = useState(0);
+  const [busyId, setBusyId] = useState(null);
 
   const socketUrl = useMemo(() => {
-    const apiBase = getApiBaseUrl();
-    return apiBase.replace(/\/api$/i, '');
+    return getApiOrigin();
   }, []);
 
   useEffect(() => {
@@ -90,6 +103,32 @@ const NotificationsBell = () => {
     }
   };
 
+  const runInviteAction = async (notification, action) => {
+    const token = notification?.meta?.invite_token;
+    if (!token) return;
+
+    setBusyId(notification.id);
+    try {
+      if (action === 'accept') {
+        await api('/teams/invitations/accept', { method: 'POST', body: { token } });
+      } else if (action === 'decline') {
+        await api('/teams/invitations/decline', { method: 'POST', body: { token } });
+      }
+
+      // Mark as read locally to keep UX snappy
+      setItems((prev) => prev.map((n) => (n.id === notification.id ? { ...n, is_read: true } : n)));
+      setUnread((prev) => Math.max(0, prev - 1));
+      // Best-effort persist read state
+      try {
+        await api(`/notifications/${notification.id}`, { method: 'PUT', body: { is_read: true } });
+      } catch {
+        // ignore
+      }
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -101,7 +140,10 @@ const NotificationsBell = () => {
           <span className="sr-only">{t('nav.notifications') || 'Notifications'}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
+      <PopoverContent
+        className="w-80 p-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+        align="end"
+      >
         <div className="flex items-center justify-between border-b border-slate-100 p-4 dark:border-slate-800">
           <h4 className="font-semibold text-slate-900 dark:text-slate-100">Notificaciones</h4>
           {unread > 0 && (
@@ -132,6 +174,29 @@ const NotificationsBell = () => {
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       {item.message}
                     </p>
+
+                    {item.type === 'team_invite' && item?.meta?.invite_token && (
+                      <div className="flex gap-2 pt-1" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          disabled={busyId === item.id}
+                          onClick={() => runInviteAction(item, 'accept')}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          disabled={busyId === item.id}
+                          onClick={() => runInviteAction(item, 'decline')}
+                        >
+                          Decline
+                        </Button>
+                      </div>
+                    )}
                     
                   </div>
                   {!item.is_read && (

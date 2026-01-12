@@ -1,3 +1,21 @@
+/**
+ * @fileoverview
+ * Ownership enforcement middleware.
+ */
+
+/**
+ * Creates a middleware that ensures the authenticated user owns the record referenced by `req.params.id`.
+ *
+ * Rules:
+ * - `super_admin` bypasses ownership checks.
+ * - Ownership is inferred from common column names:
+ *   - `created_by_user_id`
+ *   - `author_id`
+ * - For the `User` model, the record id is the owner.
+ *
+ * @param {string} modelName Sequelize model name in the model registry.
+ * @returns {Express.RequestHandler}
+ */
 export function requireOwnership(modelName) {
   return async (req, res, next) => {
     const user = req.user;

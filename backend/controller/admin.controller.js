@@ -1,9 +1,36 @@
+/**
+ * @fileoverview Admin dashboard controllers.
+ *
+ * This file contains both server-rendered admin pages and JSON API endpoints
+ * used by the admin dashboard (charts/stats). API routes are protected by
+ * authentication and `super_admin` role at the router level.
+ */
+
 import db from '../models/index.js';
 import bcrypt from 'bcryptjs';
 import { Sequelize } from 'sequelize';
 import si from 'systeminformation';
 import redisClient from '../utils/redis.js';
 const { User, Competition, Post, Registration, SystemLog, Team } = db;
+
+/**
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} params
+ * @property {object} query
+ * @property {object} body
+ * @property {object} [session]
+ */
+
+/**
+ * Express response.
+ * @typedef {object} Response
+ * @property {Function} status
+ * @property {Function} json
+ * @property {Function} render
+ * @property {Function} redirect
+ * @property {Function} send
+ */
 
 // Helper reused (similar logic as auth.controller) to support base64 obfuscated inputs
 function isBase64(str) {
@@ -156,6 +183,22 @@ export async function getStatsData(req, res) {
   }
 }
 
+/**
+ * Overview counts and server/DB health for the admin dashboard.
+ *
+ * @route GET /api/admin/stats/overview
+ * @param {Request} req
+ * @param {Response} res
+ */
+// (implementation above)
+
+/**
+ * Return user counts grouped by role.
+ *
+ * @route GET /api/admin/stats/users/by-role
+ * @param {Request} req
+ * @param {Response} res
+ */
 export async function getUsersByRole(req, res) {
   try {
     const data = await User.findAll({
@@ -173,6 +216,13 @@ export async function getUsersByRole(req, res) {
   }
 }
 
+/**
+ * Return user creation counts grouped by day.
+ *
+ * @route GET /api/admin/stats/users/timeline
+ * @param {Request} req
+ * @param {Response} res
+ */
 export async function getUsersTimeline(req, res) {
   try {
     const data = await User.findAll({
@@ -194,6 +244,13 @@ export async function getUsersTimeline(req, res) {
   }
 }
 
+/**
+ * Return registration counts grouped by status.
+ *
+ * @route GET /api/admin/stats/registrations/by-status
+ * @param {Request} req
+ * @param {Response} res
+ */
 export async function getRegistrationStats(req, res) {
   try {
     const data = await Registration.findAll({
@@ -437,3 +494,21 @@ export async function updateRegistrationStatus(req, res) {
     res.status(500).render('error', { status: 500, message: error.message });
   }
 }
+
+/**
+ * Return per-competition registration counts.
+ *
+ * @route GET /api/admin/stats/competitions/registrations
+ * @param {Request} req
+ * @param {Response} res
+ */
+// (implementation above)
+
+/**
+ * Return aggregated system log stats used by the admin dashboard.
+ *
+ * @route GET /api/admin/stats/logs
+ * @param {Request} req
+ * @param {Response} res
+ */
+// (implementation above)

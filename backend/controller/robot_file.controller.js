@@ -1,7 +1,42 @@
+/**
+ * @fileoverview Robot file upload/list/delete endpoints.
+ *
+ * Robot files are uploaded for a team and competition and can be toggled public.
+ * Access checks are enforced for team members (or admins).
+ */
+
 import db from '../models/index.js';
 const { RobotFile, TeamMembers, Registration } = db;
 import { getFileInfo } from '../middleware/upload.middleware.js';
 
+/**
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} params
+ * @property {object} query
+ * @property {object} body
+ * @property {object} user
+ * @property {number} user.id
+ * @property {string} [user.role]
+ */
+
+/**
+ * Express response.
+ * @typedef {object} Response
+ * @property {Function} status
+ * @property {Function} json
+ */
+
+/**
+ * Upload a robot file.
+ *
+ * Requires membership in the given team (unless admin). The file is provided by
+ * route-level upload middleware and inspected via `getFileInfo`.
+ *
+ * @route POST /api/robot_file
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const uploadRobotFile = async (req, res) => {
     try {
         const { team_id, competition_id, description } = req.body;
@@ -40,6 +75,16 @@ export const uploadRobotFile = async (req, res) => {
     }
 };
 
+/**
+ * List robot files.
+ *
+ * - When `competition_id` is provided without `team_id`, returns public files for that competition.
+ * - When both are provided, returns files for that team+competition.
+ *
+ * @route GET /api/robot_file
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const getRobotFiles = async (req, res) => {
     try {
         const { team_id, competition_id } = req.query;
@@ -77,6 +122,14 @@ export const getRobotFiles = async (req, res) => {
     }
 };
 
+/**
+ * Delete a robot file.
+ * Requires team membership or admin.
+ *
+ * @route DELETE /api/robot_file/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const deleteRobotFile = async (req, res) => {
     try {
         const file = await RobotFile.findByPk(req.params.id);
@@ -101,6 +154,14 @@ export const deleteRobotFile = async (req, res) => {
     }
 };
 
+/**
+ * Toggle a robot file's public visibility.
+ * Requires team membership or admin.
+ *
+ * @route PUT /api/robot_file/:id/visibility
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const toggleFileVisibility = async (req, res) => {
     try {
         const file = await RobotFile.findByPk(req.params.id);

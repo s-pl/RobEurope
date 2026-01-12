@@ -1,6 +1,24 @@
 
 const stores = new Map();
 
+/**
+ * @fileoverview
+ * Lightweight in-memory rate limiter.
+ *
+ * Note: This is process-local and is not shared across multiple instances.
+ * For production horizontal scaling, replace with a shared store (Redis).
+ */
+
+/**
+ * Creates a simple IP-based rate limiter.
+ *
+ * @typedef {Object} RateLimitOptions
+ * @property {number} [windowMs] Window length in ms.
+ * @property {number} [max] Max requests per window.
+ *
+ * @param {RateLimitOptions} [options]
+ * @returns {Express.RequestHandler}
+ */
 export default function rateLimit(options = {}) {
   const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes
   const max = options.max || 1e100; // (no limit by default)

@@ -1,4 +1,22 @@
-// Middleware to protect admin routes using session-based authentication
+/**
+ * @fileoverview
+ * Session helpers for server-rendered admin pages.
+ *
+ * Note: These middlewares are intended for the EJS admin panel (HTML redirects),
+ * not JSON APIs.
+ */
+
+/**
+ * Protects admin routes using session-based authentication.
+ *
+ * - Redirects unauthenticated users to `/admin/login`.
+ * - Enforces `super_admin` role.
+ *
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @param {Express.NextFunction} next Express next.
+ * @returns {any}
+ */
 export function requireAdminSession(req, res, next) {
   const user = req.session && req.session.user;
   if (!user) return res.redirect('/admin/login');
@@ -13,6 +31,14 @@ export function requireAdminSession(req, res, next) {
   next();
 }
 
+/**
+ * Redirects authenticated super admins away from the login page.
+ *
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @param {Express.NextFunction} next Express next.
+ * @returns {any}
+ */
 export function redirectIfAuthenticated(req, res, next) {
   if (req.session?.user?.role === 'super_admin') {
     return res.redirect('/admin');

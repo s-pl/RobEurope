@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: backend/middleware/upload.middleware.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: backend/middleware/upload.middleware.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
+
+/**
+ * @fileoverview
+ * Multer-based upload middleware.
+ *
+ * Files are stored on disk under the project `uploads/` folder.
+ * The backend typically serves these as static files from `/uploads`.
+ */
+
+/**
+ * @typedef {Object} UploadOptions
+ * @property {'single'|'array'|'fields'} [type='single'] Upload strategy.
+ * @typedef {Object} UploadFieldDefinition
+ * @property {string} name Field name.
+ * @property {number} [maxCount] Maximum number of files for that field.
+ *
+ * @property {string|UploadFieldDefinition[]} [fieldName='file'] Field name(s).
+ * @property {number} [maxSize] Maximum file size in bytes.
+ * @property {RegExp} [allowedTypes] Allowed MIME type regex (tested against `file.mimetype`).
+ */
+
+/**
+ * @typedef {Object} UploadedFileInfo
+ * @property {string} filename Stored filename.
+ * @property {string} originalname Original client filename.
+ * @property {string} mimetype MIME type.
+ * @property {number} size File size in bytes.
+ * @property {string} path Server filesystem path.
+ * @property {string} url Public URL path under `/uploads`.
+ */
+
+/**
+ * Creates a multer middleware chain based on the given options.
+ *
+ * Notes:
+ * - Defaults are inferred from the field name (e.g. `video` increases max size).
+ * - Always returns an array `[multerMiddleware, handleUploadErrors]`.
+ *
+ * @param {UploadOptions} [options]
+ * @returns {Function[]} Express middleware chain.
+ */
+export const uploadMiddleware = (options = {}) => {
+  const {
+    type = 'single',
+    fieldName = 'file',
+    maxSize,
+    allowedTypes
+  } = options;
+
+  // Determine default maxSize and allowedTypes based on fieldName
+  let defaultMaxSize = 5 * 1024 * 1024; // 5MB default
+  let defaultAllowedTypes = /image\/*/; // image/* default
+
+  if (fieldName.includes('video') || fieldName === 'video') {
+    defaultMaxSize = 200 * 1024 * 1024; // 200MB for videos
+    defaultAllowedTypes = /video\/*/;
+  }
+
+  const finalMaxSize = maxSize || defaultMaxSize;
+  const finalAllowedTypes = allowedTypes || defaultAllowedTypes;
+
+  // Storage configuration
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      const uploadDir = path.join(process.cwd(), 'uploads');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      const uniqueName = `${Date.now()}_${uuidv4()}${ext}`;
+      cb(null, uniqueName);
+    }
+  });
+
+  // File filter
+  const fileFilter = (req, file, cb) => {
+    if (finalAllowedTypes.test(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error(`Invalid file type. Allowed: ${finalAllowedTypes}`), false);
+    }
+  };
+
+  const upload = multer({
+    storage,
+    limits: { fileSize: finalMaxSize },
+    fileFilter
+  });
+
+  // Return appropriate multer middleware
+  if (type === 'fields') {
+    return [upload.fields(fieldName), handleUploadErrors];
+  } else if (type === 'array') {
+    return [upload.array(fieldName, 10), handleUploadErrors]; // Limit to 10 files
+  } else {
+    return [upload.single(fieldName), handleUploadErrors];
+  }
+};
+
+/**
+ * Express error handler for upload middleware.
+ *
+ * Translates common Multer errors to consistent HTTP responses.
+ *
+ * @param {Error} error Error thrown by multer.
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @param {Express.NextFunction} next Express next.
+ * @returns {any}
+ */
+export const handleUploadErrors = (error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({
+        error: 'File too large',
+        message: `File size exceeds the limit of ${error.field ? 'allowed size' : 'allowed size'}`
+      });
+    }
+    if (error.code === 'LIMIT_UNEXPECTED_FILE') {
+      return res.status(400).json({
+        error: 'Unexpected field',
+        message: 'Unexpected file field in form data'
+      });
+    }
+  }
+
+  if (error.message.includes('Invalid file type')) {
+    return res.status(415).json({
+      error: 'Unsupported Media Type',
+      message: error.message
+    });
+  }
+
+  // Generic error
+  return res.status(422).json({
+    error: 'Upload error',
+    message: error.message || 'An error occurred during file upload'
+  });
+};
+
+/**
+ * Extracts normalized file info from a request after multer has run.
+ *
+ * - For `upload.single`, returns a single {@link UploadedFileInfo}.
+ * - For `upload.fields`, returns a record of arrays keyed by field name.
+ * - Returns `null` when no file data is present.
+ *
+ * @param {Express.Request} req Express request.
+ * @returns {UploadedFileInfo|Object.&lt;string, UploadedFileInfo[]>|null}
+ */
+export const getFileInfo = (req) => {
+  if (req.file) {
+    return {
+      filename: req.file.filename,
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+      path: req.file.path,
+      url: `/uploads/${req.file.filename}`
+    };
+  }
+
+  if (req.files) {
+    const filesInfo = {};
+    for (const [field, files] of Object.entries(req.files)) {
+      filesInfo[field] = files.map(file => ({
+        filename: file.filename,
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+        path: file.path,
+        url: `/uploads/${file.filename}`
+      }));
+    }
+    return filesInfo;
+  }
+
+  return null;
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SystemLogger.html">SystemLogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AuthProvider">AuthProvider</a></li><li><a href="global.html#NotificationsBell">NotificationsBell</a></li><li><a href="global.html#SocketProvider">SocketProvider</a></li><li><a href="global.html#acceptInvite">acceptInvite</a></li><li><a href="global.html#addComment">addComment</a></li><li><a href="global.html#addFavoriteCompetition">addFavoriteCompetition</a></li><li><a href="global.html#addLdapUser">addLdapUser</a></li><li><a href="global.html#apiRequest">apiRequest</a></li><li><a href="global.html#approveJoinRequest">approveJoinRequest</a></li><li><a href="global.html#approveRegistration">approveRegistration</a></li><li><a href="global.html#canUseNotifications">canUseNotifications</a></li><li><a href="global.html#changePassword">changePassword</a></li><li><a href="global.html#cn">cn</a></li><li><a href="global.html#createCountry">createCountry</a></li><li><a href="global.html#createGalleryItem">createGalleryItem</a></li><li><a href="global.html#createLogEntry">createLogEntry</a></li><li><a href="global.html#createNotification">createNotification</a></li><li><a href="global.html#createPost">createPost</a></li><li><a href="global.html#createRegistration">createRegistration</a></li><li><a href="global.html#createSponsor">createSponsor</a></li><li><a href="global.html#createStream">createStream</a></li><li><a href="global.html#createTeam">createTeam</a></li><li><a href="global.html#createTeamMember">createTeamMember</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#declineInvite">declineInvite</a></li><li><a href="global.html#decodeIfBase64">decodeIfBase64</a></li><li><a href="global.html#deleteCompetition">deleteCompetition</a></li><li><a href="global.html#deleteCountry">deleteCountry</a></li><li><a href="global.html#deleteGalleryItem">deleteGalleryItem</a></li><li><a href="global.html#deleteKey">deleteKey</a></li><li><a href="global.html#deleteLdapUser">deleteLdapUser</a></li><li><a href="global.html#deleteLogEntry">deleteLogEntry</a></li><li><a href="global.html#deleteMedia">deleteMedia</a></li><li><a href="global.html#deleteNotification">deleteNotification</a></li><li><a href="global.html#deleteOldLogs">deleteOldLogs</a></li><li><a href="global.html#deletePost">deletePost</a></li><li><a href="global.html#deleteRegistration">deleteRegistration</a></li><li><a href="global.html#deleteRobotFile">deleteRobotFile</a></li><li><a href="global.html#deleteSelf">deleteSelf</a></li><li><a href="global.html#deleteSponsor">deleteSponsor</a></li><li><a href="global.html#deleteStream">deleteStream</a></li><li><a href="global.html#deleteTeam">deleteTeam</a></li><li><a href="global.html#deleteTeamMember">deleteTeamMember</a></li><li><a href="global.html#deleteUser">deleteUser</a></li><li><a href="global.html#down">down</a></li><li><a href="global.html#emitToUser">emitToUser</a></li><li><a href="global.html#exportRegistrationsCSV">exportRegistrationsCSV</a></li><li><a href="global.html#forgotPassword">forgotPassword</a></li><li><a href="global.html#form">form</a></li><li><a href="global.html#getApiOrigin">getApiOrigin</a></li><li><a href="global.html#getComments">getComments</a></li><li><a href="global.html#getCompetitionById">getCompetitionById</a></li><li><a href="global.html#getCompetitions">getCompetitions</a></li><li><a href="global.html#getCountries">getCountries</a></li><li><a href="global.html#getCountryById">getCountryById</a></li><li><a href="global.html#getFileInfo">getFileInfo</a></li><li><a href="global.html#getIO">getIO</a></li><li><a href="global.html#getKeyInfo">getKeyInfo</a></li><li><a href="global.html#getMediaById">getMediaById</a></li><li><a href="global.html#getMembershipStatus">getMembershipStatus</a></li><li><a href="global.html#getMessages">getMessages</a></li><li><a href="global.html#getMyTeam">getMyTeam</a></li><li><a href="global.html#getNotificationById">getNotificationById</a></li><li><a href="global.html#getNotifications">getNotifications</a></li><li><a href="global.html#getOverview">getOverview</a></li><li><a href="global.html#getPostById">getPostById</a></li><li><a href="global.html#getPosts">getPosts</a></li><li><a href="global.html#getRegistrationById">getRegistrationById</a></li><li><a href="global.html#getRegistrationStats">getRegistrationStats</a></li><li><a href="global.html#getRegistrations">getRegistrations</a></li><li><a href="global.html#getResendClient">getResendClient</a></li><li><a href="global.html#getRobotFiles">getRobotFiles</a></li><li><a href="global.html#getSelf">getSelf</a></li><li><a href="global.html#getSponsorById">getSponsorById</a></li><li><a href="global.html#getSponsors">getSponsors</a></li><li><a href="global.html#getStreamById">getStreamById</a></li><li><a href="global.html#getStreams">getStreams</a></li><li><a href="global.html#getSystemLogById">getSystemLogById</a></li><li><a href="global.html#getSystemLogs">getSystemLogs</a></li><li><a href="global.html#getSystemStats">getSystemStats</a></li><li><a href="global.html#getTeamById">getTeamById</a></li><li><a href="global.html#getTeamLogs">getTeamLogs</a></li><li><a href="global.html#getTeamMemberById">getTeamMemberById</a></li><li><a href="global.html#getTeamMembers">getTeamMembers</a></li><li><a href="global.html#getTeams">getTeams</a></li><li><a href="global.html#getUserById">getUserById</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#getUsersByRole">getUsersByRole</a></li><li><a href="global.html#getUsersTimeline">getUsersTimeline</a></li><li><a href="global.html#getVapidPublicKey">getVapidPublicKey</a></li><li><a href="global.html#handleUploadErrors">handleUploadErrors</a></li><li><a href="global.html#inviteToTeam">inviteToTeam</a></li><li><a href="global.html#leaveTeam">leaveTeam</a></li><li><a href="global.html#list">list</a></li><li><a href="global.html#listFavoriteCompetitions">listFavoriteCompetitions</a></li><li><a href="global.html#listGallery">listGallery</a></li><li><a href="global.html#listJoinRequests">listJoinRequests</a></li><li><a href="global.html#listKeys">listKeys</a></li><li><a href="global.html#listLdapUsers">listLdapUsers</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#me">me</a></li><li><a href="global.html#normalizeBase">normalizeBase</a></li><li><a href="global.html#parseResponse">parseResponse</a></li><li><a href="global.html#redirectIfAuthenticated">redirectIfAuthenticated</a></li><li><a href="global.html#reducer">reducer</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerTeamInCompetition">registerTeamInCompetition</a></li><li><a href="global.html#rejectRegistration">rejectRegistration</a></li><li><a href="global.html#remove">remove</a></li><li><a href="global.html#removeFavoriteCompetition">removeFavoriteCompetition</a></li><li><a href="global.html#renderAddLdapUser">renderAddLdapUser</a></li><li><a href="global.html#renderEditLdapUser">renderEditLdapUser</a></li><li><a href="global.html#requestJoinTeam">requestJoinTeam</a></li><li><a href="global.html#requestNotificationPermission">requestNotificationPermission</a></li><li><a href="global.html#requireAdminSession">requireAdminSession</a></li><li><a href="global.html#requireOwnership">requireOwnership</a></li><li><a href="global.html#requireRole">requireRole</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#resolveMediaUrl">resolveMediaUrl</a></li><li><a href="global.html#save">save</a></li><li><a href="global.html#searchUsers">searchUsers</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#sendPasswordResetCodeEmail">sendPasswordResetCodeEmail</a></li><li><a href="global.html#sendTestPush">sendTestPush</a></li><li><a href="global.html#setIO">setIO</a></li><li><a href="global.html#showNotification">showNotification</a></li><li><a href="global.html#subscribePush">subscribePush</a></li><li><a href="global.html#subscribeToPush">subscribeToPush</a></li><li><a href="global.html#toggleFileVisibility">toggleFileVisibility</a></li><li><a href="global.html#toggleLike">toggleLike</a></li><li><a href="global.html#togglePin">togglePin</a></li><li><a href="global.html#unsubscribeFromPush">unsubscribeFromPush</a></li><li><a href="global.html#unsubscribePush">unsubscribePush</a></li><li><a href="global.html#up">up</a></li><li><a href="global.html#updateCompetition">updateCompetition</a></li><li><a href="global.html#updateCountry">updateCountry</a></li><li><a href="global.html#updateLdapUser">updateLdapUser</a></li><li><a href="global.html#updateNotification">updateNotification</a></li><li><a href="global.html#updatePost">updatePost</a></li><li><a href="global.html#updateRegistration">updateRegistration</a></li><li><a href="global.html#updateSelf">updateSelf</a></li><li><a href="global.html#updateSponsor">updateSponsor</a></li><li><a href="global.html#updateStream">updateStream</a></li><li><a href="global.html#updateTeam">updateTeam</a></li><li><a href="global.html#updateTeamMember">updateTeamMember</a></li><li><a href="global.html#updateUser">updateUser</a></li><li><a href="global.html#uploadMedia">uploadMedia</a></li><li><a href="global.html#uploadMiddleware">uploadMiddleware</a></li><li><a href="global.html#uploadRobotFile">uploadRobotFile</a></li><li><a href="global.html#useApi">useApi</a></li><li><a href="global.html#useAuth">useAuth</a></li><li><a href="global.html#useAuthContext">useAuthContext</a></li><li><a href="global.html#useCountries">useCountries</a></li><li><a href="global.html#useSocket">useSocket</a></li><li><a href="global.html#useTeams">useTeams</a></li><li><a href="global.html#useToast">useToast</a></li><li><a href="global.html#validatePasswordStrength">validatePasswordStrength</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Jan 12 2026 00:56:59 GMT+0100 (hora estándar de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

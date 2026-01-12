@@ -7,6 +7,26 @@ import { getIO } from '../utils/realtime.js';
 
 const MAX_CONTENT_BYTES = Number(process.env.POST_CONTENT_MAX_BYTES || 200 * 1024); // 200 kb max payload
 
+/**
+ * @fileoverview
+ * API handlers for posts, likes, and comments.
+ *
+ * Notes:
+ * - Some endpoints are admin-only (e.g., create/pin) and enforced at the router level.
+ * - This controller emits Socket.IO events (e.g. `post_created`, `comment_added`).
+ * - `POST_CONTENT_MAX_BYTES` limits post content size to prevent oversized payloads.
+ */
+
+/**
+ * Creates a new post.
+ *
+ * Accepts optional file upload (multipart/form-data) and stores the uploaded file URL in `media_urls`.
+ *
+ * @route POST /api/posts
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const createPost = async (req, res) => {
   try {
     const postData = { ...req.body };
@@ -47,6 +67,19 @@ export const createPost = async (req, res) => {
   }
 };
 
+/**
+ * Lists posts.
+ *
+ * Query params:
+ * - `q`: searches title/content
+ * - `author_id`: filters by author
+ * - `limit`, `offset`: pagination
+ *
+ * @route GET /api/posts
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const getPosts = async (req, res) => {
   try {
     const { q, author_id, limit = 50, offset = 0 } = req.query;
@@ -86,6 +119,13 @@ export const getPosts = async (req, res) => {
   }
 };
 
+/**
+ * Retrieves a single post by id (includes author, likes, and comments).
+ * @route GET /api/posts/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const getPostById = async (req, res) => {
   try {
     const item = await Post.findByPk(req.params.id, {
@@ -114,6 +154,16 @@ export const getPostById = async (req, res) => {
   }
 };
 
+/**
+ * Updates a post by id.
+ *
+ * Accepts optional file upload and enforces the content size limit.
+ *
+ * @route PUT /api/posts/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const updatePost = async (req, res) => {
   try {
     // Get current post for logging old values
@@ -155,6 +205,13 @@ export const updatePost = async (req, res) => {
   }
 };
 
+/**
+ * Deletes a post by id.
+ * @route DELETE /api/posts/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const deletePost = async (req, res) => {
   try {
     const post = await Post.findByPk(req.params.id);
@@ -178,6 +235,13 @@ export const deletePost = async (req, res) => {
   }
 };
 
+/**
+ * Toggles the current user's like on a post.
+ * @route POST /api/posts/:id/like
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const toggleLike = async (req, res) => {
     try {
         const { id } = req.params;
@@ -201,6 +265,13 @@ export const toggleLike = async (req, res) => {
     }
 };
 
+/**
+ * Adds a comment to a post.
+ * @route POST /api/posts/:id/comments
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const addComment = async (req, res) => {
     try {
         const { id } = req.params;
@@ -227,6 +298,13 @@ export const addComment = async (req, res) => {
     }
 };
 
+/**
+ * Lists comments for a post.
+ * @route GET /api/posts/:id/comments
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const getComments = async (req, res) => {
     try {
         const { id } = req.params;
@@ -244,6 +322,13 @@ export const getComments = async (req, res) => {
     }
 };
 
+/**
+ * Toggles the pinned status of a post.
+ * @route POST /api/posts/:id/pin
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const togglePin = async (req, res) => {
     try {
         const { id } = req.params;

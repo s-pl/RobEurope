@@ -2,6 +2,23 @@ import db from '../models/index.js';
 const { Notification } = db;
 import { Op } from 'sequelize';
 
+/**
+ * @fileoverview
+ * CRUD handlers for in-app notifications.
+ *
+ * Notes:
+ * - This controller currently does not enforce auth/ownership by itself; routes must protect access.
+ * - Notifications are typically created by other business flows (teams, registration, etc.).
+ */
+
+/**
+ * Creates a notification.
+ *
+ * @route POST /api/notifications
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const createNotification = async (req, res) => {
   try {
     const item = await Notification.create(req.body);
@@ -11,6 +28,19 @@ export const createNotification = async (req, res) => {
   }
 };
 
+/**
+ * Lists notifications filtered by query params.
+ *
+ * Supported query params:
+ * - `user_id`: filter by recipient
+ * - `is_read`: boolean
+ * - `limit`, `offset`: pagination
+ *
+ * @route GET /api/notifications
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const getNotifications = async (req, res) => {
   try {
     const { user_id, is_read, limit = 50, offset = 0 } = req.query;
@@ -25,6 +55,13 @@ export const getNotifications = async (req, res) => {
   }
 };
 
+/**
+ * Retrieves a single notification by id.
+ * @route GET /api/notifications/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const getNotificationById = async (req, res) => {
   try {
     const item = await Notification.findByPk(req.params.id);
@@ -35,6 +72,16 @@ export const getNotificationById = async (req, res) => {
   }
 };
 
+/**
+ * Updates a notification.
+ *
+ * Common usage is to set `{ is_read: true }`.
+ *
+ * @route PUT /api/notifications/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const updateNotification = async (req, res) => {
   try {
     const [updated] = await Notification.update(req.body, { where: { id: req.params.id } });
@@ -46,6 +93,13 @@ export const updateNotification = async (req, res) => {
   }
 };
 
+/**
+ * Deletes a notification.
+ * @route DELETE /api/notifications/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const deleteNotification = async (req, res) => {
   try {
     const deleted = await Notification.destroy({ where: { id: req.params.id } });

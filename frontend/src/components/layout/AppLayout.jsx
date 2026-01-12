@@ -38,7 +38,11 @@ const AppLayout = () => {
           <div className="lg:hidden">
             <Navbar />
           </div>
-          <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-5xl space-y-10 px-4 pb-16 pt-10 lg:px-8 flex-1">
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="mx-auto w-full max-w-6xl flex-1 space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10"
+          >
             <Outlet />
           </main>
           <NotificationTestButton />

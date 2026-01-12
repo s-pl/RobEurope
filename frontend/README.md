@@ -36,7 +36,7 @@ npm run preview
 
 The frontend needs to talk to the backend API which can live either on your machine (`http://localhost:85`) or in the cloud deployment (`http://46.101.255.106:85`).
 
-1. Copy `.env.example` to `.env` and define the desired origin:
+1. Copy `.env.example` to `.env` and set the API base URL:
 
 	```env
 	VITE_API_BASE_URL=http://localhost:85/api
@@ -45,14 +45,7 @@ The frontend needs to talk to the backend API which can live either on your mach
 
 2. Restart the dev server after changing the file.
 
-3. When no env var is provided the app automatically tries the known hosts (localhost first, then 46.101.255.106). The first reachable host is cached in `localStorage` under the key `robeurope:apiBaseUrl` so subsequent sessions reuse it.
-
-If you ever need to switch manually without rebuilding, open the browser console and run:
-
-```js
-localStorage.setItem('robeurope:apiBaseUrl', 'http://46.101.255.106:85/api');
-location.reload();
-```
+3. The app reads the API base URL only from `.env` (no automatic host fallback, no localStorage caching). If `VITE_API_BASE_URL` is missing you will see a clear runtime error telling you how to set it.
 
 ### Styling stack
 

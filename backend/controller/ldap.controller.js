@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Admin-only LDAP management controllers (server-rendered).
+ *
+ * These handlers are mounted under the admin panel routes (see `backend/routes/admin.route.js`).
+ * They bind with the configured service account and allow listing/adding/editing/deleting users
+ * in the LDAP directory.
+ */
+
 import ldap from 'ldapjs';
 import attributePkg from '@ldapjs/attribute';
 const Attribute = attributePkg; // CJS default export is the class itself
@@ -27,6 +35,14 @@ const bindClient = () => {
 };
 
 
+/**
+ * Render the LDAP user list page.
+ *
+ * @route GET /admin/ldap-users
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const listLdapUsers = async (req, res) => {
   try {
     await bindClient();
@@ -78,11 +94,26 @@ export const listLdapUsers = async (req, res) => {
 };
 
 
+/**
+ * Render the LDAP user creation form.
+ *
+ * @route GET /admin/ldap-users/add
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ */
 export const renderAddLdapUser = (req, res) => {
   res.render('admin/ldap-user-form', { user: null, action: 'add', title: req.__('ldap.form.addTitle'), pageKey: 'ldap' });
 };
 
 
+/**
+ * Create a new LDAP user.
+ *
+ * @route POST /admin/ldap-users/add
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const addLdapUser = async (req, res) => {
   const { uid, cn, sn, mail, password } = req.body;
   const dn = `uid=${uid},${userDN}`;
@@ -114,6 +145,14 @@ export const addLdapUser = async (req, res) => {
   }
 };
 
+/**
+ * Render the LDAP user edit form for the given uid.
+ *
+ * @route GET /admin/ldap-users/edit/:uid
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const renderEditLdapUser = async (req, res) => {
   const uid = req.params.uid;
   const dn = `uid=${uid},${userDN}`;
@@ -135,6 +174,18 @@ export const renderEditLdapUser = async (req, res) => {
 };
 
 
+/**
+ * Update an LDAP user.
+ *
+ * Note: admin routes allow both `POST /admin/ldap-users/edit/:uid` and a fallback
+ * `POST /admin/ldap-users/edit` where `uid` is taken from the body.
+ *
+ * @route POST /admin/ldap-users/edit/:uid
+ * @route POST /admin/ldap-users/edit
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const updateLdapUser = async (req, res) => {
   const uid = req.params.uid || req.body.uid;
   const { cn, sn, mail, password } = req.body;
@@ -160,6 +211,14 @@ export const updateLdapUser = async (req, res) => {
 };
 
 
+/**
+ * Delete an LDAP user.
+ *
+ * @route POST /admin/ldap-users/delete/:uid
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const deleteLdapUser = async (req, res) => {
   const uid = req.params.uid;
   const dn = `uid=${uid},${userDN}`;

@@ -2,6 +2,24 @@ import db from '../models/index.js';
 const { Stream, Registration, TeamMembers, Competition } = db;
 import { Op } from 'sequelize';
 
+/**
+ * @fileoverview
+ * Stream API handlers.
+ *
+ * Streams can be associated with a competition and team.
+ * Access rules:
+ * - Creating/deleting streams requires authentication.
+ * - For competition streams, the team must be approved for that competition.
+ * - For non-admin viewers, `stream_url` is removed unless the viewer is approved.
+ */
+
+/**
+ * Creates a stream.
+ * @route POST /api/streams
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const createStream = async (req, res) => {
   try {
     const { competition_id, team_id } = req.body;
@@ -53,6 +71,13 @@ export const createStream = async (req, res) => {
   }
 };
 
+/**
+ * Lists streams.
+ * @route GET /api/streams
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const getStreams = async (req, res) => {
   try {
     const { q, limit = 50, offset = 0, status, competition_id } = req.query;
@@ -115,6 +140,13 @@ export const getStreams = async (req, res) => {
   }
 };
 
+/**
+ * Retrieves a stream by id.
+ * @route GET /api/streams/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const getStreamById = async (req, res) => {
   try {
     const item = await Stream.findByPk(req.params.id, {
@@ -135,6 +167,13 @@ export const getStreamById = async (req, res) => {
   }
 };
 
+/**
+ * Updates a stream by id.
+ * @route PUT /api/streams/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const updateStream = async (req, res) => {
   try {
     const updates = { ...req.body };
@@ -153,6 +192,13 @@ export const updateStream = async (req, res) => {
   }
 };
 
+/**
+ * Deletes a stream by id.
+ * @route DELETE /api/streams/:id
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const deleteStream = async (req, res) => {
   try {
     const stream = await Stream.findByPk(req.params.id);

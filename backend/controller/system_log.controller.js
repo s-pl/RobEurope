@@ -1,8 +1,38 @@
+/**
+ * @fileoverview System log querying and stats endpoints.
+ *
+ * These endpoints are intended to be protected by route-level middleware
+ * (authentication + `super_admin`).
+ */
+
 import db from '../models/index.js';
 const { SystemLog, User } = db;
 import { Op } from 'sequelize';
 import { Sequelize } from 'sequelize';
 
+/**
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} params
+ * @property {object} query
+ */
+
+/**
+ * Express response.
+ * @typedef {object} Response
+ * @property {Function} status
+ * @property {Function} json
+ */
+
+/**
+ * Get system logs with filtering and pagination.
+ *
+ * Supports filters: `user_id`, `action`, `entity_type`, `entity_id`, `date_from`, `date_to`.
+ *
+ * @route GET /api/system_log
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const getSystemLogs = async (req, res) => {
   try {
     const {
@@ -64,6 +94,13 @@ export const getSystemLogs = async (req, res) => {
   }
 };
 
+/**
+ * Get a single system log entry by id.
+ *
+ * @route GET /api/system_log/:id
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const getSystemLogById = async (req, res) => {
   try {
     const log = await SystemLog.findByPk(req.params.id, {
@@ -83,6 +120,15 @@ export const getSystemLogById = async (req, res) => {
   }
 };
 
+/**
+ * Get aggregated system log statistics.
+ *
+ * Returns action counts, entity-type counts, daily counts, and top users.
+ *
+ * @route GET /api/system_log/stats
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const getSystemStats = async (req, res) => {
   try {
     const { date_from, date_to } = req.query;
@@ -190,6 +236,13 @@ export const getSystemStats = async (req, res) => {
   }
 };
 
+/**
+ * Delete system logs older than N days.
+ *
+ * @route DELETE /api/system_log/cleanup
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const deleteOldLogs = async (req, res) => {
   try {
     const { days_old = 90 } = req.query;

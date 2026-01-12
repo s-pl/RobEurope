@@ -3,6 +3,7 @@ import { ArrowUpRight, Bot, CircuitBoard, Globe2, ShieldCheck, Users, Trophy, Za
 import gsap from 'gsap';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { getApiOrigin } from '../lib/apiClient';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
@@ -124,7 +125,7 @@ const Home = () => {
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="h-12 px-8 text-lg">
-            <a href="https://api.robeurope.samuelponce.es/api-docs" target="_blank" rel="noreferrer">
+            <a href={`${getApiOrigin()}/api-docs`} target="_blank" rel="noreferrer">
               {t('home.hero.secondaryCta')}
               <span className="sr-only"> (opens in a new tab)</span>
             </a>

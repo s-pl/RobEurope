@@ -1,9 +1,46 @@
+/**
+ * @fileoverview Team chat endpoints (messages + attachments).
+ *
+ * Provides message history for a team and allows posting messages (text and/or
+ * attachments). Messages are emitted via Socket.IO to the `team_<teamId>` room
+ * and create notifications for other team members.
+ */
+
 import db from '../models/index.js';
 import { getIO } from '../utils/realtime.js';
 import { getFileInfo } from '../middleware/upload.middleware.js';
 
 const { TeamMessage, TeamMembers, User, Notification } = db;
 
+/**
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} params
+ * @property {object} query
+ * @property {object} body
+ * @property {object} user
+ * @property {number} user.id
+ * @property {string} [user.role]
+ * @property {string} [user.first_name]
+ * @property {Array<any>} [files]
+ */
+
+/**
+ * Express response.
+ * @typedef {object} Response
+ * @property {Function} status
+ * @property {Function} json
+ */
+
+/**
+ * Get message history for a team.
+ *
+ * Requires team membership (unless admin).
+ *
+ * @route GET /api/teams/:teamId/messages
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const getMessages = async (req, res) => {
     try {
         const { teamId } = req.params;
@@ -42,6 +79,17 @@ export const getMessages = async (req, res) => {
     }
 };
 
+/**
+ * Send a message to a team.
+ *
+ * Accepts `content` and/or attachments. Attachments may be provided by the route
+ * upload middleware as `req.files` (array). Creates notifications for other team
+ * members and emits the message via Socket.IO.
+ *
+ * @route POST /api/teams/:teamId/messages
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const sendMessage = async (req, res) => {
     try {
         const { teamId } = req.params;

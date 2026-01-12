@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Team management endpoints.
+ *
+ * Includes team CRUD, invitations (accept/decline), join requests, membership
+ * status helpers, and competition registration.
+ */
+
 import db from '../models/index.js';
 const { Team, User, Country, TeamMembers, TeamInvite, TeamJoinRequest, Registration, Competition, Notification } = db;
 import { Op } from 'sequelize';
@@ -5,6 +12,17 @@ import { getFileInfo } from '../middleware/upload.middleware.js';
 import { v4 as uuidv4 } from 'uuid';
 import { emitToUser } from '../utils/realtime.js';
 
+/**
+ * Create a new team (authenticated).
+ *
+ * Enforces the single-team membership rule for the creator. Also creates the
+ * creator's `TeamMembers` record with role `owner`.
+ *
+ * @route POST /api/teams
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const createTeam = async (req, res) => {
   try {
     // The creator is the authenticated user
@@ -56,6 +74,14 @@ export const createTeam = async (req, res) => {
   }
 };
 
+/**
+ * List teams with optional filtering.
+ *
+ * @route GET /api/teams
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const getTeams = async (req, res) => {
   try {
     const { q, country_id, limit = 50, offset = 0, sort = 'name', order = 'ASC', withCount } = req.query;
@@ -82,6 +108,14 @@ export const getTeams = async (req, res) => {
   }
 };
 
+/**
+ * Get a team by id.
+ *
+ * @route GET /api/teams/:id
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const getTeamById = async (req, res) => {
   try {
     const item = await Team.findByPk(req.params.id);
@@ -92,6 +126,16 @@ export const getTeamById = async (req, res) => {
   }
 };
 
+/**
+ * Update a team by id (owner only via middleware).
+ *
+ * Supports optional logo upload.
+ *
+ * @route PUT /api/teams/:id
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const updateTeam = async (req, res) => {
   try {
     const updates = { ...req.body };
@@ -113,6 +157,14 @@ export const updateTeam = async (req, res) => {
   }
 };
 
+/**
+ * Delete a team by id (owner only via middleware).
+ *
+ * @route DELETE /api/teams/:id
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const deleteTeam = async (req, res) => {
   try {
     const deleted = await Team.destroy({ where: { id: req.params.id } });
@@ -123,7 +175,18 @@ export const deleteTeam = async (req, res) => {
   }
 };
 
-// Invite a user (by email or user_id) to join a team
+/**
+ * Creates a team invitation.
+ *
+ * The requester must be the team owner (enforced by `requireOwnership('Team')`).
+ * If the target user exists, a `team_invite` notification is created with a `meta.invite_token`
+ * so the invite can be accepted/declined from the UI.
+ *
+ * @route POST /api/teams/:id/invite
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const inviteToTeam = async (req, res) => {
   try {
     const teamId = Number(req.params.id);
@@ -165,7 +228,13 @@ export const inviteToTeam = async (req, res) => {
           user_id: targetUserId,
           title: 'Invitación de equipo',
           message: `Has sido invitado a unirte a ${team.name}`,
-          type: 'team_invite'
+          type: 'team_invite',
+          meta: {
+            kind: 'team_invite',
+            invite_token: token,
+            team_id: teamId,
+            team_name: team.name
+          }
         });
         emitToUser(targetUserId, 'notification', notif.toJSON());
       } catch (_) {}
@@ -177,7 +246,65 @@ export const inviteToTeam = async (req, res) => {
   }
 };
 
-// Accept an invitation by token
+/**
+ * Declines a team invitation by token.
+ *
+ * If the invitation is bound to a specific `user_id`, the authenticated user must match.
+ *
+ * @route POST /api/teams/invitations/decline
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
+export const declineInvite = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'No autorizado' });
+    const { token } = req.body || {};
+    if (!token) return res.status(400).json({ error: 'token requerido' });
+
+    const invite = await TeamInvite.findOne({ where: { token } });
+    if (!invite) return res.status(404).json({ error: 'Invitación no encontrada' });
+    if (invite.status !== 'pending') return res.status(400).json({ error: 'Invitación no disponible' });
+    if (invite.expires_at && new Date(invite.expires_at).getTime() < Date.now()) return res.status(400).json({ error: 'Invitación expirada' });
+
+    // If the invite is tied to a specific user, enforce it.
+    if (invite.user_id && invite.user_id !== userId) {
+      return res.status(403).json({ error: 'No autorizado' });
+    }
+
+    await invite.update({ status: 'declined' });
+
+    // Notify team owner
+    try {
+      const team = await Team.findByPk(invite.team_id);
+      if (team) {
+        const notif = await Notification.create({
+          user_id: team.created_by_user_id,
+          title: 'Invitación rechazada',
+          message: `Un usuario ha rechazado la invitación a ${team.name}`,
+          type: 'team_invite'
+        });
+        emitToUser(team.created_by_user_id, 'notification', notif.toJSON());
+      }
+    } catch (_) {}
+
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Accepts a team invitation by token.
+ *
+ * Enforces the single-team membership rule.
+ *
+ * @route POST /api/teams/invitations/accept
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
 export const acceptInvite = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -216,7 +343,14 @@ export const acceptInvite = async (req, res) => {
   }
 };
 
-// Request to join a team by searching it in the frontend
+/**
+ * Create a request to join a team.
+ *
+ * @route POST /api/teams/:id/requests
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const requestJoinTeam = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -249,7 +383,14 @@ export const requestJoinTeam = async (req, res) => {
   }
 };
 
-// Approve a join request (only team owner)
+/**
+ * Approve a join request (team owner only).
+ *
+ * @route POST /api/teams/requests/:requestId/approve
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const approveJoinRequest = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -286,7 +427,16 @@ export const approveJoinRequest = async (req, res) => {
   }
 };
 
-// Register a team into a competition (uses Registration table)
+/**
+ * Register a team into a competition.
+ *
+ * Creates a `Registration` row with status `pending`.
+ *
+ * @route POST /api/teams/:id/register-competition
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const registerTeamInCompetition = async (req, res) => {
   try {
     const teamId = Number(req.params.id);
@@ -308,7 +458,14 @@ export const registerTeamInCompetition = async (req, res) => {
   }
 };
 
-// Return the team the current user belongs to (owner or member)
+/**
+ * Return the team the current user belongs to (or null).
+ *
+ * @route GET /api/teams/mine
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const getMyTeam = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -333,7 +490,14 @@ export const getMyTeam = async (req, res) => {
   }
 };
 
-// List join requests for a team (owner only)
+/**
+ * List join requests for a team (owner only via middleware).
+ *
+ * @route GET /api/teams/:id/requests
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const listJoinRequests = async (req, res) => {
   try {
     const teamId = Number(req.params.id);
@@ -355,7 +519,14 @@ export const listJoinRequests = async (req, res) => {
   }
 };
 
-// Leave current team (non-owners only): sets left_at on membership
+/**
+ * Leave the current team (non-owner only).
+ *
+ * @route POST /api/teams/leave
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const leaveTeam = async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -372,7 +543,14 @@ export const leaveTeam = async (req, res) => {
   }
 };
 
-// Get membership/ownership status for current user
+/**
+ * Get the current user's membership/ownership status.
+ *
+ * @route GET /api/teams/status
+ * @param {Express.Request} req
+ * @param {Express.Response} res
+ * @returns {Promise<void>}
+ */
 export const getMembershipStatus = async (req, res) => {
   try {
     const userId = req.user?.id;

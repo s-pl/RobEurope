@@ -1,5 +1,13 @@
 /* eslint-disable react-refresh/only-export-components */
 
+/**
+ * @fileoverview Authentication session context.
+ *
+ * The frontend uses cookie-based sessions. This provider keeps the current user
+ * in memory, refreshes `/users/me` on mount, and exposes helpers for login,
+ * register, logout, profile updates, and password changes.
+ */
+
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { apiRequest } from '../lib/apiClient';
 
@@ -7,6 +15,27 @@ const AuthContext = createContext(null);
 
 // Use cookie-based session on server; avoid localStorage persistence
 
+/**
+ * @typedef {object} AuthContextValue
+ * @property {any} user
+ * @property {boolean} isAuthenticated
+ * @property {boolean} loading
+ * @property {Function} login
+ * @property {Function} register
+ * @property {Function} logout
+ * @property {Function} refreshProfile
+ * @property {Function} updateProfile
+ * @property {Function} uploadProfilePhoto
+ * @property {Function} changePassword
+ */
+
+/**
+ * Auth provider.
+ *
+ * @param {object} props
+ * @param {any} props.children
+ * @returns {JSX.Element}
+ */
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -111,6 +140,10 @@ export const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+/**
+ * Access the authentication context.
+ * @returns {AuthContextValue}
+ */
 export const useAuthContext = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuthContext must be used within AuthProvider');

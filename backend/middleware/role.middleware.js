@@ -1,5 +1,16 @@
-// Simple role enforcement: only 'user' or 'super_admin' exist.
-// Use requireRole('super_admin') where privileged access is needed.
+/**
+ * @fileoverview
+ * Role-based access control middleware.
+ */
+
+/**
+ * Creates a middleware that enforces a specific role on `req.user`.
+ *
+ * This project primarily uses `user` and `super_admin` roles.
+ *
+ * @param {string} role Required role.
+ * @returns {Express.RequestHandler}
+ */
 export function requireRole(role) {
   return (req, res, next) => {
     const user = req.user;

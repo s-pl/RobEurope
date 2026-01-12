@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: backend/controller/admin.controller.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: backend/controller/admin.controller.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Admin dashboard controllers.
+ *
+ * This file contains both server-rendered admin pages and JSON API endpoints
+ * used by the admin dashboard (charts/stats). API routes are protected by
+ * authentication and `super_admin` role at the router level.
+ */
+
+import db from '../models/index.js';
+import bcrypt from 'bcryptjs';
+import { Sequelize } from 'sequelize';
+import si from 'systeminformation';
+import redisClient from '../utils/redis.js';
+const { User, Competition, Post, Registration, SystemLog, Team } = db;
+
+/**
+ * Express request.
+ * @typedef {object} Request
+ * @property {object} params
+ * @property {object} query
+ * @property {object} body
+ * @property {object} [session]
+ */
+
+/**
+ * Express response.
+ * @typedef {object} Response
+ * @property {Function} status
+ * @property {Function} json
+ * @property {Function} render
+ * @property {Function} redirect
+ * @property {Function} send
+ */
+
+// Helper reused (similar logic as auth.controller) to support base64 obfuscated inputs
+function isBase64(str) {
+  return typeof str === 'string' &amp;&amp; /^[A-Za-z0-9+/=]+$/.test(str) &amp;&amp; (str.length % 4 === 0);
+}
+function decodeIfBase64(value) {
+  try {
+    if (!value || typeof value !== 'string') return value;
+    if (!isBase64(value)) return value;
+    return Buffer.from(value, 'base64').toString('utf8');
+  } catch (e) {
+    return value;
+  }
+}
+
+export async function renderLogin(req, res) {
+  return res.render('login', { title: req.__('auth.metaTitle'), pageKey: 'login' });
+}
+
+export async function handleLogin(req, res) {
+  try {
+    let { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).render('login', { title: req.__('auth.metaTitle'), pageKey: 'login', error: req.__('auth.errors.missing') });
+    }
+    // Normalize &amp; decode
+    email = decodeIfBase64(email.trim()).toLowerCase();
+    password = decodeIfBase64(password.trim());
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(401).render('login', { title: req.__('auth.metaTitle'), pageKey: 'login', error: req.__('auth.errors.invalid') });
+    }
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) {
+      return res.status(401).render('login', { title: req.__('auth.metaTitle'), pageKey: 'login', error: req.__('auth.errors.invalid') });
+    }
+    if (user.role !== 'super_admin') {
+      return res.status(403).render('login', { title: req.__('auth.metaTitle'), pageKey: 'login', error: req.__('auth.errors.role') });
+    }
+    req.session.user = { id: user.id, email: user.email, role: user.role, username: user.username };
+    return res.redirect('/admin');
+  } catch (e) {
+    return res.status(500).render('login', { title: req.__('auth.metaTitle'), pageKey: 'login', error: req.__('auth.errors.unexpected') });
+  }
+}
+
+export async function handleLogout(req, res) {
+  req.session.destroy(() => {
+    res.clearCookie('connect.sid');
+    res.redirect('/admin/login');
+  });
+}
+
+export async function renderDashboard(req, res) {
+  // Basic stats for dashboard quick view
+  const [users, competitions, posts, registrations] = await Promise.all([
+    User.count(),
+    Competition.count(),
+    Post.count(),
+    Registration.count()
+  ]);
+  res.render('dashboard', {
+    title: req.__('dashboard.metaTitle'),
+    pageKey: 'dashboard',
+    stats: { users, competitions, posts, registrations }
+  });
+}
+
+export async function listUsers(req, res) {
+  const all = await User.findAll({ attributes: ['id', 'email', 'username', 'first_name', 'last_name', 'role', 'is_active', 'created_at'] });
+  res.render('users', { title: req.__('users.metaTitle'), pageKey: 'users', users: all });
+}
+
+export async function promoteUser(req, res) {
+  const { id } = req.params;
+  const user = await User.findByPk(id);
+  if (!user) return res.status(404).send('User not found');
+  user.role = 'super_admin';
+  await user.save();
+  res.redirect('/admin/users');
+}
+
+// API endpoints for dashboard charts
+export async function getStatsData(req, res) {
+  try {
+    const [users, competitions, posts, registrations] = await Promise.all([
+      User.count(),
+      Competition.count(),
+      Post.count(),
+      Registration.count()
+    ]);
+
+    // System Stats
+    const mem = await si.mem();
+    const load = await si.currentLoad();
+    const disk = await si.fsSize();
+    
+    // DB Status
+    let mysqlStatus = 'down';
+    try {
+      await db.sequelize.authenticate();
+      mysqlStatus = 'up';
+    } catch (e) { mysqlStatus = 'down'; }
+
+    let redisStatus = 'down';
+    try {
+      if (redisClient.isOpen) redisStatus = 'up';
+    } catch (e) { redisStatus = 'down'; }
+    
+    // Active sessions (users activos): contar sesiones no expiradas en tabla Session
+    let activeSessions = 0;
+    try {
+      // connect-session-sequelize por defecto usa la tabla "Sessions" o la configurada; en index.js se usa tableName 'Session'
+      // Intentamos ambas por compatibilidad
+      const [rows1] = await db.sequelize.query('SELECT COUNT(*) AS c FROM "Session" WHERE expires > NOW()');
+      const [rows2] = await db.sequelize.query('SELECT COUNT(*) AS c FROM "Sessions" WHERE expires > NOW()', { raw: true }).catch(() => [null]);
+      const c1 = rows1 &amp;&amp; rows1[0] ? Number(rows1[0].c) : 0;
+      const c2 = rows2 &amp;&amp; rows2[0] ? Number(rows2[0].c) : 0;
+      activeSessions = Math.max(c1, c2);
+    } catch (_) { activeSessions = 0; }
+
+    res.json({
+      users,
+      competitions,
+      posts,
+      registrations,
+      activeSessions,
+      system: {
+        memory: {
+          total: mem.total,
+          used: mem.used,
+          free: mem.free,
+          active: mem.active
+        },
+        cpu: {
+          load: load.currentLoad
+        },
+        disk: disk[0] ? {
+          size: disk[0].size,
+          used: disk[0].used
+        } : null,
+        mysql: mysqlStatus,
+        redis: redisStatus
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+/**
+ * Overview counts and server/DB health for the admin dashboard.
+ *
+ * @route GET /api/admin/stats/overview
+ * @param {Request} req
+ * @param {Response} res
+ */
+// (implementation above)
+
+/**
+ * Return user counts grouped by role.
+ *
+ * @route GET /api/admin/stats/users/by-role
+ * @param {Request} req
+ * @param {Response} res
+ */
+export async function getUsersByRole(req, res) {
+  try {
+    const data = await User.findAll({
+      attributes: [
+        'role',
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
+      ],
+      group: ['role'],
+      raw: true
+    });
+    
+    res.json(data.map(d => ({ role: d.role, count: parseInt(d.count, 10) })));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+/**
+ * Return user creation counts grouped by day.
+ *
+ * @route GET /api/admin/stats/users/timeline
+ * @param {Request} req
+ * @param {Response} res
+ */
+export async function getUsersTimeline(req, res) {
+  try {
+    const data = await User.findAll({
+      attributes: [
+        [Sequelize.fn('DATE', Sequelize.col('created_at')), 'date'],
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
+      ],
+      group: [Sequelize.fn('DATE', Sequelize.col('created_at'))],
+      order: [[Sequelize.fn('DATE', Sequelize.col('created_at')), 'ASC']],
+      raw: true
+    });
+    
+    res.json(data.map(d => ({
+      date: d.date,
+      count: parseInt(d.count, 10)
+    })));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+/**
+ * Return registration counts grouped by status.
+ *
+ * @route GET /api/admin/stats/registrations/by-status
+ * @param {Request} req
+ * @param {Response} res
+ */
+export async function getRegistrationStats(req, res) {
+  try {
+    const data = await Registration.findAll({
+      attributes: [
+        'status',
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
+      ],
+      group: ['status'],
+      raw: true
+    });
+    
+    res.json(data.map(d => ({ status: d.status, count: parseInt(d.count, 10) })));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function getDetailedUsers(req, res) {
+  try {
+    const all = await User.findAll({
+      attributes: ['id', 'email', 'username', 'first_name', 'last_name', 'role', 'is_active', 'created_at']
+    });
+    
+    res.json(all);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Competiciones
+export async function listCompetitions(req, res) {
+  try {
+    const competitions = await Competition.findAll({
+      attributes: ['id', 'title', 'slug', 'description', 'start_date', 'end_date']
+    });
+    res.render('competitions', { title: req.__('competitions.metaTitle'), pageKey: 'competitions', competitions });
+  } catch (error) {
+    res.status(500).render('error', { status: 500, message: 'Error loading competitions', error });
+  }
+}
+
+export async function getCompetitionStats(req, res) {
+  try {
+    const data = await Competition.findAll({
+      attributes: [
+        'id',
+        'title',
+        [Sequelize.fn('COUNT', Sequelize.col('registrations.id')), 'registrationCount']
+      ],
+      include: [{
+        model: Registration,
+        as: 'registrations',
+        attributes: [],
+        required: false
+      }],
+      group: ['Competition.id'],
+      raw: true,
+      subQuery: false
+    });
+    
+    res.json(data.map(d => ({
+      id: d.id,
+      title: d.title,
+      registrations: parseInt(d.registrationCount, 10) || 0
+    })));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Logs del sistema
+export async function listSystemLogs(req, res) {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 50;
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await SystemLog.findAndCountAll({
+      include: [{
+        model: User,
+        attributes: ['username', 'email'],
+        as: 'user'
+      }],
+      order: [['created_at', 'DESC']],
+      limit,
+      offset
+    });
+
+    const totalPages = Math.ceil(count / limit);
+    res.render('system-logs', {
+      title: req.__('logs.metaTitle'),
+      pageKey: 'logs',
+      logs: rows,
+      currentPage: page,
+      totalPages,
+      totalLogs: count
+    });
+  } catch (error) {
+    res.status(500).render('error', { error: error.message });
+  }
+}
+
+export async function getLogsStats(req, res) {
+  try {
+    const [byAction, byEntity, recent] = await Promise.all([
+      SystemLog.findAll({
+        attributes: [
+          'action',
+          [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
+        ],
+        group: ['action'],
+        raw: true
+      }),
+      SystemLog.findAll({
+        attributes: [
+          'entity_type',
+          [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
+        ],
+        group: ['entity_type'],
+        raw: true
+      }),
+      SystemLog.findAll({
+        attributes: ['action', 'created_at'],
+        order: [['created_at', 'DESC']],
+        limit: 30,
+        raw: true
+      })
+    ]);
+
+    res.json({
+      byAction: byAction.map(d => ({ action: d.action, count: parseInt(d.count, 10) })),
+      byEntity: byEntity.map(d => ({ entity: d.entity_type, count: parseInt(d.count, 10) })),
+      recentTimeline: recent
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function renderEditUser(req, res) {
+  try {
+    const { id } = req.params;
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).render('error', { status: 404, message: req.__('errors.userNotFound') });
+    }
+    res.render('edit-user', { title: req.__('editUser.metaTitle'), pageKey: 'users', user });
+  } catch (error) {
+    res.status(500).render('error', { status: 500, message: error.message });
+  }
+}
+
+export async function updateUser(req, res) {
+  try {
+    const { id } = req.params;
+    const { username, email, first_name, last_name, role, is_active } = req.body;
+    
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).render('error', { status: 404, message: req.__('errors.userNotFound') });
+    }
+
+    const oldData = { ...user.toJSON() };
+    
+    await user.update({
+      username,
+      email,
+      first_name,
+      last_name,
+      role,
+      is_active: is_active === 'true'
+    });
+
+    // Log action
+    await SystemLog.create({
+      action: 'UPDATE',
+      entity_type: 'User',
+      entity_id: user.id,
+      user_id: req.session.user.id,
+      ip_address: req.ip,
+      details: `Updated user ${user.username} (ID: ${user.id})`
+    });
+
+    // Log role change specifically (auditoría)
+    if (oldData.role !== user.role) {
+      await SystemLog.create({
+        action: 'ROLE_CHANGED',
+        entity_type: 'User',
+        entity_id: user.id,
+        user_id: req.session.user.id,
+        ip_address: req.ip,
+        details: `Role changed from ${oldData.role} to ${user.role}`
+      });
+    }
+
+    res.redirect('/admin/users');
+  } catch (error) {
+    res.status(500).render('error', { status: 500, message: error.message });
+  }
+}
+
+export async function listRegistrations(req, res) {
+  try {
+    const registrations = await Registration.findAll({
+      include: [
+        { model: Team, attributes: ['name'] },
+        { model: Competition, attributes: ['title'] }
+      ],
+      order: [['registration_date', 'DESC']]
+    });
+    res.render('registrations', { title: req.__('registrations.metaTitle'), pageKey: 'registrations', registrations });
+  } catch (error) {
+    res.status(500).render('error', { status: 500, message: error.message });
+  }
+}
+
+export async function updateRegistrationStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { status, reason } = req.body;
+
+    const registration = await Registration.findByPk(id);
+    if (!registration) {
+      return res.status(404).send('Registration not found');
+    }
+
+    await registration.update({ status, decision_reason: reason });
+
+    // Log action
+    await SystemLog.create({
+      action: 'UPDATE',
+      entity_type: 'Registration',
+      entity_id: registration.id,
+      user_id: req.session.user.id,
+      ip_address: req.ip,
+      details: `Updated registration ${id} status to ${status}`
+    });
+
+    res.redirect('/admin/registrations');
+  } catch (error) {
+    res.status(500).render('error', { status: 500, message: error.message });
+  }
+}
+
+/**
+ * Return per-competition registration counts.
+ *
+ * @route GET /api/admin/stats/competitions/registrations
+ * @param {Request} req
+ * @param {Response} res
+ */
+// (implementation above)
+
+/**
+ * Return aggregated system log stats used by the admin dashboard.
+ *
+ * @route GET /api/admin/stats/logs
+ * @param {Request} req
+ * @param {Response} res
+ */
+// (implementation above)</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SystemLogger.html">SystemLogger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AuthProvider">AuthProvider</a></li><li><a href="global.html#NotificationsBell">NotificationsBell</a></li><li><a href="global.html#SocketProvider">SocketProvider</a></li><li><a href="global.html#acceptInvite">acceptInvite</a></li><li><a href="global.html#addComment">addComment</a></li><li><a href="global.html#addFavoriteCompetition">addFavoriteCompetition</a></li><li><a href="global.html#addLdapUser">addLdapUser</a></li><li><a href="global.html#apiRequest">apiRequest</a></li><li><a href="global.html#approveJoinRequest">approveJoinRequest</a></li><li><a href="global.html#approveRegistration">approveRegistration</a></li><li><a href="global.html#canUseNotifications">canUseNotifications</a></li><li><a href="global.html#changePassword">changePassword</a></li><li><a href="global.html#cn">cn</a></li><li><a href="global.html#createCountry">createCountry</a></li><li><a href="global.html#createGalleryItem">createGalleryItem</a></li><li><a href="global.html#createLogEntry">createLogEntry</a></li><li><a href="global.html#createNotification">createNotification</a></li><li><a href="global.html#createPost">createPost</a></li><li><a href="global.html#createRegistration">createRegistration</a></li><li><a href="global.html#createSponsor">createSponsor</a></li><li><a href="global.html#createStream">createStream</a></li><li><a href="global.html#createTeam">createTeam</a></li><li><a href="global.html#createTeamMember">createTeamMember</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#declineInvite">declineInvite</a></li><li><a href="global.html#decodeIfBase64">decodeIfBase64</a></li><li><a href="global.html#deleteCompetition">deleteCompetition</a></li><li><a href="global.html#deleteCountry">deleteCountry</a></li><li><a href="global.html#deleteGalleryItem">deleteGalleryItem</a></li><li><a href="global.html#deleteKey">deleteKey</a></li><li><a href="global.html#deleteLdapUser">deleteLdapUser</a></li><li><a href="global.html#deleteLogEntry">deleteLogEntry</a></li><li><a href="global.html#deleteMedia">deleteMedia</a></li><li><a href="global.html#deleteNotification">deleteNotification</a></li><li><a href="global.html#deleteOldLogs">deleteOldLogs</a></li><li><a href="global.html#deletePost">deletePost</a></li><li><a href="global.html#deleteRegistration">deleteRegistration</a></li><li><a href="global.html#deleteRobotFile">deleteRobotFile</a></li><li><a href="global.html#deleteSelf">deleteSelf</a></li><li><a href="global.html#deleteSponsor">deleteSponsor</a></li><li><a href="global.html#deleteStream">deleteStream</a></li><li><a href="global.html#deleteTeam">deleteTeam</a></li><li><a href="global.html#deleteTeamMember">deleteTeamMember</a></li><li><a href="global.html#deleteUser">deleteUser</a></li><li><a href="global.html#down">down</a></li><li><a href="global.html#emitToUser">emitToUser</a></li><li><a href="global.html#exportRegistrationsCSV">exportRegistrationsCSV</a></li><li><a href="global.html#forgotPassword">forgotPassword</a></li><li><a href="global.html#form">form</a></li><li><a href="global.html#getApiOrigin">getApiOrigin</a></li><li><a href="global.html#getComments">getComments</a></li><li><a href="global.html#getCompetitionById">getCompetitionById</a></li><li><a href="global.html#getCompetitions">getCompetitions</a></li><li><a href="global.html#getCountries">getCountries</a></li><li><a href="global.html#getCountryById">getCountryById</a></li><li><a href="global.html#getFileInfo">getFileInfo</a></li><li><a href="global.html#getIO">getIO</a></li><li><a href="global.html#getKeyInfo">getKeyInfo</a></li><li><a href="global.html#getMediaById">getMediaById</a></li><li><a href="global.html#getMembershipStatus">getMembershipStatus</a></li><li><a href="global.html#getMessages">getMessages</a></li><li><a href="global.html#getMyTeam">getMyTeam</a></li><li><a href="global.html#getNotificationById">getNotificationById</a></li><li><a href="global.html#getNotifications">getNotifications</a></li><li><a href="global.html#getOverview">getOverview</a></li><li><a href="global.html#getPostById">getPostById</a></li><li><a href="global.html#getPosts">getPosts</a></li><li><a href="global.html#getRegistrationById">getRegistrationById</a></li><li><a href="global.html#getRegistrationStats">getRegistrationStats</a></li><li><a href="global.html#getRegistrations">getRegistrations</a></li><li><a href="global.html#getResendClient">getResendClient</a></li><li><a href="global.html#getRobotFiles">getRobotFiles</a></li><li><a href="global.html#getSelf">getSelf</a></li><li><a href="global.html#getSponsorById">getSponsorById</a></li><li><a href="global.html#getSponsors">getSponsors</a></li><li><a href="global.html#getStreamById">getStreamById</a></li><li><a href="global.html#getStreams">getStreams</a></li><li><a href="global.html#getSystemLogById">getSystemLogById</a></li><li><a href="global.html#getSystemLogs">getSystemLogs</a></li><li><a href="global.html#getSystemStats">getSystemStats</a></li><li><a href="global.html#getTeamById">getTeamById</a></li><li><a href="global.html#getTeamLogs">getTeamLogs</a></li><li><a href="global.html#getTeamMemberById">getTeamMemberById</a></li><li><a href="global.html#getTeamMembers">getTeamMembers</a></li><li><a href="global.html#getTeams">getTeams</a></li><li><a href="global.html#getUserById">getUserById</a></li><li><a href="global.html#getUsers">getUsers</a></li><li><a href="global.html#getUsersByRole">getUsersByRole</a></li><li><a href="global.html#getUsersTimeline">getUsersTimeline</a></li><li><a href="global.html#getVapidPublicKey">getVapidPublicKey</a></li><li><a href="global.html#handleUploadErrors">handleUploadErrors</a></li><li><a href="global.html#inviteToTeam">inviteToTeam</a></li><li><a href="global.html#leaveTeam">leaveTeam</a></li><li><a href="global.html#list">list</a></li><li><a href="global.html#listFavoriteCompetitions">listFavoriteCompetitions</a></li><li><a href="global.html#listGallery">listGallery</a></li><li><a href="global.html#listJoinRequests">listJoinRequests</a></li><li><a href="global.html#listKeys">listKeys</a></li><li><a href="global.html#listLdapUsers">listLdapUsers</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#me">me</a></li><li><a href="global.html#normalizeBase">normalizeBase</a></li><li><a href="global.html#parseResponse">parseResponse</a></li><li><a href="global.html#redirectIfAuthenticated">redirectIfAuthenticated</a></li><li><a href="global.html#reducer">reducer</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerTeamInCompetition">registerTeamInCompetition</a></li><li><a href="global.html#rejectRegistration">rejectRegistration</a></li><li><a href="global.html#remove">remove</a></li><li><a href="global.html#removeFavoriteCompetition">removeFavoriteCompetition</a></li><li><a href="global.html#renderAddLdapUser">renderAddLdapUser</a></li><li><a href="global.html#renderEditLdapUser">renderEditLdapUser</a></li><li><a href="global.html#requestJoinTeam">requestJoinTeam</a></li><li><a href="global.html#requestNotificationPermission">requestNotificationPermission</a></li><li><a href="global.html#requireAdminSession">requireAdminSession</a></li><li><a href="global.html#requireOwnership">requireOwnership</a></li><li><a href="global.html#requireRole">requireRole</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#resolveMediaUrl">resolveMediaUrl</a></li><li><a href="global.html#save">save</a></li><li><a href="global.html#searchUsers">searchUsers</a></li><li><a href="global.html#sendMessage">sendMessage</a></li><li><a href="global.html#sendPasswordResetCodeEmail">sendPasswordResetCodeEmail</a></li><li><a href="global.html#sendTestPush">sendTestPush</a></li><li><a href="global.html#setIO">setIO</a></li><li><a href="global.html#showNotification">showNotification</a></li><li><a href="global.html#subscribePush">subscribePush</a></li><li><a href="global.html#subscribeToPush">subscribeToPush</a></li><li><a href="global.html#toggleFileVisibility">toggleFileVisibility</a></li><li><a href="global.html#toggleLike">toggleLike</a></li><li><a href="global.html#togglePin">togglePin</a></li><li><a href="global.html#unsubscribeFromPush">unsubscribeFromPush</a></li><li><a href="global.html#unsubscribePush">unsubscribePush</a></li><li><a href="global.html#up">up</a></li><li><a href="global.html#updateCompetition">updateCompetition</a></li><li><a href="global.html#updateCountry">updateCountry</a></li><li><a href="global.html#updateLdapUser">updateLdapUser</a></li><li><a href="global.html#updateNotification">updateNotification</a></li><li><a href="global.html#updatePost">updatePost</a></li><li><a href="global.html#updateRegistration">updateRegistration</a></li><li><a href="global.html#updateSelf">updateSelf</a></li><li><a href="global.html#updateSponsor">updateSponsor</a></li><li><a href="global.html#updateStream">updateStream</a></li><li><a href="global.html#updateTeam">updateTeam</a></li><li><a href="global.html#updateTeamMember">updateTeamMember</a></li><li><a href="global.html#updateUser">updateUser</a></li><li><a href="global.html#uploadMedia">uploadMedia</a></li><li><a href="global.html#uploadMiddleware">uploadMiddleware</a></li><li><a href="global.html#uploadRobotFile">uploadRobotFile</a></li><li><a href="global.html#useApi">useApi</a></li><li><a href="global.html#useAuth">useAuth</a></li><li><a href="global.html#useAuthContext">useAuthContext</a></li><li><a href="global.html#useCountries">useCountries</a></li><li><a href="global.html#useSocket">useSocket</a></li><li><a href="global.html#useTeams">useTeams</a></li><li><a href="global.html#useToast">useToast</a></li><li><a href="global.html#validatePasswordStrength">validatePasswordStrength</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Jan 12 2026 00:56:59 GMT+0100 (hora estándar de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
