@@ -76,62 +76,59 @@ const Gallery = () => {
     };
 
     return (
-        <div>
-
-            <div>
-                <h1 className="text-8xl font-bold text-blue-800 mb-2 mt-10 text-center drop-shadow-md">
-                    {t("gallery.galleryTitle")}
+        <div className="space-y-8">
+            <header className="space-y-2 text-center">
+                <h1 className="text-3xl font-bold tracking-tight text-blue-900 sm:text-4xl lg:text-5xl dark:text-blue-100">
+                    {t('gallery.galleryTitle')}
                 </h1>
-                <p className="text-blue-600 text-lg mb-10 text-center">
+                <p className="mx-auto max-w-2xl text-sm text-slate-600 sm:text-base dark:text-slate-400">
                     {t('gallery.galleryDescription')}
                 </p>
-            </div>
+            </header>
 
-            <div className="flex justify-center items-start min-h-screen mt-20">
-
-                <div className="bg-blue-200/30 backdrop-blur-md rounded-2xl shadow-lg p-8 md:p-12 w-full max-w-6xl">
+            <section className="rounded-2xl border border-slate-200 bg-white/60 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/40 sm:p-6 lg:p-8">
 
                     {isAuthenticated && isAdmin && (
-                        <form onSubmit={handleUpload} className="bg-white/80 rounded-xl border border-slate-200 p-4 md:p-6 mb-8">
-                            <h2 className="text-xl font-semibold text-blue-800 mb-4">{t('gallery.adminUploadTitle') || 'Subir foto a la galería'}</h2>
+                        <form onSubmit={handleUpload} className="rounded-xl border border-slate-200 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/50 sm:p-6 mb-6">
+                            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4">{t('gallery.adminUploadTitle') || 'Subir foto a la galería'}</h2>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="md:col-span-1">
-                                    <label className="block text-sm text-slate-700 mb-1">{t('gallery.uploadImage') || 'Imagen'}</label>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('gallery.uploadImage') || 'Imagen'}</label>
                                     <input
                                         type="file"
                                         accept="image/*"
-                                        className="block w-full text-sm"
+                                        className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-slate-900 hover:file:bg-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 dark:file:bg-slate-800 dark:file:text-slate-50 dark:hover:file:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
                                         onChange={(ev) => setForm((p) => ({ ...p, file: ev.target.files?.[0] || null }))}
                                     />
                                 </div>
 
                                 <div className="md:col-span-1">
-                                    <label className="block text-sm text-slate-700 mb-1">{t('gallery.uploadTitle') || 'Título (opcional)'}</label>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('gallery.uploadTitle') || 'Título (opcional)'}</label>
                                     <input
                                         type="text"
                                         value={form.title}
-                                        className="w-full rounded-lg border border-slate-200 px-3 py-2"
+                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
                                         onChange={(ev) => setForm((p) => ({ ...p, title: ev.target.value }))}
                                     />
                                 </div>
 
                                 <div className="md:col-span-1">
-                                    <label className="block text-sm text-slate-700 mb-1">{t('gallery.uploadDescription') || 'Descripción (opcional)'}</label>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('gallery.uploadDescription') || 'Descripción (opcional)'}</label>
                                     <input
                                         type="text"
                                         value={form.description}
-                                        className="w-full rounded-lg border border-slate-200 px-3 py-2"
+                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
                                         onChange={(ev) => setForm((p) => ({ ...p, description: ev.target.value }))}
                                     />
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between mt-4">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
                                 <button
                                     type="submit"
                                     disabled={uploadStatus.loading}
-                                    className="px-4 py-2 rounded-lg bg-blue-700 text-white font-semibold disabled:opacity-60"
+                                    className="inline-flex items-center justify-center rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
                                 >
                                     {uploadStatus.loading ? (t('gallery.uploading') || 'Subiendo...') : (t('gallery.uploadCta') || 'Subir')}
                                 </button>
@@ -148,10 +145,10 @@ const Gallery = () => {
                     {!status.loading && status.error && <p className="text-red-600" role="alert">{status.error}</p>}
 
                     {!status.loading && !status.error && (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
                             {items.map((item) => (
-                                <div key={item.id} className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
-                                    <div className="aspect-square bg-slate-50">
+                                <div key={item.id} className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-950">
+                                    <div className="aspect-square bg-slate-50 dark:bg-slate-900">
                                         <img
                                             src={resolveMediaUrl(item.url)}
                                             alt={item.title || item.original_name || 'Imagen'}
@@ -161,8 +158,8 @@ const Gallery = () => {
                                     </div>
                                     {(item.title || item.description || (isAuthenticated && isAdmin)) && (
                                         <div className="p-3">
-                                            {item.title && <p className="font-semibold text-slate-900 truncate">{item.title}</p>}
-                                            {item.description && <p className="text-sm text-slate-600 line-clamp-2">{item.description}</p>}
+                                            {item.title && <p className="font-semibold text-slate-900 truncate dark:text-slate-50">{item.title}</p>}
+                                            {item.description && <p className="text-sm text-slate-600 line-clamp-2 dark:text-slate-400">{item.description}</p>}
 
                                             {isAuthenticated && isAdmin && (
                                                 <div className="mt-3 flex items-center justify-between">
@@ -170,7 +167,7 @@ const Gallery = () => {
                                                         type="button"
                                                         onClick={() => handleDelete(item.id)}
                                                         disabled={deleteStatus.loadingId === item.id}
-                                                        className="text-sm font-semibold text-red-700 disabled:opacity-60"
+                                                        className="inline-flex items-center rounded-md px-2 py-1 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-900/20"
                                                     >
                                                         {deleteStatus.loadingId === item.id ? (t('gallery.deleting') || 'Eliminando...') : (t('gallery.delete') || 'Eliminar')}
                                                     </button>
@@ -187,9 +184,7 @@ const Gallery = () => {
                         </div>
                     )}
 
-                </div>
-            </div>
-
+            </section>
         </div>
     )
 }
