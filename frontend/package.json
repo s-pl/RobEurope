@@ -8,7 +8,8 @@
     "build": "vite build",
     "test": "vitest",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -51,6 +52,7 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react-swc": "^4.2.1",
+    "@vitest/coverage-v8": "^4.0.17",
     "autoprefixer": "^10.4.22",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
