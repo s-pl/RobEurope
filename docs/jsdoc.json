@@ -1,18 +1,42 @@
 {
   "source": {
-    "include": ["backend", "frontend/src"],
+    "include": [
+      "./backend/controller",
+      "./backend/middleware",
+      "./backend/utils",
+      "./backend/models",
+      "./backend/config",
+      "./backend/routes",
+      "./frontend/src/hooks",
+      "./frontend/src/context",
+      "./frontend/src/lib"
+    ],
     "includePattern": ".+\\.(js|jsx|mjs)$",
-    "excludePattern": "(\\\\|/)(node_modules|__tests__|uploads|logs|dist)(\\\\|/)|(^|\\\\|/)backend(\\\\|/)public(\\\\|/)"
+    "excludePattern": "(node_modules|__tests__|test)"
   },
-  "plugins": ["plugins/markdown"],
   "opts": {
-    "encoding": "utf8",
-    "destination": "docs/generated",
+    "destination": "./docs/jsdoc-output",
     "recurse": true,
-    "private": false
+    "template": "node_modules/clean-jsdoc-theme",
+    "encoding": "utf8"
   },
+  "plugins": [
+    "plugins/markdown"
+  ],
   "templates": {
     "cleverLinks": true,
-    "monospaceLinks": true
+    "monospaceLinks": true,
+    "default": {
+      "outputSourceFiles": true,
+      "includeDate": false
+    }
+  },
+  "markdown": {
+    "hardwrap": false,
+    "idInHeadings": true
+  },
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc", "closure"]
   }
 }

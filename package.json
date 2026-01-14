@@ -25,8 +25,9 @@
     },
     "homepage": "https://example.com/robeurope#readme",
     "devDependencies": {
+        "clean-jsdoc-theme": "^4.3.0",
         "eslint": "^8.49.0",
-        "jsdoc": "^4.0.4",
+        "jsdoc": "^4.0.5",
         "nodemon": "^2.0.22"
     }
 }

@@ -1,30 +1,37 @@
 /* eslint-disable react-refresh/only-export-components */
 
 /**
- * @fileoverview Socket.IO context provider.
- *
+ * @fileoverview
+ * Socket.IO context provider for real-time communication.
+ * 
  * Creates a single Socket.IO client pointing at the backend origin derived from
  * `VITE_API_BASE_URL` and exposes `{ socket, connected }` via React context.
+ * @module context/SocketContext
  */
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import io from 'socket.io-client';
 import { getApiOrigin } from '../lib/apiClient';
 
+/**
+ * React context for Socket.IO client.
+ * @type {React.Context<SocketContextValue|null>}
+ */
 const SocketContext = createContext(null);
 
 /**
- * @typedef {object} SocketContextValue
- * @property {object} socket
- * @property {boolean} connected
+ * @typedef {Object} SocketContextValue
+ * @property {Object} socket - Socket.IO client instance.
+ * @property {boolean} connected - Whether the socket is currently connected.
  */
 
 /**
- * Provides a Socket.IO client and connection status.
- *
- * @param {object} props
- * @param {any} props.children
- * @returns {JSX.Element}
+ * Socket.IO provider component.
+ * Manages a single Socket.IO connection for real-time features.
+ * 
+ * @param {Object} props - Component props.
+ * @param {React.ReactNode} props.children - Child components.
+ * @returns {JSX.Element} Provider component.
  */
 export const SocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);

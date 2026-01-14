@@ -124,12 +124,6 @@ const Home = () => {
               {t('home.hero.primaryCta')} <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="h-12 px-8 text-lg">
-            <a href={`${getApiOrigin()}/api-docs`} target="_blank" rel="noreferrer">
-              {t('home.hero.secondaryCta')}
-              <span className="sr-only"> (opens in a new tab)</span>
-            </a>
-          </Button>
         </div>
 
     

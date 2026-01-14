@@ -1,33 +1,48 @@
 /**
- * @fileoverview Teams API hook.
- *
- * Provides thin wrappers around `/api/teams` endpoints.
+ * @fileoverview
+ * Teams API hook providing thin wrappers around `/api/teams` endpoints.
+ * @module hooks/useTeams
  */
 
 import { useApi } from './useApi';
 import { useCallback } from 'react';
 
 /**
- * @typedef {object} UseTeamsApi
- * @property {Function} list
- * @property {Function} create
- * @property {Function} invite
- * @property {Function} acceptInvite
- * @property {Function} requestJoin
- * @property {Function} approveRequest
- * @property {Function} registerInCompetition
- * @property {Function} mine
- * @property {Function} update
- * @property {Function} remove
- * @property {Function} listRequests
- * @property {Function} getMembers
- * @property {Function} removeMember
- * @property {Function} leave
+ * @typedef {Object} Team
+ * @property {number} id - Team ID.
+ * @property {string} name - Team name.
+ * @property {string} [description] - Team description.
+ * @property {string} [logo_url] - URL to team logo.
+ * @property {number} [country_id] - Country ID.
  */
 
 /**
- * Returns team-related API helpers.
- * @returns {UseTeamsApi}
+ * @typedef {Object} UseTeamsApi
+ * @property {Function} list - List teams with optional filters.
+ * @property {Function} create - Create a new team.
+ * @property {Function} invite - Invite a user to a team.
+ * @property {Function} acceptInvite - Accept a team invitation.
+ * @property {Function} requestJoin - Request to join a team.
+ * @property {Function} approveRequest - Approve a join request.
+ * @property {Function} registerInCompetition - Register team in a competition.
+ * @property {Function} mine - Get current user's team.
+ * @property {Function} update - Update team details.
+ * @property {Function} remove - Delete a team.
+ * @property {Function} listRequests - List pending join requests.
+ * @property {Function} getMembers - Get team members.
+ * @property {Function} removeMember - Remove a team member.
+ * @property {Function} leave - Leave current team.
+ */
+
+/**
+ * Custom hook providing team-related API methods.
+ * All methods are memoized with useCallback for performance.
+ * 
+ * @returns {UseTeamsApi} Object containing team API methods.
+ * @example
+ * const { list, create, mine } = useTeams();
+ * const teams = await list('robotics', 1);
+ * const myTeam = await mine();
  */
 export const useTeams = () => {
   const api = useApi();
