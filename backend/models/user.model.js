@@ -1,3 +1,37 @@
+/**
+ * @fileoverview
+ * User model definition for Sequelize ORM.
+ * Represents registered users in the RobEurope platform.
+ * @module models/User
+ */
+
+/**
+ * @typedef {Object} UserAttributes
+ * @property {string} id - UUID primary key.
+ * @property {number} [country_id] - Foreign key to Country table.
+ * @property {string} first_name - User's first name.
+ * @property {string} last_name - User's last name.
+ * @property {string} username - Unique username.
+ * @property {string} email - Unique email address.
+ * @property {string} [password_hash] - Bcrypt hashed password (nullable for OAuth users).
+ * @property {string} [google_id] - Google OAuth identifier.
+ * @property {string} [github_id] - GitHub OAuth identifier.
+ * @property {string} [apple_id] - Apple OAuth identifier.
+ * @property {string} [phone] - Phone number.
+ * @property {string} [bio] - User biography.
+ * @property {string} [profile_photo_url] - URL to profile photo.
+ * @property {'user'|'super_admin'} role - User role for authorization.
+ * @property {boolean} is_active - Whether the user account is active.
+ * @property {Date} created_at - Account creation timestamp.
+ */
+
+/**
+ * Defines the User model.
+ * @async
+ * @param {Object} sequelize - Sequelize instance.
+ * @param {Object} DataTypes - Sequelize DataTypes.
+ * @returns {Promise<Object>} The User model.
+ */
 export default async function defineUserModel(sequelize, DataTypes) {
   const User = sequelize.define('User', {
     id: {
@@ -77,6 +111,14 @@ export default async function defineUserModel(sequelize, DataTypes) {
     }
   });
 
+  /**
+   * Defines model associations.
+   * - User has many Posts (as author).
+   * - User belongs to a Country.
+   * - User has many PostLikes.
+   * - User has many Comments (as author).
+   * @param {Object} models - All registered models.
+   */
   User.associate = (models) => {
     User.hasMany(models.Post, { foreignKey: 'author_id' });
     User.belongsTo(models.Country, { foreignKey: 'country_id' });

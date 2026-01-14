@@ -1,40 +1,58 @@
 /* eslint-disable react-refresh/only-export-components */
 
 /**
- * @fileoverview Authentication session context.
- *
+ * @fileoverview
+ * Authentication session context provider.
+ * 
  * The frontend uses cookie-based sessions. This provider keeps the current user
  * in memory, refreshes `/users/me` on mount, and exposes helpers for login,
  * register, logout, profile updates, and password changes.
+ * @module context/AuthContext
  */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { apiRequest } from '../lib/apiClient';
 
+/**
+ * React context for authentication state.
+ * @type {React.Context<AuthContextValue|null>}
+ */
 const AuthContext = createContext(null);
 
 // Use cookie-based session on server; avoid localStorage persistence
 
 /**
- * @typedef {object} AuthContextValue
- * @property {any} user
- * @property {boolean} isAuthenticated
- * @property {boolean} loading
- * @property {Function} login
- * @property {Function} register
- * @property {Function} logout
- * @property {Function} refreshProfile
- * @property {Function} updateProfile
- * @property {Function} uploadProfilePhoto
- * @property {Function} changePassword
+ * @typedef {Object} User
+ * @property {string} id - User UUID.
+ * @property {string} email - User email address.
+ * @property {string} first_name - User's first name.
+ * @property {string} last_name - User's last name.
+ * @property {string} username - Unique username.
+ * @property {'user'|'super_admin'} role - User role.
+ * @property {string} [profile_photo_url] - URL to profile photo.
  */
 
 /**
- * Auth provider.
- *
- * @param {object} props
- * @param {any} props.children
- * @returns {JSX.Element}
+ * @typedef {Object} AuthContextValue
+ * @property {User|null} user - Current authenticated user or null.
+ * @property {boolean} isAuthenticated - Whether user is logged in.
+ * @property {boolean} loading - Whether auth state is being loaded.
+ * @property {Function} login - Authenticate with email/password.
+ * @property {Function} register - Create new account.
+ * @property {Function} logout - End current session.
+ * @property {Function} refreshProfile - Reload user data from server.
+ * @property {Function} updateProfile - Update user profile fields.
+ * @property {Function} uploadProfilePhoto - Upload new profile photo.
+ * @property {Function} changePassword - Change user password.
+ */
+
+/**
+ * Authentication provider component.
+ * Wraps the application to provide authentication state and methods.
+ * 
+ * @param {Object} props - Component props.
+ * @param {React.ReactNode} props.children - Child components.
+ * @returns {JSX.Element} Provider component.
  */
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);

@@ -1,3 +1,35 @@
+/**
+ * @fileoverview
+ * Competition model definition for Sequelize ORM.
+ * Represents robotics competitions and events.
+ * @module models/Competition
+ */
+
+/**
+ * @typedef {Object} CompetitionAttributes
+ * @property {number} id - Auto-incrementing primary key.
+ * @property {string} title - Competition title.
+ * @property {string} slug - URL-friendly identifier.
+ * @property {string} [description] - Competition description.
+ * @property {'draft'|'published'|'archived'} status - Publication status.
+ * @property {string} [location] - Physical location of the competition.
+ * @property {number} [max_teams] - Maximum number of teams allowed.
+ * @property {Date} [registration_start] - When registration opens.
+ * @property {Date} [registration_end] - When registration closes.
+ * @property {Date} [start_date] - Competition start date.
+ * @property {Date} [end_date] - Competition end date.
+ * @property {string} [rules_url] - URL to competition rules document.
+ * @property {boolean} is_active - Whether the competition is currently active.
+ * @property {Object} [stream_url] - JSON object with streaming URLs.
+ */
+
+/**
+ * Defines the Competition model.
+ * @async
+ * @param {Object} sequelize - Sequelize instance.
+ * @param {Object} DataTypes - Sequelize DataTypes.
+ * @returns {Promise<Object>} The Competition model.
+ */
 export default async function defineCompetitionsModel(sequelize, DataTypes) {
     const Competition = sequelize.define('Competition', {
         id: {
@@ -61,6 +93,12 @@ export default async function defineCompetitionsModel(sequelize, DataTypes) {
 
     });
 
+    /**
+     * Defines model associations.
+     * - Competition has many Streams.
+     * - Competition has many Registrations.
+     * @param {Object} models - All registered models.
+     */
     Competition.associate = (models) => {
         Competition.hasMany(models.Stream, {
             foreignKey: 'competition_id',
