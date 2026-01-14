@@ -1,26 +1,46 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+/**
+ * @fileoverview UI Component Tests - 5 Essential Tests
+ */
+
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 
-describe('Button', () => {
-    // this is a basic test to ensure the Button component renders correctly
-  it('renders children and applies variant classes', () => {
-    render(<Button variant="ghost">Click me</Button>);
-    const btn = screen.getByText('Click me');
-    expect(btn).toBeTruthy();
-    expect(btn.className).toContain('inline-flex');
+describe('UI Components', () => {
+  it('Button renders and handles clicks', () => {
+    const handleClick = vi.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
+    fireEvent.click(screen.getByText('Click me'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
   });
-});
-;
 
+  it('Button can be disabled', () => {
+    render(<Button disabled>Disabled</Button>);
+    expect(screen.getByText('Disabled')).toBeDisabled();
+  });
 
-describe('Input', () => {
-    //this is a basic test to ensure the Input component renders correctly
-  it('renders input with provided type and props', () => {
-    render(<Input type="email" placeholder="you@example.com" />);
-    const input = screen.getByPlaceholderText('you@example.com');
-    expect(input).toBeTruthy();
-    expect(input.getAttribute('type')).toBe('email');
+  it('Input accepts user input', () => {
+    render(<Input placeholder="Type here" />);
+    const input = screen.getByPlaceholderText('Type here');
+    fireEvent.change(input, { target: { value: 'Hello World' } });
+    expect(input.value).toBe('Hello World');
+  });
+
+  it('Input can be disabled', () => {
+    render(<Input disabled placeholder="Disabled" />);
+    expect(screen.getByPlaceholderText('Disabled')).toBeDisabled();
+  });
+
+  it('Card renders with structure', () => {
+    render(
+      <Card>
+        <CardHeader><CardTitle>Title</CardTitle></CardHeader>
+        <CardContent><p>Content</p></CardContent>
+      </Card>
+    );
+    expect(screen.getByText('Title')).toBeTruthy();
+    expect(screen.getByText('Content')).toBeTruthy();
   });
 });
