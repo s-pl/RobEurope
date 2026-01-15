@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { useEditMode } from '../context/EditModeContext';
-import { Calendar, MapPin, Users, ChevronDown, ChevronUp, ArrowRight, Plus, Star } from 'lucide-react';
+import { Calendar, Users, ChevronDown, ChevronUp, ArrowRight, Plus, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/card';
@@ -33,7 +33,7 @@ const CompetitionItem = ({ competition, isFavorite, onToggleFavorite, onSetActiv
               </Badge>
               {competition.is_active && (
                 <Badge className="bg-green-500 hover:bg-green-600 border-none text-white">
-                  Activa
+                  {t('competitions.activeBadge')}
                 </Badge>
               )}
             </div>
@@ -41,10 +41,6 @@ const CompetitionItem = ({ competition, isFavorite, onToggleFavorite, onSetActiv
               <span className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 {new Date(competition.start_date).toLocaleDateString()}
-              </span>
-              <span className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
-                {competition.location || 'Online'}
               </span>
             </div>
           </div>
@@ -68,10 +64,10 @@ const CompetitionItem = ({ competition, isFavorite, onToggleFavorite, onSetActiv
                 variant={competition.is_active ? 'default' : 'outline'}
                 size="sm"
                 onClick={(e)=>{ e.stopPropagation(); onSetActive?.(competition.id); }}
-                title={competition.is_active ? (t('competitions.active')||'Activa') : (t('competitions.setActive')||'Marcar activa')}
+                title={competition.is_active ? (t('competitions.deactivate')) : (t('competitions.setActive'))}
                 className="ml-1"
               >
-                {competition.is_active ? (t('competitions.active')||'Activa') : (t('competitions.setActive')||'Marcar activa')}
+                {competition.is_active ? (t('competitions.deactivate')) : (t('competitions.setActive'))}
               </Button>
             )}
             <Button variant="ghost" size="icon" className="text-slate-500 dark:text-slate-400">
@@ -128,7 +124,6 @@ const Competitions = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    location: '',
     start_date: '',
     end_date: '',
     max_teams: '',
@@ -216,7 +211,7 @@ const Competitions = () => {
         }
       });
       setCreateOpen(false);
-      setFormData({ title: '', description: '', location: '', start_date: '', end_date: '', max_teams: '', is_active: false });
+      setFormData({ title: '', description: '', start_date: '', end_date: '', max_teams: '', is_active: false });
       fetchAll();
     } catch (err) {
       alert(err.message || t('competitions.createError'));
@@ -227,7 +222,9 @@ const Competitions = () => {
 
   const setActiveCompetition = async (id) => {
     try {
-      await api(`/competitions/${id}`, { method: 'PUT', body: { is_active: true } });
+      const comp = competitions.find(c => c.id === id);
+      const newActiveState = !comp?.is_active;
+      await api(`/competitions/${id}`, { method: 'PUT', body: { is_active: newActiveState } });
       // Refrescar lista para reflejar que otras pasan a inactivas si el backend lo hace así
       fetchAll();
     } catch (err) {
@@ -270,14 +267,6 @@ const Competitions = () => {
                       id="description" 
                       value={formData.description} 
                       onChange={e => setFormData({...formData, description: e.target.value})} 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location">{t('competitions.form.location')}</Label>
-                    <Input 
-                      id="location" 
-                      value={formData.location} 
-                      onChange={e => setFormData({...formData, location: e.target.value})} 
                     />
                   </div>
                   <div className="space-y-2">

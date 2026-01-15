@@ -1,3 +1,33 @@
+/**
+ * @fileoverview
+ * Team model definition for Sequelize ORM.
+ * Represents robotics teams participating in competitions.
+ * @module models/Team
+ */
+
+/**
+ * @typedef {Object} TeamAttributes
+ * @property {number} id - Auto-incrementing primary key.
+ * @property {string} name - Team name.
+ * @property {number} [country_id] - Foreign key to Country table.
+ * @property {string} [city] - City where the team is located.
+ * @property {string} [institution] - School or institution name.
+ * @property {string} [description] - Team description.
+ * @property {string} [website_url] - Team website URL.
+ * @property {string} [logo_url] - URL to team logo.
+ * @property {string} [stream_url] - Live stream URL.
+ * @property {Object} [social_links] - JSON object with social media links.
+ * @property {string} created_by_user_id - UUID of the user who created the team.
+ * @property {Date} created_at - Creation timestamp.
+ * @property {Date} updated_at - Last update timestamp.
+ */
+
+/**
+ * Defines the Team model.
+ * @param {Object} sequelize - Sequelize instance.
+ * @param {Object} DataTypes - Sequelize DataTypes.
+ * @returns {Object} The Team model.
+ */
 export default function defineTeamsModel(sequelize, DataTypes) {
     const Team = sequelize.define('Team', {
         id: {
@@ -68,6 +98,11 @@ export default function defineTeamsModel(sequelize, DataTypes) {
 
     });
 
+    /**
+     * Defines model associations.
+     * - Team has many Streams.
+     * @param {Object} models - All registered models.
+     */
     Team.associate = (models) => {
         // Removed Media association
         Team.hasMany(models.Stream, {

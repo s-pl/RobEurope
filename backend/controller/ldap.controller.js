@@ -10,11 +10,23 @@ import ldap from 'ldapjs';
 import attributePkg from '@ldapjs/attribute';
 const Attribute = attributePkg; // CJS default export is the class itself
 import dotenv from 'dotenv';
-dotenv.config();
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Load .env from repository root (process.cwd() is "backend" when running the server)
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
-const client = ldap.createClient({
-  url: process.env.LDAP_URL,
-});
+// Ensure LDAP configuration is present. ldapjs requires either `url` or `socketPath`.
+const ldapUrl = process.env.LDAP_URL;
+const ldapSocketPath = process.env.LDAP_SOCKET_PATH;
+if (!ldapUrl && !ldapSocketPath) {
+  console.error('LDAP configuration missing: set LDAP_URL or LDAP_SOCKET_PATH in environment or .env');
+  throw new Error('LDAP configuration missing: LDAP_URL or LDAP_SOCKET_PATH required');
+}
+
+const client = ldap.createClient(
+  ldapUrl ? { url: ldapUrl } : { socketPath: ldapSocketPath }
+);
 
 
 client.on('error', (err) => {

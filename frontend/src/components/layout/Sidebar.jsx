@@ -15,14 +15,14 @@ import React, { useState } from 'react';
 
 const navLinks = [
   { to: '/', key: 'nav.home', icon: Home },
-  { to: '/posts', key: 'nav.posts', icon: Newspaper },
-  { to: '/gallery', key: 'nav.gallery', icon: Image },
-  { to: '/feedback', key: 'nav.feedback', icon: MessageSquare },
   { to: '/competitions', key: 'nav.competitions', icon: Trophy },
   { to: '/teams', key: 'nav.teams', icon: Users },
-  { to: '/sponsors', key: 'nav.sponsors', icon: Heart },
+  { to: '/posts', key: 'nav.posts', icon: Newspaper },
   { to: '/streams', key: 'nav.streams', icon: Tv },
-  { to: '/contact', key: 'nav.contact', icon: Mail }
+  { to: '/gallery', key: 'nav.gallery', icon: Image },
+  { to: '/sponsors', key: 'nav.sponsors', icon: Heart },
+  { to: '/contact', key: 'nav.contact', icon: Mail },
+  { to: '/feedback', key: 'nav.feedback', icon: MessageSquare }
 ];
 
 const languages = [

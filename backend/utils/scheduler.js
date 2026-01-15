@@ -3,10 +3,30 @@ import redisClient from './redis.js';
 import { Op } from 'sequelize';
 import { emitToUser } from './realtime.js';
 
+/**
+ * @fileoverview
+ * Background scheduler for periodic tasks.
+ * Currently handles competition reminder notifications.
+ * @module utils/scheduler
+ */
+
 const { Competition, Registration, Team, Notification } = db;
 
+/**
+ * Time window in hours before competition start to send reminders.
+ * @constant {number}
+ */
 const REMINDER_WINDOW_HOURS = 24;
 
+/**
+ * Sends reminder notifications for upcoming competitions.
+ * Finds competitions starting within the reminder window and notifies
+ * team owners with approved registrations.
+ * Uses Redis for deduplication to prevent duplicate notifications.
+ * @async
+ * @private
+ * @returns {Promise<void>}
+ */
 async function sendCompetitionReminders() {
   const now = new Date();
   const inWindow = new Date(now.getTime() + REMINDER_WINDOW_HOURS * 3600 * 1000);
@@ -45,8 +65,19 @@ async function sendCompetitionReminders() {
   }
 }
 
+/**
+ * Handle for the scheduler interval.
+ * @type {NodeJS.Timeout|null}
+ * @private
+ */
 let intervalHandle = null;
 
+/**
+ * Starts the background schedulers.
+ * Runs reminder check hourly and once at startup (after 15s delay).
+ * Safe to call multiple times - subsequent calls are no-ops.
+ * @returns {void}
+ */
 export function startSchedulers() {
   if (intervalHandle) return;
   // run hourly
@@ -57,6 +88,11 @@ export function startSchedulers() {
   setTimeout(() => sendCompetitionReminders().catch(() => {}), 15 * 1000);
 }
 
+/**
+ * Stops all background schedulers.
+ * Safe to call even if schedulers are not running.
+ * @returns {void}
+ */
 export function stopSchedulers() {
   if (intervalHandle) clearInterval(intervalHandle);
   intervalHandle = null;
