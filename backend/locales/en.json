@@ -2,14 +2,15 @@
   "common": {
     "panelFallback": "Panel",
     "appName": "RobEurope Admin",
-  "brand": "RobEurope",
-  "tagline": "",
+    "brand": "RobEurope",
+    "tagline": "",
     "menuToggle": "Toggle navigation",
     "navLabel": "Panel navigation",
-  "sidebarHint": "",
+    "sidebarHint": "",
+    "notAvailable": "N/A",
     "workspace": {
-  "eyebrow": "",
-  "description": "",
+      "eyebrow": "",
+      "description": "",
       "status": "Active session"
     },
     "language": {
@@ -285,8 +286,8 @@
       "jsonHint": "Valid JSON required.",
       "cancel": "Cancel",
       "save": "Save",
-      "createTitle": "Create {collection}",
-      "editTitle": "Edit {collection}"
+      "createTitle": "Create {{name}}",
+      "editTitle": "Edit {{name}}"
     }
   },
   "crud": {

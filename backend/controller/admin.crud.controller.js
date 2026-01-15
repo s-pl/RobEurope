@@ -88,14 +88,40 @@ const modelConfigs = {
   }
 };
 
-const localizeConfig = (config, req) => ({
-  ...config,
-  label: req.__({ phrase: config.labelKey || config.label, defaultValue: config.label }),
-  fields: config.fields.map(field => ({
-    ...field,
-    label: req.__({ phrase: field.labelKey || field.label, defaultValue: field.label })
-  }))
-});
+const localizeConfig = (config, req) => {
+  // Translate the collection label - use fallback to default
+  let collectionLabel = config.label;
+  try {
+    if (config.labelKey) {
+      const translated = req.__(config.labelKey);
+      // Only use translation if it's different from the key (meaning it was found)
+      if (translated && !translated.includes('.')) {
+        collectionLabel = translated;
+      }
+    }
+  } catch (e) {
+    console.error('Error translating collection label:', e);
+  }
+  
+  // Translate field labels with fallback
+  const translatedFields = config.fields.map(field => {
+    let fieldLabel = field.label; // default fallback
+    try {
+      if (field.labelKey) {
+        const translated = req.__(field.labelKey);
+        // Only use translation if it was found (doesn't look like a key path)
+        if (translated && !translated.includes('.')) {
+          fieldLabel = translated;
+        }
+      }
+    } catch (e) {
+      console.error('Error translating field label:', field.labelKey, e);
+    }
+    return { ...field, label: fieldLabel };
+  });
+  
+  return { ...config, label: collectionLabel, fields: translatedFields };
+};
 
 /**
  * Render a list view for a configured model.
@@ -158,8 +184,9 @@ export const form = async (req, res) => {
     }
 
     const localizedConfig = localizeConfig(config, req);
+    // Build title using i18n with mustache syntax: {{name}}
     const formTitleKey = id ? 'generic.form.editTitle' : 'generic.form.createTitle';
-    const title = req.__(formTitleKey, { collection: localizedConfig.label });
+    const title = req.__(formTitleKey, { name: localizedConfig.label });
     res.render('admin/generic-form', {
       title,
       config: localizedConfig,

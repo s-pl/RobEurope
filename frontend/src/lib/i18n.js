@@ -130,7 +130,9 @@ const resources = {
         uploadOk: 'Foto subida',
         loading: 'Cargando...',
         delete: 'Eliminar',
-        deleting: 'Eliminando...'
+        deleting: 'Eliminando...',
+        seeMore: 'Ver más',
+        seeLess: 'Ver menos'
       },
       feedback: {
         Title: "Opiniones",
@@ -408,13 +410,30 @@ const resources = {
         // Action labels
         active: 'Activa',
         setActive: 'Marcar activa',
-        setActiveError: 'No se pudo marcar como activa'
-      },
-      // Additional keys for competitions UI actions
-      competitionActions: {
-        active: 'Activa',
-        setActive: 'Marcar activa',
-        setActiveError: 'No se pudo marcar como activa'
+        setActiveError: 'No se pudo marcar como activa',
+        removeFavorite: 'Quitar de favoritos',
+        addFavorite: 'Añadir a favoritos',
+        deactivate: 'Desactivar',
+        // Detail page
+        detail: {
+          back: 'Volver',
+          share: 'Compartir',
+          linkCopied: 'Enlace copiado',
+          linkCopiedDesc: 'El enlace a la competición ha sido copiado al portapapeles.',
+          loading: 'Cargando...',
+          notFound: 'Competición no encontrada',
+          aboutEvent: 'Sobre el evento',
+          liveStreams: 'Streams en vivo',
+          watchOnPlatform: 'Ver en plataforma',
+          participatingTeams: 'Equipos Participantes',
+          noTeamsYet: 'No hay equipos registrados aún.',
+          noLocation: 'Sin ubicación',
+          publicFiles: 'Archivos Públicos',
+          information: 'Información',
+          organizer: 'Organizador',
+          website: 'Website',
+          teamsCount: 'Equipos'
+        }
       },
       streams: {
         title: 'Streams',
@@ -700,7 +719,9 @@ const resources = {
         uploadOk: 'Photo uploaded',
         loading: 'Loading...',
         delete: 'Delete',
-        deleting: 'Deleting...'
+        deleting: 'Deleting...',
+        seeMore: 'See more',
+        seeLess: 'See less'
       },
       feedback: {
         Title: "Feedback",
@@ -978,7 +999,30 @@ const resources = {
         // Action labels
         active: 'Active',
         setActive: 'Set active',
-        setActiveError: 'Could not mark as active'
+        setActiveError: 'Could not mark as active',
+        removeFavorite: 'Remove from favorites',
+        addFavorite: 'Add to favorites',
+        deactivate: 'Deactivate',
+        // Detail page
+        detail: {
+          back: 'Back',
+          share: 'Share',
+          linkCopied: 'Link copied',
+          linkCopiedDesc: 'The competition link has been copied to the clipboard.',
+          loading: 'Loading...',
+          notFound: 'Competition not found',
+          aboutEvent: 'About the event',
+          liveStreams: 'Live Streams',
+          watchOnPlatform: 'Watch on platform',
+          participatingTeams: 'Participating Teams',
+          noTeamsYet: 'No teams registered yet.',
+          noLocation: 'No location',
+          publicFiles: 'Public Files',
+          information: 'Information',
+          organizer: 'Organizer',
+          website: 'Website',
+          teamsCount: 'Teams'
+        }
       },
       streams: {
         title: 'Streams',
@@ -1262,7 +1306,9 @@ const resources = {
         uploadOk: 'Foto hochgeladen',
         loading: 'Laden...',
         delete: 'Löschen',
-        deleting: 'Wird gelöscht...'
+        deleting: 'Wird gelöscht...',
+        seeMore: 'Mehr anzeigen',
+        seeLess: 'Weniger anzeigen'
       },
       feedback: {
         Title: "Feedback",
@@ -1540,7 +1586,30 @@ const resources = {
         // Action labels
         active: 'Aktiv',
         setActive: 'Als aktiv markieren',
-        setActiveError: 'Konnte nicht als aktiv markieren'
+        setActiveError: 'Konnte nicht als aktiv markieren',
+        removeFavorite: 'Aus Favoriten entfernen',
+        addFavorite: 'Zu Favoriten hinzufügen',
+        deactivate: 'Deaktivieren',
+        // Detail page
+        detail: {
+          back: 'Zurück',
+          share: 'Teilen',
+          linkCopied: 'Link kopiert',
+          linkCopiedDesc: 'Der Link zur Veranstaltung wurde in die Zwischenablage kopiert.',
+          loading: 'Laden...',
+          notFound: 'Wettbewerb nicht gefunden',
+          aboutEvent: 'Über das Event',
+          liveStreams: 'Live-Streams',
+          watchOnPlatform: 'Auf Plattform ansehen',
+          participatingTeams: 'Teilnehmende Teams',
+          noTeamsYet: 'Noch keine Teams registriert.',
+          noLocation: 'Kein Standort',
+          publicFiles: 'Öffentliche Dateien',
+          information: 'Information',
+          organizer: 'Veranstalter',
+          website: 'Website',
+          teamsCount: 'Teams'
+        }
       },
       streams: {
         title: 'Streams',
