@@ -1,29 +1,194 @@
-<%- include('partials/header') %>
+<!DOCTYPE html>
+<html lang="<%= locale || 'es' %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= t('auth.metaTitle') %> - RobEurope</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-<article class="auth-card">
-  <header class="auth-card-header">
-    <p class="page-eyebrow"><%= t('auth.eyebrow') %></p>
-    <h2 class="page-title"><%= t('auth.title') %></h2>
-  </header>
-  <form method="post" action="/admin/login" class="form-stack">
-    <% if (typeof csrfToken !== 'undefined') { %>
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    <% } %>
-    <div>
-      <label for="login-email"><%= t('auth.email') %></label>
-      <input id="login-email" type="email" name="email" required />
-    </div>
-    <div>
-      <label for="login-password"><%= t('auth.password') %></label>
-      <input id="login-password" type="password" name="password" required />
-    </div>
-    <div class="form-actions form-actions-start">
-      <button type="submit" class="btn btn-primary"><%= t('auth.submit') %></button>
-    </div>
-    <% if (typeof error !== 'undefined' && error) { %>
-      <p class="stat-note" style="color: var(--danger);"><%= error %></p>
-    <% } %>
-  </form>
-</article>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fafafa;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
 
-<%- include('partials/footer') %>
+    .login-wrapper {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .login-brand {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .login-brand h1 {
+      color: #0a0a0a;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+    }
+
+    .login-brand span {
+      color: #737373;
+      font-size: 0.8rem;
+      font-weight: 400;
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    .login-card {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 2rem;
+    }
+
+    .login-title {
+      color: #0a0a0a;
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #525252;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.7rem 0.875rem;
+      font-size: 0.875rem;
+      font-family: inherit;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      background: #fff;
+      color: #0a0a0a;
+      transition: border-color 0.15s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #a3a3a3;
+    }
+
+    .form-input::placeholder {
+      color: #a3a3a3;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: inherit;
+      color: #fff;
+      background: #0a0a0a;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      margin-top: 0.5rem;
+    }
+
+    .btn-login:hover {
+      background: #262626;
+    }
+
+    .error-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+    .login-footer a {
+      color: #a3a3a3;
+      font-size: 0.75rem;
+      text-decoration: none;
+    }
+
+    .login-footer a:hover {
+      color: #525252;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="login-brand">
+      <h1>RobEurope</h1>
+      <span>Admin Panel</span>
+    </div>
+
+    <div class="login-card">
+      <h2 class="login-title"><%= t('auth.submit') %></h2>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="error-box"><%= error %></div>
+      <% } %>
+
+      <form method="post" action="/admin/login">
+        <% if (typeof csrfToken !== 'undefined') { %>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <% } %>
+        
+        <div class="form-group">
+          <label for="email" class="form-label"><%= t('auth.email') %></label>
+          <input 
+            id="email" 
+            type="email" 
+            name="email" 
+            class="form-input"
+            required 
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label"><%= t('auth.password') %></label>
+          <input 
+            id="password" 
+            type="password" 
+            name="password" 
+            class="form-input"
+            required 
+          />
+        </div>
+
+        <button type="submit" class="btn-login"><%= t('auth.submit') %></button>
+      </form>
+    </div>
+
+    <div class="login-footer">
+      <a href="/">← Volver al sitio</a>
+    </div>
+  </div>
+</body>
+</html>
