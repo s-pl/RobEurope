@@ -229,11 +229,14 @@ export const getCompetitionById = async (req, res) => {
  */
 export const updateCompetition = async (req, res) => {
   try {
+    // First check if competition exists
+    const existing = await Competition.findByPk(req.params.id);
+    if (!existing) return res.status(404).json({ error: 'Competition not found' });
+
     if (req.body.is_active) {
       await Competition.update({ is_active: false }, { where: { id: { [Op.ne]: req.params.id } } });
     }
-    const [updated] = await Competition.update(req.body, { where: { id: req.params.id } });
-    if (!updated) return res.status(404).json({ error: 'Competition not found' });
+    await Competition.update(req.body, { where: { id: req.params.id } });
   const updatedItem = await Competition.findByPk(req.params.id);
   getIO()?.emit('competition_updated', updatedItem);
   res.json(updatedItem);

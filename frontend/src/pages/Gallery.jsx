@@ -15,6 +15,7 @@ const Gallery = () => {
     const [uploadStatus, setUploadStatus] = useState({ loading: false, error: '', ok: '' });
     const [deleteStatus, setDeleteStatus] = useState({ loadingId: null, error: '' });
     const [form, setForm] = useState({ title: '', description: '', file: null });
+    const [expandedItems, setExpandedItems] = useState({});
 
     const load = async () => {
         setStatus({ loading: true, error: '' });
@@ -86,7 +87,7 @@ const Gallery = () => {
                 </p>
             </header>
 
-            <section className="rounded-2xl border border-slate-200 bg-white/60 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/40 sm:p-6 lg:p-8">
+            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950 sm:p-6 lg:p-8">
 
                     {isAuthenticated && isAdmin && (
                         <form onSubmit={handleUpload} className="rounded-xl border border-slate-200 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/50 sm:p-6 mb-6">
@@ -159,7 +160,22 @@ const Gallery = () => {
                                     {(item.title || item.description || (isAuthenticated && isAdmin)) && (
                                         <div className="p-3">
                                             {item.title && <p className="font-semibold text-slate-900 truncate dark:text-slate-50">{item.title}</p>}
-                                            {item.description && <p className="text-sm text-slate-600 line-clamp-2 dark:text-slate-400">{item.description}</p>}
+                                            {item.description && (
+                                                <div className="text-sm text-slate-600 dark:text-slate-400">
+                                                    <p className={expandedItems[item.id] ? '' : 'line-clamp-2'}>
+                                                        {item.description}
+                                                    </p>
+                                                    {item.description.length > 80 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setExpandedItems(prev => ({ ...prev, [item.id]: !prev[item.id] }))}
+                                                            className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium mt-1"
+                                                        >
+                                                            {expandedItems[item.id] ? t('gallery.seeLess') : t('gallery.seeMore')}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
 
                                             {isAuthenticated && isAdmin && (
                                                 <div className="mt-3 flex items-center justify-between">
