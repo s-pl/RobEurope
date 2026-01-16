@@ -176,6 +176,56 @@ describe('Auth Controller', () => {
     me(req, res);
     expect(res.json).toHaveBeenCalledWith(user);
   });
+
+  it('register: returns 409 if email already exists', async () => {
+    req.body = {
+      email: 'exists@example.com',
+      password: 'Password123!',
+      first_name: 'Test',
+      last_name: 'User',
+      username: 'testuser',
+    };
+    db.User.findOne.mockResolvedValue({ id: 'u-exists' });
+    await register(req, res);
+    expect(res.status).toHaveBeenCalledWith(409);
+  });
+
+  it('register: returns 500 if create throws', async () => {
+    req.body = {
+      email: 'error@example.com',
+      password: 'Password123!',
+      first_name: 'Test',
+      last_name: 'User',
+      username: 'testuser',
+    };
+    db.User.findOne.mockResolvedValue(null);
+    bcrypt.hash.mockResolvedValue('hashed');
+    db.User.create.mockRejectedValue(new Error('create-fail'));
+    await register(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it('login: returns 401 if password does not match', async () => {
+    req.body = { email: 'test@example.com', password: 'WrongPass' };
+    db.User.findOne.mockResolvedValue({ id: 'u1', password_hash: 'h' });
+    bcrypt.compare.mockResolvedValue(false);
+    await login(req, res);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  it('login: returns 500 if bcrypt.compare throws', async () => {
+    req.body = { email: 'test@example.com', password: 'Password123!' };
+    db.User.findOne.mockResolvedValue({ id: 'u1', password_hash: 'h' });
+    bcrypt.compare.mockRejectedValue(new Error('compare-fail'));
+    await login(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it('logout: clears cookie even if no session user', () => {
+    req.session.user = null;
+    logout(req, res);
+    expect(res.clearCookie).toHaveBeenCalledWith('connect.sid');
+  });
 });
 
 
@@ -211,6 +261,30 @@ describe('User Controller', () => {
     await deleteUser(req, res);
     expect(res.status).toHaveBeenCalledWith(404);
   });
+
+  it('getUsers: returns empty list when none', async () => {
+    db.User.findAll.mockResolvedValue([]);
+    await getUsers(req, res);
+    expect(db.User.findAll).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith([]);
+  });
+
+  it('getUserById: returns user when found', async () => {
+    const userObj = { toJSON: () => ({ id: 'u2', username: 'user2' }) };
+    db.User.findByPk.mockResolvedValue(userObj);
+    req.params = { id: 'u2' };
+    await getUserById(req, res);
+    expect(res.json).toHaveBeenCalledWith({ id: 'u2', username: 'user2' });
+  });
+
+  it('deleteUser: deletes user successfully', async () => {
+    const mockUser = { destroy: vi.fn().mockResolvedValue(true) };
+    db.User.findByPk.mockResolvedValue(mockUser);
+    req.params = { id: 'u3' };
+    await deleteUser(req, res);
+    expect(mockUser.destroy).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalled();
+  });
 });
 
 
@@ -244,6 +318,28 @@ describe('Teams Controller', () => {
     await deleteTeam(req, res);
     expect(db.Team.destroy).toHaveBeenCalledWith({ where: { id: '1' } });
     expect(res.json).toHaveBeenCalledWith({ message: 'Team deleted' });
+  });
+
+  it('getTeams: returns empty list when none', async () => {
+    db.Team.findAll.mockResolvedValue([]);
+    await getTeams(req, res);
+    expect(db.Team.findAll).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith([]);
+  });
+
+  it('getTeamById: returns team when found', async () => {
+    const team = { id: 2, name: 'TeamTwo' };
+    db.Team.findByPk.mockResolvedValue(team);
+    req.params = { id: '2' };
+    await getTeamById(req, res);
+    expect(res.json).toHaveBeenCalledWith(team);
+  });
+
+  it('deleteTeam: returns 404 when no team deleted', async () => {
+    db.Team.destroy.mockResolvedValue(0);
+    req.params = { id: '99' };
+    await deleteTeam(req, res);
+    expect(res.status).toHaveBeenCalledWith(404);
   });
 });
 
@@ -288,5 +384,27 @@ describe('Posts Controller', () => {
     req.params = { id: 999 };
     await getPostById(req, res);
     expect(res.status).toHaveBeenCalledWith(404);
+  });
+
+  it('createPost: returns 500 if create throws', async () => {
+    db.Post.create.mockRejectedValue(new Error('create-error'));
+    req.body = { title: 'T', content: 'C', author_id: 'user-1' };
+    await createPost(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it('getPostById: returns post when found', async () => {
+    const post = { id: 5, title: 'Found' };
+    db.Post.findByPk.mockResolvedValue(post);
+    req.params = { id: 5 };
+    await getPostById(req, res);
+    expect(res.json).toHaveBeenCalledWith(post);
+  });
+
+  it('getPosts: returns empty list when none', async () => {
+    db.Post.findAll.mockResolvedValue([]);
+    await getPosts(req, res);
+    expect(db.Post.findAll).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith([]);
   });
 });
