@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 
@@ -270,20 +269,20 @@ describe('User Controller', () => {
   });
 
   it('getUserById: returns user when found', async () => {
-    const userObj = { toJSON: () => ({ id: 'u2', username: 'user2' }) };
+    const userObj = { id: 'u2', username: 'user2' };
     db.User.findByPk.mockResolvedValue(userObj);
     req.params = { id: 'u2' };
     await getUserById(req, res);
-    expect(res.json).toHaveBeenCalledWith({ id: 'u2', username: 'user2' });
+    expect(res.json).toHaveBeenCalledWith(userObj);
   });
 
   it('deleteUser: deletes user successfully', async () => {
     const mockUser = { destroy: vi.fn().mockResolvedValue(true) };
     db.User.findByPk.mockResolvedValue(mockUser);
-    req.params = { id: 'u3' };
+    req.params = { id: '1' }; // Must be numeric string
     await deleteUser(req, res);
     expect(mockUser.destroy).toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith({ success: true });
   });
 });
 
@@ -404,7 +403,7 @@ describe('Posts Controller', () => {
   it('getPosts: returns empty list when none', async () => {
     db.Post.findAll.mockResolvedValue([]);
     await getPosts(req, res);
-    expect(db.Post.findAll).toHaveBeenCalled();
+    expect(db.Post.findAll).toHaveBeensCalled();
     expect(res.json).toHaveBeenCalledWith([]);
   });
 });
