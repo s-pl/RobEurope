@@ -77,6 +77,26 @@ export default function defineTeamsModel(sequelize, DataTypes) {
             type: DataTypes.JSON,
             allowNull: true
         },
+        educational_center_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'EducationalCenters',
+                key: 'id'
+            },
+            onUpdate: 'CASCADE',
+            onDelete: 'SET NULL'
+        },
+        competition_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'Competition',
+                key: 'id'
+            },
+            onUpdate: 'CASCADE',
+            onDelete: 'SET NULL'
+        },
         created_by_user_id: {
             type: DataTypes.UUID,
             allowNull: true, // must allow NULL because onDelete: 'SET NULL'
@@ -101,14 +121,27 @@ export default function defineTeamsModel(sequelize, DataTypes) {
     /**
      * Defines model associations.
      * - Team has many Streams.
+     * - Team belongs to an EducationalCenter.
+     * - Team belongs to a Competition.
      * @param {Object} models - All registered models.
      */
     Team.associate = (models) => {
-        // Removed Media association
         Team.hasMany(models.Stream, {
             foreignKey: 'team_id',
             as: 'streams'
         });
+        if (models.EducationalCenter) {
+            Team.belongsTo(models.EducationalCenter, {
+                foreignKey: 'educational_center_id',
+                as: 'educationalCenter'
+            });
+        }
+        if (models.Competition) {
+            Team.belongsTo(models.Competition, {
+                foreignKey: 'competition_id',
+                as: 'competition'
+            });
+        }
     };
 
     return Team;
