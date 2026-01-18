@@ -136,6 +136,92 @@ const resources = {
         seeMore: 'Ver más',
         seeLess: 'Ver menos'
       },
+      archives: {
+        title: 'Archivo de Información',
+        description: 'Documentos, archivos y textos informativos por competición',
+        titleRequired: 'El título es obligatorio',
+        fields: {
+          title: 'Título',
+          description: 'Descripción',
+          content: 'Contenido',
+          file: 'Archivo adjunto',
+          competition: 'Competición',
+          visibility: 'Visibilidad',
+          allowedEmails: 'Emails permitidos',
+          sortOrder: 'Orden'
+        },
+        visibility: {
+          hidden: 'Oculto',
+          public: 'Público',
+          restricted: 'Restringido'
+        },
+        contentType: {
+          label: 'Tipo de contenido',
+          file: 'Archivo',
+          text: 'Texto',
+          mixed: 'Mixto'
+        },
+        actions: {
+          create: 'Crear elemento',
+          edit: 'Editar elemento',
+          delete: 'Eliminar elemento',
+          download: 'Descargar archivo'
+        },
+        messages: {
+          created: 'Elemento creado correctamente',
+          updated: 'Elemento actualizado',
+          deleted: 'Elemento eliminado'
+        },
+        filters: {
+          competitionAll: 'Todas las competiciones',
+          visibilityAll: 'Todas las visibilidades'
+        }
+      },
+      educationalCenters: {
+        title: 'Centros Educativos',
+        description: 'Instituciones educativas participantes',
+        fields: {
+          name: 'Nombre del centro',
+          country: 'País',
+          city: 'Ciudad',
+          address: 'Dirección',
+          website: 'Sitio web',
+          phone: 'Teléfono',
+          email: 'Email de contacto',
+          logo: 'Logo',
+          description: 'Descripción',
+          admin: 'Administrador del centro'
+        },
+        status: {
+          pending: 'Pendiente de aprobación',
+          approved: 'Aprobado',
+          rejected: 'Rechazado'
+        },
+        actions: {
+          create: 'Registrar centro',
+          edit: 'Editar centro',
+          delete: 'Eliminar centro',
+          approve: 'Aprobar centro',
+          reject: 'Rechazar centro'
+        },
+        messages: {
+          created: 'Centro educativo registrado correctamente',
+          updated: 'Centro educativo actualizado',
+          deleted: 'Centro educativo eliminado',
+          approved: 'Centro educativo aprobado',
+          rejected: 'Centro educativo rechazado'
+        },
+        filters: {
+          countryAll: 'Todos los países',
+          statusAll: 'Todos los estados'
+        }
+      },
+      centerApproval: {
+        title: 'Aprobación del centro',
+        reason: {
+          placeholder: 'Indica el motivo de la decisión...'
+        }
+      },
       feedback: {
         Title: "Opiniones",
         Description: "Opiniones de nuestros usuarios",
@@ -180,10 +266,22 @@ const resources = {
         cancel: 'Cancelar',
         edit: 'Editar',
         close: 'Cerrar',
+        loading: 'Cargando...',
         skipToContent: 'Saltar al contenido',
         adminModeActive: 'Modo admin activo',
         showPassword: 'Mostrar contraseña',
         hidePassword: 'Ocultar contraseña'
+      },
+      actions: {
+        save: 'Guardar',
+        cancel: 'Cancelar',
+        delete: 'Eliminar',
+        edit: 'Editar',
+        create: 'Crear',
+        confirmDelete: '¿Estás seguro de eliminar este registro?'
+      },
+      charts: {
+        empty: 'No hay datos disponibles'
       },
       theme: {
         toggle: 'Cambiar tema',
@@ -727,6 +825,92 @@ const resources = {
         seeMore: 'See more',
         seeLess: 'See less'
       },
+      archives: {
+        title: 'Information Archive',
+        description: 'Documents, files and informative texts by competition',
+        titleRequired: 'Title is required',
+        fields: {
+          title: 'Title',
+          description: 'Description',
+          content: 'Content',
+          file: 'Attached file',
+          competition: 'Competition',
+          visibility: 'Visibility',
+          allowedEmails: 'Allowed emails',
+          sortOrder: 'Sort order'
+        },
+        visibility: {
+          hidden: 'Hidden',
+          public: 'Public',
+          restricted: 'Restricted'
+        },
+        contentType: {
+          label: 'Content type',
+          file: 'File',
+          text: 'Text',
+          mixed: 'Mixed'
+        },
+        actions: {
+          create: 'Create item',
+          edit: 'Edit item',
+          delete: 'Delete item',
+          download: 'Download file'
+        },
+        messages: {
+          created: 'Item created successfully',
+          updated: 'Item updated',
+          deleted: 'Item deleted'
+        },
+        filters: {
+          competitionAll: 'All competitions',
+          visibilityAll: 'All visibilities'
+        }
+      },
+      educationalCenters: {
+        title: 'Educational Centers',
+        description: 'Participating educational institutions',
+        fields: {
+          name: 'Center name',
+          country: 'Country',
+          city: 'City',
+          address: 'Address',
+          website: 'Website',
+          phone: 'Phone',
+          email: 'Contact email',
+          logo: 'Logo',
+          description: 'Description',
+          admin: 'Center administrator'
+        },
+        status: {
+          pending: 'Pending approval',
+          approved: 'Approved',
+          rejected: 'Rejected'
+        },
+        actions: {
+          create: 'Register center',
+          edit: 'Edit center',
+          delete: 'Delete center',
+          approve: 'Approve center',
+          reject: 'Reject center'
+        },
+        messages: {
+          created: 'Educational center registered successfully',
+          updated: 'Educational center updated',
+          deleted: 'Educational center deleted',
+          approved: 'Educational center approved',
+          rejected: 'Educational center rejected'
+        },
+        filters: {
+          countryAll: 'All countries',
+          statusAll: 'All statuses'
+        }
+      },
+      centerApproval: {
+        title: 'Center Approval',
+        reason: {
+          placeholder: 'Enter the reason for the decision...'
+        }
+      },
       feedback: {
         Title: "Feedback",
         Description: "Our users' opinions",
@@ -771,10 +955,22 @@ const resources = {
         cancel: 'Cancel',
         edit: 'Edit',
         close: 'Close',
+        loading: 'Loading...',
         skipToContent: 'Skip to content',
         adminModeActive: 'Admin mode active',
         showPassword: 'Show password',
         hidePassword: 'Hide password'
+      },
+      actions: {
+        save: 'Save',
+        cancel: 'Cancel',
+        delete: 'Delete',
+        edit: 'Edit',
+        create: 'Create',
+        confirmDelete: 'Are you sure you want to delete this record?'
+      },
+      charts: {
+        empty: 'No data available'
       },
       theme: {
         toggle: 'Toggle theme',
@@ -1316,6 +1512,92 @@ const resources = {
         seeMore: 'Mehr anzeigen',
         seeLess: 'Weniger anzeigen'
       },
+      archives: {
+        title: 'Informationsarchiv',
+        description: 'Dokumente, Dateien und Informationstexte nach Wettbewerb',
+        titleRequired: 'Titel ist erforderlich',
+        fields: {
+          title: 'Titel',
+          description: 'Beschreibung',
+          content: 'Inhalt',
+          file: 'Angehängte Datei',
+          competition: 'Wettbewerb',
+          visibility: 'Sichtbarkeit',
+          allowedEmails: 'Erlaubte E-Mails',
+          sortOrder: 'Sortierreihenfolge'
+        },
+        visibility: {
+          hidden: 'Versteckt',
+          public: 'Öffentlich',
+          restricted: 'Eingeschränkt'
+        },
+        contentType: {
+          label: 'Inhaltstyp',
+          file: 'Datei',
+          text: 'Text',
+          mixed: 'Gemischt'
+        },
+        actions: {
+          create: 'Element erstellen',
+          edit: 'Element bearbeiten',
+          delete: 'Element löschen',
+          download: 'Datei herunterladen'
+        },
+        messages: {
+          created: 'Element erfolgreich erstellt',
+          updated: 'Element aktualisiert',
+          deleted: 'Element gelöscht'
+        },
+        filters: {
+          competitionAll: 'Alle Wettbewerbe',
+          visibilityAll: 'Alle Sichtbarkeiten'
+        }
+      },
+      educationalCenters: {
+        title: 'Bildungseinrichtungen',
+        description: 'Teilnehmende Bildungseinrichtungen',
+        fields: {
+          name: 'Name der Einrichtung',
+          country: 'Land',
+          city: 'Stadt',
+          address: 'Adresse',
+          website: 'Webseite',
+          phone: 'Telefon',
+          email: 'Kontakt-E-Mail',
+          logo: 'Logo',
+          description: 'Beschreibung',
+          admin: 'Einrichtungsadministrator'
+        },
+        status: {
+          pending: 'Ausstehende Genehmigung',
+          approved: 'Genehmigt',
+          rejected: 'Abgelehnt'
+        },
+        actions: {
+          create: 'Einrichtung registrieren',
+          edit: 'Einrichtung bearbeiten',
+          delete: 'Einrichtung löschen',
+          approve: 'Einrichtung genehmigen',
+          reject: 'Einrichtung ablehnen'
+        },
+        messages: {
+          created: 'Bildungseinrichtung erfolgreich registriert',
+          updated: 'Bildungseinrichtung aktualisiert',
+          deleted: 'Bildungseinrichtung gelöscht',
+          approved: 'Bildungseinrichtung genehmigt',
+          rejected: 'Bildungseinrichtung abgelehnt'
+        },
+        filters: {
+          countryAll: 'Alle Länder',
+          statusAll: 'Alle Status'
+        }
+      },
+      centerApproval: {
+        title: 'Zentrumsgenehmigung',
+        reason: {
+          placeholder: 'Geben Sie den Grund für die Entscheidung ein...'
+        }
+      },
       feedback: {
         Title: "Feedback",
         Description: "Meinungen unserer Nutzer",
@@ -1360,10 +1642,22 @@ const resources = {
         cancel: 'Abbrechen',
         edit: 'Bearbeiten',
         close: 'Schließen',
+        loading: 'Lädt...',
         skipToContent: 'Zum Inhalt springen',
         adminModeActive: 'Admin-Modus aktiv',
         showPassword: 'Passwort anzeigen',
         hidePassword: 'Passwort verbergen'
+      },
+      actions: {
+        save: 'Speichern',
+        cancel: 'Abbrechen',
+        delete: 'Löschen',
+        edit: 'Bearbeiten',
+        create: 'Erstellen',
+        confirmDelete: 'Sind Sie sicher, dass Sie diesen Eintrag löschen möchten?'
+      },
+      charts: {
+        empty: 'Keine Daten verfügbar'
       },
       theme: {
         toggle: 'Theme wechseln',
