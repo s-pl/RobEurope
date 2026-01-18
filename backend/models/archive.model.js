@@ -110,7 +110,7 @@ export default function defineArchiveModel(sequelize, DataTypes) {
       defaultValue: DataTypes.NOW
     }
   }, {
-    tableName: 'Archives',
+    tableName: 'Archive',
     timestamps: false
   });
 

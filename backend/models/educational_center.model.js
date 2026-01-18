@@ -113,7 +113,7 @@ export default function defineEducationalCenterModel(sequelize, DataTypes) {
       defaultValue: DataTypes.NOW
     }
   }, {
-    tableName: 'EducationalCenters',
+    tableName: 'EducationalCenter',
     timestamps: false
   });
 

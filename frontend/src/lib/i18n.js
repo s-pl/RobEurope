@@ -632,7 +632,12 @@ const resources = {
           streamUrl: "URL del Stream (Twitch/YouTube)",
           submitCreate: "Crear Equipo",
           submitSave: "Guardar Cambios",
-          saveUrl: "Guardar URL"
+          saveUrl: "Guardar URL",
+          centerDescription: "Conecta tu equipo a un centro educativo existente o crea uno nuevo.",
+          selectCenter: "Seleccionar centro educativo",
+          noCenter: "-- Sin centro educativo --",
+          orCreateCenter: "¿No encuentras tu centro?",
+          createNewCenter: "Crear nuevo centro"
         },
         tabs: {
           overview: "Resumen",
@@ -1321,7 +1326,12 @@ const resources = {
           streamUrl: "Stream URL (Twitch/YouTube)",
           submitCreate: "Create Team",
           submitSave: "Save Changes",
-          saveUrl: "Save URL"
+          saveUrl: "Save URL",
+          centerDescription: "Connect your team to an existing educational center or create a new one.",
+          selectCenter: "Select educational center",
+          noCenter: "-- No educational center --",
+          orCreateCenter: "Can't find your center?",
+          createNewCenter: "Create new center"
         },
         tabs: {
           overview: "Overview",
@@ -2000,7 +2010,12 @@ const resources = {
           streamUrl: "Stream-URL (Twitch/YouTube)",
           submitCreate: "Team erstellen",
           submitSave: "Änderungen speichern",
-          saveUrl: "URL speichern"
+          saveUrl: "URL speichern",
+          centerDescription: "Verbinde dein Team mit einer bestehenden Bildungseinrichtung oder erstelle eine neue.",
+          selectCenter: "Bildungseinrichtung auswählen",
+          noCenter: "-- Keine Bildungseinrichtung --",
+          orCreateCenter: "Findest du deine Einrichtung nicht?",
+          createNewCenter: "Neue Einrichtung erstellen"
         },
         tabs: {
           overview: "Übersicht",

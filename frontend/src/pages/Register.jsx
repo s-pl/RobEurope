@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Eye, EyeOff, User, Mail, Phone, Lock } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Phone, Lock, Building2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { useAuth } from '../hooks/useAuth';
 import { getPasswordStrength, StrengthBar } from '../lib/passwordStrength.jsx';
-import { getApiBaseUrl } from '../lib/apiClient';
+import { getApiBaseUrl, apiRequest } from '../lib/apiClient';
 
 const Register = () => {
   const { register } = useAuth();
@@ -33,6 +33,27 @@ const Register = () => {
   const hasError = Boolean(error);
   const confirmMismatch = Boolean(form.confirm_password && form.password !== form.confirm_password);
   const confirmErrorId = 'confirm-password-error';
+
+  // Educational Center Admin state
+  const [wantsCenterAdmin, setWantsCenterAdmin] = useState(false);
+  const [educationalCenters, setEducationalCenters] = useState([]);
+  const [selectedCenterId, setSelectedCenterId] = useState('');
+  const [showCreateCenter, setShowCreateCenter] = useState(false);
+  const [newCenterForm, setNewCenterForm] = useState({
+    name: '',
+    city: '',
+    contact_email: '',
+    website: ''
+  });
+
+  // Load approved educational centers
+  useEffect(() => {
+    if (wantsCenterAdmin) {
+      apiRequest('/educational-centers?status=approved')
+        .then(data => setEducationalCenters(Array.isArray(data) ? data : []))
+        .catch(() => setEducationalCenters([]));
+    }
+  }, [wantsCenterAdmin]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -65,6 +86,29 @@ const Register = () => {
     try {
       const payload = { ...form };
       delete payload.confirm_password;
+
+      // If user wants to be a center admin, include the center info
+      if (wantsCenterAdmin) {
+        if (showCreateCenter) {
+          // Create new center first
+          if (!newCenterForm.name.trim()) {
+            setError(t('register.centerNameRequired') || 'El nombre del centro es requerido');
+            setLoading(false);
+            return;
+          }
+          payload.educational_center_request = {
+            action: 'create',
+            center_data: newCenterForm
+          };
+        } else if (selectedCenterId) {
+          payload.educational_center_request = {
+            action: 'join',
+            center_id: selectedCenterId
+          };
+        }
+        payload.requested_role = 'center_admin';
+      }
+
       await register(payload);
       navigate('/', { replace: true });
     } catch (err) {
@@ -202,6 +246,120 @@ const Register = () => {
               </div>
               {confirmMismatch && (
                 <p id={confirmErrorId} className="mt-1 text-xs text-red-600" role="alert">{t('forms.passwordsDontMatch')}</p>
+              )}
+            </div>
+
+            {/* Educational Center Admin Option */}
+            <div className="md:col-span-2 space-y-4 rounded-lg border border-slate-200 p-4 dark:border-slate-700">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="wantsCenterAdmin"
+                  checked={wantsCenterAdmin}
+                  onChange={(e) => {
+                    setWantsCenterAdmin(e.target.checked);
+                    if (!e.target.checked) {
+                      setShowCreateCenter(false);
+                      setSelectedCenterId('');
+                    }
+                  }}
+                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-slate-50"
+                />
+                <label htmlFor="wantsCenterAdmin" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <Building2 className="inline-block h-4 w-4 mr-1" />
+                  {t('register.wantsCenterAdmin') || '¿Quieres administrar un centro educativo?'}
+                </label>
+              </div>
+
+              {wantsCenterAdmin && (
+                <div className="space-y-4 pl-6">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    {t('register.centerAdminDescription') || 'Como administrador de centro podrás gestionar equipos, streamings y archivos de tu institución.'}
+                  </p>
+
+                  {!showCreateCenter ? (
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="selectCenter">{t('register.selectExistingCenter') || 'Seleccionar centro existente'}</Label>
+                        <select
+                          id="selectCenter"
+                          value={selectedCenterId}
+                          onChange={(e) => setSelectedCenterId(e.target.value)}
+                          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                        >
+                          <option value="">{t('register.noCenter') || '-- Selecciona un centro --'}</option>
+                          {educationalCenters.map((center) => (
+                            <option key={center.id} value={center.id}>
+                              {center.name} - {center.city}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowCreateCenter(true)}
+                        className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                      >
+                        {t('register.orCreateCenter') || '¿No encuentras tu centro? Créalo aquí'}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 rounded-md border border-dashed border-slate-300 p-3 dark:border-slate-600">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{t('register.createNewCenter') || 'Crear nuevo centro educativo'}</span>
+                        <button
+                          type="button"
+                          onClick={() => setShowCreateCenter(false)}
+                          className="text-xs text-slate-500 hover:text-slate-700"
+                        >
+                          {t('common.cancel') || 'Cancelar'}
+                        </button>
+                      </div>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <div className="space-y-1">
+                          <Label htmlFor="centerName">{t('register.centerName') || 'Nombre del centro'} *</Label>
+                          <Input
+                            id="centerName"
+                            value={newCenterForm.name}
+                            onChange={(e) => setNewCenterForm(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder={t('register.centerNamePlaceholder') || 'IES / Colegio / Universidad...'}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="centerCity">{t('register.centerCity') || 'Ciudad'}</Label>
+                          <Input
+                            id="centerCity"
+                            value={newCenterForm.city}
+                            onChange={(e) => setNewCenterForm(prev => ({ ...prev, city: e.target.value }))}
+                            placeholder={t('register.centerCityPlaceholder') || 'Madrid, Barcelona...'}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="centerEmail">{t('register.centerEmail') || 'Email de contacto'}</Label>
+                          <Input
+                            id="centerEmail"
+                            type="email"
+                            value={newCenterForm.contact_email}
+                            onChange={(e) => setNewCenterForm(prev => ({ ...prev, contact_email: e.target.value }))}
+                            placeholder="centro@ejemplo.com"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="centerWebsite">{t('register.centerWebsite') || 'Sitio web'}</Label>
+                          <Input
+                            id="centerWebsite"
+                            value={newCenterForm.website}
+                            onChange={(e) => setNewCenterForm(prev => ({ ...prev, website: e.target.value }))}
+                            placeholder="https://..."
+                          />
+                        </div>
+                      </div>
+                      <p className="text-xs text-amber-600 dark:text-amber-400">
+                        {t('register.centerPendingApproval') || 'El centro quedará pendiente de aprobación por un super administrador.'}
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 

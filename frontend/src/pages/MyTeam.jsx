@@ -12,7 +12,7 @@ import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
 import { 
   Users, Settings, Trophy, Info, Plus, 
-  LogOut, Trash2, Check, X, Video, UserPlus, MessageCircle, Code 
+  LogOut, Trash2, Check, X, Video, UserPlus, MessageCircle, Code, Building2 
 } from 'lucide-react';
 import TeamChat from '../components/teams/TeamChat';
 import TeamCompetitionDashboard from '../components/teams/TeamCompetitionDashboard';
@@ -50,7 +50,7 @@ const MyTeam = () => {
 
   const [team, setTeam] = useState(null);
   const [feedback, setFeedback] = useState('');
-  const [form, setForm] = useState({ name: '', city: '', institution: '', country_id: '', description: '', website_url: '', stream_url: '' });
+  const [form, setForm] = useState({ name: '', city: '', institution: '', country_id: '', description: '', website_url: '', stream_url: '', educational_center_id: '' });
 
   const [requests, setRequests] = useState([]);
   const [members, setMembers] = useState([]);
@@ -58,6 +58,10 @@ const MyTeam = () => {
   const [competitions, setCompetitions] = useState([]);
   const [registrations, setRegistrations] = useState([]);
   const [selectedCompetition, setSelectedCompetition] = useState('');
+  const [educationalCenters, setEducationalCenters] = useState([]);
+  const [showCreateCenter, setShowCreateCenter] = useState(false);
+  const [newCenterForm, setNewCenterForm] = useState({ name: '', city: '', email: '', website_url: '' });
+  const [centerFeedback, setCenterFeedback] = useState('');
 
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -118,6 +122,14 @@ const MyTeam = () => {
       } catch {
         // ignore
       }
+
+      // Load educational centers
+      try {
+        const centers = await api('/educational-centers?status=approved');
+        setEducationalCenters(Array.isArray(centers?.centers) ? centers.centers : Array.isArray(centers) ? centers : []);
+      } catch {
+        // ignore
+      }
     };
     load();
   }, []);
@@ -142,12 +154,38 @@ const MyTeam = () => {
     try {
       const payload = { ...form };
       if (payload.country_id) payload.country_id = Number(payload.country_id);
+      if (payload.educational_center_id) payload.educational_center_id = Number(payload.educational_center_id);
       const newTeam = await create(payload);
       setTeam(newTeam);
       setStatus({ ownedTeamId: newTeam.id, memberOfTeamId: newTeam.id });
       setFeedback(t('myTeam.feedback.created'));
     } catch (err) {
       setFeedback(err.message || t('myTeam.feedback.createError'));
+    }
+  };
+
+  const onCreateCenter = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await api('/educational-centers', {
+        method: 'POST',
+        body: JSON.stringify(newCenterForm),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      setCenterFeedback(t('educationalCenters.messages.created'));
+      setShowCreateCenter(false);
+      setNewCenterForm({ name: '', city: '', email: '', website_url: '' });
+      // Reload centers
+      const centers = await api('/educational-centers?status=approved');
+      setEducationalCenters(Array.isArray(centers?.centers) ? centers.centers : Array.isArray(centers) ? centers : []);
+      // Select the new center if approved, otherwise show message
+      if (res?.id && res?.approval_status === 'approved') {
+        setForm({ ...form, educational_center_id: res.id.toString() });
+      } else {
+        setCenterFeedback(t('educationalCenters.messages.pendingApproval') || 'Tu centro ha sido registrado y está pendiente de aprobación.');
+      }
+    } catch (err) {
+      setCenterFeedback(err.message || 'Error');
     }
   };
 
@@ -307,6 +345,96 @@ const MyTeam = () => {
                 <Label htmlFor="institution">{t('myTeam.form.institution')}</Label>
                 <Input id="institution" value={form.institution} onChange={(e) => setForm({ ...form, institution: e.target.value })} />
               </div>
+
+              {/* Centro Educativo Section */}
+              <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-blue-600" />
+                  <Label className="text-base font-medium">{t('educationalCenters.title')}</Label>
+                </div>
+                <p className="text-sm text-slate-500">{t('myTeam.form.centerDescription') || 'Conecta tu equipo a un centro educativo existente o crea uno nuevo.'}</p>
+                
+                <div>
+                  <Label htmlFor="educational_center_id">{t('myTeam.form.selectCenter') || 'Seleccionar centro educativo'}</Label>
+                  <select
+                    id="educational_center_id"
+                    value={form.educational_center_id}
+                    onChange={(e) => setForm({ ...form, educational_center_id: e.target.value })}
+                    className="w-full mt-1 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">{t('myTeam.form.noCenter') || '-- Sin centro educativo --'}</option>
+                    {educationalCenters.map((center) => (
+                      <option key={center.id} value={center.id}>
+                        {center.name} {center.city ? `(${center.city})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-500">{t('myTeam.form.orCreateCenter') || '¿No encuentras tu centro?'}</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowCreateCenter(!showCreateCenter)}
+                  >
+                    {showCreateCenter ? t('actions.cancel') : (t('myTeam.form.createNewCenter') || 'Crear nuevo centro')}
+                  </Button>
+                </div>
+
+                {showCreateCenter && (
+                  <div className="border-t border-slate-200 dark:border-slate-700 pt-4 mt-4 space-y-3">
+                    <h4 className="font-medium text-sm">{t('educationalCenters.actions.create')}</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="centerName">{t('educationalCenters.fields.name')} *</Label>
+                        <Input
+                          id="centerName"
+                          value={newCenterForm.name}
+                          onChange={(e) => setNewCenterForm({ ...newCenterForm, name: e.target.value })}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="centerCity">{t('educationalCenters.fields.city')}</Label>
+                        <Input
+                          id="centerCity"
+                          value={newCenterForm.city}
+                          onChange={(e) => setNewCenterForm({ ...newCenterForm, city: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="centerEmail">{t('educationalCenters.fields.email')}</Label>
+                        <Input
+                          id="centerEmail"
+                          type="email"
+                          value={newCenterForm.email}
+                          onChange={(e) => setNewCenterForm({ ...newCenterForm, email: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="centerWebsite">{t('educationalCenters.fields.website')}</Label>
+                        <Input
+                          id="centerWebsite"
+                          type="url"
+                          value={newCenterForm.website_url}
+                          onChange={(e) => setNewCenterForm({ ...newCenterForm, website_url: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <Button type="button" variant="secondary" size="sm" onClick={onCreateCenter}>
+                      {t('educationalCenters.actions.create')}
+                    </Button>
+                    {centerFeedback && (
+                      <p className="text-sm text-amber-600">{centerFeedback}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div>
                 <Label htmlFor="description">{t('myTeam.form.description')}</Label>
                 <Textarea id="description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />

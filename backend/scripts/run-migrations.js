@@ -28,6 +28,7 @@ import * as updateTeamsEducationalCenter from '../migrations/20260118-update-tea
 import * as updateStreamsEducationalCenter from '../migrations/20260118-update-streams-educational-center.js';
 import * as updateGalleryEnhanced from '../migrations/20260118-update-gallery-enhanced.js';
 import * as updateRegistrationCenterApproval from '../migrations/20260118-update-registration-center-approval.js';
+
 async function run() {
   try {
     await sequelize.authenticate();
