@@ -104,7 +104,7 @@ const AdminPosts = () => {
     try {
       await api(`/posts/${post.id}`, {
         method: 'PUT',
-        body: JSON.stringify({ is_pinned: !post.is_pinned })
+        body: { is_pinned: !post.is_pinned }
       });
       loadPosts();
     } catch (err) {

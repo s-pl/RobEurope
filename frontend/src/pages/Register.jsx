@@ -50,7 +50,10 @@ const Register = () => {
   useEffect(() => {
     if (wantsCenterAdmin) {
       apiRequest('/educational-centers?status=approved')
-        .then(data => setEducationalCenters(Array.isArray(data) ? data : []))
+        .then(data => {
+          const items = data?.items || (Array.isArray(data) ? data : []);
+          setEducationalCenters(items);
+        })
         .catch(() => setEducationalCenters([]));
     }
   }, [wantsCenterAdmin]);
