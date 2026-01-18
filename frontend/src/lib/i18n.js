@@ -333,8 +333,8 @@ const resources = {
           },
           visibility: {
             public: 'Público',
-            center: 'Solo centro',
-            private: 'Privado'
+            restricted: 'Restringido',
+            hidden: 'Oculto'
           },
           form: {
             title: 'Título',
@@ -344,7 +344,10 @@ const resources = {
             year: 'Año',
             visibility: 'Visibilidad',
             file: 'Archivo',
-            description: 'Descripción'
+            description: 'Descripción',
+            allowedEmails: 'Emails permitidos',
+            emailsPlaceholder: 'email1@ejemplo.com, email2@ejemplo.com',
+            emailsHelp: 'Separa los emails con comas. Solo estos usuarios podrán ver el archivo.'
           }
         },
         requests: {
@@ -657,6 +660,9 @@ const resources = {
         subtitle: 'Visualiza todos los streams de las competiciones',
         loading: 'Cargando streams...',
         error: 'Error:',
+        noStreams: 'No hay streams disponibles.',
+        noCenter: 'Sin centro educativo',
+        created: 'Creado',
         status: {
           live: 'En vivo',
           offline: 'Offline',
@@ -768,7 +774,8 @@ const resources = {
           selectCenter: "Seleccionar centro educativo",
           noCenter: "-- Sin centro educativo --",
           orCreateCenter: "¿No encuentras tu centro?",
-          createNewCenter: "Crear nuevo centro"
+          createNewCenter: "Crear nuevo centro",
+          onlyAdminsCanCreate: "Solo los administradores de centro pueden crear nuevos centros educativos."
         },
         tabs: {
           overview: "Resumen",
@@ -1158,8 +1165,8 @@ const resources = {
           },
           visibility: {
             public: 'Public',
-            center: 'Center only',
-            private: 'Private'
+            restricted: 'Restricted',
+            hidden: 'Hidden'
           },
           form: {
             title: 'Title',
@@ -1169,7 +1176,10 @@ const resources = {
             year: 'Year',
             visibility: 'Visibility',
             file: 'File',
-            description: 'Description'
+            description: 'Description',
+            allowedEmails: 'Allowed emails',
+            emailsPlaceholder: 'email1@example.com, email2@example.com',
+            emailsHelp: 'Separate emails with commas. Only these users can view the file.'
           }
         },
         requests: {
@@ -1482,6 +1492,9 @@ const resources = {
         subtitle: 'Watch all competition streams',
         loading: 'Loading streams...',
         error: 'Error:',
+        noStreams: 'No streams available.',
+        noCenter: 'No educational center',
+        created: 'Created',
         status: {
           live: 'Live',
           offline: 'Offline',
@@ -1593,7 +1606,8 @@ const resources = {
           selectCenter: "Select educational center",
           noCenter: "-- No educational center --",
           orCreateCenter: "Can't find your center?",
-          createNewCenter: "Create new center"
+          createNewCenter: "Create new center",
+          onlyAdminsCanCreate: "Only center administrators can create new educational centers."
         },
         tabs: {
           overview: "Overview",
@@ -1981,8 +1995,8 @@ const resources = {
           },
           visibility: {
             public: 'Öffentlich',
-            center: 'Nur Zentrum',
-            private: 'Privat'
+            restricted: 'Eingeschränkt',
+            hidden: 'Versteckt'
           },
           form: {
             title: 'Titel',
@@ -1992,7 +2006,10 @@ const resources = {
             year: 'Jahr',
             visibility: 'Sichtbarkeit',
             file: 'Datei',
-            description: 'Beschreibung'
+            description: 'Beschreibung',
+            allowedEmails: 'Erlaubte E-Mails',
+            emailsPlaceholder: 'email1@beispiel.de, email2@beispiel.de',
+            emailsHelp: 'E-Mails mit Kommas trennen. Nur diese Benutzer können die Datei sehen.'
           }
         },
         requests: {
@@ -2305,6 +2322,9 @@ const resources = {
         subtitle: 'Sieh dir alle Streams der Wettbewerbe an',
         loading: 'Streams werden geladen...',
         error: 'Fehler:',
+        noStreams: 'Keine Streams verfügbar.',
+        noCenter: 'Kein Bildungszentrum',
+        created: 'Erstellt',
         status: {
           live: 'Live',
           offline: 'Offline',
@@ -2408,7 +2428,8 @@ const resources = {
           selectCenter: "Bildungseinrichtung auswählen",
           noCenter: "-- Keine Bildungseinrichtung --",
           orCreateCenter: "Findest du deine Einrichtung nicht?",
-          createNewCenter: "Neue Einrichtung erstellen"
+          createNewCenter: "Neue Einrichtung erstellen",
+          onlyAdminsCanCreate: "Nur Zentrumsadministratoren können neue Bildungseinrichtungen erstellen."
         },
         tabs: {
           overview: "Übersicht",

@@ -48,7 +48,9 @@ const EducationalCenters = () => {
             if (params.toString()) url += `?${params.toString()}`;
             
             const data = await apiRequest(url);
-            setItems(Array.isArray(data?.centers) ? data.centers : Array.isArray(data) ? data : []);
+            // API returns { items: [...] } or direct array
+            const items = data?.items || (Array.isArray(data) ? data : []);
+            setItems(items);
         } catch (e) {
             setStatus({ loading: false, error: e?.message || 'Error' });
             return;

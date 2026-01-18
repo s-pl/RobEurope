@@ -380,19 +380,25 @@ const MyTeam = () => {
                   </select>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-500">{t('myTeam.form.orCreateCenter') || '¿No encuentras tu centro?'}</span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowCreateCenter(!showCreateCenter)}
-                  >
-                    {showCreateCenter ? t('actions.cancel') : (t('myTeam.form.createNewCenter') || 'Crear nuevo centro')}
-                  </Button>
-                </div>
+                {canCreateCenter ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-slate-500">{t('myTeam.form.orCreateCenter') || '¿No encuentras tu centro?'}</span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowCreateCenter(!showCreateCenter)}
+                    >
+                      {showCreateCenter ? t('actions.cancel') : (t('myTeam.form.createNewCenter') || 'Crear nuevo centro')}
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 italic">
+                    {t('myTeam.form.onlyAdminsCanCreate') || 'Solo los administradores de centro pueden crear nuevos centros educativos.'}
+                  </p>
+                )}
 
-                {showCreateCenter && (
+                {showCreateCenter && canCreateCenter && (
                   <div className="border-t border-slate-200 dark:border-slate-700 pt-4 mt-4 space-y-3">
                     <h4 className="font-medium text-sm">{t('educationalCenters.actions.create')}</h4>
                     <div className="grid grid-cols-2 gap-3">

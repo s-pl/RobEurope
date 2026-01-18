@@ -24,6 +24,7 @@ const AdminArchives = () => {
     description: '',
     file_type: 'document',
     visibility: 'public',
+    allowed_emails: '',
     competition_id: '',
     year: new Date().getFullYear()
   });
@@ -85,24 +86,40 @@ const AdminArchives = () => {
     try {
       const formDataToSend = new FormData();
       Object.keys(formData).forEach(key => {
-        if (formData[key]) formDataToSend.append(key, formData[key]);
+        if (key === 'allowed_emails' && formData.visibility === 'restricted' && formData[key]) {
+          // Convert comma-separated emails to JSON array
+          const emails = formData[key].split(',').map(e => e.trim()).filter(e => e);
+          formDataToSend.append(key, JSON.stringify(emails));
+        } else if (formData[key]) {
+          formDataToSend.append(key, formData[key]);
+        }
       });
       if (file) formDataToSend.append('file', file);
 
       if (editingArchive) {
+        // For update, prepare body properly
+        const updateData = { ...formData };
+        if (formData.visibility === 'restricted' && formData.allowed_emails) {
+          updateData.allowed_emails = formData.allowed_emails.split(',').map(e => e.trim()).filter(e => e);
+        }
         await api(`/archives/${editingArchive.id}`, {
           method: 'PUT',
-          body: formData
+          body: updateData
         });
         setFeedback({ type: 'success', message: t('admin.archives.updated') || 'Archivo actualizado' });
       } else {
-        // For file upload, use fetch directly
-        const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/archives`, {
+        // For file upload, use fetch directly with correct URL
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+        const apiUrl = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+        const response = await fetch(`${apiUrl}/archives`, {
           method: 'POST',
           credentials: 'include',
           body: formDataToSend
         });
-        if (!response.ok) throw new Error('Error al crear archivo');
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || errData.message || 'Error al crear archivo');
+        }
         setFeedback({ type: 'success', message: t('admin.archives.created') || 'Archivo creado' });
       }
       resetForm();
@@ -118,6 +135,7 @@ const AdminArchives = () => {
       description: '',
       file_type: 'document',
       visibility: 'public',
+      allowed_emails: '',
       competition_id: '',
       year: new Date().getFullYear()
     });
@@ -132,6 +150,7 @@ const AdminArchives = () => {
       description: archive.description || '',
       file_type: archive.file_type || 'document',
       visibility: archive.visibility || 'public',
+      allowed_emails: Array.isArray(archive.allowed_emails) ? archive.allowed_emails.join(', ') : (archive.allowed_emails || ''),
       competition_id: archive.competition_id || '',
       year: archive.year || new Date().getFullYear()
     });
@@ -254,10 +273,22 @@ const AdminArchives = () => {
                   className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
                 >
                   <option value="public">{t('admin.archives.visibility.public') || 'Público'}</option>
-                  <option value="center_only">{t('admin.archives.visibility.center') || 'Solo centro'}</option>
-                  <option value="private">{t('admin.archives.visibility.private') || 'Privado'}</option>
+                  <option value="restricted">{t('admin.archives.visibility.restricted') || 'Restringido'}</option>
+                  <option value="hidden">{t('admin.archives.visibility.hidden') || 'Oculto'}</option>
                 </select>
               </div>
+              {formData.visibility === 'restricted' && (
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="allowed_emails">{t('admin.archives.form.allowedEmails') || 'Emails permitidos'}</Label>
+                  <Input
+                    id="allowed_emails"
+                    value={formData.allowed_emails}
+                    onChange={(e) => setFormData(prev => ({ ...prev, allowed_emails: e.target.value }))}
+                    placeholder={t('admin.archives.form.emailsPlaceholder') || 'email1@example.com, email2@example.com'}
+                  />
+                  <p className="text-xs text-slate-500">{t('admin.archives.form.emailsHelp') || 'Separa los emails con comas'}</p>
+                </div>
+              )}
               {!editingArchive && (
                 <div className="space-y-2">
                   <Label htmlFor="file">{t('admin.archives.form.file') || 'Archivo'}</Label>

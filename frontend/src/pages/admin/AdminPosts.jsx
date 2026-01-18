@@ -72,12 +72,12 @@ const AdminPosts = () => {
       if (editingPost) {
         await api(`/posts/${editingPost.id}`, {
           method: 'PUT',
-          body: JSON.stringify(formData)
+          body: formData
         });
       } else {
         await api('/posts', {
           method: 'POST',
-          body: JSON.stringify(formData)
+          body: formData
         });
       }
       setShowForm(false);

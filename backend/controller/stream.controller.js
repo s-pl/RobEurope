@@ -120,7 +120,12 @@ export const getStreams = async (req, res) => {
       }, {
         model: db.Team,
         as: 'team',
-        required: true
+        required: true,
+        include: [{
+          model: db.EducationalCenter,
+          as: 'educationalCenter',
+          required: false
+        }]
       }]
     });
 
