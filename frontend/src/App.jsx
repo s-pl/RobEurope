@@ -27,6 +27,24 @@ import { Toaster } from './components/ui/toast';
 import { EditModeProvider } from './context/EditModeContext';
 import { SocketProvider } from './context/SocketContext';
 import AdminEditButton from './components/admin/AdminEditButton';
+import AdminCenters from './pages/admin/AdminCenters';
+import AdminArchives from './pages/admin/AdminArchives';
+import AdminRequests from './pages/admin/AdminRequests';
+
+// Admin route wrapper - requires center_admin or super_admin role
+const AdminRoute = ({ children, superAdminOnly = false }) => {
+  const { isAuthenticated, user } = useAuth();
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  if (superAdminOnly && user?.role !== 'super_admin') {
+    return <Navigate to="/" replace />;
+  }
+  if (!superAdminOnly && user?.role !== 'center_admin' && user?.role !== 'super_admin') {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+};
 
 
 
@@ -60,6 +78,12 @@ function App() {
           <Route path="sponsors" element={<Sponsors />} />
           <Route path="streams" element={<Streams />} />
           <Route path="terms" element={<Terms />} />
+
+          {/* Admin Routes */}
+          <Route path="admin/centers" element={<AdminRoute><AdminCenters /></AdminRoute>} />
+          <Route path="admin/archives" element={<AdminRoute><AdminArchives /></AdminRoute>} />
+          <Route path="admin/requests" element={<AdminRoute superAdminOnly><AdminRequests /></AdminRoute>} />
+
           <Route path="*" element={<NotFound />} />
 
           <Route

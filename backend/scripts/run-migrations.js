@@ -28,6 +28,7 @@ import * as updateTeamsEducationalCenter from '../migrations/20260118-update-tea
 import * as updateStreamsEducationalCenter from '../migrations/20260118-update-streams-educational-center.js';
 import * as updateGalleryEnhanced from '../migrations/20260118-update-gallery-enhanced.js';
 import * as updateRegistrationCenterApproval from '../migrations/20260118-update-registration-center-approval.js';
+import * as addCenterAdminRequest from '../migrations/20251214-add-center-admin-request.js';
 
 async function run() {
   try {
@@ -275,6 +276,14 @@ async function run() {
       console.log('Added center approval fields to Registration');
     } catch (e) {
       console.log('Skipping updateRegistrationCenterApproval:', e.message);
+    }
+
+    // Create CenterAdminRequest table and add pending_role to User
+    try {
+      await addCenterAdminRequest.default.up(qi, Sequelize);
+      console.log('Created CenterAdminRequest table and added pending_role to User');
+    } catch (e) {
+      console.log('Skipping addCenterAdminRequest:', e.message);
     }
 
     console.log('Migrations applied successfully');
