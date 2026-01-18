@@ -184,3 +184,52 @@ export const getFileInfo = (req) => {
 
   return null;
 };
+
+/**
+ * Pre-configured upload middleware for general file uploads.
+ * Supports PDFs, documents, images, videos, and archives.
+ */
+export const uploadFile = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      const uploadDir = path.join(process.cwd(), 'uploads');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      const uniqueName = `${Date.now()}_${uuidv4()}${ext}`;
+      cb(null, uniqueName);
+    }
+  }),
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB max
+  fileFilter: (req, file, cb) => {
+    // Allow common file types for archives
+    const allowedMimes = [
+      /^image\/.*/,
+      /^video\/.*/,
+      /^application\/pdf$/,
+      /^application\/msword$/,
+      /^application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document$/,
+      /^application\/vnd\.ms-excel$/,
+      /^application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet$/,
+      /^application\/vnd\.ms-powerpoint$/,
+      /^application\/vnd\.openxmlformats-officedocument\.presentationml\.presentation$/,
+      /^application\/zip$/,
+      /^application\/x-rar-compressed$/,
+      /^application\/x-7z-compressed$/,
+      /^text\/plain$/,
+      /^text\/csv$/
+    ];
+    
+    const isAllowed = allowedMimes.some(mime => mime.test(file.mimetype));
+    
+    if (isAllowed) {
+      cb(null, true);
+    } else {
+      cb(new Error(`Tipo de archivo no permitido: ${file.mimetype}`), false);
+    }
+  }
+});
