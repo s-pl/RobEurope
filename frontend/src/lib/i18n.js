@@ -312,7 +312,21 @@ const resources = {
             email: 'Email',
             website: 'Sitio web',
             description: 'Descripción'
-          }
+          },
+          centerRegistrationsTitle: 'Solicitudes de competición del centro',
+          centerRegistrationsDesc: 'Aprueba o rechaza las solicitudes de equipos de tu centro.',
+          noRegistrations: 'No hay solicitudes pendientes.',
+          competitionLabel: 'Competición',
+          centerStudentsTitle: 'Alumnos del centro',
+          centerStudentsDesc: 'Usuarios asociados a tu centro educativo.',
+          noStudents: 'No hay alumnos asociados.',
+          centerTeamsTitle: 'Equipos del centro',
+          centerTeamsDesc: 'Equipos asociados a tu centro educativo.',
+          noTeams: 'No hay equipos asociados.',
+          confirmRemoveUser: '¿Eliminar este alumno del centro?',
+          confirmRemoveTeam: '¿Eliminar este equipo del centro?',
+          centerApprovedReason: 'Aprobado por el centro',
+          centerRejectReason: 'Motivo del rechazo:'
         },
         archives: {
           title: 'Gestionar Archivos',
@@ -1152,7 +1166,21 @@ const resources = {
             email: 'Email',
             website: 'Website',
             description: 'Description'
-          }
+          },
+          centerRegistrationsTitle: 'Center competition requests',
+          centerRegistrationsDesc: 'Approve or reject team requests from your center.',
+          noRegistrations: 'No pending requests.',
+          competitionLabel: 'Competition',
+          centerStudentsTitle: 'Center students',
+          centerStudentsDesc: 'Users associated with your educational center.',
+          noStudents: 'No students associated.',
+          centerTeamsTitle: 'Center teams',
+          centerTeamsDesc: 'Teams associated with your educational center.',
+          noTeams: 'No teams associated.',
+          confirmRemoveUser: 'Remove this student from the center?',
+          confirmRemoveTeam: 'Remove this team from the center?',
+          centerApprovedReason: 'Approved by the center',
+          centerRejectReason: 'Rejection reason:'
         },
         archives: {
           title: 'Manage Archives',
@@ -1990,7 +2018,21 @@ const resources = {
             email: 'E-Mail',
             website: 'Webseite',
             description: 'Beschreibung'
-          }
+          },
+          centerRegistrationsTitle: 'Wettbewerbsanfragen des Zentrums',
+          centerRegistrationsDesc: 'Anfragen von Teams deines Zentrums genehmigen oder ablehnen.',
+          noRegistrations: 'Keine ausstehenden Anfragen.',
+          competitionLabel: 'Wettbewerb',
+          centerStudentsTitle: 'Schüler des Zentrums',
+          centerStudentsDesc: 'Benutzer, die deinem Bildungszentrum zugeordnet sind.',
+          noStudents: 'Keine zugeordneten Schüler.',
+          centerTeamsTitle: 'Teams des Zentrums',
+          centerTeamsDesc: 'Teams, die deinem Bildungszentrum zugeordnet sind.',
+          noTeams: 'Keine zugeordneten Teams.',
+          confirmRemoveUser: 'Diesen Schüler aus dem Zentrum entfernen?',
+          confirmRemoveTeam: 'Dieses Team aus dem Zentrum entfernen?',
+          centerApprovedReason: 'Vom Zentrum genehmigt',
+          centerRejectReason: 'Ablehnungsgrund:'
         },
         archives: {
           title: 'Archiv verwalten',

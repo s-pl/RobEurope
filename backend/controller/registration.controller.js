@@ -1,5 +1,5 @@
 import db from '../models/index.js';
-const { Registration, Team, Notification, EducationalCenter, User } = db;
+const { Registration, Team, Notification, EducationalCenter, User, Competition } = db;
 import { Op } from 'sequelize';
 import { Parser as Json2CsvParser } from 'json2csv';
 
@@ -396,6 +396,9 @@ export const getMyCenterRegistrations = async (req, res) => {
         model: Team,
         where: teamWhere,
         required: true
+      }, {
+        model: Competition,
+        required: false
       }],
       limit: Number(limit),
       offset: Number(offset),

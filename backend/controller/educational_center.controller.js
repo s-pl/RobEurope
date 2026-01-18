@@ -413,6 +413,95 @@ export const getEducationalCenterTeams = async (req, res) => {
 };
 
 /**
+ * Gets users for a specific educational center.
+ * Center admins can see users from their own center.
+ *
+ * @route GET /api/educational-centers/:id/users
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
+export const getEducationalCenterUsers = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const center = await EducationalCenter.findByPk(id);
+    if (!center) {
+      return res.status(404).json({ error: 'Centro educativo no encontrado' });
+    }
+
+    const users = await User.findAll({
+      where: { educational_center_id: id },
+      attributes: ['id', 'first_name', 'last_name', 'email', 'role', 'username'],
+      order: [['last_name', 'ASC'], ['first_name', 'ASC']]
+    });
+
+    res.json({ items: users });
+  } catch (err) {
+    console.error('Error getting center users:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Removes a user from an educational center (disassociate).
+ *
+ * @route DELETE /api/educational-centers/:id/users/:userId
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
+export const removeEducationalCenterUser = async (req, res) => {
+  try {
+    const { id, userId } = req.params;
+
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    if (String(user.educational_center_id) !== String(id)) {
+      return res.status(400).json({ error: 'El usuario no pertenece a este centro' });
+    }
+
+    if (user.role === 'super_admin') {
+      return res.status(403).json({ error: 'No se puede modificar un super_admin' });
+    }
+
+    await user.update({ educational_center_id: null, role: user.role === 'center_admin' ? 'user' : user.role });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error removing center user:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Removes a team from an educational center (disassociate).
+ *
+ * @route DELETE /api/educational-centers/:id/teams/:teamId
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
+export const removeEducationalCenterTeam = async (req, res) => {
+  try {
+    const { id, teamId } = req.params;
+
+    const team = await Team.findByPk(teamId);
+    if (!team) return res.status(404).json({ error: 'Equipo no encontrado' });
+
+    if (String(team.educational_center_id) !== String(id)) {
+      return res.status(400).json({ error: 'El equipo no pertenece a este centro' });
+    }
+
+    await team.update({ educational_center_id: null });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error removing center team:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
  * Gets streams for a specific educational center.
  *
  * @route GET /api/educational-centers/:id/streams

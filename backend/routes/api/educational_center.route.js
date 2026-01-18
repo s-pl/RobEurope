@@ -14,7 +14,10 @@ import {
   rejectCenter,
   deleteEducationalCenter,
   getEducationalCenterTeams,
-  getEducationalCenterStreams
+  getEducationalCenterStreams,
+  getEducationalCenterUsers,
+  removeEducationalCenterUser,
+  removeEducationalCenterTeam
 } from '../../controller/educational_center.controller.js';
 import authenticateToken from '../../middleware/auth.middleware.js';
 import { requireRole, requireCenterAdmin, requireAnyRole } from '../../middleware/role.middleware.js';
@@ -70,12 +73,39 @@ router.get('/:id/teams', getEducationalCenterTeams);
 
 /**
  * @swagger
+ * /api/educational-centers/{id}/users:
+ *   get:
+ *     summary: Get users for an educational center
+ *     tags: [Educational Centers]
+ */
+router.get('/:id/users', authenticateToken, requireCenterAdmin(), getEducationalCenterUsers);
+
+/**
+ * @swagger
+ * /api/educational-centers/{id}/users/{userId}:
+ *   delete:
+ *     summary: Remove a user from an educational center
+ *     tags: [Educational Centers]
+ */
+router.delete('/:id/users/:userId', authenticateToken, requireCenterAdmin(), removeEducationalCenterUser);
+
+/**
+ * @swagger
  * /api/educational-centers/{id}/streams:
  *   get:
  *     summary: Get streams for an educational center
  *     tags: [Educational Centers]
  */
 router.get('/:id/streams', getEducationalCenterStreams);
+
+/**
+ * @swagger
+ * /api/educational-centers/{id}/teams/{teamId}:
+ *   delete:
+ *     summary: Remove a team from an educational center
+ *     tags: [Educational Centers]
+ */
+router.delete('/:id/teams/:teamId', authenticateToken, requireCenterAdmin(), removeEducationalCenterTeam);
 
 // Protected routes - require authentication
 router.use(authenticateToken);

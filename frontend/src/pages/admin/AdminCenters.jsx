@@ -6,7 +6,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
-import { Building2, Check, X, Clock, Edit, Trash2, Plus, Search } from 'lucide-react';
+import { Building2, Check, X, Clock, Edit, Trash2, Plus, Search, Users } from 'lucide-react';
 
 const AdminCenters = () => {
   const { t } = useTranslation();
@@ -26,12 +26,88 @@ const AdminCenters = () => {
     website_url: '',
     description: ''
   });
+  const [myCenterTeams, setMyCenterTeams] = useState([]);
+  const [myCenterUsers, setMyCenterUsers] = useState([]);
+  const [myCenterRegistrations, setMyCenterRegistrations] = useState([]);
+  const [centerLoading, setCenterLoading] = useState(false);
 
   const isSuperAdmin = user?.role === 'super_admin';
+  const isCenterAdmin = user?.role === 'center_admin';
 
   useEffect(() => {
     loadCenters();
   }, [filter]);
+
+  useEffect(() => {
+    if (isCenterAdmin) {
+      loadMyCenterData();
+    }
+  }, [isCenterAdmin, user?.educational_center_id]);
+
+  const loadMyCenterData = async () => {
+    if (!user?.educational_center_id) return;
+    setCenterLoading(true);
+    try {
+      const [teamsRes, usersRes, regsRes] = await Promise.all([
+        api(`/educational-centers/${user.educational_center_id}/teams`),
+        api(`/educational-centers/${user.educational_center_id}/users`),
+        api('/registrations/my-center?center_approval_status=pending')
+      ]);
+      setMyCenterTeams(teamsRes?.items || (Array.isArray(teamsRes) ? teamsRes : []));
+      setMyCenterUsers(usersRes?.items || (Array.isArray(usersRes) ? usersRes : []));
+      setMyCenterRegistrations(Array.isArray(regsRes) ? regsRes : []);
+    } catch (err) {
+      setFeedback({ type: 'error', message: err.message });
+    } finally {
+      setCenterLoading(false);
+    }
+  };
+
+  const handleCenterApproveRegistration = async (registrationId) => {
+    try {
+      await api(`/registrations/${registrationId}/center-approve`, {
+        method: 'POST',
+        body: { center_approval_reason: t('admin.centers.centerApprovedReason') || 'Aprobado por el centro' }
+      });
+      loadMyCenterData();
+    } catch (err) {
+      setFeedback({ type: 'error', message: err.message });
+    }
+  };
+
+  const handleCenterRejectRegistration = async (registrationId) => {
+    const reason = prompt(t('admin.centers.centerRejectReason') || 'Motivo del rechazo:');
+    if (reason === null) return;
+    try {
+      await api(`/registrations/${registrationId}/center-reject`, {
+        method: 'POST',
+        body: { center_approval_reason: reason }
+      });
+      loadMyCenterData();
+    } catch (err) {
+      setFeedback({ type: 'error', message: err.message });
+    }
+  };
+
+  const handleRemoveCenterUser = async (userId) => {
+    if (!confirm(t('admin.centers.confirmRemoveUser') || '¿Eliminar este alumno del centro?')) return;
+    try {
+      await api(`/educational-centers/${user.educational_center_id}/users/${userId}`, { method: 'DELETE' });
+      loadMyCenterData();
+    } catch (err) {
+      setFeedback({ type: 'error', message: err.message });
+    }
+  };
+
+  const handleRemoveCenterTeam = async (teamId) => {
+    if (!confirm(t('admin.centers.confirmRemoveTeam') || '¿Eliminar este equipo del centro?')) return;
+    try {
+      await api(`/educational-centers/${user.educational_center_id}/teams/${teamId}`, { method: 'DELETE' });
+      loadMyCenterData();
+    } catch (err) {
+      setFeedback({ type: 'error', message: err.message });
+    }
+  };
 
   const loadCenters = async () => {
     setLoading(true);
@@ -39,7 +115,10 @@ const AdminCenters = () => {
       const params = filter !== 'all' ? `?status=${filter}` : '';
       const data = await api(`/educational-centers${params}`);
       // API returns { items: [...] } or array
-      const items = data?.items || (Array.isArray(data) ? data : []);
+      let items = data?.items || (Array.isArray(data) ? data : []);
+      if (isCenterAdmin && user?.educational_center_id) {
+        items = items.filter(c => String(c.id) === String(user.educational_center_id));
+      }
       setCenters(items);
     } catch (err) {
       setFeedback({ type: 'error', message: err.message });
@@ -170,6 +249,110 @@ const AdminCenters = () => {
       {feedback.message && (
         <div className={`mb-4 p-3 rounded-lg ${feedback.type === 'error' ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400' : 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'}`}>
           {feedback.message}
+        </div>
+      )}
+
+      {isCenterAdmin && (
+        <div className="space-y-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-amber-600" />
+                {t('admin.centers.centerRegistrationsTitle') || 'Solicitudes de competición del centro'}
+              </CardTitle>
+              <CardDescription>{t('admin.centers.centerRegistrationsDesc') || 'Aprueba o rechaza las solicitudes de equipos de tu centro.'}</CardDescription>
+            </CardHeader>
+            <div className="px-6 pb-6 space-y-3">
+              {centerLoading ? (
+                <p className="text-sm text-slate-500">{t('common.loading') || 'Cargando...'}</p>
+              ) : myCenterRegistrations.length === 0 ? (
+                <p className="text-sm text-slate-500">{t('admin.centers.noRegistrations') || 'No hay solicitudes pendientes.'}</p>
+              ) : (
+                myCenterRegistrations.map((reg) => (
+                  <div key={reg.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border rounded-lg p-3">
+                    <div className="space-y-1">
+                      <p className="font-medium text-slate-900 dark:text-slate-100">{reg.Team?.name || 'Equipo'}</p>
+                      <p className="text-xs text-slate-500">
+                        {t('admin.centers.competitionLabel') || 'Competición'}: {reg.Competition?.title || reg.competition_id}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => handleCenterApproveRegistration(reg.id)}>
+                        {t('actions.approve') || 'Aprobar'}
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => handleCenterRejectRegistration(reg.id)}>
+                        {t('actions.reject') || 'Rechazar'}
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-blue-600" />
+                  {t('admin.centers.centerStudentsTitle') || 'Alumnos del centro'}
+                </CardTitle>
+                <CardDescription>{t('admin.centers.centerStudentsDesc') || 'Usuarios asociados a tu centro educativo.'}</CardDescription>
+              </CardHeader>
+              <div className="px-6 pb-6 space-y-3">
+                {centerLoading ? (
+                  <p className="text-sm text-slate-500">{t('common.loading') || 'Cargando...'}</p>
+                ) : myCenterUsers.length === 0 ? (
+                  <p className="text-sm text-slate-500">{t('admin.centers.noStudents') || 'No hay alumnos asociados.'}</p>
+                ) : (
+                  myCenterUsers.map((centerUser) => (
+                    <div key={centerUser.id} className="flex items-center justify-between gap-3 border rounded-lg p-3">
+                      <div className="min-w-0">
+                        <p className="font-medium text-slate-900 dark:text-slate-100 truncate">
+                          {centerUser.first_name} {centerUser.last_name}
+                        </p>
+                        <p className="text-xs text-slate-500 truncate">{centerUser.email}</p>
+                      </div>
+                      <Button size="sm" variant="outline" onClick={() => handleRemoveCenterUser(centerUser.id)}>
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        {t('actions.remove') || 'Eliminar'}
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-emerald-600" />
+                  {t('admin.centers.centerTeamsTitle') || 'Equipos del centro'}
+                </CardTitle>
+                <CardDescription>{t('admin.centers.centerTeamsDesc') || 'Equipos asociados a tu centro educativo.'}</CardDescription>
+              </CardHeader>
+              <div className="px-6 pb-6 space-y-3">
+                {centerLoading ? (
+                  <p className="text-sm text-slate-500">{t('common.loading') || 'Cargando...'}</p>
+                ) : myCenterTeams.length === 0 ? (
+                  <p className="text-sm text-slate-500">{t('admin.centers.noTeams') || 'No hay equipos asociados.'}</p>
+                ) : (
+                  myCenterTeams.map((team) => (
+                    <div key={team.id} className="flex items-center justify-between gap-3 border rounded-lg p-3">
+                      <div className="min-w-0">
+                        <p className="font-medium text-slate-900 dark:text-slate-100 truncate">{team.name}</p>
+                        <p className="text-xs text-slate-500 truncate">{team.city || '—'}</p>
+                      </div>
+                      <Button size="sm" variant="outline" onClick={() => handleRemoveCenterTeam(team.id)}>
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        {t('actions.remove') || 'Eliminar'}
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card>
+          </div>
         </div>
       )}
 
