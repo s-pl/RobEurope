@@ -29,8 +29,11 @@ const isSuperAdmin = (user) => user?.role === 'super_admin';
  * @returns {boolean}
  */
 const hasAccessToRestricted = (archive, user) => {
-  if (!user || !user.email) return false;
+  if (!user) return false;
   if (isSuperAdmin(user)) return true;
+  if (user.role === 'center_admin') return true;
+  if (user.id && archive.uploaded_by && String(user.id) === String(archive.uploaded_by)) return true;
+  if (!user.email) return false;
   
   const allowedEmails = archive.allowed_emails || [];
   return allowedEmails.includes(user.email.toLowerCase());

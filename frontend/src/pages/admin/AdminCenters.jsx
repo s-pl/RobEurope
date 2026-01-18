@@ -278,10 +278,10 @@ const AdminCenters = () => {
                     </div>
                     <div className="flex gap-2">
                       <Button size="sm" onClick={() => handleCenterApproveRegistration(reg.id)}>
-                        {t('actions.approve') || 'Aprobar'}
+                        {t('common.approve') || 'Aprobar'}
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => handleCenterRejectRegistration(reg.id)}>
-                        {t('actions.reject') || 'Rechazar'}
+                        {t('common.reject') || 'Rechazar'}
                       </Button>
                     </div>
                   </div>
@@ -315,7 +315,7 @@ const AdminCenters = () => {
                       </div>
                       <Button size="sm" variant="outline" onClick={() => handleRemoveCenterUser(centerUser.id)}>
                         <Trash2 className="h-4 w-4 mr-1" />
-                        {t('actions.remove') || 'Eliminar'}
+                        {t('actions.delete') || 'Eliminar'}
                       </Button>
                     </div>
                   ))
@@ -345,7 +345,7 @@ const AdminCenters = () => {
                       </div>
                       <Button size="sm" variant="outline" onClick={() => handleRemoveCenterTeam(team.id)}>
                         <Trash2 className="h-4 w-4 mr-1" />
-                        {t('actions.remove') || 'Eliminar'}
+                        {t('actions.delete') || 'Eliminar'}
                       </Button>
                     </div>
                   ))

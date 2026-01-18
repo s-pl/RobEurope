@@ -41,7 +41,8 @@ const AdminArchives = () => {
     setLoading(true);
     try {
       const data = await api('/archives');
-      setArchives(Array.isArray(data) ? data : []);
+      const items = data?.items || (Array.isArray(data) ? data : []);
+      setArchives(items);
     } catch (err) {
       setFeedback({ type: 'error', message: err.message });
     } finally {
