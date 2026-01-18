@@ -612,7 +612,21 @@ const resources = {
         description: 'Los datos se envían al endpoint /auth/register para emitir un token y almacenarte en la base de datos.',
         hasAccount: '¿Ya tienes cuenta?',
         loginLink: 'Inicia sesión',
-        acceptTerms: 'Acepto los'
+        acceptTerms: 'Acepto los',
+        wantsCenterAdmin: '¿Quieres administrar un centro educativo?',
+        centerAdminDescription: 'Como administrador de centro podrás gestionar equipos, streamings y archivos de tu institución.',
+        selectExistingCenter: 'Seleccionar centro existente',
+        noCenter: '-- Selecciona un centro --',
+        orCreateCenter: '¿No encuentras tu centro? Créalo aquí',
+        createNewCenter: 'Crear nuevo centro educativo',
+        centerName: 'Nombre del centro',
+        centerNamePlaceholder: 'IES / Colegio / Universidad...',
+        centerCity: 'Ciudad',
+        centerCityPlaceholder: 'Madrid, Barcelona...',
+        centerEmail: 'Email de contacto',
+        centerWebsite: 'Sitio web',
+        centerPendingApproval: 'El centro quedará pendiente de aprobación por un super administrador.',
+        centerNameRequired: 'El nombre del centro es requerido'
       },
       general: {
         countriesLoading: 'Cargando países…',
