@@ -4,6 +4,7 @@ import { useApi } from '../../hooks/useApi';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
+import { RichTextEditor } from '../../components/ui/RichTextEditor';
 import { 
   FileText, Search, Edit, Trash2, Eye, Pin, PinOff, Plus, X, Save, Image
 } from 'lucide-react';
@@ -184,13 +185,13 @@ const AdminPosts = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">{t('admin.posts.contentLabel') || 'Contenido'}</label>
-                <textarea
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  rows={8}
-                  className="w-full px-3 py-2 border rounded-lg dark:bg-slate-800 dark:border-slate-700"
-                  required
-                />
+                <div className="mt-1">
+                  <RichTextEditor
+                    value={formData.content}
+                    onChange={(val) => setFormData({ ...formData, content: val })}
+                    placeholder={t('admin.posts.contentLabel') || 'Contenido'}
+                  />
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <input

@@ -95,6 +95,20 @@ export const register = async (req, res) => {
     const password_hash = await bcrypt.hash(password, 10);
     const now = new Date();
 
+    let educationalCenterId = null;
+    if (req.body.educational_center_id) {
+      const { EducationalCenter } = db;
+      const centerId = Number(req.body.educational_center_id);
+      if (!Number.isInteger(centerId)) {
+        return res.status(400).json({ error: 'Invalid educational_center_id' });
+      }
+      const center = await EducationalCenter.findByPk(centerId);
+      if (!center || center.approval_status !== 'approved') {
+        return res.status(400).json({ error: 'Educational center not found or not approved' });
+      }
+      educationalCenterId = centerId;
+    }
+
     // Model defines created_at (snake_case) and does not use Sequelize's updatedAt by default
     const user = await User.create({
       email,
@@ -104,6 +118,7 @@ export const register = async (req, res) => {
       username,
       phone: phone || null,
       role,
+      educational_center_id: educationalCenterId,
       created_at: now
     });
 
@@ -163,7 +178,7 @@ export const register = async (req, res) => {
     }
 
     // Set session user
-    const userSession = { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, username: user.username, role: user.role };
+    const userSession = { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, username: user.username, role: user.role, educational_center_id: user.educational_center_id };
     req.session.user = userSession;
 
     // Log user registration
@@ -245,7 +260,7 @@ export const login = async (req, res) => {
     await redisClient.del(attemptsKey);
 
     // Set session user
-    const userSession = { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, role: user.role };
+    const userSession = { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, role: user.role, educational_center_id: user.educational_center_id };
     req.session.user = userSession;
 
     // Log successful login

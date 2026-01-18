@@ -15,12 +15,14 @@ import { resolveMediaUrl } from '../lib/apiClient';
 const Profile = () => {
   const { user, updateProfile, uploadProfilePhoto } = useAuth();
   const api = useApi();
-  const [form, setForm] = useState({ first_name: '', last_name: '', phone: '', country_id: '', bio: '' });
+  const [form, setForm] = useState({ first_name: '', last_name: '', phone: '', country_id: '', bio: '', educational_center_id: '' });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   const [countries, setCountries] = useState([]);
   const [countriesStatus, setCountriesStatus] = useState({ loading: false, error: '' });
+  const [centers, setCenters] = useState([]);
+  const [centersStatus, setCentersStatus] = useState({ loading: false, error: '' });
   const [userTeams, setUserTeams] = useState([]);
   // Password change moved to Login -> Forgot Password flow
   const { t } = useTranslation();
@@ -32,7 +34,8 @@ const Profile = () => {
         last_name: user.last_name || '',
         phone: user.phone || '',
         country_id: user.country_id?.toString() || '',
-        bio: user.bio || ''
+        bio: user.bio || '',
+        educational_center_id: user.educational_center_id?.toString() || ''
       });
     }
   }, [user]);
@@ -59,6 +62,27 @@ const Profile = () => {
   }, [api]);
 
   useEffect(() => {
+    let active = true;
+    const fetchCenters = async () => {
+      setCentersStatus({ loading: true, error: '' });
+      try {
+        const data = await api('/educational-centers?status=approved');
+        if (active) {
+          const items = data?.items || (Array.isArray(data) ? data : []);
+          setCenters(items);
+          setCentersStatus({ loading: false, error: '' });
+        }
+      } catch (err) {
+        if (active) {
+          setCentersStatus({ loading: false, error: 'centers-error' });
+        }
+      }
+    };
+    fetchCenters();
+    return () => { active = false; };
+  }, [api]);
+
+  useEffect(() => {
     if (!user) return;
     const fetchTeams = async () => {
       try {
@@ -77,6 +101,11 @@ const Profile = () => {
     return `${first}${last}`.toUpperCase() || 'RE';
   }, [user]);
 
+  const currentCenter = useMemo(() => {
+    if (!form.educational_center_id) return null;
+    return centers.find(c => String(c.id) === String(form.educational_center_id)) || null;
+  }, [centers, form.educational_center_id]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -89,7 +118,8 @@ const Profile = () => {
     try {
       const payload = {
         ...form,
-        country_id: form.country_id ? Number(form.country_id) : undefined
+        country_id: form.country_id ? Number(form.country_id) : undefined,
+        educational_center_id: form.educational_center_id ? Number(form.educational_center_id) : null
       };
       if (payload.country_id === undefined) delete payload.country_id;
       await updateProfile(payload);
@@ -206,6 +236,21 @@ const Profile = () => {
                   <p>{form.phone || '—'}</p>
                 </div>
                 <div className="md:col-span-2">
+                  <p className="font-medium text-slate-900 dark:text-slate-100">{t('profile.educationalCenter')}</p>
+                  {currentCenter ? (
+                    <p>
+                      {currentCenter.name}
+                      {user.role === 'center_admin' ? (
+                        <span className="ml-2 text-xs text-amber-600">{t('profile.centerAdminBadge') || 'Administrador'}</span>
+                      ) : (
+                        <span className="ml-2 text-xs text-slate-500">{t('profile.studentBadge') || 'Alumno'}</span>
+                      )}
+                    </p>
+                  ) : (
+                    <p>{t('profile.noEducationalCenter') || 'Sin centro asignado'}</p>
+                  )}
+                </div>
+                <div className="md:col-span-2">
                   <p className="font-medium text-slate-900 dark:text-slate-100">{t('profile.bio')}</p>
                   <p>{form.bio || t('profile.bioEmpty')}</p>
                 </div>
@@ -270,6 +315,27 @@ const Profile = () => {
                       </SelectContent>
                     </Select>
                     {countriesStatus.error && <p id="countries-error" className="text-xs text-red-500 mt-1" role="alert">{t('profile.countriesError')}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="educational_center_id">{t('profile.educationalCenter')}</Label>
+                    <select
+                      id="educational_center_id"
+                      name="educational_center_id"
+                      value={form.educational_center_id}
+                      onChange={handleChange}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      disabled={centersStatus.loading}
+                    >
+                      <option value="">{t('profile.noEducationalCenter') || 'Sin centro asignado'}</option>
+                      {centers.map(center => (
+                        <option key={center.id} value={center.id}>
+                          {center.name} {center.city ? `- ${center.city}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                    {centersStatus.error && (
+                      <p className="text-xs text-red-500">{t('profile.centersLoadError') || 'No se pudieron cargar los centros'}</p>
+                    )}
                   </div>
                   <div className="md:col-span-2 space-y-2">
                     <Label htmlFor="bio">{t('profile.bio')}</Label>

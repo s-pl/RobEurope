@@ -38,6 +38,7 @@ const Register = () => {
   const [wantsCenterAdmin, setWantsCenterAdmin] = useState(false);
   const [educationalCenters, setEducationalCenters] = useState([]);
   const [selectedCenterId, setSelectedCenterId] = useState('');
+  const [studentCenterId, setStudentCenterId] = useState('');
   const [showCreateCenter, setShowCreateCenter] = useState(false);
   const [newCenterForm, setNewCenterForm] = useState({
     name: '',
@@ -48,15 +49,13 @@ const Register = () => {
 
   // Load approved educational centers
   useEffect(() => {
-    if (wantsCenterAdmin) {
-      apiRequest('/educational-centers?status=approved')
-        .then(data => {
-          const items = data?.items || (Array.isArray(data) ? data : []);
-          setEducationalCenters(items);
-        })
-        .catch(() => setEducationalCenters([]));
-    }
-  }, [wantsCenterAdmin]);
+    apiRequest('/educational-centers?status=approved')
+      .then(data => {
+        const items = data?.items || (Array.isArray(data) ? data : []);
+        setEducationalCenters(items);
+      })
+      .catch(() => setEducationalCenters([]));
+  }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -89,6 +88,10 @@ const Register = () => {
     try {
       const payload = { ...form };
       delete payload.confirm_password;
+
+      if (!wantsCenterAdmin && studentCenterId) {
+        payload.educational_center_id = Number(studentCenterId);
+      }
 
       // If user wants to be a center admin, include the center info
       if (wantsCenterAdmin) {
@@ -250,6 +253,24 @@ const Register = () => {
               {confirmMismatch && (
                 <p id={confirmErrorId} className="mt-1 text-xs text-red-600" role="alert">{t('forms.passwordsDontMatch')}</p>
               )}
+            </div>
+
+            <div className="md:col-span-2 space-y-2 rounded-lg border border-slate-200 p-4 dark:border-slate-700">
+              <Label htmlFor="studentCenterSelect">{t('register.studentCenterLabel') || 'Centro educativo (opcional)'}</Label>
+              <select
+                id="studentCenterSelect"
+                value={studentCenterId}
+                onChange={(e) => setStudentCenterId(e.target.value)}
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+              >
+                <option value="">{t('register.studentCenterPlaceholder') || '-- No indicar centro --'}</option>
+                {educationalCenters.map((center) => (
+                  <option key={center.id} value={center.id}>
+                    {center.name} {center.city ? `- ${center.city}` : ''}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-slate-500">{t('register.studentCenterHelp') || 'Opcional. Podrás cambiarlo más adelante en tu perfil.'}</p>
             </div>
 
             {/* Educational Center Admin Option */}

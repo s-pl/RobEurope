@@ -105,35 +105,36 @@ const NavItems = ({
           <Building2 className="h-5 w-5" />
           {t('nav.manageCenters') || 'Gestionar Centros'}
         </NavLink>
-        <NavLink
-          to="/admin/archives"
-          onClick={() => onNavigate?.()}
-          className={({ isActive }) =>
-            `flex items-center gap-2 py-2 text-lg transition ${
-              isActive
-                ? 'text-amber-700 font-semibold dark:text-amber-300'
-                : 'text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200'
-            }`
-          }
-        >
-          <Archive className="h-5 w-5" />
-          {t('nav.manageArchives') || 'Gestionar Archivos'}
-        </NavLink>
-        <NavLink
-          to="/admin/posts"
-          onClick={() => onNavigate?.()}
-          className={({ isActive }) =>
-            `flex items-center gap-2 py-2 text-lg transition ${
-              isActive
-                ? 'text-amber-700 font-semibold dark:text-amber-300'
-                : 'text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200'
-            }`
-          }
-        >
-          <FileText className="h-5 w-5" />
-          {t('nav.managePosts') || 'Gestionar Posts'}
-        </NavLink>
         {user?.role === 'super_admin' && (
+          <>
+            <NavLink
+              to="/admin/archives"
+              onClick={() => onNavigate?.()}
+              className={({ isActive }) =>
+                `flex items-center gap-2 py-2 text-lg transition ${
+                  isActive
+                    ? 'text-amber-700 font-semibold dark:text-amber-300'
+                    : 'text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200'
+                }`
+              }
+            >
+              <Archive className="h-5 w-5" />
+              {t('nav.manageArchives') || 'Gestionar Archivos'}
+            </NavLink>
+            <NavLink
+              to="/admin/posts"
+              onClick={() => onNavigate?.()}
+              className={({ isActive }) =>
+                `flex items-center gap-2 py-2 text-lg transition ${
+                  isActive
+                    ? 'text-amber-700 font-semibold dark:text-amber-300'
+                    : 'text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200'
+                }`
+              }
+            >
+              <FileText className="h-5 w-5" />
+              {t('nav.managePosts') || 'Gestionar Posts'}
+            </NavLink>
           <NavLink
             to="/admin/requests"
             onClick={() => onNavigate?.()}
@@ -148,6 +149,7 @@ const NavItems = ({
             <Settings className="h-5 w-5" />
             {t('nav.adminRequests') || 'Solicitudes Admin'}
           </NavLink>
+          </>
         )}
       </>
     )}
