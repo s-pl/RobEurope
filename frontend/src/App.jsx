@@ -18,6 +18,8 @@ import Posts from './pages/Posts';
 import Sponsors from './pages/Sponsors';
 import Streams from './pages/Streaming';
 import Gallery from './pages/Gallery';
+import Archive from './pages/Archive';
+import EducationalCenters from './pages/EducationalCenters';
 import Feedback from './pages/Feedback';
 import Terms from './pages/Terms';
 import NotFound from './pages/NotFound';
@@ -52,6 +54,8 @@ function App() {
           <Route path="my-team" element={<ProtectedRoute><MyTeam /></ProtectedRoute>} />
           <Route path="posts" element={<Posts />} />
           <Route path="gallery" element={<Gallery />} />
+          <Route path="archive" element={<Archive />} />
+          <Route path="educational-centers" element={<EducationalCenters />} />
           <Route path="feedback" element={<Feedback />} />
           <Route path="sponsors" element={<Sponsors />} />
           <Route path="streams" element={<Streams />} />
