@@ -851,7 +851,13 @@ const resources = {
           activeTitle: "Inscripciones Activas",
           noRegistrations: "No hay inscripciones registradas.",
           compPrefix: "Competición #",
-          reason: "Motivo:"
+          reason: "Motivo:",
+          centerReason: "Centro:",
+          status: {
+            pending: "Pendiente",
+            approved: "Aprobado",
+            rejected: "Rechazado"
+          }
         },
         settings: {
           editTitle: "Editar Información",
@@ -1708,7 +1714,13 @@ const resources = {
           activeTitle: "Active Registrations",
           noRegistrations: "No registrations found.",
           compPrefix: "Competition #",
-          reason: "Reason:"
+          reason: "Reason:",
+          centerReason: "Center:",
+          status: {
+            pending: "Pending",
+            approved: "Approved",
+            rejected: "Rejected"
+          }
         },
         settings: {
           editTitle: "Edit Information",
@@ -2556,7 +2568,13 @@ const resources = {
           activeTitle: "Aktive Anmeldungen",
           noRegistrations: "Keine Anmeldungen gefunden.",
           compPrefix: "Wettbewerb #",
-          reason: "Grund:"
+          reason: "Grund:",
+          centerReason: "Zentrum:",
+          status: {
+            pending: "Ausstehend",
+            approved: "Genehmigt",
+            rejected: "Abgelehnt"
+          }
         },
         settings: {
           editTitle: "Informationen bearbeiten",

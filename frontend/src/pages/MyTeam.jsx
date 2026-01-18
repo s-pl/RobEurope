@@ -704,10 +704,24 @@ const MyTeam = () => {
                           <div>
                             <p className="font-medium">{t('myTeam.competitions.compPrefix')} {r.competition_id}</p>
                             <div className="flex items-center gap-2 mt-1">
-                              <Badge variant={r.status === 'approved' ? 'default' : r.status === 'rejected' ? 'destructive' : 'secondary'}>
-                                {r.status}
-                              </Badge>
-                              {r.decision_reason && <span className="text-xs text-slate-500">{t('myTeam.competitions.reason')} {r.decision_reason}</span>}
+                              {(() => {
+                                const displayStatus = r.status === 'pending'
+                                  ? (r.center_approval_status || 'pending')
+                                  : r.status;
+                                return (
+                                  <Badge variant={displayStatus === 'approved' ? 'default' : displayStatus === 'rejected' ? 'destructive' : 'secondary'}>
+                                    {t(`myTeam.competitions.status.${displayStatus}`) || displayStatus}
+                                  </Badge>
+                                );
+                              })()}
+                              {r.center_approval_reason && r.status === 'pending' && (
+                                <span className="text-xs text-slate-500">
+                                  {t('myTeam.competitions.centerReason') || 'Centro:'} {r.center_approval_reason}
+                                </span>
+                              )}
+                              {r.decision_reason && r.status !== 'pending' && (
+                                <span className="text-xs text-slate-500">{t('myTeam.competitions.reason')} {r.decision_reason}</span>
+                              )}
                             </div>
                           </div>
                           <div className="text-xs text-slate-400">
