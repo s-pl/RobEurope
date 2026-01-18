@@ -16,6 +16,8 @@ import systemLogRouter from './system_log.route.js';
 import robotFilesRouter from './robot_file.route.js';
 import teamLogsRouter from './team_log.route.js';
 import galleryRouter from './gallery.route.js';
+import educationalCenterRouter from './educational_center.route.js';
+import archiveRouter from './archive.route.js';
 import authenticateToken from '../../middleware/auth.middleware.js';
 import adminApiRouter from './admin.route.js';
 const router = express.Router();
@@ -31,6 +33,8 @@ router.use('/sponsors', sponsorsRouter);
 router.use('/teams', teamsRouter);
 router.use('/team-members', teamMembersRouter);
 router.use('/gallery', galleryRouter);
+router.use('/educational-centers', educationalCenterRouter);
+router.use('/archives', archiveRouter);
 
 // Protect all routes after this middleware: only authenticated users can access
 router.use(authenticateToken);
