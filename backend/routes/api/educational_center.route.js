@@ -10,8 +10,8 @@ import {
   getEducationalCenterById,
   createEducationalCenter,
   updateEducationalCenter,
-  approveEducationalCenter,
-  rejectEducationalCenter,
+  approveCenter,
+  rejectCenter,
   deleteEducationalCenter,
   getEducationalCenterTeams,
   getEducationalCenterStreams
@@ -111,7 +111,7 @@ router.put('/:id', requireCenterAdmin(), updateEducationalCenter);
  *     security:
  *       - sessionAuth: []
  */
-router.post('/:id/approve', requireRole('super_admin'), approveEducationalCenter);
+router.post('/:id/approve', requireRole('super_admin'), approveCenter);
 
 /**
  * @swagger
@@ -122,7 +122,19 @@ router.post('/:id/approve', requireRole('super_admin'), approveEducationalCenter
  *     security:
  *       - sessionAuth: []
  */
-router.post('/:id/reject', requireRole('super_admin'), rejectEducationalCenter);
+router.post('/:id/reject', requireRole('super_admin'), rejectCenter);
+
+/**
+ * @swagger
+ * /api/educational-centers/{id}:
+ *   patch:
+ *     summary: Approve an educational center (PATCH method)
+ *     tags: [Educational Centers]
+ *     security:
+ *       - sessionAuth: []
+ */
+router.patch('/:id/approve', requireRole('super_admin'), approveCenter);
+router.patch('/:id/reject', requireRole('super_admin'), rejectCenter);
 
 /**
  * @swagger

@@ -440,3 +440,72 @@ export const getEducationalCenterStreams = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+/**
+ * Approves an educational center (super_admin only).
+ *
+ * @route PATCH /api/educational-centers/:id/approve
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
+export const approveCenter = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adminUserId = req.session?.user?.id;
+
+    if (!isSuperAdmin(req.session?.user)) {
+      return res.status(403).json({ error: 'Solo super_admin puede aprobar centros' });
+    }
+
+    const center = await EducationalCenter.findByPk(id);
+    if (!center) {
+      return res.status(404).json({ error: 'Centro educativo no encontrado' });
+    }
+
+    await center.update({
+      approval_status: 'approved',
+      approved_by_user_id: adminUserId,
+      approved_at: new Date()
+    });
+
+    res.json({ message: 'Centro aprobado correctamente', center });
+  } catch (err) {
+    console.error('Error approving center:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Rejects an educational center (super_admin only).
+ *
+ * @route PATCH /api/educational-centers/:id/reject
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
+export const rejectCenter = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    if (!isSuperAdmin(req.session?.user)) {
+      return res.status(403).json({ error: 'Solo super_admin puede rechazar centros' });
+    }
+
+    const center = await EducationalCenter.findByPk(id);
+    if (!center) {
+      return res.status(404).json({ error: 'Centro educativo no encontrado' });
+    }
+
+    await center.update({
+      approval_status: 'rejected',
+      rejection_reason: reason || null
+    });
+
+    res.json({ message: 'Centro rechazado', center });
+  } catch (err) {
+    console.error('Error rejecting center:', err);
+    res.status(500).json({ error: err.message });
+  }
+};

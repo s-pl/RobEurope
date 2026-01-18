@@ -24,6 +24,7 @@ import { setIO } from './utils/realtime.js';
 import { startSchedulers } from './utils/scheduler.js';
 import db from './models/index.js';
 import adminRoutes from './routes/admin.route.js';
+import adminApiRoutes from './routes/admin.routes.js';
 import requestId from './middleware/requestId.middleware.js';
 import redisClient from './utils/redis.js';
 import passport from 'passport';
@@ -181,6 +182,7 @@ app.get('/locale/:locale', (req, res) => {
 });
 // Apply rate limiting on API routes
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
+app.use('/api/admin', adminApiRoutes);
 app.use('/api/streams', streamRoutes);
 app.use('/api/media', mediaRoutes); 
 
