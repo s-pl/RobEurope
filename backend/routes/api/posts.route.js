@@ -3,12 +3,15 @@ import { createPost, getPosts, getPostById, updatePost, deletePost, toggleLike, 
 import authenticateToken from '../../middleware/auth.middleware.js';
 import { requireOwnership } from '../../middleware/ownership.middleware.js';
 import { uploadMiddleware } from '../../middleware/upload.middleware.js';
-import { requireRole } from '../../middleware/role.middleware.js';
+import { requireRole, requireAnyRole } from '../../middleware/role.middleware.js';
 const router = express.Router();
+
+// Helper to allow both center_admin and super_admin
+const requireAdminRole = requireAnyRole(['center_admin', 'super_admin']);
 
 router.get('/', getPosts);
 router.get('/:id', getPostById);
-router.post('/', authenticateToken, requireRole('super_admin'), uploadMiddleware({ fieldName: 'image' }), createPost);
+router.post('/', authenticateToken, requireAdminRole, uploadMiddleware({ fieldName: 'image' }), createPost);
 router.put('/:id', authenticateToken, requireOwnership('Post'), uploadMiddleware({ fieldName: 'image' }), updatePost);
 router.delete('/:id', authenticateToken, requireOwnership('Post'), deletePost);
 

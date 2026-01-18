@@ -1,6 +1,7 @@
 import express from 'express';
 import { getRequests, approveRequest, rejectRequest } from '../controller/center_admin_request.controller.js';
-import { requireAuth, requireRole } from '../middleware/auth.middleware.js';
+import authenticateToken from '../middleware/auth.middleware.js';
+import { requireRole } from '../middleware/role.middleware.js';
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ const router = express.Router();
  *       200:
  *         description: List of center admin requests
  */
-router.get('/center-requests', requireAuth, requireRole(['super_admin']), getRequests);
+router.get('/center-requests', authenticateToken, requireRole('super_admin'), getRequests);
 
 /**
  * @swagger
@@ -42,7 +43,7 @@ router.get('/center-requests', requireAuth, requireRole(['super_admin']), getReq
  *       200:
  *         description: Request approved
  */
-router.patch('/center-requests/:id/approve', requireAuth, requireRole(['super_admin']), approveRequest);
+router.patch('/center-requests/:id/approve', authenticateToken, requireRole('super_admin'), approveRequest);
 
 /**
  * @swagger
@@ -70,6 +71,6 @@ router.patch('/center-requests/:id/approve', requireAuth, requireRole(['super_ad
  *       200:
  *         description: Request rejected
  */
-router.patch('/center-requests/:id/reject', requireAuth, requireRole(['super_admin']), rejectRequest);
+router.patch('/center-requests/:id/reject', authenticateToken, requireRole('super_admin'), rejectRequest);
 
 export default router;

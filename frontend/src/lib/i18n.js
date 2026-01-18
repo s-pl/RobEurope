@@ -65,7 +65,12 @@ const resources = {
         feedback: 'Opiniones',
         login: 'Iniciar sesión',
         register: 'Registrarse',
-        logout: 'Cerrar sesión'
+        logout: 'Cerrar sesión',
+        adminSection: 'Administración',
+        manageCenters: 'Gestionar Centros',
+        manageArchives: 'Gestionar Archivos',
+        managePosts: 'Gestionar Posts',
+        adminRequests: 'Solicitudes Admin'
       },
       status: {
         connected: 'Conectado',
@@ -270,7 +275,119 @@ const resources = {
         skipToContent: 'Saltar al contenido',
         adminModeActive: 'Modo admin activo',
         showPassword: 'Mostrar contraseña',
-        hidePassword: 'Ocultar contraseña'
+        hidePassword: 'Ocultar contraseña',
+        create: 'Crear',
+        approve: 'Aprobar',
+        reject: 'Rechazar'
+      },
+      admin: {
+        centers: {
+          title: 'Gestionar Centros Educativos',
+          description: 'Administra los centros educativos registrados',
+          create: 'Crear Centro',
+          edit: 'Editar Centro',
+          search: 'Buscar centros...',
+          empty: 'No hay centros',
+          approved: 'Centro aprobado',
+          rejected: 'Centro rechazado',
+          deleted: 'Centro eliminado',
+          updated: 'Centro actualizado',
+          created: 'Centro creado',
+          confirmDelete: '¿Eliminar este centro?',
+          rejectReason: 'Motivo del rechazo:',
+          status: {
+            pending: 'Pendiente',
+            approved: 'Aprobado',
+            rejected: 'Rechazado'
+          },
+          filter: {
+            all: 'Todos',
+            pending: 'Pendientes',
+            approved: 'Aprobados',
+            rejected: 'Rechazados'
+          },
+          form: {
+            name: 'Nombre',
+            city: 'Ciudad',
+            email: 'Email',
+            website: 'Sitio web',
+            description: 'Descripción'
+          }
+        },
+        archives: {
+          title: 'Gestionar Archivos',
+          description: 'Administra los archivos del centro',
+          upload: 'Subir Archivo',
+          edit: 'Editar Archivo',
+          search: 'Buscar archivos...',
+          empty: 'No hay archivos',
+          deleted: 'Archivo eliminado',
+          updated: 'Archivo actualizado',
+          created: 'Archivo creado',
+          confirmDelete: '¿Eliminar este archivo?',
+          types: {
+            document: 'Documento',
+            image: 'Imagen',
+            video: 'Video',
+            other: 'Otro'
+          },
+          visibility: {
+            public: 'Público',
+            center: 'Solo centro',
+            private: 'Privado'
+          },
+          form: {
+            title: 'Título',
+            type: 'Tipo',
+            competition: 'Competición',
+            noCompetition: '-- Sin competición --',
+            year: 'Año',
+            visibility: 'Visibilidad',
+            file: 'Archivo',
+            description: 'Descripción'
+          }
+        },
+        requests: {
+          title: 'Solicitudes de Administrador de Centro',
+          description: 'Gestiona las solicitudes de usuarios para ser administradores de centro',
+          empty: 'No hay solicitudes',
+          approved: 'Solicitud aprobada',
+          rejected: 'Solicitud rechazada',
+          rejectReason: 'Motivo del rechazo:',
+          reason: 'Motivo',
+          requestedAt: 'Solicitado',
+          status: {
+            pending: 'Pendiente',
+            approved: 'Aprobada',
+            rejected: 'Rechazada'
+          },
+          filter: {
+            pending: 'Pendientes',
+            approved: 'Aprobadas',
+            rejected: 'Rechazadas'
+          },
+          type: {
+            create: 'Crear centro',
+            join: 'Unirse a centro'
+          }
+        },
+        posts: {
+          title: 'Gestión de Posts',
+          description: 'Crea, edita y elimina publicaciones del sistema.',
+          create: 'Nuevo Post',
+          edit: 'Editar Post',
+          searchPlaceholder: 'Buscar posts...',
+          titleLabel: 'Título',
+          contentLabel: 'Contenido',
+          pinPost: 'Fijar post',
+          tableTitle: 'Título',
+          tableAuthor: 'Autor',
+          tableStatus: 'Estado',
+          tableActions: 'Acciones',
+          noPosts: 'No hay posts para mostrar.',
+          confirmDelete: '¿Eliminar este post?',
+          pinned: 'Fijado'
+        }
       },
       actions: {
         save: 'Guardar',
@@ -773,7 +890,12 @@ const resources = {
         feedback: 'Feedback',
         login: 'Log in',
         register: 'Register',
-        logout: 'Log out'
+        logout: 'Log out',
+        adminSection: 'Administration',
+        manageCenters: 'Manage Centers',
+        manageArchives: 'Manage Archives',
+        managePosts: 'Manage Posts',
+        adminRequests: 'Admin Requests'
       },
       status: {
         connected: 'Online',
@@ -978,7 +1100,119 @@ const resources = {
         skipToContent: 'Skip to content',
         adminModeActive: 'Admin mode active',
         showPassword: 'Show password',
-        hidePassword: 'Hide password'
+        hidePassword: 'Hide password',
+        create: 'Create',
+        approve: 'Approve',
+        reject: 'Reject'
+      },
+      admin: {
+        centers: {
+          title: 'Manage Educational Centers',
+          description: 'Manage registered educational centers',
+          create: 'Create Center',
+          edit: 'Edit Center',
+          search: 'Search centers...',
+          empty: 'No centers found',
+          approved: 'Center approved',
+          rejected: 'Center rejected',
+          deleted: 'Center deleted',
+          updated: 'Center updated',
+          created: 'Center created',
+          confirmDelete: 'Delete this center?',
+          rejectReason: 'Rejection reason:',
+          status: {
+            pending: 'Pending',
+            approved: 'Approved',
+            rejected: 'Rejected'
+          },
+          filter: {
+            all: 'All',
+            pending: 'Pending',
+            approved: 'Approved',
+            rejected: 'Rejected'
+          },
+          form: {
+            name: 'Name',
+            city: 'City',
+            email: 'Email',
+            website: 'Website',
+            description: 'Description'
+          }
+        },
+        archives: {
+          title: 'Manage Archives',
+          description: 'Manage center archives',
+          upload: 'Upload File',
+          edit: 'Edit File',
+          search: 'Search files...',
+          empty: 'No files found',
+          deleted: 'File deleted',
+          updated: 'File updated',
+          created: 'File created',
+          confirmDelete: 'Delete this file?',
+          types: {
+            document: 'Document',
+            image: 'Image',
+            video: 'Video',
+            other: 'Other'
+          },
+          visibility: {
+            public: 'Public',
+            center: 'Center only',
+            private: 'Private'
+          },
+          form: {
+            title: 'Title',
+            type: 'Type',
+            competition: 'Competition',
+            noCompetition: '-- No competition --',
+            year: 'Year',
+            visibility: 'Visibility',
+            file: 'File',
+            description: 'Description'
+          }
+        },
+        requests: {
+          title: 'Center Admin Requests',
+          description: 'Manage user requests to become center administrators',
+          empty: 'No requests found',
+          approved: 'Request approved',
+          rejected: 'Request rejected',
+          rejectReason: 'Rejection reason:',
+          reason: 'Reason',
+          requestedAt: 'Requested',
+          status: {
+            pending: 'Pending',
+            approved: 'Approved',
+            rejected: 'Rejected'
+          },
+          filter: {
+            pending: 'Pending',
+            approved: 'Approved',
+            rejected: 'Rejected'
+          },
+          type: {
+            create: 'Create center',
+            join: 'Join center'
+          }
+        },
+        posts: {
+          title: 'Post Management',
+          description: 'Create, edit and delete system posts.',
+          create: 'New Post',
+          edit: 'Edit Post',
+          searchPlaceholder: 'Search posts...',
+          titleLabel: 'Title',
+          contentLabel: 'Content',
+          pinPost: 'Pin post',
+          tableTitle: 'Title',
+          tableAuthor: 'Author',
+          tableStatus: 'Status',
+          tableActions: 'Actions',
+          noPosts: 'No posts to display.',
+          confirmDelete: 'Delete this post?',
+          pinned: 'Pinned'
+        }
       },
       actions: {
         save: 'Save',
@@ -1479,7 +1713,12 @@ const resources = {
         feedback: 'Feedback',
         login: 'Anmelden',
         register: 'Registrieren',
-        logout: 'Abmelden'
+        logout: 'Abmelden',
+        adminSection: 'Verwaltung',
+        manageCenters: 'Zentren verwalten',
+        manageArchives: 'Archiv verwalten',
+        managePosts: 'Beiträge verwalten',
+        adminRequests: 'Admin-Anfragen'
       },
       status: {
         connected: 'Verbunden',
@@ -1684,7 +1923,119 @@ const resources = {
         skipToContent: 'Zum Inhalt springen',
         adminModeActive: 'Admin-Modus aktiv',
         showPassword: 'Passwort anzeigen',
-        hidePassword: 'Passwort verbergen'
+        hidePassword: 'Passwort verbergen',
+        create: 'Erstellen',
+        approve: 'Genehmigen',
+        reject: 'Ablehnen'
+      },
+      admin: {
+        centers: {
+          title: 'Bildungseinrichtungen verwalten',
+          description: 'Registrierte Bildungseinrichtungen verwalten',
+          create: 'Zentrum erstellen',
+          edit: 'Zentrum bearbeiten',
+          search: 'Zentren suchen...',
+          empty: 'Keine Zentren gefunden',
+          approved: 'Zentrum genehmigt',
+          rejected: 'Zentrum abgelehnt',
+          deleted: 'Zentrum gelöscht',
+          updated: 'Zentrum aktualisiert',
+          created: 'Zentrum erstellt',
+          confirmDelete: 'Dieses Zentrum löschen?',
+          rejectReason: 'Ablehnungsgrund:',
+          status: {
+            pending: 'Ausstehend',
+            approved: 'Genehmigt',
+            rejected: 'Abgelehnt'
+          },
+          filter: {
+            all: 'Alle',
+            pending: 'Ausstehend',
+            approved: 'Genehmigt',
+            rejected: 'Abgelehnt'
+          },
+          form: {
+            name: 'Name',
+            city: 'Stadt',
+            email: 'E-Mail',
+            website: 'Webseite',
+            description: 'Beschreibung'
+          }
+        },
+        archives: {
+          title: 'Archiv verwalten',
+          description: 'Archivdateien des Zentrums verwalten',
+          upload: 'Datei hochladen',
+          edit: 'Datei bearbeiten',
+          search: 'Dateien suchen...',
+          empty: 'Keine Dateien gefunden',
+          deleted: 'Datei gelöscht',
+          updated: 'Datei aktualisiert',
+          created: 'Datei erstellt',
+          confirmDelete: 'Diese Datei löschen?',
+          types: {
+            document: 'Dokument',
+            image: 'Bild',
+            video: 'Video',
+            other: 'Sonstiges'
+          },
+          visibility: {
+            public: 'Öffentlich',
+            center: 'Nur Zentrum',
+            private: 'Privat'
+          },
+          form: {
+            title: 'Titel',
+            type: 'Typ',
+            competition: 'Wettbewerb',
+            noCompetition: '-- Kein Wettbewerb --',
+            year: 'Jahr',
+            visibility: 'Sichtbarkeit',
+            file: 'Datei',
+            description: 'Beschreibung'
+          }
+        },
+        requests: {
+          title: 'Zentrum-Admin-Anfragen',
+          description: 'Anfragen von Benutzern zur Zentrumsadministration verwalten',
+          empty: 'Keine Anfragen gefunden',
+          approved: 'Anfrage genehmigt',
+          rejected: 'Anfrage abgelehnt',
+          rejectReason: 'Ablehnungsgrund:',
+          reason: 'Grund',
+          requestedAt: 'Angefordert',
+          status: {
+            pending: 'Ausstehend',
+            approved: 'Genehmigt',
+            rejected: 'Abgelehnt'
+          },
+          filter: {
+            pending: 'Ausstehend',
+            approved: 'Genehmigt',
+            rejected: 'Abgelehnt'
+          },
+          type: {
+            create: 'Zentrum erstellen',
+            join: 'Zentrum beitreten'
+          }
+        },
+        posts: {
+          title: 'Beitragsverwaltung',
+          description: 'Erstellen, bearbeiten und löschen Sie Systembeiträge.',
+          create: 'Neuer Beitrag',
+          edit: 'Beitrag bearbeiten',
+          searchPlaceholder: 'Beiträge suchen...',
+          titleLabel: 'Titel',
+          contentLabel: 'Inhalt',
+          pinPost: 'Beitrag anheften',
+          tableTitle: 'Titel',
+          tableAuthor: 'Autor',
+          tableStatus: 'Status',
+          tableActions: 'Aktionen',
+          noPosts: 'Keine Beiträge vorhanden.',
+          confirmDelete: 'Diesen Beitrag löschen?',
+          pinned: 'Angeheftet'
+        }
       },
       actions: {
         save: 'Speichern',

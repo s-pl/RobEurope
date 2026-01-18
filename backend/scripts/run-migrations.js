@@ -280,8 +280,11 @@ async function run() {
 
     // Create CenterAdminRequest table and add pending_role to User
     try {
-      await addCenterAdminRequest.default.up(qi, Sequelize);
-      console.log('Created CenterAdminRequest table and added pending_role to User');
+      const upFn = addCenterAdminRequest.up || addCenterAdminRequest.default?.up;
+      if (upFn) {
+        await upFn(qi, Sequelize);
+        console.log('Created CenterAdminRequest table and added pending_role to User');
+      }
     } catch (e) {
       console.log('Skipping addCenterAdminRequest:', e.message);
     }

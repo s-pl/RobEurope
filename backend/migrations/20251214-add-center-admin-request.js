@@ -1,27 +1,25 @@
-'use strict';
 
-/** @type {import('sequelize-cli').Migration} */
-module.exports = {
-  async up(queryInterface, Sequelize) {
-    // Add pending_role and educational_center_id to User table
+/**
+ * Migration: Add CenterAdminRequest table and pending_role to User
+ */
+
+export async function up(queryInterface, Sequelize) {
+  // Add pending_role to User table if not exists
+  const userTableDesc = await queryInterface.describeTable('User');
+  
+  if (!userTableDesc.pending_role) {
     await queryInterface.addColumn('User', 'pending_role', {
       type: Sequelize.ENUM('user', 'center_admin', 'super_admin'),
       allowNull: true,
       defaultValue: null
     });
+  }
 
-    await queryInterface.addColumn('User', 'educational_center_id', {
-      type: Sequelize.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'EducationalCenter',
-        key: 'id'
-      },
-      onUpdate: 'CASCADE',
-      onDelete: 'SET NULL'
-    });
-
-    // Create CenterAdminRequest table
+  // Create CenterAdminRequest table if not exists
+  const tables = await queryInterface.showAllTables();
+  const tableNames = tables.map(t => (typeof t === 'object' ? t.tableName || t.name : t));
+  
+  if (!tableNames.includes('CenterAdminRequest')) {
     await queryInterface.createTable('CenterAdminRequest', {
       id: {
         type: Sequelize.INTEGER,
@@ -29,14 +27,8 @@ module.exports = {
         primaryKey: true
       },
       user_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'User',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
+        type: Sequelize.UUID,
+        allowNull: false
       },
       educational_center_id: {
         type: Sequelize.INTEGER,
@@ -62,14 +54,8 @@ module.exports = {
         allowNull: true
       },
       decided_by_user_id: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        references: {
-          model: 'User',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL'
+        type: Sequelize.UUID,
+        allowNull: true
       },
       decided_at: {
         type: Sequelize.DATE,
@@ -85,11 +71,12 @@ module.exports = {
         allowNull: true
       }
     });
-  },
-
-  async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('CenterAdminRequest');
-    await queryInterface.removeColumn('User', 'educational_center_id');
-    await queryInterface.removeColumn('User', 'pending_role');
   }
-};
+}
+
+export async function down(queryInterface, Sequelize) {
+  await queryInterface.dropTable('CenterAdminRequest');
+  await queryInterface.removeColumn('User', 'pending_role');
+}
+
+export default { up, down };

@@ -30,6 +30,7 @@ import AdminEditButton from './components/admin/AdminEditButton';
 import AdminCenters from './pages/admin/AdminCenters';
 import AdminArchives from './pages/admin/AdminArchives';
 import AdminRequests from './pages/admin/AdminRequests';
+import AdminPosts from './pages/admin/AdminPosts';
 
 // Admin route wrapper - requires center_admin or super_admin role
 const AdminRoute = ({ children, superAdminOnly = false }) => {
@@ -82,6 +83,7 @@ function App() {
           {/* Admin Routes */}
           <Route path="admin/centers" element={<AdminRoute><AdminCenters /></AdminRoute>} />
           <Route path="admin/archives" element={<AdminRoute><AdminArchives /></AdminRoute>} />
+          <Route path="admin/posts" element={<AdminRoute><AdminPosts /></AdminRoute>} />
           <Route path="admin/requests" element={<AdminRoute superAdminOnly><AdminRequests /></AdminRoute>} />
 
           <Route path="*" element={<NotFound />} />

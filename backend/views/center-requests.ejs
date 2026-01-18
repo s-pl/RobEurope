@@ -1,0 +1,176 @@
+<%- include('partials/header') %>
+
+<section class="page-header">
+  <div>
+    <p class="page-eyebrow"><%= t('centerRequests.eyebrow') || 'Gestión de Solicitudes' %></p>
+    <h2 class="page-title"><%= t('centerRequests.title') || 'Solicitudes de Centro Admin' %></h2>
+  </div>
+  <p class="page-description"><%= t('centerRequests.description') || 'Revisa y gestiona las solicitudes de usuarios para convertirse en administradores de centros educativos.' %></p>
+</section>
+
+<div class="table-wrapper">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th><%= t('centerRequests.table.user') || 'Usuario' %></th>
+        <th><%= t('centerRequests.table.center') || 'Centro Educativo' %></th>
+        <th><%= t('centerRequests.table.type') || 'Tipo de Solicitud' %></th>
+        <th><%= t('centerRequests.table.status') || 'Estado' %></th>
+        <th><%= t('centerRequests.table.date') || 'Fecha' %></th>
+        <th><%= t('centerRequests.table.decidedBy') || 'Decidido por' %></th>
+        <th><%= t('actions.title') || 'Acciones' %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (requests && requests.length > 0) { %>
+        <% requests.forEach(request => { %>
+          <tr>
+            <td>
+              <% if (request.requestingUser) { %>
+                <strong><%= request.requestingUser.first_name %> <%= request.requestingUser.last_name %></strong>
+                <br><small><%= request.requestingUser.email %></small>
+              <% } else { %>
+                <span class="text-muted">-</span>
+              <% } %>
+            </td>
+            <td>
+              <% if (request.center) { %>
+                <strong><%= request.center.name %></strong>
+                <% if (request.center.city) { %>
+                  <br><small><%= request.center.city %></small>
+                <% } %>
+              <% } else { %>
+                <span class="text-muted">-</span>
+              <% } %>
+            </td>
+            <td>
+              <% if (request.request_type === 'create_center') { %>
+                <span class="badge badge-info"><%= t('centerRequests.types.createCenter') || 'Crear Centro' %></span>
+              <% } else { %>
+                <span class="badge badge-secondary"><%= t('centerRequests.types.joinCenter') || 'Unirse a Centro' %></span>
+              <% } %>
+            </td>
+            <td>
+              <% if (request.status === 'pending') { %>
+                <span class="badge badge-warning"><%= t('status.pending') %></span>
+              <% } else if (request.status === 'approved') { %>
+                <span class="badge badge-success"><%= t('status.approved') %></span>
+              <% } else { %>
+                <span class="badge badge-danger"><%= t('status.rejected') %></span>
+              <% } %>
+            </td>
+            <td>
+              <%= new Date(request.created_at).toLocaleDateString() %>
+            </td>
+            <td>
+              <% if (request.decidedBy) { %>
+                <%= request.decidedBy.first_name %> <%= request.decidedBy.last_name %>
+                <% if (request.decided_at) { %>
+                  <br><small><%= new Date(request.decided_at).toLocaleDateString() %></small>
+                <% } %>
+              <% } else { %>
+                <span class="text-muted">-</span>
+              <% } %>
+            </td>
+            <td>
+              <% if (request.status === 'pending') { %>
+                <div class="btn-group">
+                  <form action="/admin/center-requests/<%= request.id %>/approve" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('<%= t('centerRequests.confirmApprove') || '¿Aprobar esta solicitud?' %>')">
+                      <%= t('actions.approve') %>
+                    </button>
+                  </form>
+                  <button type="button" class="btn btn-sm btn-danger" onclick="showRejectModal(<%= request.id %>)">
+                    <%= t('actions.reject') %>
+                  </button>
+                </div>
+              <% } else { %>
+                <span class="text-muted"><%= t('actions.processed') %></span>
+                <% if (request.decision_reason) { %>
+                  <br><small title="<%= request.decision_reason %>"><%= t('centerRequests.reason') || 'Razón' %>: <%= request.decision_reason.substring(0, 50) %><%= request.decision_reason.length > 50 ? '...' : '' %></small>
+                <% } %>
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      <% } else { %>
+        <tr>
+          <td colspan="7" class="text-center">
+            <p class="text-muted"><%= t('centerRequests.noRequests') || 'No hay solicitudes pendientes.' %></p>
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="modal" style="display:none;">
+  <div class="modal-overlay" onclick="hideRejectModal()"></div>
+  <div class="modal-content">
+    <h3><%= t('centerRequests.rejectTitle') || 'Rechazar Solicitud' %></h3>
+    <form id="rejectForm" method="POST">
+      <div class="form-group">
+        <label for="reason"><%= t('centerRequests.rejectReason') || 'Razón del rechazo (opcional)' %></label>
+        <textarea name="reason" id="reason" rows="3" class="form-control" placeholder="<%= t('centerRequests.rejectPlaceholder') || 'Escribe la razón del rechazo...' %>"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="hideRejectModal()"><%= t('actions.cancel') %></button>
+        <button type="submit" class="btn btn-danger"><%= t('actions.reject') %></button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .badge-warning { background: rgba(245, 158, 11, 0.15); color: #b45309; }
+  .badge-success { background: rgba(16, 185, 129, 0.15); color: #047857; }
+  .badge-danger { background: rgba(239, 68, 68, 0.15); color: #b91c1c; }
+  .badge-info { background: rgba(37, 99, 235, 0.15); color: #1d4ed8; }
+  .badge-secondary { background: rgba(107, 114, 128, 0.15); color: #374151; }
+  
+  .btn-group { display: flex; gap: 6px; }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+  .btn-success { background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer; }
+  .btn-danger { background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer; }
+  .btn-secondary { background: var(--muted); color: white; border: none; border-radius: 6px; cursor: pointer; }
+  .btn-success:hover { opacity: 0.9; }
+  .btn-danger:hover { opacity: 0.9; }
+  
+  .text-muted { color: var(--muted-foreground); }
+  .text-center { text-align: center; }
+  
+  .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+  .modal-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); }
+  .modal-content { position: relative; background: var(--card); padding: 24px; border-radius: var(--radius); max-width: 500px; width: 90%; box-shadow: var(--shadow-card); }
+  .modal-content h3 { margin: 0 0 16px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
+  .form-control { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+</style>
+
+<script>
+  let currentRequestId = null;
+  
+  function showRejectModal(id) {
+    currentRequestId = id;
+    document.getElementById('rejectForm').action = '/admin/center-requests/' + id + '/reject';
+    document.getElementById('rejectModal').style.display = 'flex';
+  }
+  
+  function hideRejectModal() {
+    currentRequestId = null;
+    document.getElementById('rejectModal').style.display = 'none';
+    document.getElementById('reason').value = '';
+  }
+</script>
+
+<%- include('partials/footer') %>

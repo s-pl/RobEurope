@@ -1,5 +1,6 @@
 import { createElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../hooks/useAuth';
 import { useTeams } from '../hooks/useTeams';
 import { useRegistrations } from '../hooks/useRegistrations';
 import { useStreams } from '../hooks/useStreams';
@@ -43,10 +44,14 @@ const TabButton = ({ id, label, Icon, active, onSelect }) => (
 
 const MyTeam = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const api = useApi();
   const { mine, update, invite, remove, listRequests, approveRequest, getMembers, removeMember, leave, create } = useTeams();
   const { list: listRegistrations, create: createRegistration } = useRegistrations();
   const { streams, createStream, deleteStream } = useStreams();
+
+  // Check if user can create educational centers (only center_admin or super_admin)
+  const canCreateCenter = user?.role === 'center_admin' || user?.role === 'super_admin';
 
   const [team, setTeam] = useState(null);
   const [feedback, setFeedback] = useState('');
@@ -126,7 +131,9 @@ const MyTeam = () => {
       // Load educational centers
       try {
         const centers = await api('/educational-centers?status=approved');
-        setEducationalCenters(Array.isArray(centers?.centers) ? centers.centers : Array.isArray(centers) ? centers : []);
+        // API returns { items: [...] } or direct array
+        const items = centers?.items || (Array.isArray(centers) ? centers : []);
+        setEducationalCenters(items);
       } catch {
         // ignore
       }
@@ -177,7 +184,9 @@ const MyTeam = () => {
       setNewCenterForm({ name: '', city: '', email: '', website_url: '' });
       // Reload centers
       const centers = await api('/educational-centers?status=approved');
-      setEducationalCenters(Array.isArray(centers?.centers) ? centers.centers : Array.isArray(centers) ? centers : []);
+      // API returns { items: [...] } or direct array
+      const items = centers?.items || (Array.isArray(centers) ? centers : []);
+      setEducationalCenters(items);
       // Select the new center if approved, otherwise show message
       if (res?.id && res?.approval_status === 'approved') {
         setForm({ ...form, educational_center_id: res.id.toString() });

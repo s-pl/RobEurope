@@ -17,7 +17,7 @@ import {
   getEducationalCenterStreams
 } from '../../controller/educational_center.controller.js';
 import authenticateToken from '../../middleware/auth.middleware.js';
-import { requireRole, requireCenterAdmin } from '../../middleware/role.middleware.js';
+import { requireRole, requireCenterAdmin, requireAnyRole } from '../../middleware/role.middleware.js';
 
 const router = express.Router();
 
@@ -84,12 +84,12 @@ router.use(authenticateToken);
  * @swagger
  * /api/educational-centers:
  *   post:
- *     summary: Create a new educational center
+ *     summary: Create a new educational center (center_admin or super_admin only)
  *     tags: [Educational Centers]
  *     security:
  *       - sessionAuth: []
  */
-router.post('/', createEducationalCenter);
+router.post('/', requireAnyRole(['center_admin', 'super_admin']), createEducationalCenter);
 
 /**
  * @swagger

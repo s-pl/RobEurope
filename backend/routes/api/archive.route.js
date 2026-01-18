@@ -16,10 +16,13 @@ import {
   reorderArchives
 } from '../../controller/archive.controller.js';
 import authenticateToken from '../../middleware/auth.middleware.js';
-import { requireRole } from '../../middleware/role.middleware.js';
+import { requireAnyRole } from '../../middleware/role.middleware.js';
 import { uploadFile } from '../../middleware/upload.middleware.js';
 
 const router = express.Router();
+
+// Helper to allow both center_admin and super_admin
+const requireAdminRole = requireAnyRole(['center_admin', 'super_admin']);
 
 /**
  * @swagger
@@ -81,7 +84,7 @@ router.use(authenticateToken);
  *     security:
  *       - sessionAuth: []
  */
-router.post('/', requireRole('super_admin'), uploadFile.single('file'), createArchive);
+router.post('/', requireAdminRole, uploadFile.single('file'), createArchive);
 
 /**
  * @swagger
@@ -92,7 +95,7 @@ router.post('/', requireRole('super_admin'), uploadFile.single('file'), createAr
  *     security:
  *       - sessionAuth: []
  */
-router.post('/reorder', requireRole('super_admin'), reorderArchives);
+router.post('/reorder', requireAdminRole, reorderArchives);
 
 /**
  * @swagger
@@ -103,7 +106,7 @@ router.post('/reorder', requireRole('super_admin'), reorderArchives);
  *     security:
  *       - sessionAuth: []
  */
-router.put('/:id', requireRole('super_admin'), uploadFile.single('file'), updateArchive);
+router.put('/:id', requireAdminRole, uploadFile.single('file'), updateArchive);
 
 /**
  * @swagger
@@ -114,7 +117,7 @@ router.put('/:id', requireRole('super_admin'), uploadFile.single('file'), update
  *     security:
  *       - sessionAuth: []
  */
-router.patch('/:id/visibility', requireRole('super_admin'), updateArchiveVisibility);
+router.patch('/:id/visibility', requireAdminRole, updateArchiveVisibility);
 
 /**
  * @swagger
@@ -125,6 +128,6 @@ router.patch('/:id/visibility', requireRole('super_admin'), updateArchiveVisibil
  *     security:
  *       - sessionAuth: []
  */
-router.delete('/:id', requireRole('super_admin'), deleteArchive);
+router.delete('/:id', requireAdminRole, deleteArchive);
 
 export default router;

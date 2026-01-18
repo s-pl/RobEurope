@@ -23,6 +23,11 @@ import {
 import * as crudController from '../controller/admin.crud.controller.js';
 import { renderRedisExplorer, listKeys, getKeyInfo, deleteKey, getOverview } from '../controller/admin.redis.controller.js';
 import * as ldapController from '../controller/ldap.controller.js';
+import { 
+  renderCenterRequests, 
+  approveRequestDashboard, 
+  rejectRequestDashboard 
+} from '../controller/center_admin_request.controller.js';
 
 const router = Router();
 
@@ -66,6 +71,11 @@ router.post('/ldap-users/edit/:uid', requireAdminSession, ldapController.updateL
 // Fallback: allow POST without :uid using body.uid from the form (prevents 'Cannot POST /admin/ldap-users/edit/')
 router.post('/ldap-users/edit', requireAdminSession, ldapController.updateLdapUser);
 router.post('/ldap-users/delete/:uid', requireAdminSession, ldapController.deleteLdapUser);
+
+// Center admin requests routes
+router.get('/center-requests', requireAdminSession, renderCenterRequests);
+router.post('/center-requests/:id/approve', requireAdminSession, approveRequestDashboard);
+router.post('/center-requests/:id/reject', requireAdminSession, rejectRequestDashboard);
 
 // Generic CRUD routes (Must be last to avoid conflicts)
 router.get('/:model', requireAdminSession, crudController.list);

@@ -38,7 +38,33 @@
     "redis": "Redis Explorer",
     "educationalCenters": "Educational Centers",
     "archives": "Archive",
-    "gallery": "Gallery"
+    "gallery": "Gallery",
+    "centerRequests": "Center Requests",
+    "contentManagement": "Content Management"
+  },
+  "centerRequests": {
+    "metaTitle": "Center Admin Requests",
+    "eyebrow": "Request Management",
+    "title": "Center Admin Requests",
+    "description": "Review and manage user requests to become educational center administrators.",
+    "table": {
+      "user": "User",
+      "center": "Educational Center",
+      "type": "Type",
+      "status": "Status",
+      "date": "Date",
+      "decidedBy": "Decided by"
+    },
+    "types": {
+      "createCenter": "Create Center",
+      "joinCenter": "Join Center"
+    },
+    "noRequests": "No requests found.",
+    "confirmApprove": "Approve this request?",
+    "rejectTitle": "Reject Request",
+    "rejectReason": "Rejection reason (optional)",
+    "rejectPlaceholder": "Enter rejection reason...",
+    "reason": "Reason"
   },
   "auth": {
     "metaTitle": "Admin access",
@@ -349,6 +375,36 @@
         "maxTeams": "Max teams",
         "registrationStart": "Registration start",
         "registrationEnd": "Registration end"
+      }
+    },
+    "educationalCenters": {
+      "label": "Educational Centers",
+      "fields": {
+        "address": "Address",
+        "city": "City",
+        "countryId": "Country ID",
+        "phone": "Phone",
+        "isVerified": "Verified"
+      }
+    },
+    "archives": {
+      "label": "Archive",
+      "fields": {
+        "fileUrl": "File URL",
+        "fileType": "File Type",
+        "competitionId": "Competition ID",
+        "year": "Year",
+        "isVisible": "Visible"
+      }
+    },
+    "gallery": {
+      "label": "Gallery",
+      "fields": {
+        "mediaUrl": "Media URL",
+        "mediaType": "Media Type",
+        "competitionId": "Competition ID",
+        "year": "Year",
+        "isFeatured": "Featured"
       }
     }
   },

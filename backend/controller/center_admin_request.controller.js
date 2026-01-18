@@ -165,8 +165,155 @@ export const rejectRequest = async (req, res) => {
   }
 };
 
+/**
+ * Render the center requests page for the admin dashboard (EJS)
+ */
+export const renderCenterRequests = async (req, res) => {
+  try {
+    const requests = await CenterAdminRequest.findAll({
+      include: [
+        {
+          model: User,
+          as: 'requestingUser',
+          attributes: ['id', 'first_name', 'last_name', 'username', 'email']
+        },
+        {
+          model: EducationalCenter,
+          as: 'center',
+          attributes: ['id', 'name', 'city', 'approval_status']
+        },
+        {
+          model: User,
+          as: 'decidedBy',
+          attributes: ['id', 'first_name', 'last_name', 'username']
+        }
+      ],
+      order: [['created_at', 'DESC']]
+    });
+
+    res.render('center-requests', {
+      title: req.__('centerRequests.metaTitle') || 'Solicitudes de Centro Admin',
+      pageKey: 'centerRequests',
+      requests
+    });
+  } catch (err) {
+    console.error('Error rendering center requests page:', err);
+    res.status(500).send('Error loading requests');
+  }
+};
+
+/**
+ * Approve a request from the dashboard (POST with redirect)
+ */
+export const approveRequestDashboard = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adminUserId = req.session?.user?.id;
+
+    const request = await CenterAdminRequest.findByPk(id, {
+      include: [
+        { model: User, as: 'requestingUser' },
+        { model: EducationalCenter, as: 'center' }
+      ]
+    });
+
+    if (!request || request.status !== 'pending') {
+      return res.redirect('/admin/center-requests');
+    }
+
+    // Update the request
+    await request.update({
+      status: 'approved',
+      decided_by_user_id: adminUserId,
+      decided_at: new Date(),
+      updated_at: new Date()
+    });
+
+    // Update the user role
+    const user = await User.findByPk(request.user_id);
+    if (user) {
+      await user.update({
+        role: 'center_admin',
+        pending_role: null,
+        educational_center_id: request.educational_center_id
+      });
+    }
+
+    // Approve center if created
+    if (request.request_type === 'create_center' && request.center) {
+      await request.center.update({
+        approval_status: 'approved',
+        approved_by_user_id: adminUserId,
+        approved_at: new Date()
+      });
+    }
+
+    await SystemLogger.logUpdate('CenterAdminRequest', id, {
+      status: 'approved',
+      user_id: request.user_id
+    }, req, 'Center admin request approved from dashboard');
+
+    return res.redirect('/admin/center-requests');
+  } catch (err) {
+    console.error('Error approving request from dashboard:', err);
+    return res.redirect('/admin/center-requests');
+  }
+};
+
+/**
+ * Reject a request from the dashboard (POST with redirect)
+ */
+export const rejectRequestDashboard = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const adminUserId = req.session?.user?.id;
+
+    const request = await CenterAdminRequest.findByPk(id, {
+      include: [
+        { model: User, as: 'requestingUser' },
+        { model: EducationalCenter, as: 'center' }
+      ]
+    });
+
+    if (!request || request.status !== 'pending') {
+      return res.redirect('/admin/center-requests');
+    }
+
+    await request.update({
+      status: 'rejected',
+      decision_reason: reason || null,
+      decided_by_user_id: adminUserId,
+      decided_at: new Date(),
+      updated_at: new Date()
+    });
+
+    const user = await User.findByPk(request.user_id);
+    if (user) {
+      await user.update({ pending_role: null });
+    }
+
+    if (request.request_type === 'create_center' && request.center) {
+      await request.center.update({ approval_status: 'rejected' });
+    }
+
+    await SystemLogger.logUpdate('CenterAdminRequest', id, {
+      status: 'rejected',
+      reason
+    }, req, 'Center admin request rejected from dashboard');
+
+    return res.redirect('/admin/center-requests');
+  } catch (err) {
+    console.error('Error rejecting request from dashboard:', err);
+    return res.redirect('/admin/center-requests');
+  }
+};
+
 export default {
   getRequests,
   approveRequest,
-  rejectRequest
+  rejectRequest,
+  renderCenterRequests,
+  approveRequestDashboard,
+  rejectRequestDashboard
 };

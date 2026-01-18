@@ -22,8 +22,8 @@ const AdminCenters = () => {
   const [formData, setFormData] = useState({
     name: '',
     city: '',
-    contact_email: '',
-    website: '',
+    email: '',
+    website_url: '',
     description: ''
   });
 
@@ -38,7 +38,9 @@ const AdminCenters = () => {
     try {
       const params = filter !== 'all' ? `?status=${filter}` : '';
       const data = await api(`/educational-centers${params}`);
-      setCenters(Array.isArray(data) ? data : []);
+      // API returns { items: [...] } or array
+      const items = data?.items || (Array.isArray(data) ? data : []);
+      setCenters(items);
     } catch (err) {
       setFeedback({ type: 'error', message: err.message });
     } finally {
@@ -106,7 +108,7 @@ const AdminCenters = () => {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', city: '', contact_email: '', website: '', description: '' });
+    setFormData({ name: '', city: '', email: '', website_url: '', description: '' });
     setEditingCenter(null);
     setShowCreateForm(false);
   };
@@ -115,8 +117,8 @@ const AdminCenters = () => {
     setFormData({
       name: center.name || '',
       city: center.city || '',
-      contact_email: center.contact_email || '',
-      website: center.website || '',
+      email: center.email || '',
+      website_url: center.website_url || '',
       description: center.description || ''
     });
     setEditingCenter(center);
@@ -222,20 +224,20 @@ const AdminCenters = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="contact_email">{t('admin.centers.form.email') || 'Email'}</Label>
+                <Label htmlFor="email">{t('admin.centers.form.email') || 'Email'}</Label>
                 <Input
-                  id="contact_email"
+                  id="email"
                   type="email"
-                  value={formData.contact_email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, contact_email: e.target.value }))}
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="website">{t('admin.centers.form.website') || 'Sitio web'}</Label>
+                <Label htmlFor="website_url">{t('admin.centers.form.website') || 'Sitio web'}</Label>
                 <Input
-                  id="website"
-                  value={formData.website}
-                  onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                  id="website_url"
+                  value={formData.website_url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, website_url: e.target.value }))}
                 />
               </div>
             </div>

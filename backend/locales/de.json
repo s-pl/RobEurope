@@ -38,7 +38,33 @@
     "redis": "Redis Explorer",
     "educationalCenters": "Bildungseinrichtungen",
     "archives": "Archiv",
-    "gallery": "Galerie"
+    "gallery": "Galerie",
+    "centerRequests": "Zentrums-Anfragen",
+    "contentManagement": "Inhaltsverwaltung"
+  },
+  "centerRequests": {
+    "metaTitle": "Zentrums-Admin-Anfragen",
+    "eyebrow": "Anfragenverwaltung",
+    "title": "Zentrums-Admin-Anfragen",
+    "description": "Überprüfen und verwalten Sie Benutzeranfragen, um Administratoren von Bildungseinrichtungen zu werden.",
+    "table": {
+      "user": "Benutzer",
+      "center": "Bildungseinrichtung",
+      "type": "Typ",
+      "status": "Status",
+      "date": "Datum",
+      "decidedBy": "Entschieden von"
+    },
+    "types": {
+      "createCenter": "Zentrum erstellen",
+      "joinCenter": "Zentrum beitreten"
+    },
+    "noRequests": "Keine Anfragen gefunden.",
+    "confirmApprove": "Diese Anfrage genehmigen?",
+    "rejectTitle": "Anfrage ablehnen",
+    "rejectReason": "Ablehnungsgrund (optional)",
+    "rejectPlaceholder": "Ablehnungsgrund eingeben...",
+    "reason": "Grund"
   },
   "auth": {
     "metaTitle": "Administratorzugang",
@@ -349,6 +375,36 @@
         "maxTeams": "Max. Teams",
         "registrationStart": "Registrierungsbeginn",
         "registrationEnd": "Registrierungsende"
+      }
+    },
+    "educationalCenters": {
+      "label": "Bildungseinrichtungen",
+      "fields": {
+        "address": "Adresse",
+        "city": "Stadt",
+        "countryId": "Länder-ID",
+        "phone": "Telefon",
+        "isVerified": "Verifiziert"
+      }
+    },
+    "archives": {
+      "label": "Archiv",
+      "fields": {
+        "fileUrl": "Datei-URL",
+        "fileType": "Dateityp",
+        "competitionId": "Wettbewerbs-ID",
+        "year": "Jahr",
+        "isVisible": "Sichtbar"
+      }
+    },
+    "gallery": {
+      "label": "Galerie",
+      "fields": {
+        "mediaUrl": "Medien-URL",
+        "mediaType": "Medientyp",
+        "competitionId": "Wettbewerbs-ID",
+        "year": "Jahr",
+        "isFeatured": "Hervorgehoben"
       }
     }
   },

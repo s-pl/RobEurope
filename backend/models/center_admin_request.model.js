@@ -13,12 +13,8 @@ export default (sequelize) => {
       autoIncrement: true
     },
     user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'User',
-        key: 'id'
-      }
+      type: DataTypes.UUID,
+      allowNull: false
     },
     educational_center_id: {
       type: DataTypes.INTEGER,
@@ -42,12 +38,8 @@ export default (sequelize) => {
       allowNull: true
     },
     decided_by_user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'User',
-        key: 'id'
-      }
+      type: DataTypes.UUID,
+      allowNull: true
     },
     decided_at: {
       type: DataTypes.DATE,
