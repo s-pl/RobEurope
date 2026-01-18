@@ -36,7 +36,7 @@ const isCenterAdminForTeam = (user, team) => {
   if (!isCenterAdmin(user)) return false;
   return user.educational_center_id && user.educational_center_id === team?.educational_center_id;
 };
- */
+ 
 
 /**
  * Creates a registration.
