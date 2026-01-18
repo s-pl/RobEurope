@@ -74,7 +74,7 @@ const AdminArchives = () => {
     try {
       await api(`/archives/${archive.id}`, {
         method: 'PUT',
-        body: { visibility: archive.visibility === 'public' ? 'private' : 'public' }
+        body: { visibility: archive.visibility === 'public' ? 'hidden' : 'public' }
       });
       loadArchives();
     } catch (err) {

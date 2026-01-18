@@ -145,6 +145,7 @@ const resources = {
         title: 'Archivo de Información',
         description: 'Documentos, archivos y textos informativos por competición',
         titleRequired: 'El título es obligatorio',
+        empty: 'No hay archivos',
         fields: {
           title: 'Título',
           description: 'Descripción',
@@ -279,6 +280,9 @@ const resources = {
         create: 'Crear',
         approve: 'Aprobar',
         reject: 'Rechazar'
+      },
+      status: {
+        label: 'Estado'
       },
       admin: {
         centers: {
@@ -999,6 +1003,7 @@ const resources = {
         title: 'Information Archive',
         description: 'Documents, files and informative texts by competition',
         titleRequired: 'Title is required',
+        empty: 'No files found',
         fields: {
           title: 'Title',
           description: 'Description',
@@ -1133,6 +1138,9 @@ const resources = {
         create: 'Create',
         approve: 'Approve',
         reject: 'Reject'
+      },
+      status: {
+        label: 'Status'
       },
       admin: {
         centers: {
@@ -1851,6 +1859,7 @@ const resources = {
         title: 'Informationsarchiv',
         description: 'Dokumente, Dateien und Informationstexte nach Wettbewerb',
         titleRequired: 'Titel ist erforderlich',
+        empty: 'Keine Dateien gefunden',
         fields: {
           title: 'Titel',
           description: 'Beschreibung',
@@ -1985,6 +1994,9 @@ const resources = {
         create: 'Erstellen',
         approve: 'Genehmigen',
         reject: 'Ablehnen'
+      },
+      status: {
+        label: 'Status'
       },
       admin: {
         centers: {
