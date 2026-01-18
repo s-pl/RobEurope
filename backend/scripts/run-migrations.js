@@ -21,6 +21,13 @@ import * as addIsPublicToRobotFiles from '../migrations/20251130-add-is-public-t
 import * as addOauthFieldsToUsers from '../migrations/20251123215620-add-oauth-fields-to-users.js';
 import * as createGalleryTable from '../migrations/20260111-create-gallery-table.js';
 import * as addMetaToNotifications from '../migrations/20260112-add-meta-to-notifications.js';
+import * as createEducationalCenters from '../migrations/20260118-create-educational-centers.js';
+import * as createArchives from '../migrations/20260118-create-archives.js';
+import * as updateUserRoles from '../migrations/20260118-update-user-roles.js';
+import * as updateTeamsEducationalCenter from '../migrations/20260118-update-teams-educational-center.js';
+import * as updateStreamsEducationalCenter from '../migrations/20260118-update-streams-educational-center.js';
+import * as updateGalleryEnhanced from '../migrations/20260118-update-gallery-enhanced.js';
+import * as updateRegistrationCenterApproval from '../migrations/20260118-update-registration-center-approval.js';
 async function run() {
   try {
     await sequelize.authenticate();
@@ -210,6 +217,65 @@ async function run() {
     } catch (e) {
       console.log('Skipping createGalleryTable (probably already exists):', e.message);
     }
+
+    // ========== NEW MIGRATIONS (2026-01-18) ==========
+
+    // Create EducationalCenters table
+    try {
+      await createEducationalCenters.default.up(qi, Sequelize);
+      console.log('Created EducationalCenters table');
+    } catch (e) {
+      console.log('Skipping createEducationalCenters:', e.message);
+    }
+
+    // Create Archives table
+    try {
+      await createArchives.default.up(qi, Sequelize);
+      console.log('Created Archives table');
+    } catch (e) {
+      console.log('Skipping createArchives:', e.message);
+    }
+
+    // Update User roles (add center_admin)
+    try {
+      await updateUserRoles.default.up(qi, Sequelize);
+      console.log('Updated User roles');
+    } catch (e) {
+      console.log('Skipping updateUserRoles:', e.message);
+    }
+
+    // Add educational_center_id to Teams
+    try {
+      await updateTeamsEducationalCenter.default.up(qi, Sequelize);
+      console.log('Added educational_center_id to Teams');
+    } catch (e) {
+      console.log('Skipping updateTeamsEducationalCenter:', e.message);
+    }
+
+    // Add educational_center_id to Streams
+    try {
+      await updateStreamsEducationalCenter.default.up(qi, Sequelize);
+      console.log('Added educational_center_id to Streams');
+    } catch (e) {
+      console.log('Skipping updateStreamsEducationalCenter:', e.message);
+    }
+
+    // Enhance Gallery table (videos, competition_id, etc.)
+    try {
+      await updateGalleryEnhanced.default.up(qi, Sequelize);
+      console.log('Enhanced Gallery table with video support');
+    } catch (e) {
+      console.log('Skipping updateGalleryEnhanced:', e.message);
+    }
+
+    // Add center approval fields to Registration
+    try {
+      await updateRegistrationCenterApproval.default.up(qi, Sequelize);
+      console.log('Added center approval fields to Registration');
+    } catch (e) {
+      console.log('Skipping updateRegistrationCenterApproval:', e.message);
+    }
+
     console.log('Migrations applied successfully');
   } catch (err) {
     console.error('Migration error:', err);

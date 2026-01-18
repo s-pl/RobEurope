@@ -10,12 +10,12 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
-    // Add educational_center_id to Streams
-    await queryInterface.addColumn('Streams', 'educational_center_id', {
+    // Add educational_center_id to Stream
+    await queryInterface.addColumn('Stream', 'educational_center_id', {
       type: Sequelize.INTEGER,
       allowNull: true,
       references: {
-        model: 'EducationalCenters',
+        model: 'EducationalCenter',
         key: 'id'
       },
       onUpdate: 'CASCADE',
@@ -23,10 +23,10 @@ export default {
     });
 
     // Add index
-    await queryInterface.addIndex('Streams', ['educational_center_id']);
+    await queryInterface.addIndex('Stream', ['educational_center_id']);
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeColumn('Streams', 'educational_center_id');
+    await queryInterface.removeColumn('Stream', 'educational_center_id');
   }
 };

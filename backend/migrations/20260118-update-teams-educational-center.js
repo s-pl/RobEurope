@@ -10,24 +10,24 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
-    // Add educational_center_id to Teams
-    await queryInterface.addColumn('Teams', 'educational_center_id', {
+    // Add educational_center_id to Team
+    await queryInterface.addColumn('Team', 'educational_center_id', {
       type: Sequelize.INTEGER,
       allowNull: true,
       references: {
-        model: 'EducationalCenters',
+        model: 'EducationalCenter',
         key: 'id'
       },
       onUpdate: 'CASCADE',
       onDelete: 'SET NULL'
     });
 
-    // Add competition_id to Teams for associating teams with competitions
-    await queryInterface.addColumn('Teams', 'competition_id', {
+    // Add competition_id to Team for associating teams with competitions
+    await queryInterface.addColumn('Team', 'competition_id', {
       type: Sequelize.INTEGER,
       allowNull: true,
       references: {
-        model: 'Competitions',
+        model: 'Competition',
         key: 'id'
       },
       onUpdate: 'CASCADE',
@@ -35,12 +35,12 @@ export default {
     });
 
     // Add indexes
-    await queryInterface.addIndex('Teams', ['educational_center_id']);
-    await queryInterface.addIndex('Teams', ['competition_id']);
+    await queryInterface.addIndex('Team', ['educational_center_id']);
+    await queryInterface.addIndex('Team', ['competition_id']);
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeColumn('Teams', 'educational_center_id');
-    await queryInterface.removeColumn('Teams', 'competition_id');
+    await queryInterface.removeColumn('Team', 'educational_center_id');
+    await queryInterface.removeColumn('Team', 'competition_id');
   }
 };

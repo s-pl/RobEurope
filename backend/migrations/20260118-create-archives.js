@@ -10,7 +10,7 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Archives', {
+    await queryInterface.createTable('Archive', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -49,7 +49,7 @@ export default {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
-          model: 'Competitions',
+          model: 'Competition',
           key: 'id'
         },
         onUpdate: 'CASCADE',
@@ -74,7 +74,7 @@ export default {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'Users',
+          model: 'User',
           key: 'id'
         },
         onUpdate: 'CASCADE',
@@ -91,12 +91,12 @@ export default {
     });
 
     // Add indexes for faster lookups
-    await queryInterface.addIndex('Archives', ['competition_id']);
-    await queryInterface.addIndex('Archives', ['visibility']);
-    await queryInterface.addIndex('Archives', ['uploaded_by']);
+    await queryInterface.addIndex('Archive', ['competition_id']);
+    await queryInterface.addIndex('Archive', ['visibility']);
+    await queryInterface.addIndex('Archive', ['uploaded_by']);
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Archives');
+    await queryInterface.dropTable('Archive');
   }
 };

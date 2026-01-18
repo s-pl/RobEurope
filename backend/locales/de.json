@@ -35,7 +35,10 @@
     "countries": "Länder",
     "logs": "Logs",
     "ldap": "LDAP-Benutzer",
-    "redis": "Redis Explorer"
+    "redis": "Redis Explorer",
+    "educationalCenters": "Bildungseinrichtungen",
+    "archives": "Archiv",
+    "gallery": "Galerie"
   },
   "auth": {
     "metaTitle": "Administratorzugang",
@@ -430,5 +433,187 @@
       "newUsers": "Neue Benutzer: {count}"
     },
     "empty": "Keine Daten vorhanden"
+  },
+  "educationalCenters": {
+    "metaTitle": "Bildungseinrichtungen-Verwaltung",
+    "eyebrow": "Einrichtungen",
+    "title": "Bildungseinrichtungen",
+    "description": "Verwalte Bildungseinrichtungen, ihre Teams und zugehörige Streams.",
+    "nav": "Bildungseinrichtungen",
+    "singular": "Bildungseinrichtung",
+    "plural": "Bildungseinrichtungen",
+    "status": {
+      "pending": "Ausstehende Genehmigung",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt"
+    },
+    "fields": {
+      "name": "Name der Einrichtung",
+      "country": "Land",
+      "city": "Stadt",
+      "address": "Adresse",
+      "website": "Webseite",
+      "phone": "Telefon",
+      "email": "Kontakt-E-Mail",
+      "logo": "Logo",
+      "description": "Beschreibung",
+      "admin": "Einrichtungsadministrator"
+    },
+    "actions": {
+      "create": "Einrichtung erstellen",
+      "edit": "Einrichtung bearbeiten",
+      "delete": "Einrichtung löschen",
+      "approve": "Einrichtung genehmigen",
+      "reject": "Einrichtung ablehnen",
+      "viewTeams": "Teams anzeigen",
+      "viewStreams": "Streams anzeigen"
+    },
+    "messages": {
+      "created": "Bildungseinrichtung erfolgreich erstellt",
+      "updated": "Bildungseinrichtung aktualisiert",
+      "deleted": "Bildungseinrichtung gelöscht",
+      "approved": "Bildungseinrichtung genehmigt",
+      "rejected": "Bildungseinrichtung abgelehnt",
+      "pendingApproval": "Ihre Anfrage wartet auf Genehmigung"
+    },
+    "filters": {
+      "searchPlaceholder": "Nach Name, Stadt suchen...",
+      "statusAll": "Alle Status",
+      "countryAll": "Alle Länder"
+    },
+    "table": {
+      "headers": {
+        "name": "Name",
+        "country": "Land",
+        "city": "Stadt",
+        "admin": "Administrator",
+        "status": "Status",
+        "teams": "Teams",
+        "created": "Erstellt"
+      }
+    }
+  },
+  "archives": {
+    "metaTitle": "Informationsarchiv",
+    "eyebrow": "Archiv",
+    "title": "Informationsarchiv",
+    "description": "Verwalte Dokumente, Dateien und Informationstexte nach Wettbewerb.",
+    "nav": "Archiv",
+    "singular": "Archivelement",
+    "plural": "Archivelemente",
+    "visibility": {
+      "hidden": "Versteckt",
+      "public": "Öffentlich",
+      "restricted": "Eingeschränkt"
+    },
+    "contentType": {
+      "file": "Datei",
+      "text": "Text",
+      "mixed": "Gemischt"
+    },
+    "fields": {
+      "title": "Titel",
+      "description": "Beschreibung",
+      "content": "Inhalt",
+      "file": "Angehängte Datei",
+      "competition": "Wettbewerb",
+      "visibility": "Sichtbarkeit",
+      "allowedEmails": "Erlaubte E-Mails",
+      "sortOrder": "Sortierreihenfolge"
+    },
+    "actions": {
+      "create": "Element erstellen",
+      "edit": "Element bearbeiten",
+      "delete": "Element löschen",
+      "download": "Datei herunterladen",
+      "reorder": "Elemente neu ordnen"
+    },
+    "messages": {
+      "created": "Element erfolgreich erstellt",
+      "updated": "Element aktualisiert",
+      "deleted": "Element gelöscht",
+      "reordered": "Reihenfolge aktualisiert"
+    },
+    "filters": {
+      "searchPlaceholder": "Nach Titel suchen...",
+      "visibilityAll": "Alle Sichtbarkeiten",
+      "competitionAll": "Alle Wettbewerbe"
+    },
+    "table": {
+      "headers": {
+        "title": "Titel",
+        "type": "Typ",
+        "competition": "Wettbewerb",
+        "visibility": "Sichtbarkeit",
+        "created": "Erstellt"
+      }
+    }
+  },
+  "gallery": {
+    "metaTitle": "Mediengalerie",
+    "eyebrow": "Galerie",
+    "title": "Mediengalerie",
+    "description": "Verwalte Bilder und Videos nach Wettbewerb organisiert.",
+    "nav": "Galerie",
+    "mediaTypes": {
+      "image": "Bild",
+      "video": "Video",
+      "all": "Alle"
+    },
+    "fields": {
+      "title": "Titel",
+      "description": "Beschreibung",
+      "mediaType": "Medientyp",
+      "file": "Datei",
+      "url": "Medien-URL",
+      "thumbnail": "Vorschaubild",
+      "duration": "Dauer",
+      "competition": "Wettbewerb",
+      "featured": "Hervorgehoben",
+      "order": "Reihenfolge"
+    },
+    "actions": {
+      "upload": "Medien hochladen",
+      "edit": "Medien bearbeiten",
+      "delete": "Medien löschen",
+      "toggleFeatured": "Hervorhebung umschalten",
+      "reorder": "Galerie neu ordnen"
+    },
+    "messages": {
+      "uploaded": "Medien erfolgreich hochgeladen",
+      "updated": "Medien aktualisiert",
+      "deleted": "Medien gelöscht",
+      "featured": "Hervorhebungsstatus geändert",
+      "reordered": "Galeriereihenfolge aktualisiert"
+    },
+    "filters": {
+      "searchPlaceholder": "Nach Titel suchen...",
+      "typeAll": "Alle Typen",
+      "competitionAll": "Alle Wettbewerbe"
+    }
+  },
+  "centerApproval": {
+    "title": "Zentrumsgenehmigung",
+    "description": "Verwalte Anfragen deiner Bildungseinrichtung.",
+    "pending": "Ausstehende Anfragen",
+    "approved": "Genehmigt",
+    "rejected": "Abgelehnt",
+    "actions": {
+      "approve": "Anfrage genehmigen",
+      "reject": "Anfrage ablehnen"
+    },
+    "messages": {
+      "approved": "Anfrage vom Zentrum genehmigt",
+      "rejected": "Anfrage vom Zentrum abgelehnt"
+    },
+    "reason": {
+      "label": "Grund",
+      "placeholder": "Grund für die Entscheidung eingeben..."
+    }
+  },
+  "roles": {
+    "user": "Benutzer",
+    "center_admin": "Zentrumsadministrator",
+    "super_admin": "Super-Administrator"
   }
 }

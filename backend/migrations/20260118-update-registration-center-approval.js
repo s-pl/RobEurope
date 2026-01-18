@@ -13,18 +13,18 @@
 export default {
   async up(queryInterface, Sequelize) {
     // Add center approval status
-    await queryInterface.addColumn('Registrations', 'center_approval_status', {
+    await queryInterface.addColumn('Registration', 'center_approval_status', {
       type: Sequelize.ENUM('pending', 'approved', 'rejected'),
       defaultValue: 'pending',
       allowNull: false
     });
 
     // Add center approved by (center admin user id)
-    await queryInterface.addColumn('Registrations', 'center_approved_by', {
+    await queryInterface.addColumn('Registration', 'center_approved_by', {
       type: Sequelize.UUID,
       allowNull: true,
       references: {
-        model: 'Users',
+        model: 'User',
         key: 'id'
       },
       onUpdate: 'CASCADE',
@@ -32,41 +32,41 @@ export default {
     });
 
     // Add center approval reason
-    await queryInterface.addColumn('Registrations', 'center_approval_reason', {
+    await queryInterface.addColumn('Registration', 'center_approval_reason', {
       type: Sequelize.STRING,
       allowNull: true
     });
 
     // Add center approved at timestamp
-    await queryInterface.addColumn('Registrations', 'center_approved_at', {
+    await queryInterface.addColumn('Registration', 'center_approved_at', {
       type: Sequelize.DATE,
       allowNull: true
     });
 
     // Add password for password-based registration
-    await queryInterface.addColumn('Registrations', 'registration_password', {
+    await queryInterface.addColumn('Registration', 'registration_password', {
       type: Sequelize.STRING,
       allowNull: true
     });
 
     // Add flag to indicate if this is a password-based registration
-    await queryInterface.addColumn('Registrations', 'is_password_registration', {
+    await queryInterface.addColumn('Registration', 'is_password_registration', {
       type: Sequelize.BOOLEAN,
       defaultValue: false,
       allowNull: false
     });
 
     // Add indexes
-    await queryInterface.addIndex('Registrations', ['center_approval_status']);
-    await queryInterface.addIndex('Registrations', ['center_approved_by']);
+    await queryInterface.addIndex('Registration', ['center_approval_status']);
+    await queryInterface.addIndex('Registration', ['center_approved_by']);
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeColumn('Registrations', 'center_approval_status');
-    await queryInterface.removeColumn('Registrations', 'center_approved_by');
-    await queryInterface.removeColumn('Registrations', 'center_approval_reason');
-    await queryInterface.removeColumn('Registrations', 'center_approved_at');
-    await queryInterface.removeColumn('Registrations', 'registration_password');
-    await queryInterface.removeColumn('Registrations', 'is_password_registration');
+    await queryInterface.removeColumn('Registration', 'center_approval_status');
+    await queryInterface.removeColumn('Registration', 'center_approved_by');
+    await queryInterface.removeColumn('Registration', 'center_approval_reason');
+    await queryInterface.removeColumn('Registration', 'center_approved_at');
+    await queryInterface.removeColumn('Registration', 'registration_password');
+    await queryInterface.removeColumn('Registration', 'is_password_registration');
   }
 };

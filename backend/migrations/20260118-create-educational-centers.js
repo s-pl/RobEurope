@@ -10,7 +10,7 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('EducationalCenters', {
+    await queryInterface.createTable('EducationalCenter', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -63,7 +63,7 @@ export default {
         type: Sequelize.UUID,
         allowNull: true,
         references: {
-          model: 'Users',
+          model: 'User',
           key: 'id'
         },
         onUpdate: 'CASCADE',
@@ -93,12 +93,12 @@ export default {
     });
 
     // Add index for faster lookups
-    await queryInterface.addIndex('EducationalCenters', ['name']);
-    await queryInterface.addIndex('EducationalCenters', ['admin_user_id']);
-    await queryInterface.addIndex('EducationalCenters', ['approval_status']);
+    await queryInterface.addIndex('EducationalCenter', ['name']);
+    await queryInterface.addIndex('EducationalCenter', ['admin_user_id']);
+    await queryInterface.addIndex('EducationalCenter', ['approval_status']);
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('EducationalCenters');
+    await queryInterface.dropTable('EducationalCenter');
   }
 };
