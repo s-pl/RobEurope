@@ -805,6 +805,22 @@
           <a href="/admin/redis" class="nav-item <%= pageKey === 'redis' ? 'active' : '' %>">
             <span><%= t('nav.redis') %></span>
           </a>
+          
+          <div style="margin: 16px 0 8px 0; padding: 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted);">
+            <%= t('nav.contentManagement') || 'Gestión de Contenido' %>
+          </div>
+          <a href="/admin/EducationalCenter" class="nav-item <%= pageKey === 'educationalcenters' ? 'active' : '' %>">
+            <span><%= t('nav.educationalCenters') %></span>
+          </a>
+          <a href="/admin/Archive" class="nav-item <%= pageKey === 'archives' ? 'active' : '' %>">
+            <span><%= t('nav.archives') %></span>
+          </a>
+          <a href="/admin/Gallery" class="nav-item <%= pageKey === 'galleries' ? 'active' : '' %>">
+            <span><%= t('nav.gallery') %></span>
+          </a>
+          <a href="/admin/center-requests" class="nav-item <%= pageKey === 'centerRequests' ? 'active' : '' %>">
+            <span><%= t('nav.centerRequests') || 'Solicitudes de Centro' %></span>
+          </a>
         </nav>
 
         <div class="sidebar-footer">

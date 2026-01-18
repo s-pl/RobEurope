@@ -85,6 +85,60 @@ const modelConfigs = {
       { name: 'registration_end', label: 'Fin Registro', labelKey: 'crud.competitions.fields.registrationEnd', type: 'datetime', list: false, form: true },
       { name: 'stream_url', label: 'Stream URL', labelKey: 'crud.fields.streamUrl', type: 'text', list: false, form: true },
     ]
+  },
+  EducationalCenter: {
+    model: 'EducationalCenter',
+    label: 'Centros Educativos',
+    labelKey: 'crud.educationalCenters.label',
+    pk: 'id',
+    fields: [
+      { name: 'id', label: 'ID', labelKey: 'crud.fields.id', type: 'text', list: true, form: false },
+      { name: 'name', label: 'Nombre', labelKey: 'crud.fields.name', type: 'text', list: true, form: true, required: true },
+      { name: 'description', label: 'Descripción', labelKey: 'crud.fields.description', type: 'textarea', list: false, form: true },
+      { name: 'address', label: 'Dirección', labelKey: 'crud.educationalCenters.fields.address', type: 'text', list: true, form: true },
+      { name: 'city', label: 'Ciudad', labelKey: 'crud.educationalCenters.fields.city', type: 'text', list: true, form: true },
+      { name: 'country_id', label: 'País ID', labelKey: 'crud.educationalCenters.fields.countryId', type: 'number', list: false, form: true },
+      { name: 'email', label: 'Email', labelKey: 'crud.fields.email', type: 'text', list: true, form: true },
+      { name: 'phone', label: 'Teléfono', labelKey: 'crud.educationalCenters.fields.phone', type: 'text', list: false, form: true },
+      { name: 'website_url', label: 'Sitio Web', labelKey: 'crud.fields.website', type: 'text', list: false, form: true },
+      { name: 'logo_url', label: 'Logo URL', labelKey: 'crud.fields.logo', type: 'text', list: false, form: true },
+      { name: 'status', label: 'Estado', labelKey: 'crud.fields.status', type: 'select', options: ['pending', 'approved', 'rejected'], list: true, form: true },
+      { name: 'is_verified', label: 'Verificado', labelKey: 'crud.educationalCenters.fields.isVerified', type: 'checkbox', list: true, form: true },
+    ]
+  },
+  Archive: {
+    model: 'Archive',
+    label: 'Archivo',
+    labelKey: 'crud.archives.label',
+    pk: 'id',
+    fields: [
+      { name: 'id', label: 'ID', labelKey: 'crud.fields.id', type: 'text', list: true, form: false },
+      { name: 'title', label: 'Título', labelKey: 'crud.fields.title', type: 'text', list: true, form: true, required: true },
+      { name: 'description', label: 'Descripción', labelKey: 'crud.fields.description', type: 'textarea', list: false, form: true },
+      { name: 'file_url', label: 'URL del Archivo', labelKey: 'crud.archives.fields.fileUrl', type: 'text', list: true, form: true },
+      { name: 'file_type', label: 'Tipo de Archivo', labelKey: 'crud.archives.fields.fileType', type: 'text', list: true, form: true },
+      { name: 'competition_id', label: 'Competición ID', labelKey: 'crud.archives.fields.competitionId', type: 'number', list: true, form: true },
+      { name: 'year', label: 'Año', labelKey: 'crud.archives.fields.year', type: 'number', list: true, form: true },
+      { name: 'is_visible', label: 'Visible', labelKey: 'crud.archives.fields.isVisible', type: 'checkbox', list: true, form: true },
+      { name: 'created_at', label: 'Creado', labelKey: 'crud.fields.createdAt', type: 'datetime', list: true, form: false },
+    ]
+  },
+  Gallery: {
+    model: 'Gallery',
+    label: 'Galería',
+    labelKey: 'crud.gallery.label',
+    pk: 'id',
+    fields: [
+      { name: 'id', label: 'ID', labelKey: 'crud.fields.id', type: 'text', list: true, form: false },
+      { name: 'title', label: 'Título', labelKey: 'crud.fields.title', type: 'text', list: true, form: true, required: true },
+      { name: 'description', label: 'Descripción', labelKey: 'crud.fields.description', type: 'textarea', list: false, form: true },
+      { name: 'media_url', label: 'URL del Media', labelKey: 'crud.gallery.fields.mediaUrl', type: 'text', list: true, form: true, required: true },
+      { name: 'media_type', label: 'Tipo de Media', labelKey: 'crud.gallery.fields.mediaType', type: 'select', options: ['image', 'video'], list: true, form: true },
+      { name: 'competition_id', label: 'Competición ID', labelKey: 'crud.gallery.fields.competitionId', type: 'number', list: true, form: true },
+      { name: 'year', label: 'Año', labelKey: 'crud.gallery.fields.year', type: 'number', list: true, form: true },
+      { name: 'is_featured', label: 'Destacado', labelKey: 'crud.gallery.fields.isFeatured', type: 'checkbox', list: true, form: true },
+      { name: 'created_at', label: 'Creado', labelKey: 'crud.fields.createdAt', type: 'datetime', list: true, form: false },
+    ]
   }
 };
 

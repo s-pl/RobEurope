@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom';
-import { Bot, User, Settings, LogOut, ChevronDown, Menu, X, Globe } from 'lucide-react';
+import { Bot, User, Settings, LogOut, ChevronDown, Menu, X, Globe, Building2, Archive, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useApi } from '../../hooks/useApi';
@@ -15,6 +15,8 @@ const navLinks = [
   { to: '/', key: 'nav.home' },
   { to: '/posts', key: 'nav.posts' },
   { to: '/gallery', key: 'nav.gallery' },
+  { to: '/archive', key: 'nav.archives' },
+  { to: '/educational-centers', key: 'nav.educationalCenters' },
   { to: '/feedback', key: 'nav.feedback' },
   { to: '/competitions', key: 'nav.competitions' },
   { to: '/teams', key: 'nav.teams' },
@@ -33,6 +35,7 @@ const NavItems = ({
   t,
   isAuthenticated,
   hasTeam,
+  user,
   onNavigate,
   mobile = false
 }) => (
@@ -78,6 +81,77 @@ const NavItems = ({
       >
         {t('nav.myTeam')}
       </NavLink>
+    )}
+    
+    {/* Admin Section for mobile */}
+    {isAuthenticated && (user?.role === 'center_admin' || user?.role === 'super_admin') && mobile && (
+      <>
+        <div className="my-4 border-t-2 border-amber-300 dark:border-amber-700 pt-4">
+          <p className="text-xs font-semibold uppercase text-amber-600 dark:text-amber-400 mb-2">
+            {t('nav.adminSection') || 'Administración'}
+          </p>
+        </div>
+        <NavLink
+          to="/admin/centers"
+          onClick={() => onNavigate?.()}
+          className={({ isActive }) =>
+            `flex items-center gap-2 py-2 text-lg transition ${
+              isActive
+                ? 'text-amber-700 font-semibold dark:text-amber-300'
+                : 'text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200'
+            }`
+          }
+        >
+          <Building2 className="h-5 w-5" />
+          {t('nav.manageCenters') || 'Gestionar Centros'}
+        </NavLink>
+        {user?.role === 'super_admin' && (
+          <>
+            <NavLink
+              to="/admin/archives"
+              onClick={() => onNavigate?.()}
+              className={({ isActive }) =>
+                `flex items-center gap-2 py-2 text-lg transition ${
+                  isActive
+                    ? 'text-amber-700 font-semibold dark:text-amber-300'
+                    : 'text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200'
+                }`
+              }
+            >
+              <Archive className="h-5 w-5" />
+              {t('nav.manageArchives') || 'Gestionar Archivos'}
+            </NavLink>
+            <NavLink
+              to="/admin/posts"
+              onClick={() => onNavigate?.()}
+              className={({ isActive }) =>
+                `flex items-center gap-2 py-2 text-lg transition ${
+                  isActive
+                    ? 'text-amber-700 font-semibold dark:text-amber-300'
+                    : 'text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200'
+                }`
+              }
+            >
+              <FileText className="h-5 w-5" />
+              {t('nav.managePosts') || 'Gestionar Posts'}
+            </NavLink>
+          <NavLink
+            to="/admin/requests"
+            onClick={() => onNavigate?.()}
+            className={({ isActive }) =>
+              `flex items-center gap-2 py-2 text-lg transition ${
+                isActive
+                  ? 'text-amber-700 font-semibold dark:text-amber-300'
+                  : 'text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200'
+              }`
+            }
+          >
+            <Settings className="h-5 w-5" />
+            {t('nav.adminRequests') || 'Solicitudes Admin'}
+          </NavLink>
+          </>
+        )}
+      </>
     )}
   </>
 );
@@ -133,6 +207,7 @@ const Navbar = () => {
                   t={t}
                   isAuthenticated={isAuthenticated}
                   hasTeam={hasTeam}
+                  user={user}
                   mobile
                   onNavigate={() => setIsOpen(false)}
                 />
@@ -204,7 +279,7 @@ const Navbar = () => {
 
         {/* Desktop Nav */}
         <nav aria-label={t('nav.primaryNavigation') || 'Primary navigation'} className="hidden items-center gap-6 text-sm font-medium text-blue-600 lg:flex dark:text-slate-300">
-          <NavItems t={t} isAuthenticated={isAuthenticated} hasTeam={hasTeam} />
+          <NavItems t={t} isAuthenticated={isAuthenticated} hasTeam={hasTeam} user={user} />
         </nav>
 
         <div className="hidden lg:flex items-center gap-4">

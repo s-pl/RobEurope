@@ -33,6 +33,37 @@ export default async function defineGalleryModel(sequelize, DataTypes) {
       type: DataTypes.TEXT,
       allowNull: true
     },
+    media_type: {
+      type: DataTypes.ENUM('image', 'video'),
+      defaultValue: 'image',
+      allowNull: false
+    },
+    thumbnail_url: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    duration: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    competition_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'Competition',
+        key: 'id'
+      }
+    },
+    sort_order: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      allowNull: false
+    },
+    is_featured: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
+    },
     uploaded_by: {
       type: DataTypes.UUID,
       allowNull: false,
@@ -56,6 +87,12 @@ export default async function defineGalleryModel(sequelize, DataTypes) {
       foreignKey: 'uploaded_by',
       as: 'uploader'
     });
+    if (models.Competition) {
+      Gallery.belongsTo(models.Competition, {
+        foreignKey: 'competition_id',
+        as: 'competition'
+      });
+    }
   };
 
   return Gallery;

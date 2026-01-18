@@ -1,7 +1,8 @@
 import { Link, NavLink } from 'react-router-dom';
 import { 
   Bot, User, LogOut, Globe, ChevronLeft, ChevronRight,
-  Home, Newspaper, Trophy, Users, Heart, Tv, Mail, Shield, Image, MessageSquare
+  Home, Newspaper, Trophy, Users, Heart, Tv, Mail, Shield, Image, MessageSquare,
+  Archive, Building2, Settings, FileText
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
@@ -20,6 +21,8 @@ const navLinks = [
   { to: '/posts', key: 'nav.posts', icon: Newspaper },
   { to: '/streams', key: 'nav.streams', icon: Tv },
   { to: '/gallery', key: 'nav.gallery', icon: Image },
+  { to: '/archive', key: 'nav.archives', icon: Archive },
+  { to: '/educational-centers', key: 'nav.educationalCenters', icon: Building2 },
   { to: '/sponsors', key: 'nav.sponsors', icon: Heart },
   { to: '/contact', key: 'nav.contact', icon: Mail },
   { to: '/feedback', key: 'nav.feedback', icon: MessageSquare }
@@ -129,6 +132,78 @@ const Sidebar = () => {
                 <Shield className="h-5 w-5 shrink-0" />
                 {!collapsed && <span>{t('nav.myTeam')}</span>}
               </NavLink>
+            )}
+
+            {/* Admin Section - visible for center_admin and super_admin */}
+            {(user?.role === 'center_admin' || user?.role === 'super_admin') && (
+              <>
+                <div className="my-4 border-t border-amber-200 dark:border-amber-800" />
+                {!collapsed && (
+                  <p className="px-3 py-1 text-xs font-semibold uppercase text-amber-600 dark:text-amber-400">
+                    {t('nav.adminSection') || 'Administración'}
+                  </p>
+                )}
+                <NavLink
+                  to="/admin/centers"
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-amber-50 text-amber-900 dark:bg-amber-900/20 dark:text-amber-100'
+                        : 'text-amber-600 hover:bg-amber-50 hover:text-amber-900 dark:text-amber-400 dark:hover:bg-amber-900/10 dark:hover:text-amber-100'
+                    } ${collapsed ? 'justify-center px-2' : ''}`
+                  }
+                  title={collapsed ? t('nav.manageCenters') : ''}
+                >
+                  <Building2 className="h-5 w-5 shrink-0" />
+                  {!collapsed && <span>{t('nav.manageCenters') || 'Gestionar Centros'}</span>}
+                </NavLink>
+                {user?.role === 'super_admin' && (
+                  <>
+                    <NavLink
+                      to="/admin/archives"
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                          isActive
+                            ? 'bg-amber-50 text-amber-900 dark:bg-amber-900/20 dark:text-amber-100'
+                            : 'text-amber-600 hover:bg-amber-50 hover:text-amber-900 dark:text-amber-400 dark:hover:bg-amber-900/10 dark:hover:text-amber-100'
+                        } ${collapsed ? 'justify-center px-2' : ''}`
+                      }
+                      title={collapsed ? t('nav.manageArchives') : ''}
+                    >
+                      <Archive className="h-5 w-5 shrink-0" />
+                      {!collapsed && <span>{t('nav.manageArchives') || 'Gestionar Archivos'}</span>}
+                    </NavLink>
+                    <NavLink
+                      to="/admin/posts"
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                          isActive
+                            ? 'bg-amber-50 text-amber-900 dark:bg-amber-900/20 dark:text-amber-100'
+                            : 'text-amber-600 hover:bg-amber-50 hover:text-amber-900 dark:text-amber-400 dark:hover:bg-amber-900/10 dark:hover:text-amber-100'
+                        } ${collapsed ? 'justify-center px-2' : ''}`
+                      }
+                      title={collapsed ? t('nav.managePosts') : ''}
+                    >
+                      <FileText className="h-5 w-5 shrink-0" />
+                      {!collapsed && <span>{t('nav.managePosts') || 'Gestionar Posts'}</span>}
+                    </NavLink>
+                  <NavLink
+                    to="/admin/requests"
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                        isActive
+                          ? 'bg-amber-50 text-amber-900 dark:bg-amber-900/20 dark:text-amber-100'
+                          : 'text-amber-600 hover:bg-amber-50 hover:text-amber-900 dark:text-amber-400 dark:hover:bg-amber-900/10 dark:hover:text-amber-100'
+                      } ${collapsed ? 'justify-center px-2' : ''}`
+                    }
+                    title={collapsed ? t('nav.adminRequests') : ''}
+                  >
+                    <Settings className="h-5 w-5 shrink-0" />
+                    {!collapsed && <span>{t('nav.adminRequests') || 'Solicitudes Admin'}</span>}
+                  </NavLink>
+                  </>
+                )}
+              </>
             )}
           </>
         )}

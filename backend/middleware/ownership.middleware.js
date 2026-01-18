@@ -26,6 +26,11 @@ export function requireOwnership(modelName) {
       return next();
     }
 
+    // Center admin can also manage posts and archives
+    if (user.role === 'center_admin' && (modelName === 'Post' || modelName === 'Archive')) {
+      return next();
+    }
+
     const id = req.params.id;
     if (!id) return res.status(400).json({ error: 'ID requerido' });
 

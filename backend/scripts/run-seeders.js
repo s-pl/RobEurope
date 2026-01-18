@@ -17,7 +17,8 @@ const seeders = [
   '../seeders/20251122-seed-team-streams.js',
   '../seeders/20251122-seed-enhanced-data.js',
   '../seeders/20260115-seed-sponsors-demo.js',
-  '../seeders/20260115-seed-gallery-demo.js'
+  '../seeders/20260115-seed-gallery-demo.js',
+  '../seeders/20260118-seed-educational-center-demo.js'
 ];
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

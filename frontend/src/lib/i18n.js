@@ -60,10 +60,17 @@ const resources = {
         theme: 'Tema',
         posts: 'Noticias',
         gallery: 'Galería',
+        archives: 'Archivo',
+        educationalCenters: 'Centros Educativos',
         feedback: 'Opiniones',
         login: 'Iniciar sesión',
         register: 'Registrarse',
-        logout: 'Cerrar sesión'
+        logout: 'Cerrar sesión',
+        adminSection: 'Administración',
+        manageCenters: 'Gestionar Centros',
+        manageArchives: 'Gestionar Archivos',
+        managePosts: 'Gestionar Posts',
+        adminRequests: 'Solicitudes Admin'
       },
       status: {
         connected: 'Conectado',
@@ -134,6 +141,93 @@ const resources = {
         seeMore: 'Ver más',
         seeLess: 'Ver menos'
       },
+      archives: {
+        title: 'Archivo de Información',
+        description: 'Documentos, archivos y textos informativos por competición',
+        titleRequired: 'El título es obligatorio',
+        empty: 'No hay archivos',
+        fields: {
+          title: 'Título',
+          description: 'Descripción',
+          content: 'Contenido',
+          file: 'Archivo adjunto',
+          competition: 'Competición',
+          visibility: 'Visibilidad',
+          allowedEmails: 'Emails permitidos',
+          sortOrder: 'Orden'
+        },
+        visibility: {
+          hidden: 'Oculto',
+          public: 'Público',
+          restricted: 'Restringido'
+        },
+        contentType: {
+          label: 'Tipo de contenido',
+          file: 'Archivo',
+          text: 'Texto',
+          mixed: 'Mixto'
+        },
+        actions: {
+          create: 'Crear elemento',
+          edit: 'Editar elemento',
+          delete: 'Eliminar elemento',
+          download: 'Descargar archivo'
+        },
+        messages: {
+          created: 'Elemento creado correctamente',
+          updated: 'Elemento actualizado',
+          deleted: 'Elemento eliminado'
+        },
+        filters: {
+          competitionAll: 'Todas las competiciones',
+          visibilityAll: 'Todas las visibilidades'
+        }
+      },
+      educationalCenters: {
+        title: 'Centros Educativos',
+        description: 'Instituciones educativas participantes',
+        fields: {
+          name: 'Nombre del centro',
+          country: 'País',
+          city: 'Ciudad',
+          address: 'Dirección',
+          website: 'Sitio web',
+          phone: 'Teléfono',
+          email: 'Email de contacto',
+          logo: 'Logo',
+          description: 'Descripción',
+          admin: 'Administrador del centro'
+        },
+        status: {
+          pending: 'Pendiente de aprobación',
+          approved: 'Aprobado',
+          rejected: 'Rechazado'
+        },
+        actions: {
+          create: 'Registrar centro',
+          edit: 'Editar centro',
+          delete: 'Eliminar centro',
+          approve: 'Aprobar centro',
+          reject: 'Rechazar centro'
+        },
+        messages: {
+          created: 'Centro educativo registrado correctamente',
+          updated: 'Centro educativo actualizado',
+          deleted: 'Centro educativo eliminado',
+          approved: 'Centro educativo aprobado',
+          rejected: 'Centro educativo rechazado'
+        },
+        filters: {
+          countryAll: 'Todos los países',
+          statusAll: 'Todos los estados'
+        }
+      },
+      centerApproval: {
+        title: 'Aprobación del centro',
+        reason: {
+          placeholder: 'Indica el motivo de la decisión...'
+        }
+      },
       feedback: {
         Title: "Opiniones",
         Description: "Opiniones de nuestros usuarios",
@@ -178,10 +272,154 @@ const resources = {
         cancel: 'Cancelar',
         edit: 'Editar',
         close: 'Cerrar',
+        loading: 'Cargando...',
         skipToContent: 'Saltar al contenido',
         adminModeActive: 'Modo admin activo',
         showPassword: 'Mostrar contraseña',
-        hidePassword: 'Ocultar contraseña'
+        hidePassword: 'Ocultar contraseña',
+        create: 'Crear',
+        approve: 'Aprobar',
+        reject: 'Rechazar'
+      },
+      status: {
+        label: 'Estado'
+      },
+      admin: {
+        centers: {
+          title: 'Gestionar Centros Educativos',
+          description: 'Administra los centros educativos registrados',
+          create: 'Crear Centro',
+          edit: 'Editar Centro',
+          search: 'Buscar centros...',
+          empty: 'No hay centros',
+          approved: 'Centro aprobado',
+          rejected: 'Centro rechazado',
+          deleted: 'Centro eliminado',
+          updated: 'Centro actualizado',
+          created: 'Centro creado',
+          confirmDelete: '¿Eliminar este centro?',
+          rejectReason: 'Motivo del rechazo:',
+          status: {
+            pending: 'Pendiente',
+            approved: 'Aprobado',
+            rejected: 'Rechazado'
+          },
+          filter: {
+            all: 'Todos',
+            pending: 'Pendientes',
+            approved: 'Aprobados',
+            rejected: 'Rechazados'
+          },
+          form: {
+            name: 'Nombre',
+            city: 'Ciudad',
+            email: 'Email',
+            website: 'Sitio web',
+            description: 'Descripción'
+          },
+          centerRegistrationsTitle: 'Solicitudes de competición del centro',
+          centerRegistrationsDesc: 'Aprueba o rechaza las solicitudes de equipos de tu centro.',
+          noRegistrations: 'No hay solicitudes pendientes.',
+          competitionLabel: 'Competición',
+          centerStudentsTitle: 'Alumnos del centro',
+          centerStudentsDesc: 'Usuarios asociados a tu centro educativo.',
+          noStudents: 'No hay alumnos asociados.',
+          centerTeamsTitle: 'Equipos del centro',
+          centerTeamsDesc: 'Equipos asociados a tu centro educativo.',
+          noTeams: 'No hay equipos asociados.',
+          confirmRemoveUser: '¿Eliminar este alumno del centro?',
+          confirmRemoveTeam: '¿Eliminar este equipo del centro?',
+          centerApprovedReason: 'Aprobado por el centro',
+          centerRejectReason: 'Motivo del rechazo:'
+        },
+        archives: {
+          title: 'Gestionar Archivos',
+          description: 'Administra los archivos del centro',
+          upload: 'Subir Archivo',
+          edit: 'Editar Archivo',
+          search: 'Buscar archivos...',
+          empty: 'No hay archivos',
+          deleted: 'Archivo eliminado',
+          updated: 'Archivo actualizado',
+          created: 'Archivo creado',
+          confirmDelete: '¿Eliminar este archivo?',
+          types: {
+            document: 'Documento',
+            image: 'Imagen',
+            video: 'Video',
+            other: 'Otro'
+          },
+          visibility: {
+            public: 'Público',
+            restricted: 'Restringido',
+            hidden: 'Oculto'
+          },
+          form: {
+            title: 'Título',
+            type: 'Tipo',
+            competition: 'Competición',
+            noCompetition: '-- Sin competición --',
+            year: 'Año',
+            visibility: 'Visibilidad',
+            file: 'Archivo',
+            description: 'Descripción',
+            allowedEmails: 'Emails permitidos',
+            emailsPlaceholder: 'email1@ejemplo.com, email2@ejemplo.com',
+            emailsHelp: 'Separa los emails con comas. Solo estos usuarios podrán ver el archivo.'
+          }
+        },
+        requests: {
+          title: 'Solicitudes de Administrador de Centro',
+          description: 'Gestiona las solicitudes de usuarios para ser administradores de centro',
+          empty: 'No hay solicitudes',
+          approved: 'Solicitud aprobada',
+          rejected: 'Solicitud rechazada',
+          rejectReason: 'Motivo del rechazo:',
+          reason: 'Motivo',
+          requestedAt: 'Solicitado',
+          status: {
+            pending: 'Pendiente',
+            approved: 'Aprobada',
+            rejected: 'Rechazada'
+          },
+          filter: {
+            pending: 'Pendientes',
+            approved: 'Aprobadas',
+            rejected: 'Rechazadas'
+          },
+          type: {
+            create: 'Crear centro',
+            join: 'Unirse a centro'
+          }
+        },
+        posts: {
+          title: 'Gestión de Posts',
+          description: 'Crea, edita y elimina publicaciones del sistema.',
+          create: 'Nuevo Post',
+          edit: 'Editar Post',
+          searchPlaceholder: 'Buscar posts...',
+          titleLabel: 'Título',
+          contentLabel: 'Contenido',
+          pinPost: 'Fijar post',
+          tableTitle: 'Título',
+          tableAuthor: 'Autor',
+          tableStatus: 'Estado',
+          tableActions: 'Acciones',
+          noPosts: 'No hay posts para mostrar.',
+          confirmDelete: '¿Eliminar este post?',
+          pinned: 'Fijado'
+        }
+      },
+      actions: {
+        save: 'Guardar',
+        cancel: 'Cancelar',
+        delete: 'Eliminar',
+        edit: 'Editar',
+        create: 'Crear',
+        confirmDelete: '¿Estás seguro de eliminar este registro?'
+      },
+      charts: {
+        empty: 'No hay datos disponibles'
       },
       theme: {
         toggle: 'Cambiar tema',
@@ -440,6 +678,9 @@ const resources = {
         subtitle: 'Visualiza todos los streams de las competiciones',
         loading: 'Cargando streams...',
         error: 'Error:',
+        noStreams: 'No hay streams disponibles.',
+        noCenter: 'Sin centro educativo',
+        created: 'Creado',
         status: {
           live: 'En vivo',
           offline: 'Offline',
@@ -486,6 +727,11 @@ const resources = {
         bioEmpty: 'Sin biografía',
         username: 'Nombre de usuario',
         country: 'País',
+        educationalCenter: 'Centro educativo',
+        noEducationalCenter: 'Sin centro asignado',
+        centerAdminBadge: 'Administrador',
+        studentBadge: 'Alumno',
+        centersLoadError: 'No se pudieron cargar los centros.',
         photo: 'Foto de Perfil',
         heroTagline: 'Cuenta vinculada',
         heroNote: 'Los cambios sincronizan con /users/me.',
@@ -512,7 +758,24 @@ const resources = {
         description: 'Los datos se envían al endpoint /auth/register para emitir un token y almacenarte en la base de datos.',
         hasAccount: '¿Ya tienes cuenta?',
         loginLink: 'Inicia sesión',
-        acceptTerms: 'Acepto los'
+        acceptTerms: 'Acepto los',
+        studentCenterLabel: 'Centro educativo (opcional)',
+        studentCenterPlaceholder: '-- No indicar centro --',
+        studentCenterHelp: 'Opcional. Podrás cambiarlo más adelante en tu perfil.',
+        wantsCenterAdmin: '¿Quieres administrar un centro educativo?',
+        centerAdminDescription: 'Como administrador de centro podrás gestionar equipos, streamings y archivos de tu institución.',
+        selectExistingCenter: 'Seleccionar centro existente',
+        noCenter: '-- Selecciona un centro --',
+        orCreateCenter: '¿No encuentras tu centro? Créalo aquí',
+        createNewCenter: 'Crear nuevo centro educativo',
+        centerName: 'Nombre del centro',
+        centerNamePlaceholder: 'IES / Colegio / Universidad...',
+        centerCity: 'Ciudad',
+        centerCityPlaceholder: 'Madrid, Barcelona...',
+        centerEmail: 'Email de contacto',
+        centerWebsite: 'Sitio web',
+        centerPendingApproval: 'El centro quedará pendiente de aprobación por un super administrador.',
+        centerNameRequired: 'El nombre del centro es requerido'
       },
       general: {
         countriesLoading: 'Cargando países…',
@@ -532,7 +795,13 @@ const resources = {
           streamUrl: "URL del Stream (Twitch/YouTube)",
           submitCreate: "Crear Equipo",
           submitSave: "Guardar Cambios",
-          saveUrl: "Guardar URL"
+          saveUrl: "Guardar URL",
+          centerDescription: "Conecta tu equipo a un centro educativo existente o crea uno nuevo.",
+          selectCenter: "Seleccionar centro educativo",
+          noCenter: "-- Sin centro educativo --",
+          orCreateCenter: "¿No encuentras tu centro?",
+          createNewCenter: "Crear nuevo centro",
+          onlyAdminsCanCreate: "Solo los administradores de centro pueden crear nuevos centros educativos."
         },
         tabs: {
           overview: "Resumen",
@@ -582,7 +851,13 @@ const resources = {
           activeTitle: "Inscripciones Activas",
           noRegistrations: "No hay inscripciones registradas.",
           compPrefix: "Competición #",
-          reason: "Motivo:"
+          reason: "Motivo:",
+          centerReason: "Centro:",
+          status: {
+            pending: "Pendiente",
+            approved: "Aprobado",
+            rejected: "Rechazado"
+          }
         },
         settings: {
           editTitle: "Editar Información",
@@ -649,10 +924,17 @@ const resources = {
         theme: 'Theme',
         posts: 'News',
         gallery: 'Gallery',
+        archives: 'Archive',
+        educationalCenters: 'Educational Centers',
         feedback: 'Feedback',
         login: 'Log in',
         register: 'Register',
-        logout: 'Log out'
+        logout: 'Log out',
+        adminSection: 'Administration',
+        manageCenters: 'Manage Centers',
+        manageArchives: 'Manage Archives',
+        managePosts: 'Manage Posts',
+        adminRequests: 'Admin Requests'
       },
       status: {
         connected: 'Online',
@@ -723,6 +1005,93 @@ const resources = {
         seeMore: 'See more',
         seeLess: 'See less'
       },
+      archives: {
+        title: 'Information Archive',
+        description: 'Documents, files and informative texts by competition',
+        titleRequired: 'Title is required',
+        empty: 'No files found',
+        fields: {
+          title: 'Title',
+          description: 'Description',
+          content: 'Content',
+          file: 'Attached file',
+          competition: 'Competition',
+          visibility: 'Visibility',
+          allowedEmails: 'Allowed emails',
+          sortOrder: 'Sort order'
+        },
+        visibility: {
+          hidden: 'Hidden',
+          public: 'Public',
+          restricted: 'Restricted'
+        },
+        contentType: {
+          label: 'Content type',
+          file: 'File',
+          text: 'Text',
+          mixed: 'Mixed'
+        },
+        actions: {
+          create: 'Create item',
+          edit: 'Edit item',
+          delete: 'Delete item',
+          download: 'Download file'
+        },
+        messages: {
+          created: 'Item created successfully',
+          updated: 'Item updated',
+          deleted: 'Item deleted'
+        },
+        filters: {
+          competitionAll: 'All competitions',
+          visibilityAll: 'All visibilities'
+        }
+      },
+      educationalCenters: {
+        title: 'Educational Centers',
+        description: 'Participating educational institutions',
+        fields: {
+          name: 'Center name',
+          country: 'Country',
+          city: 'City',
+          address: 'Address',
+          website: 'Website',
+          phone: 'Phone',
+          email: 'Contact email',
+          logo: 'Logo',
+          description: 'Description',
+          admin: 'Center administrator'
+        },
+        status: {
+          pending: 'Pending approval',
+          approved: 'Approved',
+          rejected: 'Rejected'
+        },
+        actions: {
+          create: 'Register center',
+          edit: 'Edit center',
+          delete: 'Delete center',
+          approve: 'Approve center',
+          reject: 'Reject center'
+        },
+        messages: {
+          created: 'Educational center registered successfully',
+          updated: 'Educational center updated',
+          deleted: 'Educational center deleted',
+          approved: 'Educational center approved',
+          rejected: 'Educational center rejected'
+        },
+        filters: {
+          countryAll: 'All countries',
+          statusAll: 'All statuses'
+        }
+      },
+      centerApproval: {
+        title: 'Center Approval',
+        reason: {
+          placeholder: 'Enter the reason for the decision...'
+        }
+      },
       feedback: {
         Title: "Feedback",
         Description: "Our users' opinions",
@@ -767,10 +1136,154 @@ const resources = {
         cancel: 'Cancel',
         edit: 'Edit',
         close: 'Close',
+        loading: 'Loading...',
         skipToContent: 'Skip to content',
         adminModeActive: 'Admin mode active',
         showPassword: 'Show password',
-        hidePassword: 'Hide password'
+        hidePassword: 'Hide password',
+        create: 'Create',
+        approve: 'Approve',
+        reject: 'Reject'
+      },
+      status: {
+        label: 'Status'
+      },
+      admin: {
+        centers: {
+          title: 'Manage Educational Centers',
+          description: 'Manage registered educational centers',
+          create: 'Create Center',
+          edit: 'Edit Center',
+          search: 'Search centers...',
+          empty: 'No centers found',
+          approved: 'Center approved',
+          rejected: 'Center rejected',
+          deleted: 'Center deleted',
+          updated: 'Center updated',
+          created: 'Center created',
+          confirmDelete: 'Delete this center?',
+          rejectReason: 'Rejection reason:',
+          status: {
+            pending: 'Pending',
+            approved: 'Approved',
+            rejected: 'Rejected'
+          },
+          filter: {
+            all: 'All',
+            pending: 'Pending',
+            approved: 'Approved',
+            rejected: 'Rejected'
+          },
+          form: {
+            name: 'Name',
+            city: 'City',
+            email: 'Email',
+            website: 'Website',
+            description: 'Description'
+          },
+          centerRegistrationsTitle: 'Center competition requests',
+          centerRegistrationsDesc: 'Approve or reject team requests from your center.',
+          noRegistrations: 'No pending requests.',
+          competitionLabel: 'Competition',
+          centerStudentsTitle: 'Center students',
+          centerStudentsDesc: 'Users associated with your educational center.',
+          noStudents: 'No students associated.',
+          centerTeamsTitle: 'Center teams',
+          centerTeamsDesc: 'Teams associated with your educational center.',
+          noTeams: 'No teams associated.',
+          confirmRemoveUser: 'Remove this student from the center?',
+          confirmRemoveTeam: 'Remove this team from the center?',
+          centerApprovedReason: 'Approved by the center',
+          centerRejectReason: 'Rejection reason:'
+        },
+        archives: {
+          title: 'Manage Archives',
+          description: 'Manage center archives',
+          upload: 'Upload File',
+          edit: 'Edit File',
+          search: 'Search files...',
+          empty: 'No files found',
+          deleted: 'File deleted',
+          updated: 'File updated',
+          created: 'File created',
+          confirmDelete: 'Delete this file?',
+          types: {
+            document: 'Document',
+            image: 'Image',
+            video: 'Video',
+            other: 'Other'
+          },
+          visibility: {
+            public: 'Public',
+            restricted: 'Restricted',
+            hidden: 'Hidden'
+          },
+          form: {
+            title: 'Title',
+            type: 'Type',
+            competition: 'Competition',
+            noCompetition: '-- No competition --',
+            year: 'Year',
+            visibility: 'Visibility',
+            file: 'File',
+            description: 'Description',
+            allowedEmails: 'Allowed emails',
+            emailsPlaceholder: 'email1@example.com, email2@example.com',
+            emailsHelp: 'Separate emails with commas. Only these users can view the file.'
+          }
+        },
+        requests: {
+          title: 'Center Admin Requests',
+          description: 'Manage user requests to become center administrators',
+          empty: 'No requests found',
+          approved: 'Request approved',
+          rejected: 'Request rejected',
+          rejectReason: 'Rejection reason:',
+          reason: 'Reason',
+          requestedAt: 'Requested',
+          status: {
+            pending: 'Pending',
+            approved: 'Approved',
+            rejected: 'Rejected'
+          },
+          filter: {
+            pending: 'Pending',
+            approved: 'Approved',
+            rejected: 'Rejected'
+          },
+          type: {
+            create: 'Create center',
+            join: 'Join center'
+          }
+        },
+        posts: {
+          title: 'Post Management',
+          description: 'Create, edit and delete system posts.',
+          create: 'New Post',
+          edit: 'Edit Post',
+          searchPlaceholder: 'Search posts...',
+          titleLabel: 'Title',
+          contentLabel: 'Content',
+          pinPost: 'Pin post',
+          tableTitle: 'Title',
+          tableAuthor: 'Author',
+          tableStatus: 'Status',
+          tableActions: 'Actions',
+          noPosts: 'No posts to display.',
+          confirmDelete: 'Delete this post?',
+          pinned: 'Pinned'
+        }
+      },
+      actions: {
+        save: 'Save',
+        cancel: 'Cancel',
+        delete: 'Delete',
+        edit: 'Edit',
+        create: 'Create',
+        confirmDelete: 'Are you sure you want to delete this record?'
+      },
+      charts: {
+        empty: 'No data available'
       },
       theme: {
         toggle: 'Toggle theme',
@@ -1029,6 +1542,9 @@ const resources = {
         subtitle: 'Watch all competition streams',
         loading: 'Loading streams...',
         error: 'Error:',
+        noStreams: 'No streams available.',
+        noCenter: 'No educational center',
+        created: 'Created',
         status: {
           live: 'Live',
           offline: 'Offline',
@@ -1075,6 +1591,11 @@ const resources = {
         bioEmpty: 'No biography provided',
         username: 'Username',
         country: 'Country',
+        educationalCenter: 'Educational center',
+        noEducationalCenter: 'No center assigned',
+        centerAdminBadge: 'Administrator',
+        studentBadge: 'Student',
+        centersLoadError: 'Centers could not be loaded.',
         photo: 'Profile Photo',
         heroTagline: 'Linked account',
         heroNote: 'Changes sync with /users/me.',
@@ -1101,7 +1622,24 @@ const resources = {
         description: 'Data is sent to /auth/register to issue a token and store you in the database.',
         hasAccount: 'Already have an account?',
         loginLink: 'Sign in',
-        acceptTerms: 'I accept the'
+        acceptTerms: 'I accept the',
+        studentCenterLabel: 'Educational center (optional)',
+        studentCenterPlaceholder: '-- No center selected --',
+        studentCenterHelp: 'Optional. You can change it later in your profile.',
+        wantsCenterAdmin: 'Do you want to manage an educational center?',
+        centerAdminDescription: 'As a center admin you can manage teams, streams and files for your institution.',
+        selectExistingCenter: 'Select existing center',
+        noCenter: '-- Select a center --',
+        orCreateCenter: 'Can\'t find your center? Create it here',
+        createNewCenter: 'Create new educational center',
+        centerName: 'Center name',
+        centerNamePlaceholder: 'High School / College / University...',
+        centerCity: 'City',
+        centerCityPlaceholder: 'New York, London...',
+        centerEmail: 'Contact email',
+        centerWebsite: 'Website',
+        centerPendingApproval: 'The center will be pending approval by a super admin.',
+        centerNameRequired: 'Center name is required'
       },
       general: {
         countriesLoading: 'Loading countries…',
@@ -1121,7 +1659,13 @@ const resources = {
           streamUrl: "Stream URL (Twitch/YouTube)",
           submitCreate: "Create Team",
           submitSave: "Save Changes",
-          saveUrl: "Save URL"
+          saveUrl: "Save URL",
+          centerDescription: "Connect your team to an existing educational center or create a new one.",
+          selectCenter: "Select educational center",
+          noCenter: "-- No educational center --",
+          orCreateCenter: "Can't find your center?",
+          createNewCenter: "Create new center",
+          onlyAdminsCanCreate: "Only center administrators can create new educational centers."
         },
         tabs: {
           overview: "Overview",
@@ -1170,7 +1714,13 @@ const resources = {
           activeTitle: "Active Registrations",
           noRegistrations: "No registrations found.",
           compPrefix: "Competition #",
-          reason: "Reason:"
+          reason: "Reason:",
+          centerReason: "Center:",
+          status: {
+            pending: "Pending",
+            approved: "Approved",
+            rejected: "Rejected"
+          }
         },
         settings: {
           editTitle: "Edit Information",
@@ -1236,10 +1786,17 @@ const resources = {
         theme: 'Thema',
         posts: 'Nachrichten',
         gallery: 'Galerie',
+        archives: 'Archiv',
+        educationalCenters: 'Bildungseinrichtungen',
         feedback: 'Feedback',
         login: 'Anmelden',
         register: 'Registrieren',
-        logout: 'Abmelden'
+        logout: 'Abmelden',
+        adminSection: 'Verwaltung',
+        manageCenters: 'Zentren verwalten',
+        manageArchives: 'Archiv verwalten',
+        managePosts: 'Beiträge verwalten',
+        adminRequests: 'Admin-Anfragen'
       },
       status: {
         connected: 'Verbunden',
@@ -1310,6 +1867,93 @@ const resources = {
         seeMore: 'Mehr anzeigen',
         seeLess: 'Weniger anzeigen'
       },
+      archives: {
+        title: 'Informationsarchiv',
+        description: 'Dokumente, Dateien und Informationstexte nach Wettbewerb',
+        titleRequired: 'Titel ist erforderlich',
+        empty: 'Keine Dateien gefunden',
+        fields: {
+          title: 'Titel',
+          description: 'Beschreibung',
+          content: 'Inhalt',
+          file: 'Angehängte Datei',
+          competition: 'Wettbewerb',
+          visibility: 'Sichtbarkeit',
+          allowedEmails: 'Erlaubte E-Mails',
+          sortOrder: 'Sortierreihenfolge'
+        },
+        visibility: {
+          hidden: 'Versteckt',
+          public: 'Öffentlich',
+          restricted: 'Eingeschränkt'
+        },
+        contentType: {
+          label: 'Inhaltstyp',
+          file: 'Datei',
+          text: 'Text',
+          mixed: 'Gemischt'
+        },
+        actions: {
+          create: 'Element erstellen',
+          edit: 'Element bearbeiten',
+          delete: 'Element löschen',
+          download: 'Datei herunterladen'
+        },
+        messages: {
+          created: 'Element erfolgreich erstellt',
+          updated: 'Element aktualisiert',
+          deleted: 'Element gelöscht'
+        },
+        filters: {
+          competitionAll: 'Alle Wettbewerbe',
+          visibilityAll: 'Alle Sichtbarkeiten'
+        }
+      },
+      educationalCenters: {
+        title: 'Bildungseinrichtungen',
+        description: 'Teilnehmende Bildungseinrichtungen',
+        fields: {
+          name: 'Name der Einrichtung',
+          country: 'Land',
+          city: 'Stadt',
+          address: 'Adresse',
+          website: 'Webseite',
+          phone: 'Telefon',
+          email: 'Kontakt-E-Mail',
+          logo: 'Logo',
+          description: 'Beschreibung',
+          admin: 'Einrichtungsadministrator'
+        },
+        status: {
+          pending: 'Ausstehende Genehmigung',
+          approved: 'Genehmigt',
+          rejected: 'Abgelehnt'
+        },
+        actions: {
+          create: 'Einrichtung registrieren',
+          edit: 'Einrichtung bearbeiten',
+          delete: 'Einrichtung löschen',
+          approve: 'Einrichtung genehmigen',
+          reject: 'Einrichtung ablehnen'
+        },
+        messages: {
+          created: 'Bildungseinrichtung erfolgreich registriert',
+          updated: 'Bildungseinrichtung aktualisiert',
+          deleted: 'Bildungseinrichtung gelöscht',
+          approved: 'Bildungseinrichtung genehmigt',
+          rejected: 'Bildungseinrichtung abgelehnt'
+        },
+        filters: {
+          countryAll: 'Alle Länder',
+          statusAll: 'Alle Status'
+        }
+      },
+      centerApproval: {
+        title: 'Zentrumsgenehmigung',
+        reason: {
+          placeholder: 'Geben Sie den Grund für die Entscheidung ein...'
+        }
+      },
       feedback: {
         Title: "Feedback",
         Description: "Meinungen unserer Nutzer",
@@ -1354,10 +1998,154 @@ const resources = {
         cancel: 'Abbrechen',
         edit: 'Bearbeiten',
         close: 'Schließen',
+        loading: 'Lädt...',
         skipToContent: 'Zum Inhalt springen',
         adminModeActive: 'Admin-Modus aktiv',
         showPassword: 'Passwort anzeigen',
-        hidePassword: 'Passwort verbergen'
+        hidePassword: 'Passwort verbergen',
+        create: 'Erstellen',
+        approve: 'Genehmigen',
+        reject: 'Ablehnen'
+      },
+      status: {
+        label: 'Status'
+      },
+      admin: {
+        centers: {
+          title: 'Bildungseinrichtungen verwalten',
+          description: 'Registrierte Bildungseinrichtungen verwalten',
+          create: 'Zentrum erstellen',
+          edit: 'Zentrum bearbeiten',
+          search: 'Zentren suchen...',
+          empty: 'Keine Zentren gefunden',
+          approved: 'Zentrum genehmigt',
+          rejected: 'Zentrum abgelehnt',
+          deleted: 'Zentrum gelöscht',
+          updated: 'Zentrum aktualisiert',
+          created: 'Zentrum erstellt',
+          confirmDelete: 'Dieses Zentrum löschen?',
+          rejectReason: 'Ablehnungsgrund:',
+          status: {
+            pending: 'Ausstehend',
+            approved: 'Genehmigt',
+            rejected: 'Abgelehnt'
+          },
+          filter: {
+            all: 'Alle',
+            pending: 'Ausstehend',
+            approved: 'Genehmigt',
+            rejected: 'Abgelehnt'
+          },
+          form: {
+            name: 'Name',
+            city: 'Stadt',
+            email: 'E-Mail',
+            website: 'Webseite',
+            description: 'Beschreibung'
+          },
+          centerRegistrationsTitle: 'Wettbewerbsanfragen des Zentrums',
+          centerRegistrationsDesc: 'Anfragen von Teams deines Zentrums genehmigen oder ablehnen.',
+          noRegistrations: 'Keine ausstehenden Anfragen.',
+          competitionLabel: 'Wettbewerb',
+          centerStudentsTitle: 'Schüler des Zentrums',
+          centerStudentsDesc: 'Benutzer, die deinem Bildungszentrum zugeordnet sind.',
+          noStudents: 'Keine zugeordneten Schüler.',
+          centerTeamsTitle: 'Teams des Zentrums',
+          centerTeamsDesc: 'Teams, die deinem Bildungszentrum zugeordnet sind.',
+          noTeams: 'Keine zugeordneten Teams.',
+          confirmRemoveUser: 'Diesen Schüler aus dem Zentrum entfernen?',
+          confirmRemoveTeam: 'Dieses Team aus dem Zentrum entfernen?',
+          centerApprovedReason: 'Vom Zentrum genehmigt',
+          centerRejectReason: 'Ablehnungsgrund:'
+        },
+        archives: {
+          title: 'Archiv verwalten',
+          description: 'Archivdateien des Zentrums verwalten',
+          upload: 'Datei hochladen',
+          edit: 'Datei bearbeiten',
+          search: 'Dateien suchen...',
+          empty: 'Keine Dateien gefunden',
+          deleted: 'Datei gelöscht',
+          updated: 'Datei aktualisiert',
+          created: 'Datei erstellt',
+          confirmDelete: 'Diese Datei löschen?',
+          types: {
+            document: 'Dokument',
+            image: 'Bild',
+            video: 'Video',
+            other: 'Sonstiges'
+          },
+          visibility: {
+            public: 'Öffentlich',
+            restricted: 'Eingeschränkt',
+            hidden: 'Versteckt'
+          },
+          form: {
+            title: 'Titel',
+            type: 'Typ',
+            competition: 'Wettbewerb',
+            noCompetition: '-- Kein Wettbewerb --',
+            year: 'Jahr',
+            visibility: 'Sichtbarkeit',
+            file: 'Datei',
+            description: 'Beschreibung',
+            allowedEmails: 'Erlaubte E-Mails',
+            emailsPlaceholder: 'email1@beispiel.de, email2@beispiel.de',
+            emailsHelp: 'E-Mails mit Kommas trennen. Nur diese Benutzer können die Datei sehen.'
+          }
+        },
+        requests: {
+          title: 'Zentrum-Admin-Anfragen',
+          description: 'Anfragen von Benutzern zur Zentrumsadministration verwalten',
+          empty: 'Keine Anfragen gefunden',
+          approved: 'Anfrage genehmigt',
+          rejected: 'Anfrage abgelehnt',
+          rejectReason: 'Ablehnungsgrund:',
+          reason: 'Grund',
+          requestedAt: 'Angefordert',
+          status: {
+            pending: 'Ausstehend',
+            approved: 'Genehmigt',
+            rejected: 'Abgelehnt'
+          },
+          filter: {
+            pending: 'Ausstehend',
+            approved: 'Genehmigt',
+            rejected: 'Abgelehnt'
+          },
+          type: {
+            create: 'Zentrum erstellen',
+            join: 'Zentrum beitreten'
+          }
+        },
+        posts: {
+          title: 'Beitragsverwaltung',
+          description: 'Erstellen, bearbeiten und löschen Sie Systembeiträge.',
+          create: 'Neuer Beitrag',
+          edit: 'Beitrag bearbeiten',
+          searchPlaceholder: 'Beiträge suchen...',
+          titleLabel: 'Titel',
+          contentLabel: 'Inhalt',
+          pinPost: 'Beitrag anheften',
+          tableTitle: 'Titel',
+          tableAuthor: 'Autor',
+          tableStatus: 'Status',
+          tableActions: 'Aktionen',
+          noPosts: 'Keine Beiträge vorhanden.',
+          confirmDelete: 'Diesen Beitrag löschen?',
+          pinned: 'Angeheftet'
+        }
+      },
+      actions: {
+        save: 'Speichern',
+        cancel: 'Abbrechen',
+        delete: 'Löschen',
+        edit: 'Bearbeiten',
+        create: 'Erstellen',
+        confirmDelete: 'Sind Sie sicher, dass Sie diesen Eintrag löschen möchten?'
+      },
+      charts: {
+        empty: 'Keine Daten verfügbar'
       },
       theme: {
         toggle: 'Theme wechseln',
@@ -1616,6 +2404,9 @@ const resources = {
         subtitle: 'Sieh dir alle Streams der Wettbewerbe an',
         loading: 'Streams werden geladen...',
         error: 'Fehler:',
+        noStreams: 'Keine Streams verfügbar.',
+        noCenter: 'Kein Bildungszentrum',
+        created: 'Erstellt',
         status: {
           live: 'Live',
           offline: 'Offline',
@@ -1657,6 +2448,11 @@ const resources = {
       profile: {
         heroTagline: 'Verknüpftes Konto',
         heroNote: 'Änderungen synchronisieren mit /users/me.',
+        educationalCenter: 'Bildungszentrum',
+        noEducationalCenter: 'Kein Zentrum zugewiesen',
+        centerAdminBadge: 'Administrator',
+        studentBadge: 'Schüler',
+        centersLoadError: 'Zentren konnten nicht geladen werden.',
         feedback: {
           success: 'Profil erfolgreich aktualisiert.',
           error: 'Profil konnte nicht aktualisiert werden.',
@@ -1680,7 +2476,24 @@ const resources = {
         description: 'Die Daten werden an /auth/register gesendet, um ein Token zu erstellen und dich zu speichern.',
         hasAccount: 'Hast du schon ein Konto?',
         loginLink: 'Anmelden',
-        acceptTerms: 'Ich akzeptiere die'
+        acceptTerms: 'Ich akzeptiere die',
+        studentCenterLabel: 'Bildungszentrum (optional)',
+        studentCenterPlaceholder: '-- Kein Zentrum ausgewählt --',
+        studentCenterHelp: 'Optional. Du kannst es später in deinem Profil ändern.',
+        wantsCenterAdmin: 'Möchtest du ein Bildungszentrum verwalten?',
+        centerAdminDescription: 'Als Zentrumsadministrator kannst du Teams, Streams und Dateien deiner Einrichtung verwalten.',
+        selectExistingCenter: 'Bestehendes Zentrum auswählen',
+        noCenter: '-- Zentrum auswählen --',
+        orCreateCenter: 'Zentrum nicht gefunden? Hier erstellen',
+        createNewCenter: 'Neues Bildungszentrum erstellen',
+        centerName: 'Name des Zentrums',
+        centerNamePlaceholder: 'Gymnasium / Hochschule / Universität...',
+        centerCity: 'Stadt',
+        centerCityPlaceholder: 'Berlin, München...',
+        centerEmail: 'Kontakt-E-Mail',
+        centerWebsite: 'Webseite',
+        centerPendingApproval: 'Das Zentrum muss von einem Super-Administrator genehmigt werden.',
+        centerNameRequired: 'Der Name des Zentrums ist erforderlich'
       },
       general: {
         countriesLoading: 'Länder werden geladen…',
@@ -1700,7 +2513,13 @@ const resources = {
           streamUrl: "Stream-URL (Twitch/YouTube)",
           submitCreate: "Team erstellen",
           submitSave: "Änderungen speichern",
-          saveUrl: "URL speichern"
+          saveUrl: "URL speichern",
+          centerDescription: "Verbinde dein Team mit einer bestehenden Bildungseinrichtung oder erstelle eine neue.",
+          selectCenter: "Bildungseinrichtung auswählen",
+          noCenter: "-- Keine Bildungseinrichtung --",
+          orCreateCenter: "Findest du deine Einrichtung nicht?",
+          createNewCenter: "Neue Einrichtung erstellen",
+          onlyAdminsCanCreate: "Nur Zentrumsadministratoren können neue Bildungseinrichtungen erstellen."
         },
         tabs: {
           overview: "Übersicht",
@@ -1749,7 +2568,13 @@ const resources = {
           activeTitle: "Aktive Anmeldungen",
           noRegistrations: "Keine Anmeldungen gefunden.",
           compPrefix: "Wettbewerb #",
-          reason: "Grund:"
+          reason: "Grund:",
+          centerReason: "Zentrum:",
+          status: {
+            pending: "Ausstehend",
+            approved: "Genehmigt",
+            rejected: "Abgelehnt"
+          }
         },
         settings: {
           editTitle: "Informationen bearbeiten",

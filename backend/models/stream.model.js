@@ -28,7 +28,15 @@ export default function defineStreamModel(sequelize, DataTypes) {
     },
     team_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true  // Changed to allow streams without teams (center-based)
+    },
+    educational_center_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'EducationalCenters',
+        key: 'id'
+      }
     },
     created_at: {
       type: DataTypes.DATE,
@@ -49,6 +57,12 @@ export default function defineStreamModel(sequelize, DataTypes) {
       foreignKey: 'team_id',
       as: 'team'
     });
+    if (models.EducationalCenter) {
+      Stream.belongsTo(models.EducationalCenter, {
+        foreignKey: 'educational_center_id',
+        as: 'educationalCenter'
+      });
+    }
   };
 
   return Stream;

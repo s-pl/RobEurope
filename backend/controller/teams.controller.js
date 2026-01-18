@@ -34,12 +34,24 @@ export const createTeam = async (req, res) => {
     if (existingMembership) return res.status(400).json({ error: 'Ya perteneces a un equipo' });
 
     // Validate foreign keys before attempting insert to return a friendly 400
-    const { country_id } = req.body;
+    const { country_id, educational_center_id } = req.body;
     if (country_id) {
       // Country may be optional in some deployments
       if (Country) {
         const c = await Country.findByPk(country_id);
         if (!c) return res.status(400).json({ error: `country_id '${country_id}' does not exist` });
+      }
+    }
+
+    // Validate educational center if provided
+    if (educational_center_id) {
+      const EducationalCenter = db.EducationalCenter;
+      if (EducationalCenter) {
+        const center = await EducationalCenter.findByPk(educational_center_id);
+        if (!center) return res.status(400).json({ error: `educational_center_id '${educational_center_id}' does not exist` });
+        if (center.approval_status !== 'approved') {
+          return res.status(400).json({ error: 'El centro educativo aún no ha sido aprobado' });
+        }
       }
     }
 

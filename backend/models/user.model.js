@@ -98,8 +98,21 @@ export default async function defineUserModel(sequelize, DataTypes) {
         allowNull: true
     },
     role: {
-        type: DataTypes.ENUM('user', 'super_admin'),
+        type: DataTypes.ENUM('user', 'center_admin', 'super_admin'),
         defaultValue: 'user'
+    },
+    pending_role: {
+        type: DataTypes.ENUM('user', 'center_admin', 'super_admin'),
+        allowNull: true,
+        defaultValue: null
+    },
+    educational_center_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'EducationalCenter',
+            key: 'id'
+        }
     },
     is_active: {
         type: DataTypes.BOOLEAN,
@@ -117,6 +130,7 @@ export default async function defineUserModel(sequelize, DataTypes) {
    * - User belongs to a Country.
    * - User has many PostLikes.
    * - User has many Comments (as author).
+   * - User belongs to an EducationalCenter (for center_admin role).
    * @param {Object} models - All registered models.
    */
   User.associate = (models) => {
@@ -124,6 +138,12 @@ export default async function defineUserModel(sequelize, DataTypes) {
     User.belongsTo(models.Country, { foreignKey: 'country_id' });
     User.hasMany(models.PostLike, { foreignKey: 'user_id' });
     User.hasMany(models.Comment, { foreignKey: 'author_id' });
+    if (models.EducationalCenter) {
+      User.belongsTo(models.EducationalCenter, {
+        foreignKey: 'educational_center_id',
+        as: 'educationalCenter'
+      });
+    }
   };
 
   return User;

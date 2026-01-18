@@ -29,6 +29,7 @@ Welcome to the RobEurope documentation. This index provides quick access to all 
 | [README](../README.md) | Project overview, quick start, and basic information |
 | [Architecture](architecture.md) | System design, components, and technology decisions |
 | [Contributing](contributing.md) | Guidelines for contributing to the project |
+| [¿how auth works?](authentication.md) | Md explaining how authentication works|
 
 ### Technical Documentation
 
@@ -38,6 +39,7 @@ Welcome to the RobEurope documentation. This index provides quick access to all 
 | [Frontend Guide](frontend.md) | React application, components, hooks, state management |
 | [Database Schema](database.md) | ERD diagrams, models, relationships, migrations |
 | [API Reference](api.md) | REST endpoints, request/response formats, WebSocket events |
+| [Authentication](authentication.md) | Login flows, OAuth, LDAP, sessions, role-based access |
 
 ### Operations Documentation
 
@@ -45,6 +47,7 @@ Welcome to the RobEurope documentation. This index provides quick access to all 
 |----------|-------------|
 | [Deployment Guide](deployment.md) | Production deployment, server setup, configuration |
 | [Security](security.md) | Authentication, authorization, security best practices |
+| [Redis](redis.md) | Redis integration, caching, throttling, key patterns |
 
 ### Visual Documentation
 
@@ -91,10 +94,12 @@ flowchart TB
 
 ### Authentication
 
-- [Password Authentication](security.md#password-authentication)
-- [OAuth Integration](security.md#oauth-20-integration)
-- [Session Management](security.md#session-management)
-- [LDAP Authentication](security.md#ldap-security)
+- [Authentication System](authentication.md) - Complete authentication documentation
+- [Password Authentication](authentication.md#local-authentication)
+- [OAuth Integration](authentication.md#oauth-20-providers)
+- [Session Management](authentication.md#session-management)
+- [LDAP Authentication](authentication.md#ldap-authentication)
+- [Role-Based Access Control](authentication.md#role-based-access-control)
 
 ### API Development
 

@@ -35,7 +35,36 @@
     "countries": "Countries",
     "logs": "Logs",
     "ldap": "LDAP Users",
-    "redis": "Redis Explorer"
+    "redis": "Redis Explorer",
+    "educationalCenters": "Educational Centers",
+    "archives": "Archive",
+    "gallery": "Gallery",
+    "centerRequests": "Center Requests",
+    "contentManagement": "Content Management"
+  },
+  "centerRequests": {
+    "metaTitle": "Center Admin Requests",
+    "eyebrow": "Request Management",
+    "title": "Center Admin Requests",
+    "description": "Review and manage user requests to become educational center administrators.",
+    "table": {
+      "user": "User",
+      "center": "Educational Center",
+      "type": "Type",
+      "status": "Status",
+      "date": "Date",
+      "decidedBy": "Decided by"
+    },
+    "types": {
+      "createCenter": "Create Center",
+      "joinCenter": "Join Center"
+    },
+    "noRequests": "No requests found.",
+    "confirmApprove": "Approve this request?",
+    "rejectTitle": "Reject Request",
+    "rejectReason": "Rejection reason (optional)",
+    "rejectPlaceholder": "Enter rejection reason...",
+    "reason": "Reason"
   },
   "auth": {
     "metaTitle": "Admin access",
@@ -347,6 +376,36 @@
         "registrationStart": "Registration start",
         "registrationEnd": "Registration end"
       }
+    },
+    "educationalCenters": {
+      "label": "Educational Centers",
+      "fields": {
+        "address": "Address",
+        "city": "City",
+        "countryId": "Country ID",
+        "phone": "Phone",
+        "isVerified": "Verified"
+      }
+    },
+    "archives": {
+      "label": "Archive",
+      "fields": {
+        "fileUrl": "File URL",
+        "fileType": "File Type",
+        "competitionId": "Competition ID",
+        "year": "Year",
+        "isVisible": "Visible"
+      }
+    },
+    "gallery": {
+      "label": "Gallery",
+      "fields": {
+        "mediaUrl": "Media URL",
+        "mediaType": "Media Type",
+        "competitionId": "Competition ID",
+        "year": "Year",
+        "isFeatured": "Featured"
+      }
     }
   },
   "ldap": {
@@ -430,5 +489,187 @@
       "newUsers": "New users: {count}"
     },
     "empty": "No data available"
+  },
+  "educationalCenters": {
+    "metaTitle": "Educational Centers Management",
+    "eyebrow": "Centers",
+    "title": "Educational Centers",
+    "description": "Manage educational centers, their teams and associated streams.",
+    "nav": "Educational Centers",
+    "singular": "Educational Center",
+    "plural": "Educational Centers",
+    "status": {
+      "pending": "Pending Approval",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "fields": {
+      "name": "Center name",
+      "country": "Country",
+      "city": "City",
+      "address": "Address",
+      "website": "Website",
+      "phone": "Phone",
+      "email": "Contact email",
+      "logo": "Logo",
+      "description": "Description",
+      "admin": "Center administrator"
+    },
+    "actions": {
+      "create": "Create center",
+      "edit": "Edit center",
+      "delete": "Delete center",
+      "approve": "Approve center",
+      "reject": "Reject center",
+      "viewTeams": "View teams",
+      "viewStreams": "View streams"
+    },
+    "messages": {
+      "created": "Educational center created successfully",
+      "updated": "Educational center updated",
+      "deleted": "Educational center deleted",
+      "approved": "Educational center approved",
+      "rejected": "Educational center rejected",
+      "pendingApproval": "Your request is pending approval"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name, city...",
+      "statusAll": "All statuses",
+      "countryAll": "All countries"
+    },
+    "table": {
+      "headers": {
+        "name": "Name",
+        "country": "Country",
+        "city": "City",
+        "admin": "Administrator",
+        "status": "Status",
+        "teams": "Teams",
+        "created": "Created"
+      }
+    }
+  },
+  "archives": {
+    "metaTitle": "Information Archive",
+    "eyebrow": "Archive",
+    "title": "Information Archive",
+    "description": "Manage documents, files and informative texts by competition.",
+    "nav": "Archive",
+    "singular": "Archive item",
+    "plural": "Archive items",
+    "visibility": {
+      "hidden": "Hidden",
+      "public": "Public",
+      "restricted": "Restricted"
+    },
+    "contentType": {
+      "file": "File",
+      "text": "Text",
+      "mixed": "Mixed"
+    },
+    "fields": {
+      "title": "Title",
+      "description": "Description",
+      "content": "Content",
+      "file": "Attached file",
+      "competition": "Competition",
+      "visibility": "Visibility",
+      "allowedEmails": "Allowed emails",
+      "sortOrder": "Sort order"
+    },
+    "actions": {
+      "create": "Create item",
+      "edit": "Edit item",
+      "delete": "Delete item",
+      "download": "Download file",
+      "reorder": "Reorder items"
+    },
+    "messages": {
+      "created": "Item created successfully",
+      "updated": "Item updated",
+      "deleted": "Item deleted",
+      "reordered": "Order updated"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by title...",
+      "visibilityAll": "All visibilities",
+      "competitionAll": "All competitions"
+    },
+    "table": {
+      "headers": {
+        "title": "Title",
+        "type": "Type",
+        "competition": "Competition",
+        "visibility": "Visibility",
+        "created": "Created"
+      }
+    }
+  },
+  "gallery": {
+    "metaTitle": "Media Gallery",
+    "eyebrow": "Gallery",
+    "title": "Media Gallery",
+    "description": "Manage images and videos organized by competition.",
+    "nav": "Gallery",
+    "mediaTypes": {
+      "image": "Image",
+      "video": "Video",
+      "all": "All"
+    },
+    "fields": {
+      "title": "Title",
+      "description": "Description",
+      "mediaType": "Media type",
+      "file": "File",
+      "url": "Media URL",
+      "thumbnail": "Thumbnail",
+      "duration": "Duration",
+      "competition": "Competition",
+      "featured": "Featured",
+      "order": "Order"
+    },
+    "actions": {
+      "upload": "Upload media",
+      "edit": "Edit media",
+      "delete": "Delete media",
+      "toggleFeatured": "Toggle featured",
+      "reorder": "Reorder gallery"
+    },
+    "messages": {
+      "uploaded": "Media uploaded successfully",
+      "updated": "Media updated",
+      "deleted": "Media deleted",
+      "featured": "Featured status changed",
+      "reordered": "Gallery order updated"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by title...",
+      "typeAll": "All types",
+      "competitionAll": "All competitions"
+    }
+  },
+  "centerApproval": {
+    "title": "Center Approval",
+    "description": "Manage requests from your educational center.",
+    "pending": "Pending requests",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "actions": {
+      "approve": "Approve request",
+      "reject": "Reject request"
+    },
+    "messages": {
+      "approved": "Request approved by center",
+      "rejected": "Request rejected by center"
+    },
+    "reason": {
+      "label": "Reason",
+      "placeholder": "Enter the reason for the decision..."
+    }
+  },
+  "roles": {
+    "user": "User",
+    "center_admin": "Center Administrator",
+    "super_admin": "Super Administrator"
   }
 }

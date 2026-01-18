@@ -1,5 +1,5 @@
 import db from '../models/index.js';
-const { User, Country } = db;
+const { User, Country, EducationalCenter } = db;
 
 import bcrypt from 'bcryptjs';
 import { Op } from 'sequelize';
@@ -174,7 +174,7 @@ export const updateSelf = async (req, res) => {
     if (!id) return res.status(401).json({ error: 'No autorizado' });
 
     // Allowed fields to update by user themselves
-    const allowed = ['first_name', 'last_name', 'phone', 'profile_photo_url', 'country_id', 'is_active'];
+    const allowed = ['first_name', 'last_name', 'phone', 'profile_photo_url', 'country_id', 'is_active', 'educational_center_id'];
     const updates = {};
     for (const key of allowed) {
       if (Object.prototype.hasOwnProperty.call(req.body, key)) updates[key] = req.body[key];
@@ -187,6 +187,21 @@ export const updateSelf = async (req, res) => {
       } else {
         const exists = await Country.findByPk(updates.country_id);
         if (!exists) return res.status(400).json({ error: 'Invalid country_id' });
+      }
+    }
+
+    // Validate educational center if requested
+    if (Object.prototype.hasOwnProperty.call(updates, 'educational_center_id')) {
+      if (updates.educational_center_id == null || updates.educational_center_id === '') {
+        updates.educational_center_id = null;
+      } else {
+        const centerId = Number(updates.educational_center_id);
+        if (!Number.isInteger(centerId)) return res.status(400).json({ error: 'Invalid educational_center_id' });
+        const center = await EducationalCenter.findByPk(centerId);
+        if (!center || center.approval_status !== 'approved') {
+          return res.status(400).json({ error: 'Educational center not found or not approved' });
+        }
+        updates.educational_center_id = centerId;
       }
     }
 

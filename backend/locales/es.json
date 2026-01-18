@@ -35,7 +35,36 @@
     "countries": "Países",
     "logs": "Logs",
     "ldap": "Usuarios LDAP",
-    "redis": "Redis Explorer"
+    "redis": "Redis Explorer",
+    "educationalCenters": "Centros Educativos",
+    "archives": "Archivo",
+    "gallery": "Galería",
+    "centerRequests": "Solicitudes de Centro",
+    "contentManagement": "Gestión de Contenido"
+  },
+  "centerRequests": {
+    "metaTitle": "Solicitudes de Centro Admin",
+    "eyebrow": "Gestión de Solicitudes",
+    "title": "Solicitudes de Centro Admin",
+    "description": "Revisa y gestiona las solicitudes de usuarios para convertirse en administradores de centros educativos.",
+    "table": {
+      "user": "Usuario",
+      "center": "Centro Educativo",
+      "type": "Tipo",
+      "status": "Estado",
+      "date": "Fecha",
+      "decidedBy": "Decidido por"
+    },
+    "types": {
+      "createCenter": "Crear Centro",
+      "joinCenter": "Unirse a Centro"
+    },
+    "noRequests": "No hay solicitudes.",
+    "confirmApprove": "¿Aprobar esta solicitud?",
+    "rejectTitle": "Rechazar Solicitud",
+    "rejectReason": "Razón del rechazo (opcional)",
+    "rejectPlaceholder": "Escribe la razón del rechazo...",
+    "reason": "Razón"
   },
   "auth": {
     "metaTitle": "Acceso administrativo",
@@ -347,6 +376,36 @@
         "registrationStart": "Inicio registro",
         "registrationEnd": "Fin registro"
       }
+    },
+    "educationalCenters": {
+      "label": "Centros Educativos",
+      "fields": {
+        "address": "Dirección",
+        "city": "Ciudad",
+        "countryId": "País ID",
+        "phone": "Teléfono",
+        "isVerified": "Verificado"
+      }
+    },
+    "archives": {
+      "label": "Archivo",
+      "fields": {
+        "fileUrl": "URL del Archivo",
+        "fileType": "Tipo de Archivo",
+        "competitionId": "Competición ID",
+        "year": "Año",
+        "isVisible": "Visible"
+      }
+    },
+    "gallery": {
+      "label": "Galería",
+      "fields": {
+        "mediaUrl": "URL del Media",
+        "mediaType": "Tipo de Media",
+        "competitionId": "Competición ID",
+        "year": "Año",
+        "isFeatured": "Destacado"
+      }
     }
   },
   "ldap": {
@@ -430,5 +489,187 @@
       "newUsers": "Nuevos usuarios: {count}"
     },
     "empty": "No hay datos disponibles"
+  },
+  "educationalCenters": {
+    "metaTitle": "Gestión de Centros Educativos",
+    "eyebrow": "Centros",
+    "title": "Centros Educativos",
+    "description": "Administra los centros educativos, sus equipos y streams asociados.",
+    "nav": "Centros Educativos",
+    "singular": "Centro Educativo",
+    "plural": "Centros Educativos",
+    "status": {
+      "pending": "Pendiente de aprobación",
+      "approved": "Aprobado",
+      "rejected": "Rechazado"
+    },
+    "fields": {
+      "name": "Nombre del centro",
+      "country": "País",
+      "city": "Ciudad",
+      "address": "Dirección",
+      "website": "Sitio web",
+      "phone": "Teléfono",
+      "email": "Email de contacto",
+      "logo": "Logo",
+      "description": "Descripción",
+      "admin": "Administrador del centro"
+    },
+    "actions": {
+      "create": "Crear centro",
+      "edit": "Editar centro",
+      "delete": "Eliminar centro",
+      "approve": "Aprobar centro",
+      "reject": "Rechazar centro",
+      "viewTeams": "Ver equipos",
+      "viewStreams": "Ver streams"
+    },
+    "messages": {
+      "created": "Centro educativo creado correctamente",
+      "updated": "Centro educativo actualizado",
+      "deleted": "Centro educativo eliminado",
+      "approved": "Centro educativo aprobado",
+      "rejected": "Centro educativo rechazado",
+      "pendingApproval": "Tu solicitud está pendiente de aprobación"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por nombre, ciudad...",
+      "statusAll": "Todos los estados",
+      "countryAll": "Todos los países"
+    },
+    "table": {
+      "headers": {
+        "name": "Nombre",
+        "country": "País",
+        "city": "Ciudad",
+        "admin": "Administrador",
+        "status": "Estado",
+        "teams": "Equipos",
+        "created": "Creado"
+      }
+    }
+  },
+  "archives": {
+    "metaTitle": "Archivo de información",
+    "eyebrow": "Archivo",
+    "title": "Archivo de Información",
+    "description": "Gestiona documentos, archivos y textos informativos por competición.",
+    "nav": "Archivo",
+    "singular": "Elemento de archivo",
+    "plural": "Elementos de archivo",
+    "visibility": {
+      "hidden": "Oculto",
+      "public": "Público",
+      "restricted": "Restringido"
+    },
+    "contentType": {
+      "file": "Archivo",
+      "text": "Texto",
+      "mixed": "Mixto"
+    },
+    "fields": {
+      "title": "Título",
+      "description": "Descripción",
+      "content": "Contenido",
+      "file": "Archivo adjunto",
+      "competition": "Competición",
+      "visibility": "Visibilidad",
+      "allowedEmails": "Emails permitidos",
+      "sortOrder": "Orden"
+    },
+    "actions": {
+      "create": "Crear elemento",
+      "edit": "Editar elemento",
+      "delete": "Eliminar elemento",
+      "download": "Descargar archivo",
+      "reorder": "Reordenar elementos"
+    },
+    "messages": {
+      "created": "Elemento creado correctamente",
+      "updated": "Elemento actualizado",
+      "deleted": "Elemento eliminado",
+      "reordered": "Orden actualizado"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por título...",
+      "visibilityAll": "Todas las visibilidades",
+      "competitionAll": "Todas las competiciones"
+    },
+    "table": {
+      "headers": {
+        "title": "Título",
+        "type": "Tipo",
+        "competition": "Competición",
+        "visibility": "Visibilidad",
+        "created": "Creado"
+      }
+    }
+  },
+  "gallery": {
+    "metaTitle": "Galería de medios",
+    "eyebrow": "Galería",
+    "title": "Galería de Medios",
+    "description": "Gestiona imágenes y vídeos organizados por competición.",
+    "nav": "Galería",
+    "mediaTypes": {
+      "image": "Imagen",
+      "video": "Vídeo",
+      "all": "Todos"
+    },
+    "fields": {
+      "title": "Título",
+      "description": "Descripción",
+      "mediaType": "Tipo de medio",
+      "file": "Archivo",
+      "url": "URL del medio",
+      "thumbnail": "Miniatura",
+      "duration": "Duración",
+      "competition": "Competición",
+      "featured": "Destacado",
+      "order": "Orden"
+    },
+    "actions": {
+      "upload": "Subir medio",
+      "edit": "Editar medio",
+      "delete": "Eliminar medio",
+      "toggleFeatured": "Alternar destacado",
+      "reorder": "Reordenar galería"
+    },
+    "messages": {
+      "uploaded": "Medio subido correctamente",
+      "updated": "Medio actualizado",
+      "deleted": "Medio eliminado",
+      "featured": "Estado de destacado cambiado",
+      "reordered": "Orden de galería actualizado"
+    },
+    "filters": {
+      "searchPlaceholder": "Buscar por título...",
+      "typeAll": "Todos los tipos",
+      "competitionAll": "Todas las competiciones"
+    }
+  },
+  "centerApproval": {
+    "title": "Aprobación del centro",
+    "description": "Gestiona las solicitudes de tu centro educativo.",
+    "pending": "Solicitudes pendientes",
+    "approved": "Aprobadas",
+    "rejected": "Rechazadas",
+    "actions": {
+      "approve": "Aprobar solicitud",
+      "reject": "Rechazar solicitud"
+    },
+    "messages": {
+      "approved": "Solicitud aprobada por el centro",
+      "rejected": "Solicitud rechazada por el centro"
+    },
+    "reason": {
+      "label": "Motivo",
+      "placeholder": "Indica el motivo de la decisión..."
+    }
+  },
+  "roles": {
+    "user": "Usuario",
+    "center_admin": "Administrador de centro",
+    "super_admin": "Super Administrador"
   }
 }
