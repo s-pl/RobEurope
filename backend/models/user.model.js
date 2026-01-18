@@ -101,11 +101,16 @@ export default async function defineUserModel(sequelize, DataTypes) {
         type: DataTypes.ENUM('user', 'center_admin', 'super_admin'),
         defaultValue: 'user'
     },
+    pending_role: {
+        type: DataTypes.ENUM('user', 'center_admin', 'super_admin'),
+        allowNull: true,
+        defaultValue: null
+    },
     educational_center_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
-            model: 'EducationalCenters',
+            model: 'EducationalCenter',
             key: 'id'
         }
     },

@@ -107,6 +107,61 @@ export const register = async (req, res) => {
       created_at: now
     });
 
+    // Handle educational center admin request if provided
+    const { educational_center_request, requested_role } = req.body;
+    if (requested_role === 'center_admin' && educational_center_request) {
+      const { EducationalCenter, CenterAdminRequest } = db;
+
+      if (educational_center_request.action === 'create' && educational_center_request.center_data) {
+        // Create a new educational center with pending status
+        const centerData = educational_center_request.center_data;
+        const newCenter = await EducationalCenter.create({
+          name: centerData.name,
+          city: centerData.city || null,
+          contact_email: centerData.contact_email || null,
+          website: centerData.website || null,
+          approval_status: 'pending',
+          created_by_user_id: user.id,
+          created_at: now
+        });
+
+        // Create a request for center_admin role
+        if (CenterAdminRequest) {
+          await CenterAdminRequest.create({
+            user_id: user.id,
+            educational_center_id: newCenter.id,
+            status: 'pending',
+            request_type: 'create_center',
+            created_at: now
+          });
+        }
+
+        // Update user with pending center admin role request
+        await user.update({ pending_role: 'center_admin', educational_center_id: newCenter.id });
+
+      } else if (educational_center_request.action === 'join' && educational_center_request.center_id) {
+        // User wants to join an existing center as admin
+        const centerId = educational_center_request.center_id;
+        const existingCenter = await EducationalCenter.findByPk(centerId);
+        
+        if (existingCenter && existingCenter.approval_status === 'approved') {
+          // Create a request for center_admin role at this center
+          if (CenterAdminRequest) {
+            await CenterAdminRequest.create({
+              user_id: user.id,
+              educational_center_id: centerId,
+              status: 'pending',
+              request_type: 'join_center',
+              created_at: now
+            });
+          }
+
+          // Update user with pending center admin role request
+          await user.update({ pending_role: 'center_admin', educational_center_id: centerId });
+        }
+      }
+    }
+
     // Set session user
     const userSession = { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, username: user.username, role: user.role };
     req.session.user = userSession;
