@@ -110,7 +110,7 @@ const AdminArchives = () => {
         setFeedback({ type: 'success', message: t('admin.archives.updated') || 'Archivo actualizado' });
       } else {
         // For file upload, use fetch directly with correct URL
-        const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+        const baseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
         const apiUrl = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
         const response = await fetch(`${apiUrl}/archives`, {
           method: 'POST',
