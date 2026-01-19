@@ -23,8 +23,8 @@ const Archive = () => {
     setStatus({ loading: true, error: '' });
     try {
       const url = selectedCompetition
-        ? `/archives?competition_id=${selectedCompetition}`
-        : '/archives';
+        ? `archives?competition_id=${selectedCompetition}`
+        : 'archives';
       const data = await apiRequest(url);
       setItems(Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : []);
     } catch (e) {
