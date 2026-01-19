@@ -1,51 +1,51 @@
-# Logs — Configuración y uso
+# Logs — Configuration and Usage
 
-Este documento describe la configuración del logger central en `backend/utils/logger.js`.
+This document describes the central logger configuration in `backend/utils/logger.js`.
 
-Resumen
-- Librería: `winston` con `winston-daily-rotate-file` para rotación diaria.
-- Formatos: timestamps + JSON para ficheros, consola en modo coloreado y simple.
+Overview
+- Library: `winston` with `winston-daily-rotate-file` for daily rotation.
+- Formats: timestamps + JSON for files, colored/simple console output.
 - Transports:
-  - `access-<DATE>.log` (nivel `info`), retenidos `14d`.
-  - `error-<DATE>.log` (nivel `error`), retenidos `30d`.
-  - `Console` (nivel `debug`) para salida en desarrollo/interactivo.
-- Manejo de excepciones: archivo `exceptions-<DATE>.log`.
+  - `access-<DATE>.log` (`info` level), retained `14d`.
+  - `error-<DATE>.log` (`error` level), retained `30d`.
+  - `Console` (`debug` level) for development/interactive output.
+- Exception handling: `exceptions-<DATE>.log` file.
 
-Ubicaciones y nombres de fichero
-- Carpeta base de logs: `logs` (resuelta mediante `path.resolve('logs')`).
-- Nombres: `access-YYYY-MM-DD.log`, `error-YYYY-MM-DD.log`, `exceptions-YYYY-MM-DD.log`.
+Locations and file names
+- Base log folder: `logs` (resolved via `path.resolve('logs')`).
+- Names: `access-YYYY-MM-DD.log`, `error-YYYY-MM-DD.log`, `exceptions-YYYY-MM-DD.log`.
 
-Formato y niveles
-- El logger principal usa JSON con `timestamp` para archivos (útil para ingestión/lectura por sistemas de logging).
-- Consola usa formato legible (colores + texto simple) y muestra mensajes de nivel `debug` o superior.
-- Nivel por defecto establecido en `info` en el código; los `Console` muestran `debug`.
+Format and levels
+- The main logger uses JSON with `timestamp` for files (useful for ingestion/log-reading systems).
+- Console output uses a readable format (colors + plain text) and shows messages at `debug` or higher.
+- Default level is set to `info`; the console transport emits `debug`.
 
-Cómo usar el logger en el código
-1. Importar la instancia compartida:
+How to use the logger in code
+1. Import the shared instance:
 
 ```js
 import logger from '../utils/logger.js';
 
-logger.info('Servidor iniciado en puerto 3000');
-logger.error('Error al procesar petición', { err });
-logger.debug('Valores de entrada', { body });
+logger.info('Server started on port 3000');
+logger.error('Error processing request', { err });
+logger.debug('Input values', { body });
 ```
 
-Consideraciones operativas
-- Asegurarse de que la carpeta `logs` exista y tenga permisos de escritura para el proceso node.
-- Si ejecutas en contenedores, monta un volumen o dirige los logs al `stdout`/`stderr` según convenga (actualmente la consola ya emite logs visibles).
-- Retención: los ficheros viejos se eliminan automáticamente según `maxFiles` (`14d` / `30d`). Ajustar en `logger.js` si es necesario.
+Operational considerations
+- Ensure the `logs` folder exists and is writable by the Node.js process.
+- When running in containers, mount a volume or route the logs to `stdout`/`stderr` as needed (console already emits visible logs).
+- Retention: old files are deleted automatically according to `maxFiles` (`14d` / `30d`). Adjust in `logger.js` if necessary.
 
-Personalización
-- Cambiar la carpeta de logs: modificar `const logDir = path.resolve('logs')`.
-- Cambiar niveles/global config: ajustar `level` en `createLogger` o parametrizar mediante `process.env.LOG_LEVEL` si se desea.
-- Añadir transports (ej. Elasticsearch, syslog): seguir el patrón de `transports: [...]` y mantener el mismo `format`.
+Customization
+- Change the log folder: modify `const logDir = path.resolve('logs')`.
+- Adjust levels/global config: tweak `level` in `createLogger` or parameterize via `process.env.LOG_LEVEL`.
+- Add transports (e.g., Elasticsearch, syslog): follow the `transports: [...]` pattern and keep the same `format`.
 
-Errores y excepciones
-- Las excepciones no capturadas se registran en `exceptions-<DATE>.log` mediante `exceptionHandlers`.
-- Para capturar promesas rechazadas globalmente, añadir un handler para `unhandledRejection` que llame a `logger.error` y cierre el proceso si procede.
+Errors and exceptions
+- Uncaught exceptions are logged to `exceptions-<DATE>.log` through `exceptionHandlers`.
+- To capture rejected promises globally, add an `unhandledRejection` handler that calls `logger.error` and exits when appropriate.
 
-Dónde mirar primero
-- `backend/utils/logger.js` — implementación completa y parámetros por defecto.
+Where to look first
+- `backend/utils/logger.js` — full implementation and defaults.
 
-Si quieres, actualizo este documento para incluir ejemplos de rotación, configuración por entorno o integración con un colector (ELK/Datadog). Solo dime qué prefieres.
+If you want, I can extend this document with rotation examples, environment-specific config, or integration with a collector (ELK/Datadog). Just let me know.
