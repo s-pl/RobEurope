@@ -768,6 +768,19 @@
             }
         }
 
+        /* PDF export state (used by html2pdf-based exporter) */
+        .pdf-only { display: none; }
+        body.exporting-pdf .hide-on-pdf { display: none !important; }
+        body.exporting-pdf .pdf-only { display: block; page-break-after: always; text-align: center; padding: 60px 20px; }
+        body.exporting-pdf .main-layout { grid-template-columns: 1fr; }
+        body.exporting-pdf section { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+        /* Avoid breaking inside important blocks */
+        .no-break-inside { break-inside: avoid; page-break-inside: avoid; }
+        img { max-width: 100%; height: auto; }
+        /* PDF wrapper and page-break helpers */
+        .pdf-wrapper { max-width: 210mm; margin: 0 auto; background: #fff; }
+        .pdf-wrapper .content-section section { page-break-inside: avoid; break-inside: avoid; }
+
         /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -802,7 +815,7 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <div class="logo">RE</div>
+                
                 <div class="header-text">
                     <h1>
                         RobEurope
@@ -818,7 +831,14 @@
         </div>
     </header>
 
-    <div class="lang-selector">
+    <!-- Cover page for PDF export only -->
+    <div id="pdf-cover" class="pdf-only" aria-hidden="true">
+        <h1 class="pdf-title">RobEurope - Manual</h1>
+        <p class="pdf-subtitle">Manual de Usuario</p>
+        <p class="pdf-meta">v2.0 — Última actualización: Enero 2026</p>
+    </div>
+
+    <div class="lang-selector hide-on-pdf">
         <div class="container">
             <div class="lang-buttons">
                 <button class="lang-btn active" data-lang="es">Espanol</button>
@@ -827,7 +847,7 @@
                 <button class="lang-btn" data-lang="fr">Francais</button>
                 <button class="lang-btn" data-lang="sv">Svenska</button>
             </div>
-            <button class="print-btn" onclick="window.print()">
+            <button class="print-btn hide-on-pdf" onclick="window.print()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/>
                 </svg>
@@ -847,7 +867,7 @@
     <div class="container">
         <div class="main-layout">
             <!-- Sidebar Navigation -->
-            <aside class="sidebar">
+            <aside class="sidebar hide-on-pdf">
                 <nav id="sidebar-nav-es">
                     <h2>Contenido</h2>
                     <ul>
@@ -2075,6 +2095,19 @@
                             <div class="faq-answer">Si encuentra contenido que viola las normas de la comunidad, utilice el formulario de contacto para reportarlo, incluyendo el enlace al contenido en cuestion.</div>
                         </div>
                     </section>
+
+                    <section id="es-quick">
+                        <h2><span class="section-number">19</span> Resumen rápido: Lista de comprobación</h2>
+                        <ul class="checklist">
+                            <li class="checked">Crear y verificar su cuenta</li>
+                            <li class="checked">Completar perfil y datos del centro</li>
+                            <li class="checked">Crear equipo e invitar miembros</li>
+                            <li class="checked">Subir documentos y pruebas necesarias</li>
+                            <li class="checked">Revisar calendario y estado de inscripciones</li>
+                            <li class="checked">Configurar notificaciones</li>
+                        </ul>
+                        <p>Consejo: use el botón <strong>Exportar PDF</strong> para guardar el manual completo en su idioma.</p>
+                    </section>
                 </div>
 
                 <!-- ENGLISH CONTENT -->
@@ -3266,6 +3299,19 @@
                             <div class="faq-answer">If you find content that violates community rules, report it via the contact form and include the content link.</div>
                         </div>
                     </section>
+
+                    <section id="en-quick">
+                        <h2><span class="section-number">19</span> Quick Checklist</h2>
+                        <ul class="checklist">
+                            <li class="checked">Create and verify your account</li>
+                            <li class="checked">Complete profile and center information</li>
+                            <li class="checked">Create a team and invite members</li>
+                            <li class="checked">Upload required documents and submissions</li>
+                            <li class="checked">Check calendar and registration status</li>
+                            <li class="checked">Configure notifications</li>
+                        </ul>
+                        <p>Tip: use the <strong>Export PDF</strong> button to save the manual in your language.</p>
+                    </section>
                 </div>
 
                 <!-- GERMAN CONTENT -->
@@ -4450,6 +4496,19 @@
                             <div class="faq-question">Wie melde ich unangemessene Inhalte?</div>
                             <div class="faq-answer">Nutzen Sie das Kontaktformular und fügen Sie den Link zum betreffenden Inhalt hinzu.</div>
                         </div>
+                    </section>
+
+                    <section id="de-quick">
+                        <h2><span class="section-number">19</span> Schnellübersicht: Checkliste</h2>
+                        <ul class="checklist">
+                            <li class="checked">Konto erstellen und verifizieren</li>
+                            <li class="checked">Profil und Zentrumsdaten ausfüllen</li>
+                            <li class="checked">Team erstellen und Mitglieder einladen</li>
+                            <li class="checked">Erforderliche Dokumente hochladen</li>
+                            <li class="checked">Kalender und Anmeldestatus überprüfen</li>
+                            <li class="checked">Benachrichtigungen konfigurieren</li>
+                        </ul>
+                        <p>Tipp: Verwenden Sie die Schaltfläche <strong>Export PDF</strong>, um das Handbuch in Ihrer Sprache zu speichern.</p>
                     </section>
                 </div>
 
@@ -6797,7 +6856,7 @@
         </div>
     </div>
 
-    <footer>
+    <footer class="hide-on-pdf">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
@@ -6850,11 +6909,66 @@
         const exportBtn = document.getElementById('export-pdf');
         const sidebar = document.querySelector('.sidebar');
 
+        const sidebarTitles = {
+            es: 'Contenido',
+            en: 'Contents',
+            de: 'Inhalt',
+            fr: 'Contenu',
+            sv: 'Innehåll'
+        };
+
+        const sidebarLabels = {
+            es: [
+                '1. Introduccion', '2. Requisitos del sistema', '3. Primeros pasos', '4. Roles y permisos', '5. Navegacion', '6. Perfil de usuario', '7. Gestion de equipos', '8. Competiciones', '9. Publicaciones', '10. Streaming en vivo', '11. Centros educativos', '12. Galeria y archivo', '13. Notificaciones', '14. Chat de equipo', '15. Panel de administracion', '16. Accesibilidad', '17. Solucion de problemas', '18. Preguntas frecuentes'
+            ],
+            en: [
+                '1. Introduction', '2. System requirements', '3. Getting started', '4. Roles & permissions', '5. Navigation', '6. User profile', '7. Team management', '8. Competitions', '9. Posts', '10. Live streaming', '11. Educational centers', '12. Gallery & archive', '13. Notifications', '14. Team chat', '15. Admin panel', '16. Accessibility', '17. Troubleshooting', '18. FAQ'
+            ],
+            de: [
+                '1. Einführung', '2. Systemanforderungen', '3. Erste Schritte', '4. Rollen & Berechtigungen', '5. Navigation', '6. Benutzerprofil', '7. Teamverwaltung', '8. Wettbewerbe', '9. Beiträge', '10. Live-Streaming', '11. Bildungszentren', '12. Galerie & Archiv', '13. Benachrichtigungen', '14. Team-Chat', '15. Admin-Bereich', '16. Barrierefreiheit', '17. Fehlerbehebung', '18. Häufige Fragen'
+            ],
+            fr: [
+                '1. Introduction', '2. Exigences système', '3. Prise en main', '4. Rôles et permissions', '5. Navigation', '6. Profil utilisateur', '7. Gestion des équipes', '8. Compétitions', '9. Publications', '10. Diffusion en direct', '11. Centres éducatifs', '12. Galerie & archive', '13. Notifications', '14. Chat d\'équipe', '15. Panneau d\'administration', '16. Accessibilité', '17. Dépannage', '18. FAQ'
+            ],
+            sv: [
+                '1. Introduktion', '2. Systemkrav', '3. Kom igång', '4. Roller och behörigheter', '5. Navigering', '6. Användarprofil', '7. Teamhantering', '8. Tävlingar', '9. Inlägg', '10. Liveströmning', '11. Utbildningscenter', '12. Galleri & arkiv', '13. Aviseringar', '14. Teamchat', '15. Adminpanel', '16. Tillgänglighet', '17. Felsökning', '18. Vanliga frågor'
+            ]
+        };
+
         function updateUI(lang) {
             const langLabels = labels[lang] || labels.es;
             if (printLabel) printLabel.textContent = langLabels.print;
             if (exportLabel) exportLabel.textContent = langLabels.export;
-            if (sidebar) sidebar.style.display = lang === 'es' ? '' : 'none';
+
+            // Keep sidebar visible on all languages and adapt its links to point to the selected language
+            if (sidebar) {
+                sidebar.style.display = '';
+
+                // Update sidebar header title
+                const header = sidebar.querySelector('h2');
+                if (header) header.textContent = sidebarTitles[lang] || sidebarTitles.es;
+
+                // Update all sidebar links to point to the language-specific section ids and update their labels
+                const labelsArr = sidebarLabels[lang] || sidebarLabels.es;
+                const links = Array.from(sidebar.querySelectorAll('a'));
+                links.forEach((a, idx) => {
+                    const href = a.getAttribute('href') || '';
+                    // Remove any existing language prefix (#es- / #en- / etc.)
+                    const base = href.replace(/^#(es-|en-|de-|fr-|sv-)?/, '');
+                    a.setAttribute('href', '#' + lang + '-' + base);
+                    a.classList.remove('active');
+
+                    // Update link text if we have a label for it
+                    if (labelsArr[idx]) a.textContent = labelsArr[idx];
+                });
+
+                // Mark first link active by default
+                const first = sidebar.querySelector('a');
+                if (first) first.classList.add('active');
+            }
+
+            // Update scroll tracking for the selected language
+            updateScrollTracking(lang);
         }
 
         // Language switching
@@ -6882,9 +6996,67 @@
         if (exportBtn) {
             exportBtn.addEventListener('click', () => {
                 const lang = document.documentElement.lang || 'es';
-                document.title = titles[lang] || titles.es;
-                window.print();
+                exportToPdf(lang);
             });
+        }
+
+        // Export to PDF using html2pdf (no window.print) — improved: adds a cover page and wraps content
+        async function exportToPdf(lang) {
+            const title = titles[lang] || titles.es;
+            const content = document.getElementById('content-' + lang) || document.getElementById('content-es');
+            if (!content) return;
+
+            const cover = document.getElementById('pdf-cover');
+            const subtitleEl = document.querySelector('.subtitle-' + lang);
+            if (cover) {
+                const pdfTitleEl = cover.querySelector('.pdf-title');
+                const pdfSubtitleEl = cover.querySelector('.pdf-subtitle');
+                if (pdfTitleEl) pdfTitleEl.textContent = title;
+                if (pdfSubtitleEl) pdfSubtitleEl.textContent = (subtitleEl ? subtitleEl.textContent : '');
+            }
+
+            // Ensure the right content is active and apply exporting class
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            content.classList.add('active');
+            document.body.classList.add('exporting-pdf');
+
+            // Update title for metadata and build filename
+            const prevTitle = document.title;
+            document.title = title;
+            const filename = (title || 'manual').replace(/[^a-z0-9]+/gi, '_') + '.pdf';
+
+            // Build a temporary wrapper that includes cover + the content to export
+            const wrapper = document.createElement('div');
+            wrapper.className = 'pdf-wrapper';
+            wrapper.style.background = '#fff';
+            wrapper.style.padding = '20px';
+            wrapper.style.color = 'inherit';
+            wrapper.style.fontFamily = 'inherit';
+
+            if (cover) wrapper.appendChild(cover.cloneNode(true));
+            wrapper.appendChild(content.cloneNode(true));
+
+            document.body.appendChild(wrapper);
+
+            const opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     filename,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: ['css', 'legacy'] }
+            };
+
+            try {
+                await html2pdf().set(opt).from(wrapper).save();
+            } catch (e) {
+                console.error('PDF export error', e);
+                alert('Error al generar el PDF: ' + (e.message || e));
+            } finally {
+                document.body.classList.remove('exporting-pdf');
+                document.title = prevTitle;
+                wrapper.remove();
+            }
         }
 
         // FAQ accordion
@@ -6895,7 +7067,7 @@
             });
         });
 
-        // Smooth scroll for sidebar links
+        // Smooth scroll for sidebar links (delegated)
         document.querySelectorAll('.sidebar a').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -6903,27 +7075,31 @@
                 const target = document.getElementById(targetId);
                 if (target) {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    
+
                     document.querySelectorAll('.sidebar a').forEach(l => l.classList.remove('active'));
                     link.classList.add('active');
                 }
             });
         });
 
-        // Update active sidebar link on scroll
-        const sections = document.querySelectorAll('#content-es section[id]');
-        const navLinks = document.querySelectorAll('#sidebar-nav-es a');
+        // Scroll tracking: dynamic based on language
+        let trackedSections = [];
+        let trackedNavLinks = [];
+        function updateScrollTracking(lang) {
+            trackedSections = Array.from(document.querySelectorAll('#content-' + lang + ' section[id]'));
+            trackedNavLinks = Array.from(document.querySelectorAll('.sidebar a'));
+        }
 
         window.addEventListener('scroll', () => {
             let current = '';
-            sections.forEach(section => {
+            trackedSections.forEach(section => {
                 const sectionTop = section.offsetTop - 100;
                 if (window.scrollY >= sectionTop) {
                     current = section.getAttribute('id');
                 }
             });
 
-            navLinks.forEach(link => {
+            trackedNavLinks.forEach(link => {
                 link.classList.remove('active');
                 if (link.getAttribute('href') === '#' + current) {
                     link.classList.add('active');
@@ -6933,5 +7109,8 @@
 
         updateUI(document.documentElement.lang || 'es');
     </script>
+
+    <!-- html2pdf (bundled: html2canvas + jsPDF) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 </body>
 </html>

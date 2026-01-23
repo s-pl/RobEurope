@@ -247,6 +247,9 @@ app.use((err, req, res, next) => {
   }
 });
 
+app.get('/manual', (req, res) => {
+  res.sendFile(path.join(__dirname, '../docs/manual/user-manual.html'));
+})
 
 // register global unhandled error handlers
 process.on('uncaughtException', (err) => {
