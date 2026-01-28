@@ -526,9 +526,9 @@ const resources = {
           tagline: 'Robótica educativa europea',
           title: 'RobEurope 2025 · la liga continental de robótica educativa',
           description:
-            'Streaming oficial, datos en tiempo real y APIs abiertas para que cada instituto pueda diseñar, simular y desplegar su robot.',
+            'Streaming oficial y datos en tiempo real para que cada instituto pueda participar desde cualquier punto de Europa. Consulta la web para ver el calendario de competiciones, equipos inscritos y estadísticas en vivo.',
           primaryCta: 'Calendario',
-          secondaryCta: 'API Docs'
+          secondaryCta: 'Documentación web'
         },
         callouts: {
           nextQualifier: { label: 'Siguiente clasificatorio', fallback: 'Por anunciar' },
@@ -552,7 +552,7 @@ const resources = {
           }
         },
         pillarLabel: 'Pilar',
-        loading: 'Sincronizando con la API...',
+        loading: 'Sincronizando con la web...',
         error: 'No se pudo cargar la información',
         howItWorks: {
           title: "Cómo Funciona",
@@ -601,9 +601,9 @@ const resources = {
           tagline: 'Circuito oficial',
           title: 'Competiciones RobEurope',
           description:
-            'Consulta la API para conocer las fechas de clasificación, comentaristas y reglamento técnico. Esta vista usa exactamente los endpoints protegidos del backend Express.'
+            'Consulta la web para conocer las fechas de clasificación, comentaristas y reglamento técnico.'
         },
-        locked: 'Inicia sesión para consumir /api/competitions y mostrar el calendario real.',
+        locked: 'Inicia sesión para consumir y mostrar el calendario real.',
         loading: 'Sincronizando calendario...',
         error: 'Error al sincronizar competiciones.',
         empty: 'No hay competiciones registradas en la base de datos todavía.',
@@ -695,12 +695,12 @@ const resources = {
           tagline: 'Contacto',
           title: 'Hablemos de RobEurope',
           description:
-            'Canalizamos preguntas sobre licencias, sponsors, voluntariado y workshops. Si necesitas permisos para consumir la API en producción, rellena el formulario y te enviaremos claves dedicadas.'
+            'Canalizamos preguntas sobre licencias, sponsors, voluntariado y workshops. Si necesitas acceso a funcionalidades avanzadas, rellena el formulario y te contactaremos.'
         },
         channels: [
           { title: 'Mentores & coaches', detail: 'mentors@robeurope.eu', note: 'Registro de formadores oficiales' },
           { title: 'Sponsors & prensa', detail: 'press@robeurope.eu', note: 'Dossieres y media kit' },
-          { title: 'Soporte técnico', detail: '+34 900 123 456', note: 'Infraestructura digital & APIs' }
+          { title: 'Soporte técnico', detail: '+34 900 123 456', note: 'Infraestructura digital & web' }
         ],
         form: {
           title: 'Programa tu llamada',
@@ -741,7 +741,7 @@ const resources = {
           photoSuccess: 'Foto actualizada correctamente.',
           photoError: 'No se pudo subir la foto.'
         },
-        countriesError: 'No se pudieron cargar los países. Comprueba la conexión con la API.'
+        countriesError: 'No se pudieron cargar los países. Comprueba la conexión con la web.'
       },
       login: {
         tagline: 'Portal RobEurope',
@@ -1390,9 +1390,9 @@ const resources = {
           tagline: 'European educational robotics',
           title: 'RobEurope 2025 · the continental educational robotics league',
           description:
-            'Official streaming, real-time data and open APIs so every school can design, simulate and deploy its robot.',
+            'Official streaming and real-time data so every school can participate, view the competition calendar, registered teams and live stats through this section.',
           primaryCta: 'Calendar',
-          secondaryCta: 'API Docs'
+          secondaryCta: 'Web Docs'
         },
         callouts: {
           nextQualifier: { label: 'Next qualifier', fallback: 'TBA' },
@@ -1416,7 +1416,7 @@ const resources = {
           }
         },
         pillarLabel: 'Pillar',
-        loading: 'Syncing with the API...',
+        loading: 'Syncing with the web...',
         error: 'We could not load the information.',
         howItWorks: {
           title: "How it Works",
@@ -1465,7 +1465,7 @@ const resources = {
           tagline: 'Official circuit',
           title: 'RobEurope competitions',
           description:
-            'Use the API to learn about qualifiers, casters and the technical rulebook. This view consumes the same secured endpoints as the backend.'
+            'Through this section you can learn about qualifiers, casters and the technical rulebook.'
         },
         locked: 'Sign in to consume /api/competitions and display the real schedule.',
         loading: 'Syncing calendar...',
@@ -1559,12 +1559,12 @@ const resources = {
           tagline: 'Contact',
           title: 'Let\'s talk about RobEurope',
           description:
-            'We channel questions about licenses, sponsorships, volunteering and workshops. If you need production API access just fill the form and we will send dedicated keys.'
+            'We channel questions about licenses, sponsorships, volunteering and workshops. If you need access to advanced features, just fill the form and we will contact you.'
         },
         channels: [
           { title: 'Mentors & coaches', detail: 'mentors@robeurope.eu', note: 'Official trainer registry' },
           { title: 'Sponsors & press', detail: 'press@robeurope.eu', note: 'Media kit & dossiers' },
-          { title: 'Technical support', detail: '+34 900 123 456', note: 'Digital infrastructure & APIs' }
+          { title: 'Technical support', detail: '+34 900 123 456', note: 'Digital infrastructure & web' }
         ],
         form: {
           title: 'Schedule your call',
@@ -1605,7 +1605,7 @@ const resources = {
           photoSuccess: 'Photo updated successfully.',
           photoError: 'Photo upload failed.'
         },
-        countriesError: 'Countries could not be loaded. Check the API connection.'
+        countriesError: 'Countries could not be loaded. Check the web connection.'
       },
       login: {
         tagline: 'RobEurope portal',
@@ -2252,9 +2252,9 @@ const resources = {
           tagline: 'Europäische Bildungsrobotik',
           title: 'RobEurope 2025 · die kontinentale Bildungsrobotik-Liga',
           description:
-            'Offizielle Streams, Echtzeitdaten und offene APIs, damit jede Schule ihren Roboter entwerfen, simulieren und ausrollen kann.',
+            'Offizielle Streams und Echtzeitdaten, damit jede Schule teilnehmen, den Wettbewerbskalender, registrierte Teams und Live-Statistiken in diesem Bereich einsehen kann.',
           primaryCta: 'Kalender',
-          secondaryCta: 'API-Dokumentation'
+          secondaryCta: 'Web-Dokumentation'
         },
         callouts: {
           nextQualifier: { label: 'Nächste Qualifikation', fallback: 'Noch offen' },
@@ -2278,7 +2278,7 @@ const resources = {
           }
         },
         pillarLabel: 'Säule',
-        loading: 'Synchronisiere mit der API...',
+        loading: 'Synchronisiere mit der Webseite...',
         error: 'Informationen konnten nicht geladen werden.',
         howItWorks: {
           title: "Wie es funktioniert",
@@ -2327,7 +2327,7 @@ const resources = {
           tagline: 'Offizieller Circuit',
           title: 'RobEurope-Wettkämpfe',
           description:
-            'Über die API erhältst du Termine, Hosts und das technische Regelwerk. Diese Ansicht nutzt dieselben abgesicherten Endpunkte wie das Backend.'
+            'In diesem Bereich findest du Termine, Hosts und das technische Regelwerk.'
         },
         locked: 'Melde dich an, um /api/competitions aufzurufen und den echten Kalender zu sehen.',
         loading: 'Kalender wird synchronisiert...',
@@ -2421,12 +2421,12 @@ const resources = {
           tagline: 'Kontakt',
           title: 'Lass uns über RobEurope sprechen',
           description:
-            'Wir betreuen Fragen zu Lizenzen, Sponsoring, Ehrenamt und Workshops. Für Produktionszugänge zur API genügt das Formular, danach senden wir dir dedizierte Schlüssel.'
+            'Wir betreuen Fragen zu Lizenzen, Sponsoring, Ehrenamt und Workshops. Für erweiterte Funktionen genügt das Formular, danach melden wir uns bei dir.'
         },
         channels: [
           { title: 'Mentoren & Coaches', detail: 'mentors@robeurope.eu', note: 'Register offizieller Trainer' },
           { title: 'Sponsoren & Presse', detail: 'press@robeurope.eu', note: 'Mediakit & Unterlagen' },
-          { title: 'Technischer Support', detail: '+34 900 123 456', note: 'Digitale Infrastruktur & APIs' }
+          { title: 'Technischer Support', detail: '+34 900 123 456', note: 'Digitale Infrastruktur & Webseite' }
         ],
         form: {
           title: 'Plane deinen Call',
@@ -2459,7 +2459,7 @@ const resources = {
           photoSuccess: 'Foto erfolgreich aktualisiert.',
           photoError: 'Upload des Fotos fehlgeschlagen.'
         },
-        countriesError: 'Länder konnten nicht geladen werden. Prüfe die API-Verbindung.'
+        countriesError: 'Länder konnten nicht geladen werden. Prüfe die Verbindung zur Webseite.'
       },
       login: {
         tagline: 'RobEurope-Portal',
