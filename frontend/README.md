@@ -47,6 +47,16 @@ The frontend needs to talk to the backend API which can live either on your mach
 
 3. The app reads the API base URL only from `.env` (no automatic host fallback, no localStorage caching). If `VITE_API_BASE_URL` is missing you will see a clear runtime error telling you how to set it.
 
+### Backend active flag (mock mode)
+
+If you want the UI to run without the backend (mock data mode), set (Vite only exposes variables prefixed with `VITE_`, but the code also checks `IS_BACKEND_ACTIVE` when provided by the build pipeline):
+
+```env
+VITE_IS_BACKEND_ACTIVE=false
+```
+
+When disabled, the frontend uses sample data for all API calls and shows a banner explaining that the backend is off and the UI is a mockup with reduced functionality.
+
 ### Styling stack
 
 - Tailwind CSS utility layer

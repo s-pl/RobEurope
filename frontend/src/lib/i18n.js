@@ -275,6 +275,7 @@ const resources = {
         loading: 'Cargando...',
         skipToContent: 'Saltar al contenido',
         adminModeActive: 'Modo admin activo',
+        backendOfflineBanner: 'Backend apagado para ahorrar recursos. Se muestran datos de ejemplo (mockup) y funcionalidades recortadas.',
         showPassword: 'Mostrar contraseña',
         hidePassword: 'Ocultar contraseña',
         create: 'Crear',
@@ -401,6 +402,7 @@ const resources = {
           titleLabel: 'Título',
           contentLabel: 'Contenido',
           pinPost: 'Fijar post',
+          backendOfflineBanner: 'Backend is off to save resources. The UI shows sample data (mockup) with reduced functionality.',
           tableTitle: 'Título',
           tableAuthor: 'Autor',
           tableStatus: 'Estado',
@@ -419,6 +421,7 @@ const resources = {
         confirmDelete: '¿Estás seguro de eliminar este registro?'
       },
       charts: {
+        backendOfflineBanner: 'Backend ist zur Ressourcenschonung deaktiviert. Es werden Beispieldaten (Mockup) mit eingeschränkten Funktionen angezeigt.',
         empty: 'No hay datos disponibles'
       },
       theme: {

@@ -109,18 +109,11 @@ const AdminArchives = () => {
         });
         setFeedback({ type: 'success', message: t('admin.archives.updated') || 'Archivo actualizado' });
       } else {
-        // For file upload, use fetch directly with correct URL
-        const baseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
-        const apiUrl = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-        const response = await fetch(`${apiUrl}/archives`, {
+        await api('/archives', {
           method: 'POST',
-          credentials: 'include',
-          body: formDataToSend
+          body: formDataToSend,
+          formData: true
         });
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error || errData.message || 'Error al crear archivo');
-        }
         setFeedback({ type: 'success', message: t('admin.archives.created') || 'Archivo creado' });
       }
       resetForm();

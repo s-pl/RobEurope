@@ -7,7 +7,7 @@ import { useToast } from '../../hooks/useToast';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
-import { resolveMediaUrl, getApiOrigin } from '../../lib/apiClient';
+import { resolveMediaUrl, getApiOrigin, isBackendActive } from '../../lib/apiClient';
 import { io } from 'socket.io-client';
 
 const TeamChat = ({ teamId }) => {
@@ -37,8 +37,12 @@ const TeamChat = ({ teamId }) => {
   }, []);
 
   useEffect(() => {
+    if (!isBackendActive) return undefined;
+
     // Initialize socket
     const socketUrl = getApiOrigin();
+    if (!socketUrl) return undefined;
+
     socketRef.current = io(socketUrl);
 
     // Send user info when joining
@@ -93,7 +97,10 @@ const TeamChat = ({ teamId }) => {
     (async () => {
       try {
         const data = await api(`/teams/${teamId}/messages`);
-        if (!cancelled) setMessages(data);
+        if (!cancelled) {
+          const items = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
+          setMessages(items);
+        }
       } catch (error) {
         console.error(error);
       }

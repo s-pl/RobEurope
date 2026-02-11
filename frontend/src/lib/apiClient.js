@@ -6,6 +6,8 @@
  * The application uses cookie-based sessions, so requests are sent with `credentials: 'include'`.
  */
 
+import { mockApiRequest } from './mockBackend';
+
 /**
  * Normalizes a base URL into an API base ending with `/api`.
  *
@@ -23,7 +25,16 @@ const normalizeBase = (url) => {
   return `${trimmed}/api`;
 };
 
+export const isBackendActive = (() => {
+  const raw = import.meta.env.VITE_IS_BACKEND_ACTIVE ?? import.meta.env.IS_BACKEND_ACTIVE;
+  if (raw === undefined || raw === null || raw === '') return true;
+  if (typeof raw === 'boolean') return raw;
+  const normalized = String(raw).trim().toLowerCase();
+  return !['false', '0', 'no', 'off'].includes(normalized);
+})();
+
 const requireApiBaseUrl = () => {
+  if (!isBackendActive) return '';
   const envBase = normalizeBase(import.meta.env.VITE_API_BASE_URL || '');
   if (!envBase) {
     throw new Error(
@@ -42,7 +53,11 @@ const getApiBaseUrl = () => requireApiBaseUrl();
  *
  * @returns {string} Origin URL, e.g. `http://localhost:85`.
  */
-export const getApiOrigin = () => getApiBaseUrl().replace(/\/?api\/?$/, '');
+export const getApiOrigin = () => {
+  const base = getApiBaseUrl();
+  if (!base) return '';
+  return base.replace(/\/?api\/?$/, '');
+};
 
 /**
  * Parses a fetch Response into JSON (when possible) or plain text.
@@ -74,6 +89,9 @@ const parseResponse = async (response) => {
  * @returns {Promise<any>} Parsed response body.
  */
 export async function apiRequest(path, { method = 'GET', body, headers = {}, formData = false } = {}) {
+  if (!isBackendActive) {
+    return mockApiRequest(path, { method, body, headers, formData });
+  }
   const finalHeaders = { ...headers };
 
   // Session based auth - no token needed
