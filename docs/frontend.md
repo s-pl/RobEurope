@@ -102,7 +102,10 @@ Create a `.env` file in the frontend directory:
 ```env
 VITE_API_BASE_URL=http://localhost:85/api
 VITE_SOCKET_URL=http://localhost:85
+VITE_IS_BACKEND_ACTIVE=true
 ```
+
+Set `VITE_IS_BACKEND_ACTIVE=false` to enable mock mode (the UI uses sample data and displays a banner explaining that the backend is off to save resources). The frontend also checks `IS_BACKEND_ACTIVE` if your build pipeline injects non-Vite env vars.
 
 ---
 

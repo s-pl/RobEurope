@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useApi } from '../../hooks/useApi';
-import { getApiOrigin } from '../../lib/apiClient';
+import { getApiOrigin, isBackendActive } from '../../lib/apiClient';
 import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { ScrollArea } from '../ui/scroll-area';
@@ -51,6 +51,8 @@ const NotificationsBell = () => {
       } catch {
         // ignore
       }
+      if (!isBackendActive) return;
+
       await requestNotificationPermission();
 
       try {

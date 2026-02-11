@@ -11,7 +11,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import io from 'socket.io-client';
-import { getApiOrigin } from '../lib/apiClient';
+import { getApiOrigin, isBackendActive } from '../lib/apiClient';
 
 /**
  * React context for Socket.IO client.
@@ -36,11 +36,15 @@ const SocketContext = createContext(null);
 export const SocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
 
-  const socketUrl = useMemo(() => getApiOrigin(), []);
+  const socketUrl = useMemo(() => (isBackendActive ? getApiOrigin() : ''), []);
 
-  const socket = useMemo(() => io(socketUrl, { transports: ['websocket', 'polling'] }), [socketUrl]);
+  const socket = useMemo(() => {
+    if (!isBackendActive || !socketUrl) return null;
+    return io(socketUrl, { transports: ['websocket', 'polling'] });
+  }, [socketUrl]);
 
   useEffect(() => {
+    if (!socket) return undefined;
     socket.on('connect', () => setConnected(true));
     socket.on('disconnect', () => setConnected(false));
     return () => {
