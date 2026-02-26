@@ -32,22 +32,27 @@ console.log(`Connecting to DB at ${DB_HOST}:${DB_PORT}, database: ${DB_NAME}, us
 const defaultCaPath = path.resolve(__dirname, "../certs/ca-certificate.crt");
 const CA_PATH = process.env.DB_SSL_CA || defaultCaPath;
 
+const isLocalHost = ["localhost", "127.0.0.1", "::1", "mysql"].includes(DB_HOST);
+
 let dialectOptions = {};
-try {
-  if (fs.existsSync(CA_PATH)) {
-    dialectOptions = {
-      ssl: {
-        // Provide CA and enforce verification; mysql2 uses Node TLS options
-        ca: fs.readFileSync(CA_PATH, "utf8"),
-        rejectUnauthorized: true,
-        minVersion: "TLSv1.2",
-      },
-    };
+if (isLocalHost) {
+  // Local Docker MySQL — no SSL needed
+  dialectOptions = { ssl: false };
+} else {
+  try {
+    if (fs.existsSync(CA_PATH)) {
+      dialectOptions = {
+        ssl: {
+          // Provide CA and enforce verification; mysql2 uses Node TLS options
+          ca: fs.readFileSync(CA_PATH, "utf8"),
+          rejectUnauthorized: true,
+          minVersion: "TLSv1.2",
+        },
+      };
+    }
+  } catch (err) {
+    console.warn(`Warning: Unable to read SSL CA file at ${CA_PATH}. Proceeding without explicit CA.`);
   }
-} catch (err) {
-  // If SSL is required and cert is missing, Sequelize will fail on connect – that's desirable in prod
-  // but we avoid throwing here to keep local dev flexible.
-  console.warn(`Warning: Unable to read SSL CA file at ${CA_PATH}. Proceeding without explicit CA.`);
 }
 
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {

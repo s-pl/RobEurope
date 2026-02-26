@@ -433,7 +433,6 @@ const resources = {
       auth: {
         orContinueWith: 'O continuar con',
         orSignUpWith: 'O registrarte con',
-        signInWithLdap: 'Iniciar sesión con LDAP',
         backToLogin: 'Volver al inicio de sesión'
       },
       forgot: {
@@ -1297,7 +1296,6 @@ const resources = {
       auth: {
         orContinueWith: 'Or continue with',
         orSignUpWith: 'Or sign up with',
-        signInWithLdap: 'Sign in with LDAP',
         backToLogin: 'Back to login'
       },
       forgot: {
@@ -2159,7 +2157,6 @@ const resources = {
       auth: {
         orContinueWith: 'Oder weiter mit',
         orSignUpWith: 'Oder registrieren mit',
-        signInWithLdap: 'Mit LDAP anmelden',
         backToLogin: 'Zurück zur Anmeldung'
       },
       forgot: {

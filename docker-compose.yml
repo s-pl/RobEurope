@@ -1,23 +1,24 @@
-version: '3.8'
-
 services:
-  openldap:
-    image: osixia/openldap:1.5.0
-    container_name: openldap
+  mysql:
+    image: mysql:8.0
+    container_name: robeurope-mysql
+    profiles: ["local-db"]
     environment:
-      LDAP_ORGANISATION: "RobEurope"
-      LDAP_DOMAIN: "robeurope.samuelponce.es"
-      LDAP_ADMIN_PASSWORD: "adminpassword"
-      LDAP_CONFIG_PASSWORD: "configpassword"
-      LDAP_TLS: "false"  # For simplicity, disable TLS
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-robeurope_dev}
+      MYSQL_USER: ${MYSQL_USER:-robeurope_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-devpassword}
     ports:
-      - "389:389"
-      - "636:636"
+      - "3306:3306"
     volumes:
-      - ldap_data:/var/lib/ldap
-      - ldap_config:/etc/ldap/slapd.d
+      - mysql_data:/var/lib/mysql
     networks:
       - robeurope_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:alpine
@@ -28,8 +29,7 @@ services:
       - robeurope_network
 
 volumes:
-  ldap_data:
-  ldap_config:
+  mysql_data:
 
 networks:
   robeurope_network:

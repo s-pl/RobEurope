@@ -49,37 +49,6 @@ router.get('/github/callback',
 );
 
 
-router.post('/ldap', (req, res, next) => {
-  passport.authenticate('ldapauth', (err, user, info) => {
-    if (err) {
-      console.error('LDAP error:', err);
-      return res.status(500).json({ error: 'LDAP authentication failed' });
-    }
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid LDAP credentials' });
-    }
-    req.logIn(user, (loginErr) => {
-      if (loginErr) {
-        console.error('LDAP session error:', loginErr);
-        return res.status(500).json({ error: 'Session error' });
-      }
-    
-      req.session.user = {
-        id: user.id,
-        email: user.email,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        username: user.username,
-        role: user.role
-      };
-      req.session.save((saveErr) => {
-        if (saveErr) return res.status(500).json({ error: 'Session save failed' });
-        return res.json({ success: true });
-      });
-    });
-  })(req, res, next);
-});
-
 
 
 export default router;

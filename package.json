@@ -5,11 +5,13 @@
     "main": "backend/index.js",
     "scripts": {
         "start": "node ./backend/index.js",
-        "dev": "npm --prefix backend run dev",
-        "start:backend": "npm --prefix backend run start",
-        "start:frontend": "npm --prefix frontend run dev",
-        "build": "echo \"No build step defined\"",
-        "test": "echo \"No tests specified\" && exit 0",
+        "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+        "dev:backend": "npm --prefix backend run dev",
+        "dev:frontend": "npm --prefix frontend run dev",
+        "build": "npm --prefix frontend run build",
+        "test": "npm --prefix backend run test",
+        "migrate": "npm --prefix backend run migrate",
+        "seed": "npm --prefix backend run seed",
         "lint": "eslint .",
         "docs:generate": "jsdoc -c docs/jsdoc.json"
     },
@@ -26,6 +28,7 @@
     "homepage": "https://example.com/robeurope#readme",
     "devDependencies": {
         "clean-jsdoc-theme": "^4.3.0",
+        "concurrently": "^9.1.0",
         "eslint": "^8.49.0",
         "jsdoc": "^4.0.5",
         "nodemon": "^2.0.22"

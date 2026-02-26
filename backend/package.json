@@ -26,12 +26,12 @@
     "i18n": "^0.15.3",
     "json2csv": "^5.0.7",
     "jsonwebtoken": "^9.0.2",
-    "ldapjs": "^3.0.7",
+
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "mysql2": "^3.15.2",
     "passport": "^0.7.0",
-  "passport-ldapauth": "^3.0.1",
+
     "passport-apple": "^2.0.2",
     "passport-github2": "^0.1.12",
     "passport-google-oauth20": "^2.0.0",
