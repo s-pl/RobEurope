@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react-swc'
 
 export default defineConfig({
   plugins: [react()],
+  // Lee los archivos .env desde la raíz del proyecto en vez de frontend/
+  envDir: '../',
   test: {
     globals: true,
     environment: 'jsdom',

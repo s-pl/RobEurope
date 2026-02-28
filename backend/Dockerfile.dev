@@ -1,0 +1,17 @@
+# ============================================================
+# Backend — Development image (hot-reload with nodemon)
+# ============================================================
+FROM node:20-alpine
+WORKDIR /app
+
+RUN apk add --no-cache python3 make g++
+
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+# Source code is mounted as a volume at runtime — no COPY needed.
+RUN mkdir -p uploads
+
+EXPOSE 85
+
+CMD ["npm", "run", "dev"]

@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import './env.js';
 import express from 'express';
 import http from 'http';
 import path from 'path';
@@ -8,7 +8,6 @@ import rateLimit from './middleware/rateLimit.middleware.js';
 import timeoutMiddleware from './middleware/timeout.middleware.js';
 import morgan from 'morgan';
 import logger from './utils/logger.js';
-import dotenv from 'dotenv';
 import streamRoutes from './routes/api/stream.route.js';
 import mediaRoutes from './routes/api/media.route.js';
 import swaggerRouter from './swagger.js';

@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ============================================
-# RobEurope - Build & Setup Script
-# ============================================
+# ============================================================
+# RobEurope — Build Script
+# Builds Docker images and runs initial DB migrations/seeds.
+#
+# Usage:
+#   ./build.sh            # development (default)
+#   ./build.sh prod       # production
+# ============================================================
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -11,148 +16,93 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-log()   { echo -e "${BLUE}[INFO]${NC} $*"; }
-ok()    { echo -e "${GREEN}[OK]${NC} $*"; }
-warn()  { echo -e "${YELLOW}[WARN]${NC} $*"; }
-err()   { echo -e "${RED}[ERROR]${NC} $*"; exit 1; }
+log()  { echo -e "${BLUE}[INFO]${NC} $*"; }
+ok()   { echo -e "${GREEN}[OK]${NC} $*"; }
+warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
+err()  { echo -e "${RED}[ERROR]${NC} $*"; exit 1; }
 
-# ---------------------------
-# 1. Check OS
-# ---------------------------
-if [[ "$(uname -s)" != "Linux" ]]; then
-  err "This script only supports Linux."
+PROFILE="${1:-dev}"
+
+if [[ "$PROFILE" != "dev" && "$PROFILE" != "prod" ]]; then
+  err "Unknown profile '$PROFILE'. Use 'dev' or 'prod'."
 fi
-ok "Linux detected"
 
 # ---------------------------
-# 2. Check dependencies
+# 1. Check dependencies
 # ---------------------------
-check_cmd() {
-  if ! command -v "$1" &>/dev/null; then
-    err "'$1' is not installed. Please install it and re-run this script."
-  fi
-}
+command -v docker &>/dev/null || err "Docker is not installed."
 
-check_cmd node
-check_cmd npm
-check_cmd docker
-
-# Check node version >= 18
-NODE_MAJOR=$(node -v | sed 's/v//' | cut -d. -f1)
-if (( NODE_MAJOR < 18 )); then
-  err "Node.js v18+ required (found v$(node -v))"
-fi
-ok "Node.js $(node -v)"
-
-# Check docker compose (plugin or standalone)
 if docker compose version &>/dev/null; then
   COMPOSE="docker compose"
 elif command -v docker-compose &>/dev/null; then
   COMPOSE="docker-compose"
 else
-  err "'docker compose' is not available. Install Docker Compose plugin."
+  err "'docker compose' plugin is not available."
 fi
-ok "$COMPOSE available"
+ok "Docker Compose: $COMPOSE"
 
 # ---------------------------
-# 3. Environment file
+# 2. Environment file
 # ---------------------------
 if [[ ! -f .env ]]; then
-  if [[ -f .env.development ]]; then
-    cp .env.development .env
-    ok "Copied .env.development -> .env"
+  if [[ -f .env.example ]]; then
+    cp .env.example .env
+    warn "Copied .env.example → .env. Edit it before continuing!"
   else
-    err "No .env or .env.development found"
+    err "No .env file found. Create one (see SETUP.md)."
   fi
 else
-  ok ".env already exists"
+  ok ".env found"
 fi
 
-# Load .env
-set -a
-source .env
-set +a
+# Load .env so $-variables are available in this script
+set -a; source .env; set +a
 
 # ---------------------------
-# 3b. Generate frontend/.env if missing
+# 3. Build images
 # ---------------------------
-if [[ ! -f frontend/.env ]]; then
-  cat > frontend/.env <<EOF
-VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:85}
-VITE_WS_URL=${VITE_WS_URL:-ws://localhost:85}
-VITE_APP_NAME=${VITE_APP_NAME:-RobEurope Dev}
-EOF
-  ok "Generated frontend/.env"
-else
-  ok "frontend/.env already exists"
-fi
+log "Building Docker images (profile: $PROFILE)..."
+$COMPOSE --profile "$PROFILE" build
+ok "Images built"
 
 # ---------------------------
-# 4. Install dependencies
+# 4. Start infrastructure (MySQL + Redis)
 # ---------------------------
-log "Installing root dependencies..."
-npm install
+log "Starting MySQL and Redis..."
+$COMPOSE --profile "$PROFILE" up -d mysql redis
 
-log "Installing backend dependencies..."
-npm --prefix backend install
-
-log "Installing frontend dependencies..."
-npm --prefix frontend install
-
-ok "All dependencies installed"
-
-# ---------------------------
-# 5. Determine if local MySQL is needed
-# ---------------------------
-DB_HOST="${DB_HOST_DEV:-localhost}"
-NEED_LOCAL_DB=false
-
-if [[ "$DB_HOST" == "localhost" || "$DB_HOST" == "127.0.0.1" || "$DB_HOST" == "mysql" ]]; then
-  NEED_LOCAL_DB=true
-fi
+log "Waiting for MySQL to be healthy..."
+RETRIES=40
+until docker exec robeurope-mysql mysqladmin ping -h localhost --silent 2>/dev/null; do
+  RETRIES=$((RETRIES - 1))
+  if (( RETRIES == 0 )); then
+    err "MySQL did not become ready. Check: docker logs robeurope-mysql"
+  fi
+  sleep 3
+done
+ok "MySQL is ready"
 
 # ---------------------------
-# 6. Start Docker containers
-# ---------------------------
-if [[ "$NEED_LOCAL_DB" == true ]]; then
-  log "Local DB detected (DB_HOST_DEV=$DB_HOST) — starting MySQL + Redis..."
-  $COMPOSE --profile local-db up -d
-else
-  log "External DB detected (DB_HOST_DEV=$DB_HOST) — starting Redis only..."
-  $COMPOSE up -d
-fi
-
-ok "Docker containers started"
-
-# ---------------------------
-# 7. Wait for MySQL (if local)
-# ---------------------------
-if [[ "$NEED_LOCAL_DB" == true ]]; then
-  log "Waiting for MySQL to be ready..."
-  RETRIES=30
-  until docker exec robeurope-mysql mysqladmin ping -h localhost --silent 2>/dev/null; do
-    RETRIES=$((RETRIES - 1))
-    if (( RETRIES == 0 )); then
-      err "MySQL did not become ready in time"
-    fi
-    sleep 2
-  done
-  ok "MySQL is ready"
-fi
-
-# ---------------------------
-# 8. Run migrations & seeders
+# 5. Run migrations & seeds
 # ---------------------------
 log "Running database migrations..."
-npm --prefix backend run migrate
+if [[ "$PROFILE" == "dev" ]]; then
+  $COMPOSE --profile "$PROFILE" run --rm backend-dev sh -c "node scripts/run-migrations.js"
+else
+  $COMPOSE --profile "$PROFILE" run --rm backend     sh -c "node scripts/run-migrations.js"
+fi
+ok "Migrations applied"
 
 log "Running database seeders..."
-npm --prefix backend run seed
-
-ok "Database setup complete"
+if [[ "$PROFILE" == "dev" ]]; then
+  $COMPOSE --profile "$PROFILE" run --rm backend-dev sh -c "node scripts/run-seeders.js"
+else
+  $COMPOSE --profile "$PROFILE" run --rm backend     sh -c "node scripts/run-seeders.js"
+fi
+ok "Seeders applied"
 
 echo ""
 echo -e "${GREEN}============================================${NC}"
-echo -e "${GREEN}  RobEurope build complete!${NC}"
-echo -e "${GREEN}  Run ./start.sh to start the application${NC}"
+echo -e "${GREEN}  RobEurope build complete! (${PROFILE})${NC}"
+echo -e "${GREEN}  Run ./start.sh [${PROFILE}] to launch${NC}"
 echo -e "${GREEN}============================================${NC}"
