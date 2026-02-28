@@ -1,54 +1,31 @@
-import { Users, Trophy, Star, Activity } from 'lucide-react';
+import { Users, Trophy, CheckCircle2, Clock } from 'lucide-react';
+
+const ITEMS = [
+  { key: 'memberCount',     label: 'Miembros',      Icon: Users },
+  { key: 'competitionCount',label: 'Competiciones', Icon: Trophy },
+  { key: 'approvedCount',   label: 'Aprobadas',     Icon: CheckCircle2 },
+  { key: 'activeCount',     label: 'Pendientes',    Icon: Clock },
+];
 
 export default function StatsModule({ team, stats = {}, accentColor }) {
-  const accent = accentColor || '#2563eb';
-
-  const items = [
-    {
-      label: 'Miembros',
-      value: stats.memberCount ?? team?.memberCount ?? 0,
-      Icon: Users,
-      color: '#2563eb'
-    },
-    {
-      label: 'Competiciones',
-      value: stats.competitionCount ?? 0,
-      Icon: Trophy,
-      color: '#16a34a'
-    },
-    {
-      label: 'Aprobadas',
-      value: stats.approvedCount ?? 0,
-      Icon: Star,
-      color: '#d97706'
-    },
-    {
-      label: 'Activas',
-      value: stats.activeCount ?? 0,
-      Icon: Activity,
-      color: '#dc2626'
-    }
-  ];
+  const accent = accentColor || '#18181b';
 
   return (
-    <div className="grid grid-cols-2 gap-3 h-full">
-      {items.map(({ label, value, Icon, color }) => (
-        <div
-          key={label}
-          className="flex flex-col gap-2 rounded-xl p-4 border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-md transition-shadow"
-        >
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {ITEMS.map(({ key, label, Icon }) => {
+        const val = stats[key] ?? team?.[key] ?? 0;
+        return (
           <div
-            className="w-10 h-10 rounded-lg flex items-center justify-center"
-            style={{ background: `${color}18` }}
+            key={key}
+            className="rounded-xl border border-zinc-200 bg-white p-4"
+            style={{ borderLeftColor: accent, borderLeftWidth: 3 }}
           >
-            <Icon className="h-5 w-5" style={{ color }} />
+            <Icon className="h-4 w-4 text-zinc-400 mb-2" />
+            <p className="text-2xl font-mono font-bold text-zinc-900 tabular-nums">{val}</p>
+            <p className="text-xs text-zinc-500 mt-0.5 font-medium">{label}</p>
           </div>
-          <div>
-            <p className="text-2xl font-black text-slate-900 dark:text-slate-100">{value}</p>
-            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">{label}</p>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

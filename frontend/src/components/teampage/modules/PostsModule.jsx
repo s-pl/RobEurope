@@ -1,63 +1,65 @@
 import { useEffect, useState } from 'react';
 import { apiRequest } from '../../../lib/apiClient';
-import { Calendar, MessageCircle, Heart } from 'lucide-react';
+import { FileText, Calendar, User, ArrowRight } from 'lucide-react';
 
 export default function PostsModule({ team, config = {}, accentColor }) {
-  const { limit = 3 } = config;
-  const accent = accentColor || '#2563eb';
-  const [posts, setPosts] = useState([]);
+  const { limit = 5, sortBy = 'newest', showAuthor = true, showDate = true } = config;
+  const accent    = accentColor || '#18181b';
+  const [posts, setPosts]     = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!team?.id) return;
-    apiRequest(`/posts?team_id=${team.id}&limit=${limit}`)
+    if (!team?.id) { setLoading(false); return; }
+    const order = sortBy === 'oldest' ? 'asc' : 'desc';
+    apiRequest(`/posts?team_id=${team.id}&limit=${limit}&order=${order}`)
       .then(data => setPosts(Array.isArray(data) ? data : data?.items || []))
       .catch(() => setPosts([]))
       .finally(() => setLoading(false));
-  }, [team?.id, limit]);
+  }, [team?.id, limit, sortBy]);
 
   return (
-    <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
-      <div className="px-6 pt-5 pb-3 flex items-center gap-2 border-b border-slate-100 dark:border-slate-800">
-        <span style={{ color: accent }}>📝</span>
-        <h3 className="font-bold text-slate-900 dark:text-slate-100">Publicaciones recientes</h3>
+    <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
+      <div className="px-5 py-3.5 border-b border-zinc-100 flex items-center gap-2">
+        <FileText className="h-4 w-4 text-zinc-400" />
+        <h3 className="font-semibold text-zinc-900 text-sm">Publicaciones</h3>
       </div>
 
-      <div className="divide-y divide-slate-100 dark:divide-slate-800">
+      <div className="divide-y divide-zinc-100">
         {loading ? (
-          Array.from({ length: limit }).map((_, i) => (
-            <div key={i} className="p-4 animate-pulse space-y-2">
-              <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-3/4" />
-              <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-1/2" />
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="p-4 space-y-2 animate-pulse">
+              <div className="h-3.5 bg-zinc-100 rounded w-3/4" />
+              <div className="h-3 bg-zinc-100 rounded w-1/2" />
             </div>
           ))
         ) : posts.length === 0 ? (
-          <div className="p-8 text-center text-slate-400">
-            <p className="text-3xl mb-2">📭</p>
-            <p className="text-sm">Sin publicaciones todavía</p>
+          <div className="p-8 text-center">
+            <FileText className="h-8 w-8 text-zinc-300 mx-auto mb-2" />
+            <p className="text-sm text-zinc-400">Sin publicaciones todavía</p>
           </div>
         ) : (
           posts.map((post) => (
-            <div key={post.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-              <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-100 line-clamp-1">
-                {post.title}
-              </h4>
+            <div key={post.id} className="p-4 hover:bg-zinc-50 transition-colors group cursor-default">
+              <div className="flex items-start justify-between gap-2">
+                <h4 className="font-medium text-sm text-zinc-900 line-clamp-1">
+                  {post.title}
+                </h4>
+                <ArrowRight className="h-3.5 w-3.5 text-zinc-300 flex-shrink-0 mt-0.5 group-hover:text-zinc-400 transition-colors" />
+              </div>
               {post.excerpt && (
-                <p className="mt-1 text-xs text-slate-500 line-clamp-2">{post.excerpt}</p>
+                <p className="mt-1 text-xs text-zinc-500 line-clamp-2 leading-relaxed">{post.excerpt}</p>
               )}
-              <div className="mt-2 flex items-center gap-4 text-xs text-slate-400">
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  {new Date(post.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
-                </span>
-                {post.likes_count != null && (
+              <div className="mt-2 flex items-center gap-3 text-xs text-zinc-400">
+                {showDate && post.created_at && (
                   <span className="flex items-center gap-1">
-                    <Heart className="h-3 w-3" /> {post.likes_count}
+                    <Calendar className="h-3 w-3" />
+                    {new Date(post.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </span>
                 )}
-                {post.comments_count != null && (
+                {showAuthor && post.author && (
                   <span className="flex items-center gap-1">
-                    <MessageCircle className="h-3 w-3" /> {post.comments_count}
+                    <User className="h-3 w-3" />
+                    {post.author?.username || post.author?.first_name || 'Autor'}
                   </span>
                 )}
               </div>

@@ -1,38 +1,39 @@
 import { resolveMediaUrl } from '../../../lib/apiClient';
-import { Globe, Instagram, Twitter, Youtube, Github, Linkedin } from 'lucide-react';
+import { Globe, Instagram, Twitter, Youtube, Github, Linkedin, Building2 } from 'lucide-react';
 
 const SOCIAL_ICONS = {
   instagram: Instagram,
-  twitter: Twitter,
-  youtube: Youtube,
-  github: Github,
-  linkedin: Linkedin,
-  web: Globe,
-  website: Globe
+  twitter:   Twitter,
+  youtube:   Youtube,
+  github:    Github,
+  linkedin:  Linkedin,
+  web:       Globe,
+  website:   Globe,
+};
+
+const SOCIAL_LABELS = {
+  instagram: 'Instagram',
+  twitter:   'Twitter',
+  youtube:   'YouTube',
+  github:    'GitHub',
+  linkedin:  'LinkedIn',
+  web:       'Web',
+  website:   'Web',
 };
 
 export default function HeroModule({ team, config = {}, accentColor }) {
-  const { showLogo = true, showSocials = true, tagline } = config;
+  const { showLogo = true, showSocials = true, tagline = '' } = config;
   const socials = team?.social_links || {};
-  const accent = accentColor || '#2563eb';
+  const accent  = accentColor || '#18181b';
+
+  const subtitle = tagline || [team?.institution, team?.city].filter(Boolean).join(' · ');
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl min-h-[220px] flex items-end"
-      style={{
-        background: `linear-gradient(135deg, ${accent}22 0%, ${accent}55 100%)`,
-        borderBottom: `4px solid ${accent}`
-      }}
+      className="rounded-xl border border-zinc-200 bg-white overflow-hidden"
+      style={{ borderTopColor: accent, borderTopWidth: 3 }}
     >
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-5"
-        style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, ${accent} 1px, transparent 0)`,
-          backgroundSize: '32px 32px'
-        }}
-      />
-
-      <div className="relative z-10 w-full p-8 flex flex-col md:flex-row items-start md:items-end gap-6">
+      <div className="p-6 sm:p-8 flex flex-col sm:flex-row gap-6">
         {/* Logo */}
         {showLogo && (
           <div className="flex-shrink-0">
@@ -40,12 +41,12 @@ export default function HeroModule({ team, config = {}, accentColor }) {
               <img
                 src={resolveMediaUrl(team.logo_url)}
                 alt={team.name}
-                className="w-24 h-24 rounded-2xl object-cover shadow-xl border-4 border-white/30"
+                className="w-20 h-20 rounded-xl object-cover border border-zinc-200"
               />
             ) : (
               <div
-                className="w-24 h-24 rounded-2xl flex items-center justify-center text-4xl font-black text-white shadow-xl"
-                style={{ background: accent }}
+                className="w-20 h-20 rounded-xl flex items-center justify-center text-2xl font-black text-white select-none"
+                style={{ backgroundColor: accent }}
               >
                 {(team?.name || 'T').substring(0, 2).toUpperCase()}
               </div>
@@ -54,54 +55,58 @@ export default function HeroModule({ team, config = {}, accentColor }) {
         )}
 
         {/* Info */}
-        <div className="flex-1">
-          <h1 className="text-4xl md:text-5xl font-black text-white drop-shadow-lg tracking-tight">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900 leading-tight">
             {team?.name || 'Nombre del equipo'}
           </h1>
-          {(tagline || team?.institution || team?.city) && (
-            <p className="mt-2 text-lg text-white/80 font-medium">
-              {tagline || [team?.institution, team?.city].filter(Boolean).join(' · ')}
+
+          {subtitle && (
+            <p className="mt-1 text-sm text-zinc-500 flex items-center gap-1.5">
+              {team?.institution && <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-zinc-400" />}
+              {subtitle}
             </p>
           )}
+
           {team?.description && (
-            <p className="mt-3 text-white/70 max-w-2xl line-clamp-2">
+            <p className="mt-3 text-sm text-zinc-600 leading-relaxed max-w-2xl line-clamp-3">
               {team.description}
             </p>
           )}
-        </div>
 
-        {/* Socials */}
-        {showSocials && Object.keys(socials).length > 0 && (
-          <div className="flex gap-3 flex-wrap">
-            {Object.entries(socials).map(([platform, url]) => {
-              if (!url) return null;
-              const Icon = SOCIAL_ICONS[platform.toLowerCase()] || Globe;
-              return (
+          {/* Social links */}
+          {showSocials && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {Object.entries(socials).map(([platform, url]) => {
+                if (!url) return null;
+                const Icon  = SOCIAL_ICONS[platform.toLowerCase()] || Globe;
+                const label = SOCIAL_LABELS[platform.toLowerCase()] || platform;
+                return (
+                  <a
+                    key={platform}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300 text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {label}
+                  </a>
+                );
+              })}
+              {team?.website_url && !socials.web && !socials.website && (
                 <a
-                  key={platform}
-                  href={url}
+                  href={team.website_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white transition-all hover:scale-110 backdrop-blur-sm"
-                  title={platform}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300 text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
                 >
-                  <Icon className="h-5 w-5" />
+                  <Globe className="h-3.5 w-3.5" />
+                  Web
                 </a>
-              );
-            })}
-            {team?.website_url && (
-              <a
-                href={team.website_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white transition-all hover:scale-110 backdrop-blur-sm"
-                title="Web"
-              >
-                <Globe className="h-5 w-5" />
-              </a>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

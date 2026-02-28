@@ -1,49 +1,47 @@
-import HeroModule from './modules/HeroModule';
-import StatsModule from './modules/StatsModule';
-import MembersModule from './modules/MembersModule';
-import PostsModule from './modules/PostsModule';
+import HeroModule         from './modules/HeroModule';
+import StatsModule        from './modules/StatsModule';
+import MembersModule      from './modules/MembersModule';
+import PostsModule        from './modules/PostsModule';
 import CompetitionsModule from './modules/CompetitionsModule';
-import AboutModule from './modules/AboutModule';
-import GalleryModule from './modules/GalleryModule';
-import RobotsModule from './modules/RobotsModule';
-import CountdownModule from './modules/CountdownModule';
-import SocialModule from './modules/SocialModule';
+import RichTextModule     from './modules/RichTextModule';
+import CustomStatsModule  from './modules/CustomStatsModule';
+import GalleryModule      from './modules/GalleryModule';
+import RobotsModule       from './modules/RobotsModule';
+import CountdownModule    from './modules/CountdownModule';
+import SocialModule       from './modules/SocialModule';
 
-const MODULES = {
-  hero: HeroModule,
-  stats: StatsModule,
-  members: MembersModule,
-  posts: PostsModule,
+const COMPONENTS = {
+  hero:         HeroModule,
+  stats:        StatsModule,
+  members:      MembersModule,
+  posts:        PostsModule,
   competitions: CompetitionsModule,
-  about: AboutModule,
-  gallery: GalleryModule,
-  robots: RobotsModule,
-  countdown: CountdownModule,
-  social: SocialModule
+  richtext:     RichTextModule,
+  customstats:  CustomStatsModule,
+  about:        RichTextModule,   // legacy alias
+  gallery:      GalleryModule,
+  robots:       RobotsModule,
+  countdown:    CountdownModule,
+  social:       SocialModule,
 };
 
-/**
- * Renders a single module by type with shared props.
- */
-export default function ModuleRenderer({ module, team, stats, isEditing, onConfigChange, accentColor }) {
-  const Component = MODULES[module.type];
-
+export default function ModuleRenderer({ module: mod, team, stats, isEditing, onConfigChange, accentColor }) {
+  const Component = COMPONENTS[mod.type];
   if (!Component) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center text-slate-400 text-sm">
-        Módulo desconocido: <code>{module.type}</code>
+      <div className="border border-zinc-200 rounded-lg p-4 text-sm text-zinc-400">
+        Módulo desconocido: <code className="font-mono">{mod.type}</code>
       </div>
     );
   }
-
   return (
     <Component
       team={team}
       stats={stats}
-      config={module.config || {}}
+      config={mod.config || {}}
       isEditing={isEditing}
-      onConfigChange={(newConfig) => onConfigChange?.(module.id, newConfig)}
-      accentColor={accentColor}
+      onConfigChange={(newConfig) => onConfigChange?.(mod.id, newConfig)}
+      accentColor={accentColor || '#18181b'}
     />
   );
 }

@@ -8,11 +8,10 @@
 4. [Arquitectura Docker](#4-arquitectura-docker)
 5. [Comandos útiles](#5-comandos-útiles)
 6. [Despliegue en producción](#6-despliegue-en-producción)
-7. [CI/CD — Deploy automático desde GitHub](#7-cicd--deploy-automático-desde-github)
-8. [Sistema de slugs y páginas de equipo](#8-sistema-de-slugs-y-páginas-de-equipo)
-9. [Configuración de nginx + SSL (producción)](#9-configuración-de-nginx--ssl-producción)
-10. [Bases de datos](#10-bases-de-datos)
-11. [Solución de problemas](#11-solución-de-problemas)
+7. [Sistema de slugs y páginas de equipo](#7-sistema-de-slugs-y-páginas-de-equipo)
+8. [Configuración de nginx + SSL (producción)](#8-configuración-de-nginx--ssl-producción)
+9. [Bases de datos](#9-bases-de-datos)
+10. [Solución de problemas](#10-solución-de-problemas)
 
 ---
 
@@ -230,129 +229,7 @@ Asegúrate de que las variables de entorno de Vercel (`VITE_*`) apuntan a la URL
 
 ---
 
-## 7. CI/CD — Deploy automático desde GitHub
-
-Los workflows de GitHub Actions se activan automáticamente al hacer push a las ramas del repositorio `s-pl/Robeurope`:
-
-| Rama | Entorno | Backend | Base de datos |
-|------|---------|---------|---------------|
-| `develop` | Staging | puerto 8585 | `robeurope_staging` |
-| `main` | Producción | puerto 85 | `robeurope_prod` |
-
-El deploy solo se dispara si hay cambios en `backend/**` (no molesta si solo cambia el frontend).
-
-### Secretos de GitHub necesarios
-
-Ve a **Settings → Secrets and variables → Actions** en el repositorio y añade:
-
-| Secreto | Valor |
-|---------|-------|
-| `SSH_HOST` | IP del servidor (ej. `167.99.194.232`) |
-| `SSH_USER` | Usuario SSH (ej. `root`) |
-| `SSH_PRIVATE_KEY` | Clave privada SSH (genera una nueva, ver más abajo) |
-
-> El frontend en Vercel ya se despliega automáticamente vía integración nativa de Vercel con GitHub. No necesita configuración adicional.
-
-### Entornos de GitHub (protección de rama)
-
-Para que el deploy de producción requiera aprobación manual:
-
-1. Ve a **Settings → Environments**
-2. Crea el entorno `production` y activa **Required reviewers**
-3. Crea el entorno `staging` sin protección (despliegue automático)
-
-### Setup inicial del servidor (una sola vez)
-
-```bash
-# 1. Generar par de claves SSH específico para CI/CD
-ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/robeurope_deploy
-# → Añade la clave PÚBLICA al servidor:
-cat ~/.ssh/robeurope_deploy.pub >> ~/.ssh/authorized_keys
-# → Añade la clave PRIVADA como secreto SSH_PRIVATE_KEY en GitHub
-
-# 2. Crear directorios de despliegue en el servidor
-mkdir -p /opt/robeurope /opt/robeurope-staging
-
-# 3. Clonar el repositorio en ambas ubicaciones
-git clone --branch main    https://github.com/s-pl/Robeurope.git /opt/robeurope
-git clone --branch develop https://github.com/s-pl/Robeurope.git /opt/robeurope-staging
-
-# 4. Crear los .env en cada directorio (con los valores reales)
-cp /opt/robeurope/.env.example /opt/robeurope/.env
-nano /opt/robeurope/.env          # → valores de PRODUCCIÓN
-
-cp /opt/robeurope-staging/.env.example /opt/robeurope-staging/.env
-nano /opt/robeurope-staging/.env  # → valores de STAGING
-
-# 5. Primer arranque (crea volúmenes y aplica migraciones)
-cd /opt/robeurope
-docker compose -p robeurope-prod --profile prod up -d
-docker compose -p robeurope-prod --profile prod exec -T backend node scripts/run-migrations.js
-
-cd /opt/robeurope-staging
-docker compose -p robeurope-staging \
-  -f docker-compose.yml -f docker-compose.staging.yml \
-  --profile prod up -d
-docker compose -p robeurope-staging \
-  -f docker-compose.yml -f docker-compose.staging.yml \
-  --profile prod exec -T backend node scripts/run-migrations.js
-```
-
-### Diferencias entre staging y producción
-
-| Aspecto | Staging | Producción |
-|---------|---------|------------|
-| Directorio | `/opt/robeurope-staging/` | `/opt/robeurope/` |
-| Rama git | `develop` | `main` |
-| Puerto backend | `8585` | `85` |
-| Puerto MySQL | `3307` | `3306` |
-| Puerto Redis | `6380` | `6379` |
-| Base de datos | `robeurope_staging` | `robeurope_prod` |
-| Compose override | `-f docker-compose.staging.yml` | _(ninguno)_ |
-| Dominio | `staging.api.robeurope.samuelponce.es` | `api.robeurope.samuelponce.es` |
-
-### Nginx — añadir staging
-
-Añade este bloque al nginx del servidor para exponer el staging:
-
-```nginx
-server {
-    listen 80;
-    server_name staging.api.robeurope.samuelponce.es;
-
-    location / {
-        proxy_pass         http://127.0.0.1:8585;
-        proxy_http_version 1.1;
-        proxy_set_header   Upgrade $http_upgrade;
-        proxy_set_header   Connection "upgrade";
-        proxy_set_header   Host $host;
-        proxy_set_header   X-Real-IP $remote_addr;
-        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header   X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-Después aplica el certificado SSL:
-
-```bash
-certbot --nginx -d staging.api.robeurope.samuelponce.es
-```
-
-### Flujo de trabajo recomendado
-
-```
-feature branch → develop → [auto-deploy staging] → revisión → main → [auto-deploy producción]
-```
-
-1. Desarrollas en una rama de feature
-2. Haces merge a `develop` → se despliega automáticamente en staging
-3. Pruebas en `https://staging.api.robeurope.samuelponce.es`
-4. Cuando todo está bien, haces merge a `main` → se despliega en producción
-
----
-
-## 8. Sistema de slugs y páginas de equipo
+## 7. Sistema de slugs y páginas de equipo
 
 ### ¿Cómo funciona?
 
@@ -450,7 +327,7 @@ VITE_TEAM_DOMAIN=robeurope.samuelponce.es
 
 ---
 
-## 9. Configuración de nginx + SSL (producción)
+## 8. Configuración de nginx + SSL (producción)
 
 ```bash
 # Instala nginx si no está
@@ -471,7 +348,7 @@ Después del script, solicita los certificados SSL (ver sección 7).
 
 ---
 
-## 10. Bases de datos
+## 9. Bases de datos
 
 ### Entornos
 
@@ -519,7 +396,7 @@ docker exec -it robeurope-mysql mysql -u robeurope_user -p robeurope_dev
 
 ---
 
-## 11. Solución de problemas
+## 10. Solución de problemas
 
 ### MySQL no arranca
 
