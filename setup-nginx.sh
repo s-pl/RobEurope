@@ -270,7 +270,6 @@ EOF
     --dns-digitalocean-propagation-seconds 30 \
     --cert-name "$CERT_NAME" \
     -d "*.${TEAM_DOMAIN}" \
-    -d "api.${TEAM_DOMAIN}" \
     --agree-tos --non-interactive \
     --email "admin@${TEAM_DOMAIN}" \
     || err "certbot falló. Revisa los logs: journalctl -u certbot"
