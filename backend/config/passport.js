@@ -1,7 +1,7 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as GitHubStrategy } from 'passport-github2';
-import LdapStrategy from 'passport-ldapauth';
+
 import db from '../models/index.js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -107,73 +107,3 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
 
 
 export default passport;
-
-// LDAP Strategy (optional; registers only if env vars are provided)
-try {
-  const {
-    LDAP_URL,
-    LDAP_BIND_DN,
-    LDAP_BIND_PASSWORD,
-    LDAP_SEARCH_BASE,
-    LDAP_SEARCH_FILTER
-  } = process.env;
-
-  if (LDAP_URL && LDAP_SEARCH_BASE && (LDAP_SEARCH_FILTER || true)) {
-    const OPTS = {
-      server: {
-        url: LDAP_URL,
-        bindDN: LDAP_BIND_DN,
-        bindCredentials: LDAP_BIND_PASSWORD,
-        searchBase: LDAP_SEARCH_BASE,
-    
-        searchFilter: LDAP_SEARCH_FILTER || '(|(mail={{username}})(uid={{username}}))',
-   
-        searchAttributes: ['dn', 'cn', 'sn', 'givenName', 'mail', 'uid']
-      },
-      usernameField: 'username',
-      passwordField: 'password',
-      passReqToCallback: true
-    };
-
-    passport.use('ldapauth', new LdapStrategy(OPTS, async (req, user, done) => {
-      try {
-       
-        const email = user.mail || null;
-        const uid = user.uid || null;
-        const firstName = user.givenName || 'User';
-        const lastName = user.sn || 'LDAP';
-        const usernameBase = uid || (email ? String(email).split('@')[0] : `ldap_${Date.now()}`);
-
-     
-        let local = email ? await User.findOne({ where: { email } }) : null;
-      
-        if (!local) local = await User.findOne({ where: { username: usernameBase } });
-
-        if (!local) {
-          
-          let uniqueUsername = usernameBase;
-          const exists = await User.findOne({ where: { username: uniqueUsername } });
-          if (exists) uniqueUsername = `${uniqueUsername}_${uuidv4().slice(0,4)}`;
-
-          local = await User.create({
-            first_name: firstName,
-            last_name: lastName,
-            username: uniqueUsername,
-            email: email || null,
-            password_hash: null
-          });
-        }
-
-      
-        return done(null, local);
-      } catch (err) {
-        return done(err);
-      }
-    }));
-    console.log('Registering LDAP Strategy');
-  } else {
-    console.log('LDAP env vars not set; skipping LDAP strategy');
-  }
-} catch (e) {
-  console.log('LDAP strategy init failed:', e.message);
-}

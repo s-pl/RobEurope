@@ -11,10 +11,12 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
-import { 
-  Users, Settings, Trophy, Info, Plus, 
-  LogOut, Trash2, Check, X, Video, UserPlus, MessageCircle, Code, Building2 
+import {
+  Users, Settings, Trophy, Info, Plus,
+  LogOut, Trash2, Check, X, Video, UserPlus, MessageCircle, Code, Building2, ExternalLink
 } from 'lucide-react';
+
+const TEAM_DOMAIN = import.meta.env.VITE_TEAM_DOMAIN || 'robeurope.samuelponce.es';
 import TeamChat from '../components/teams/TeamChat';
 import TeamCompetitionDashboard from '../components/teams/TeamCompetitionDashboard';
 import { resolveMediaUrl } from '../lib/apiClient';
@@ -484,12 +486,30 @@ const MyTeam = () => {
           <p className="text-slate-500 text-sm mt-1">
             {team.institution} • {team.city}
           </p>
+          {team.slug && (
+            <a
+              href={`/teams/${team.slug}/page`}
+              className="inline-flex items-center gap-1 mt-1 text-xs text-blue-500 hover:underline"
+            >
+              <ExternalLink className="h-3 w-3" />
+              {team.slug}.{TEAM_DOMAIN} — Ver página pública
+            </a>
+          )}
         </div>
-        {!isOwner && (
-          <Button variant="destructive" size="sm" onClick={onLeave} className="gap-2">
-            <LogOut className="h-4 w-4" /> {t('myTeam.actions.leave')}
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {team.slug && (
+            <Button variant="ghost" size="sm" asChild>
+              <a href={`/teams/${team.slug}/page`}>
+                <ExternalLink className="h-4 w-4 mr-1" /> Página pública
+              </a>
+            </Button>
+          )}
+          {!isOwner && (
+            <Button variant="destructive" size="sm" onClick={onLeave} className="gap-2">
+              <LogOut className="h-4 w-4" /> {t('myTeam.actions.leave')}
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Tabs Navigation */}

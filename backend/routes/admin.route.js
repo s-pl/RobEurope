@@ -22,7 +22,7 @@ import {
 } from '../controller/admin.controller.js';
 import * as crudController from '../controller/admin.crud.controller.js';
 import { renderRedisExplorer, listKeys, getKeyInfo, deleteKey, getOverview } from '../controller/admin.redis.controller.js';
-import * as ldapController from '../controller/ldap.controller.js';
+
 import { 
   renderCenterRequests, 
   approveRequestDashboard, 
@@ -61,16 +61,6 @@ router.get('/api/redis/keys', requireAdminSession, listKeys);
 router.get('/api/redis/key/:key', requireAdminSession, getKeyInfo);
 router.delete('/api/redis/key/:key', requireAdminSession, deleteKey);
 router.get('/api/redis/overview', requireAdminSession, getOverview);
-
-// LDAP routes
-router.get('/ldap-users', requireAdminSession, ldapController.listLdapUsers);
-router.get('/ldap-users/add', requireAdminSession, ldapController.renderAddLdapUser);
-router.post('/ldap-users/add', requireAdminSession, ldapController.addLdapUser);
-router.get('/ldap-users/edit/:uid', requireAdminSession, ldapController.renderEditLdapUser);
-router.post('/ldap-users/edit/:uid', requireAdminSession, ldapController.updateLdapUser);
-// Fallback: allow POST without :uid using body.uid from the form (prevents 'Cannot POST /admin/ldap-users/edit/')
-router.post('/ldap-users/edit', requireAdminSession, ldapController.updateLdapUser);
-router.post('/ldap-users/delete/:uid', requireAdminSession, ldapController.deleteLdapUser);
 
 // Center admin requests routes
 router.get('/center-requests', requireAdminSession, renderCenterRequests);

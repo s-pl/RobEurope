@@ -1,35 +1,198 @@
-version: '3.8'
+# ============================================================
+# RobEurope — Docker Compose
+#
+# Profiles:
+#   dev   → backend-dev + frontend-dev + mysql + redis
+#   prod  → backend     + frontend     + mysql + redis
+#
+# Usage:
+#   Development : docker compose --profile dev  up -d
+#   Production  : docker compose --profile prod up -d
+# ============================================================
 
 services:
-  openldap:
-    image: osixia/openldap:1.5.0
-    container_name: openldap
+
+  # ----------------------------------------------------------
+  # MySQL (shared across all profiles)
+  # ----------------------------------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: robeurope-mysql
+    restart: unless-stopped
+    profiles: [dev, prod]
     environment:
-      LDAP_ORGANISATION: "RobEurope"
-      LDAP_DOMAIN: "robeurope.samuelponce.es"
-      LDAP_ADMIN_PASSWORD: "adminpassword"
-      LDAP_CONFIG_PASSWORD: "configpassword"
-      LDAP_TLS: "false"  # For simplicity, disable TLS
-    ports:
-      - "389:389"
-      - "636:636"
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_USER:          ${MYSQL_USER:-robeurope_user}
+      MYSQL_PASSWORD:      ${MYSQL_PASSWORD:-devpassword}
+      # Extra databases (robeurope_dev, robeurope_test, robeurope_prod)
+      # are created via init.sql — no MYSQL_DATABASE needed here.
     volumes:
-      - ldap_data:/var/lib/ldap
-      - ldap_config:/etc/ldap/slapd.d
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "${MYSQL_HOST_PORT:-3306}:3306"
+    networks:
+      - robeurope_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ----------------------------------------------------------
+  # Redis (shared across all profiles)
+  # ----------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: robeurope-redis
+    restart: unless-stopped
+    profiles: [dev, prod]
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+    networks:
+      - robeurope_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ----------------------------------------------------------
+  # Backend — Development (nodemon + source mount)
+  # ----------------------------------------------------------
+  backend-dev:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: robeurope-backend-dev
+    restart: unless-stopped
+    profiles: [dev]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV:       development
+      PORT:           85
+      DB_HOST_DEV:    mysql
+      DB_PORT_DEV:    3306
+      DB_NAME_DEV:    ${DB_NAME_DEV:-robeurope_dev}
+      DB_USER_DEV:    ${MYSQL_USER:-robeurope_user}
+      DB_PASS_DEV:    ${MYSQL_PASSWORD:-devpassword}
+      REDIS_URL:      redis://redis:6379
+      SESSION_SECRET: ${SESSION_SECRET:-dev-session-secret-change-me}
+      TEAM_DOMAIN:    ${TEAM_DOMAIN:-localhost}
+      RESEND_API_KEY:       ${RESEND_API_KEY:-}
+      VAPID_PUBLIC_KEY:     ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY:    ${VAPID_PRIVATE_KEY:-}
+      GOOGLE_CLIENT_ID:     ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GITHUB_CLIENT_ID:     ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+    volumes:
+      - ./backend:/app
+      - backend_node_modules:/app/node_modules
+      - backend_uploads:/app/uploads
+    ports:
+      - "${PORT:-85}:85"
     networks:
       - robeurope_network
 
-  redis:
-    image: redis:alpine
-    container_name: robeurope-redis
+  # ----------------------------------------------------------
+  # Frontend — Development (Vite dev server + source mount)
+  # ----------------------------------------------------------
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: robeurope-frontend-dev
+    restart: unless-stopped
+    profiles: [dev]
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:85}
+      VITE_WS_URL:       ${VITE_WS_URL:-ws://localhost:85}
+      VITE_APP_NAME:     ${VITE_APP_NAME:-RobEurope Dev}
+      VITE_TEAM_DOMAIN:  ${VITE_TEAM_DOMAIN:-localhost}
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
     ports:
-      - "6379:6379"
+      - "5173:5173"
+    networks:
+      - robeurope_network
+
+  # ----------------------------------------------------------
+  # Backend — Production
+  # ----------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: robeurope-backend
+    restart: unless-stopped
+    profiles: [prod]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV:       production
+      PORT:           85
+      DB_HOST_PROD:   mysql
+      DB_PORT_PROD:   3306
+      DB_NAME_PROD:   ${DB_NAME_PROD:-robeurope_prod}
+      DB_USER_PROD:   ${MYSQL_USER:-robeurope_user}
+      DB_PASS_PROD:   ${MYSQL_PASSWORD:-devpassword}
+      REDIS_URL:      redis://redis:6379
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET is required in production}
+      COOKIE_DOMAIN:  ${COOKIE_DOMAIN:-.robeurope.samuelponce.es}
+      TEAM_DOMAIN:    ${TEAM_DOMAIN:-robeurope.samuelponce.es}
+      RESEND_API_KEY:       ${RESEND_API_KEY:-}
+      VAPID_PUBLIC_KEY:     ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY:    ${VAPID_PRIVATE_KEY:-}
+      GOOGLE_CLIENT_ID:     ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GITHUB_CLIENT_ID:     ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+    volumes:
+      - backend_uploads:/app/uploads
+    ports:
+      - "${PORT:-85}:85"
+    networks:
+      - robeurope_network
+
+  # ----------------------------------------------------------
+  # Frontend — Production (nginx serving built SPA)
+  # ----------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-https://api.robeurope.samuelponce.es}
+        VITE_WS_URL:       ${VITE_WS_URL:-wss://api.robeurope.samuelponce.es}
+        VITE_APP_NAME:     ${VITE_APP_NAME:-RobEurope}
+        VITE_TEAM_DOMAIN:  ${VITE_TEAM_DOMAIN:-robeurope.samuelponce.es}
+    container_name: robeurope-frontend
+    restart: unless-stopped
+    profiles: [prod]
+    ports:
+      - "3000:80"
     networks:
       - robeurope_network
 
 volumes:
-  ldap_data:
-  ldap_config:
+  mysql_data:
+  redis_data:
+  backend_uploads:
+  # Named volumes keep node_modules inside the container so the
+  # host OS/arch doesn't conflict with container binaries.
+  backend_node_modules:
+  frontend_node_modules:
 
 networks:
   robeurope_network:

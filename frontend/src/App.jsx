@@ -31,6 +31,20 @@ import AdminCenters from './pages/admin/AdminCenters';
 import AdminArchives from './pages/admin/AdminArchives';
 import AdminRequests from './pages/admin/AdminRequests';
 import AdminPosts from './pages/admin/AdminPosts';
+import TeamPublicPage from './pages/TeamPublicPage';
+
+// ── Subdomain detection ─────────────────────────────────────────────────────
+const TEAM_DOMAIN = import.meta.env.VITE_TEAM_DOMAIN || 'robeurope.samuelponce.es';
+
+function getTeamSlugFromHostname() {
+  const hostname = window.location.hostname;
+  // Match: <slug>.<TEAM_DOMAIN>  (but not TEAM_DOMAIN itself)
+  const escaped = TEAM_DOMAIN.replace(/\./g, '\\.');
+  const match = hostname.match(new RegExp(`^([a-z0-9][a-z0-9-]*)\\.(${escaped})$`, 'i'));
+  return match ? match[1] : null;
+}
+
+const teamSlugFromSubdomain = getTeamSlugFromHostname();
 
 // Admin route wrapper - requires center_admin or super_admin role
 const AdminRoute = ({ children, superAdminOnly = false }) => {
@@ -58,6 +72,16 @@ const GuestRoute = ({ children }) => {
 };
 
 function App() {
+  // If accessed via a team subdomain, render only the team public page
+  if (teamSlugFromSubdomain) {
+    return (
+      <SocketProvider>
+        <TeamPublicPage slug={teamSlugFromSubdomain} isSubdomain />
+        <Toaster />
+      </SocketProvider>
+    );
+  }
+
   return (
     <BrowserRouter>
   <SocketProvider>
@@ -70,6 +94,7 @@ function App() {
           <Route path="contact" element={<Contact />} />
           <Route path="teams" element={<Teams />} />
           <Route path="teams/accept" element={<ProtectedRoute><AcceptInvite /></ProtectedRoute>} />
+          <Route path="teams/:slug/page" element={<TeamPublicPage />} />
           <Route path="my-team" element={<ProtectedRoute><MyTeam /></ProtectedRoute>} />
           <Route path="posts" element={<Posts />} />
           <Route path="gallery" element={<Gallery />} />
