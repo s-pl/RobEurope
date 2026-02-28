@@ -72,6 +72,16 @@ const sessionStore = new SequelizeStore({
 sessionStore.sync();
 // When behind a reverse proxy (NGINX, Caddy, etc.) trust the first proxy so secure cookies work
 app.set('trust proxy', 1);
+// En producción el frontend (Vercel) y la API (DO) están en subdominios
+// diferentes de robeurope.samuelponce.es. Para que la cookie de sesión viaje
+// en peticiones cross-origin con credentials: 'include' necesitamos:
+//   domain: '.robeurope.samuelponce.es'  → válida en todos los subdominios
+//   sameSite: 'none' + secure: true      → permite cross-origin con HTTPS
+const isProduction = process.env.NODE_ENV === 'production';
+const cookieDomain = isProduction
+  ? (process.env.COOKIE_DOMAIN || `.${(process.env.TEAM_DOMAIN || 'robeurope.samuelponce.es')}`)
+  : undefined; // en dev no forzamos dominio (localhost)
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'Session123456789100000',
   store: sessionStore,
@@ -79,10 +89,14 @@ app.use(session({
   saveUninitialized: false,
   proxy: true,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // set true behind HTTPS reverse proxy with trust proxy
+    secure: isProduction,      // HTTPS requerido en prod (trust proxy ya activo)
     httpOnly: true,
-    sameSite: 'lax',
-    maxAge: 1000 * 60 * 60 * 24 // 24 hours
+    // 'none' permite cross-origin con credentials (necesario Vercel ↔ api.DO)
+    // 'lax' en dev (localhost no requiere cross-origin)
+    sameSite: isProduction ? 'none' : 'lax',
+    // Dominio compartido para que funcione desde equipo.robeurope.samuelponce.es
+    ...(cookieDomain && { domain: cookieDomain }),
+    maxAge: 1000 * 60 * 60 * 24 * 7 // 7 días
   }
 }));
 

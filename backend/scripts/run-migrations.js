@@ -29,6 +29,7 @@ import * as updateStreamsEducationalCenter from '../migrations/20260118-update-s
 import * as updateGalleryEnhanced from '../migrations/20260118-update-gallery-enhanced.js';
 import * as updateRegistrationCenterApproval from '../migrations/20260118-update-registration-center-approval.js';
 import * as addCenterAdminRequest from '../migrations/20251214-add-center-admin-request.js';
+import * as addTeamSlugAndPages from '../migrations/20260228-add-team-slug-and-pages.js';
 
 async function run() {
   try {
@@ -287,6 +288,17 @@ async function run() {
       }
     } catch (e) {
       console.log('Skipping addCenterAdminRequest:', e.message);
+    }
+
+    // Add slug to Team and create TeamPage table
+    try {
+      const upFn = addTeamSlugAndPages.up || addTeamSlugAndPages.default?.up;
+      if (upFn) {
+        await upFn(qi, Sequelize);
+        console.log('Added Team.slug and created TeamPage table');
+      }
+    } catch (e) {
+      console.log('Skipping addTeamSlugAndPages:', e.message);
     }
 
     console.log('Migrations applied successfully');
