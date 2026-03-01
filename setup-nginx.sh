@@ -3,14 +3,10 @@
 # RobEurope - Nginx Setup (Arquitectura split: Vercel + DO)
 #
 # ARQUITECTURA:
-#   robeurope.samuelponce.es         → Vercel (frontend)
 #   api.robeurope.samuelponce.es     → Este servidor (backend :85)
-#   *.robeurope.samuelponce.es       → Este servidor (nginx proxy a Vercel)
 #
 # DNS NECESARIO:
 #   A     api.robeurope.samuelponce.es   → <esta IP>
-#   A     *.robeurope.samuelponce.es     → <esta IP>
-#   A/CNAME robeurope.samuelponce.es    → Vercel
 # ============================================================
 set -euo pipefail
 
@@ -31,7 +27,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # ── Configuración ────────────────────────────────────────────
 BACKEND_PORT="${PORT:-85}"
 TEAM_DOMAIN="${TEAM_DOMAIN:-robeurope.samuelponce.es}"
-VERCEL_HOST="${VERCEL_HOST:-$TEAM_DOMAIN}"
 CERT_NAME="robeurope"
 CERT_DIR="/etc/letsencrypt/live/${CERT_NAME}"
 DO_CREDS_FILE="/root/.secrets/do-certbot.ini"
@@ -67,23 +62,20 @@ EOF
 write_nginx_config() {
   local WITH_SSL="${1:-false}"
 
-  local API_LISTEN TEAM_LISTEN SSL_BLOCK=""
+  local API_LISTEN SSL_BLOCK=""
   if [[ "$WITH_SSL" == "true" ]]; then
     API_LISTEN="listen 443 ssl;\n    listen [::]:443 ssl;"
-    TEAM_LISTEN="listen 443 ssl;\n    listen [::]:443 ssl;"
     SSL_BLOCK=$(ssl_params \
       | sed "s|CERT_FULLCHAIN_PLACEHOLDER|${CERT_FULLCHAIN}|g" \
       | sed "s|CERT_KEY_PLACEHOLDER|${CERT_KEY}|g")
   else
     API_LISTEN="listen 80;\n    listen [::]:80;"
-    TEAM_LISTEN="listen 80;\n    listen [::]:80;"
   fi
 
   cat > "$CONFIG_FILE" << NGINX_EOF
 # ============================================================
 # RobEurope - Nginx Config  |  Generado: $(date)
 #  api.${TEAM_DOMAIN}  →  backend localhost:${BACKEND_PORT}
-#  *.${TEAM_DOMAIN}    →  proxy transparente a Vercel
 # ============================================================
 
 map \$http_upgrade \$connection_upgrade {
@@ -96,7 +88,7 @@ $(if [[ "$WITH_SSL" == "true" ]]; then cat << REDIRECT
 server {
     listen 80;
     listen [::]:80;
-    server_name api.${TEAM_DOMAIN} ~^(?!api\$|www\$)[a-z0-9][a-z0-9\-]*\.${DOMAIN_REGEX}\$;
+    server_name api.${TEAM_DOMAIN};
     return 301 https://\$host\$request_uri;
 }
 REDIRECT
@@ -139,37 +131,6 @@ $(echo "$SSL_BLOCK")
     }
 }
 
-# ── EQUIPOS: <slug>.${TEAM_DOMAIN} ──────────────────────────
-server {
-    $(echo -e "$TEAM_LISTEN")
-    server_name ~^(?P<team_slug>(?!api\$|www\$)[a-z0-9][a-z0-9\-]*)\.${DOMAIN_REGEX}\$;
-$(echo "$SSL_BLOCK")
-
-    access_log /var/log/nginx/robeurope_teams_access.log;
-    error_log  /var/log/nginx/robeurope_teams_error.log;
-
-    location / {
-        proxy_pass          https://${VERCEL_HOST};
-        proxy_http_version  1.1;
-        proxy_ssl_server_name on;
-        proxy_set_header    Host              ${VERCEL_HOST};
-        proxy_set_header    X-Real-IP         \$remote_addr;
-        proxy_set_header    X-Forwarded-For   \$proxy_add_x_forwarded_for;
-        proxy_set_header    X-Forwarded-Proto \$scheme;
-        proxy_set_header    X-Team-Slug       \$team_slug;
-        proxy_buffering     off;
-        proxy_read_timeout  60s;
-
-        location ~* \.(js|css|woff2?|png|jpg|svg|ico)\$ {
-            proxy_pass          https://${VERCEL_HOST};
-            proxy_http_version  1.1;
-            proxy_ssl_server_name on;
-            proxy_set_header    Host ${VERCEL_HOST};
-            proxy_cache_valid   200 1d;
-            add_header          Cache-Control "public, max-age=86400";
-        }
-    }
-}
 NGINX_EOF
 
   ok "Config escrita $(if [[ "$WITH_SSL" == "true" ]]; then echo "(SSL)"; else echo "(HTTP)"; fi)"
@@ -305,12 +266,10 @@ echo -e "${GREEN}═════════════════════
 echo -e "${GREEN}  ✓  nginx configurado para RobEurope${NC}"
 echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
 echo -e "  API backend  : https://api.${TEAM_DOMAIN}  →  :${BACKEND_PORT}"
-echo -e "  Team pages   : https://<slug>.${TEAM_DOMAIN}  →  Vercel"
 echo -e "  HTTP → HTTPS : redireccionamiento automático"
 echo -e "  Cert         : $CERT_DIR"
 echo ""
 echo -e "  ${CYAN}DNS requerido:${NC}"
 echo -e "  A  api.${TEAM_DOMAIN}  →  ${SERVER_IP}"
-echo -e "  A  *.${TEAM_DOMAIN}   →  ${SERVER_IP}"
 echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
 echo ""
