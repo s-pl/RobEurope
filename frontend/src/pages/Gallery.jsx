@@ -2,6 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiRequest, resolveMediaUrl } from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Skeleton } from '../components/ui/skeleton';
+import { Alert, AlertTitle, AlertDescription } from '../components/ui/alert';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
 
 const Gallery = () => {
 
@@ -78,16 +83,9 @@ const Gallery = () => {
 
     return (
         <div className="space-y-8">
-            <header className="space-y-2 text-center">
-                <h1 className="text-3xl font-bold tracking-tight text-blue-900 sm:text-4xl lg:text-5xl dark:text-blue-100">
-                    {t('gallery.galleryTitle')}
-                </h1>
-                <p className="mx-auto max-w-2xl text-sm text-slate-600 sm:text-base dark:text-slate-400">
-                    {t('gallery.galleryDescription')}
-                </p>
-            </header>
+            <PageHeader title={t('gallery.galleryTitle')} description={t('gallery.galleryDescription')} />
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950 sm:p-6 lg:p-8">
+            <div>
 
                     {isAuthenticated && isAdmin && (
                         <form onSubmit={handleUpload} className="rounded-xl border border-slate-200 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/50 sm:p-6 mb-6">
@@ -126,29 +124,49 @@ const Gallery = () => {
                             </div>
 
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
-                                <button
+                                <Button
                                     type="submit"
                                     disabled={uploadStatus.loading}
-                                    className="inline-flex items-center justify-center rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
                                 >
                                     {uploadStatus.loading ? (t('gallery.uploading') || 'Subiendo...') : (t('gallery.uploadCta') || 'Subir')}
-                                </button>
+                                </Button>
 
                                 <div className="text-sm">
-                                    {uploadStatus.error && <span className="text-red-600" role="alert">{uploadStatus.error}</span>}
-                                    {!uploadStatus.error && uploadStatus.ok && <span className="text-green-700" role="status">{uploadStatus.ok}</span>}
+                                    {uploadStatus.error && (
+                                        <Alert variant="destructive" className="py-2">
+                                            <AlertDescription>{uploadStatus.error}</AlertDescription>
+                                        </Alert>
+                                    )}
+                                    {!uploadStatus.error && uploadStatus.ok && (
+                                        <Alert variant="success" className="py-2">
+                                            <AlertDescription>{uploadStatus.ok}</AlertDescription>
+                                        </Alert>
+                                    )}
                                 </div>
                             </div>
                         </form>
                     )}
 
-                    {status.loading && <p className="text-slate-600">{t('gallery.loading') || 'Cargando...'}</p>}
-                    {!status.loading && status.error && <p className="text-red-600" role="alert">{status.error}</p>}
+                    {status.loading && (
+                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
+                            {[...Array(8)].map((_, i) => (
+                                <div key={i} className="aspect-square rounded-xl">
+                                    <Skeleton className="h-full w-full rounded-xl" />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {!status.loading && status.error && (
+                        <Alert variant="destructive">
+                            <AlertTitle>Error</AlertTitle>
+                            <AlertDescription>{status.error}</AlertDescription>
+                        </Alert>
+                    )}
 
                     {!status.loading && !status.error && (
                         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
                             {items.map((item) => (
-                                <div key={item.id} className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-950">
+                                <Card key={item.id} className="overflow-hidden group cursor-pointer p-0">
                                     <div className="aspect-square bg-slate-50 dark:bg-slate-900">
                                         <img
                                             src={resolveMediaUrl(item.url)}
@@ -195,12 +213,12 @@ const Gallery = () => {
                                             )}
                                         </div>
                                     )}
-                                </div>
+                                </Card>
                             ))}
                         </div>
                     )}
 
-            </section>
+            </div>
         </div>
     )
 }

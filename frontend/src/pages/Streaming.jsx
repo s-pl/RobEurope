@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStreams } from '../hooks/useStreams';
+import { PageHeader } from '../components/ui/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Eye, Building2 } from 'lucide-react';
@@ -68,13 +69,8 @@ const Streams = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-blue-900 dark:text-blue-100">{t('streams.title')}</h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-2">{t('streams.subtitle')}</p>
-        </div>
-      </div>
+    <div className="space-y-8">
+      <PageHeader title={t('streams.title')} description={t('streams.subtitle')} />
 
       {streamsByCenter.length === 0 ? (
         <div className="text-center py-12">

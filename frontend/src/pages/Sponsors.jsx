@@ -8,7 +8,10 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { Badge } from '../components/ui/badge';
-import { Plus, Edit, Trash2, ExternalLink } from 'lucide-react';
+import { Plus, Edit, Trash2, ExternalLink, Heart } from 'lucide-react';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Alert, AlertDescription } from '../components/ui/alert';
+import { Skeleton } from '../components/ui/skeleton';
 
 const Sponsors = () => {
   const { t } = useTranslation();
@@ -89,36 +92,38 @@ const Sponsors = () => {
     setDialogOpen(true);
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-blue-900 dark:text-blue-100">{t('sponsors.title')}</h1>
-          <p className="text-blue-600 dark:text-blue-400 mt-1">{t('sponsors.subtitle')}</p>
-        </div>
-        {isAdmin && (
+      <PageHeader
+        title={t('sponsors.title')}
+        description={t('sponsors.subtitle')}
+        action={isAdmin && (
           <Button onClick={openCreateDialog} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             {t('sponsors.create')}
           </Button>
         )}
-      </div>
+      />
 
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg">
-          {error}
+      {loading && (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="rounded-xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
+              <Skeleton className="h-5 w-2/3" />
+              <Skeleton className="h-36 w-full" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          ))}
         </div>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {!loading && <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {sponsors.map((sponsor) => (
           <Card key={sponsor.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
@@ -186,17 +191,17 @@ const Sponsors = () => {
             </CardContent>
           </Card>
         ))}
-      </div>
+      </div>}
 
-      {sponsors.length === 0 && !loading && (
-        <div className="text-center py-12">
-          <div className="text-blue-400 mb-4">
-            <Plus className="h-12 w-12 mx-auto" />
+      {sponsors.length === 0 && !loading && !error && (
+        <div className="text-center py-20 space-y-3">
+          <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto">
+            <Heart className="h-7 w-7 text-slate-400" />
           </div>
-          <h3 className="text-lg font-medium text-blue-900 dark:text-blue-100 mb-2">{t('sponsors.empty')}</h3>
-          <p className="text-blue-600 dark:text-blue-400 mb-4">{t('sponsors.emptyDesc')}</p>
+          <p className="font-medium text-slate-900 dark:text-slate-100">{t('sponsors.empty')}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">{t('sponsors.emptyDesc')}</p>
           {isAdmin && (
-            <Button onClick={openCreateDialog}>
+            <Button onClick={openCreateDialog} className="mt-2">
               <Plus className="h-4 w-4 mr-2" />
               {t('sponsors.create')}
             </Button>

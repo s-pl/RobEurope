@@ -1,5 +1,5 @@
 import express from 'express';
-import { createTeam, getTeams, getTeamById, updateTeam, deleteTeam, inviteToTeam, acceptInvite, declineInvite, requestJoinTeam, approveJoinRequest, registerTeamInCompetition, getMyTeam, listJoinRequests, getMembershipStatus, leaveTeam, getTeamBySlug, getTeamPage, updateTeamPage } from '../../controller/teams.controller.js';
+import { createTeam, getTeams, getTeamById, updateTeam, deleteTeam, inviteToTeam, acceptInvite, declineInvite, requestJoinTeam, approveJoinRequest, registerTeamInCompetition, getMyTeam, listJoinRequests, getMembershipStatus, leaveTeam, getMyJoinRequests, cancelJoinRequest } from '../../controller/teams.controller.js';
 import { getMessages, sendMessage } from '../../controller/team_chat.controller.js';
 import authenticateToken from '../../middleware/auth.middleware.js';
 import { requireOwnership } from '../../middleware/ownership.middleware.js';
@@ -9,13 +9,9 @@ const router = express.Router();
 router.get('/', getTeams);
 router.get('/mine', authenticateToken, getMyTeam);
 router.get('/status', authenticateToken, getMembershipStatus);
+router.get('/my-requests', authenticateToken, getMyJoinRequests);
 router.post('/leave', authenticateToken, leaveTeam);
-// Public slug lookup (must be before /:id)
-router.get('/by-slug/:slug', getTeamBySlug);
 router.get('/:id', getTeamById);
-// Team page
-router.get('/:id/page', getTeamPage);
-router.put('/:id/page', authenticateToken, updateTeamPage);
 router.post('/', authenticateToken, uploadMiddleware({ fieldName: 'logo' }), createTeam);
 router.put('/:id', authenticateToken, requireOwnership('Team'), uploadMiddleware({ fieldName: 'logo' }), updateTeam);
 router.delete('/:id', authenticateToken, requireOwnership('Team'), deleteTeam);
@@ -28,6 +24,7 @@ router.post('/invitations/decline', authenticateToken, declineInvite);
 // join requests
 router.post('/:id/requests', authenticateToken, requestJoinTeam);
 router.post('/requests/:requestId/approve', authenticateToken, approveJoinRequest);
+router.delete('/requests/:requestId', authenticateToken, cancelJoinRequest);
 router.get('/:id/requests', authenticateToken, requireOwnership('Team'), listJoinRequests);
 
 // team -> competition registration

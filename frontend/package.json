@@ -24,6 +24,7 @@
     "clsx": "^2.1.1",
     "dompurify": "^3.3.0",
     "file-saver": "^2.0.5",
+    "framer-motion": "^12.34.3",
     "gsap": "^3.13.0",
     "i18next": "^24.0.2",
     "jszip": "^3.10.1",

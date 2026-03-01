@@ -3,14 +3,10 @@
 # RobEurope - Nginx Setup (Arquitectura split: Vercel + DO)
 #
 # ARQUITECTURA:
-#   robeurope.samuelponce.es         → Vercel (frontend)
 #   api.robeurope.samuelponce.es     → Este servidor (backend :85)
-#   *.robeurope.samuelponce.es       → Este servidor (nginx proxies a Vercel)
 #
 # DNS NECESARIO:
 #   A     api.robeurope.samuelponce.es   → <esta IP>
-#   A     *.robeurope.samuelponce.es     → <esta IP>
-#   A/CNAME robeurope.samuelponce.es    → Vercel
 # ============================================================
 set -euo pipefail
 
@@ -22,71 +18,93 @@ warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
 err()  { echo -e "${RED}[ERR ]${NC} $*"; exit 1; }
 step() { echo -e "\n${CYAN}══════ $* ══════${NC}"; }
 
+[[ "$EUID" -ne 0 ]] && err "Ejecuta como root o con sudo."
+
 # ── Cargar .env ──────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [[ -f "$SCRIPT_DIR/.env" ]]; then
-  set -a; source "$SCRIPT_DIR/.env"; set +a
-  log "Variables cargadas desde .env"
-fi
+[[ -f "$SCRIPT_DIR/.env" ]] && { set -a; source "$SCRIPT_DIR/.env"; set +a; log ".env cargado"; }
 
-# ── Configuración (override desde .env) ─────────────────────
+# ── Configuración ────────────────────────────────────────────
 BACKEND_PORT="${PORT:-85}"
 TEAM_DOMAIN="${TEAM_DOMAIN:-robeurope.samuelponce.es}"
-# El host donde está el frontend de Vercel (subdominio raíz)
-VERCEL_HOST="${VERCEL_HOST:-$TEAM_DOMAIN}"
+CERT_NAME="robeurope"
+CERT_DIR="/etc/letsencrypt/live/${CERT_NAME}"
+DO_CREDS_FILE="/root/.secrets/do-certbot.ini"
 
 NGINX_CONF_NAME="robeurope"
 SITES_AVAILABLE="/etc/nginx/sites-available"
 SITES_ENABLED="/etc/nginx/sites-enabled"
-
-# ── Verificar root ───────────────────────────────────────────
-[[ "$EUID" -ne 0 ]] && err "Ejecuta como root o con sudo."
-
-step "Verificando nginx"
-if ! command -v nginx &>/dev/null; then
-  log "Instalando nginx..."
-  if   command -v apt-get &>/dev/null; then apt-get update -qq && apt-get install -y nginx
-  elif command -v dnf     &>/dev/null; then dnf install -y nginx
-  elif command -v yum     &>/dev/null; then yum install -y nginx
-  else err "No se pudo detectar el gestor de paquetes."; fi
-  ok "nginx instalado"
-else
-  ok "nginx ya disponible"
-fi
-
-# Escapar el dominio para usarlo en regex de nginx
-DOMAIN_REGEX=$(echo "$TEAM_DOMAIN" | sed 's/\./\\./g')
-
-step "Generando configuración"
 CONFIG_FILE="$SITES_AVAILABLE/$NGINX_CONF_NAME"
 
-cat > "$CONFIG_FILE" << NGINX_EOF
+DOMAIN_REGEX=$(echo "$TEAM_DOMAIN" | sed 's/\./\\./g')
+
+# ── Parámetros SSL ───────────────────────────────────────────
+CERT_FULLCHAIN="$CERT_DIR/fullchain.pem"
+CERT_KEY="$CERT_DIR/privkey.pem"
+
 # ============================================================
-# RobEurope - Nginx Config  |  Generado: $(date)
-#
-#  api.${TEAM_DOMAIN}  →  backend en localhost:${BACKEND_PORT}
-#  *.${TEAM_DOMAIN}    →  proxy transparente a Vercel (${VERCEL_HOST})
+# Funciones de generación de config nginx
 # ============================================================
 
-# Upgrade de WebSocket
-map \$http_upgrade \$connection_upgrade {
-    default  upgrade;
-    ''       close;
+ssl_params() {
+  cat << 'EOF'
+    ssl_certificate     CERT_FULLCHAIN_PLACEHOLDER;
+    ssl_certificate_key CERT_KEY_PLACEHOLDER;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 1d;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+EOF
 }
 
-# ── API: api.${TEAM_DOMAIN} ─────────────────────────────────
-#    Proxea directamente al backend Express en :${BACKEND_PORT}
+write_nginx_config() {
+  local WITH_SSL="${1:-false}"
+
+  local API_LISTEN SSL_BLOCK=""
+  if [[ "$WITH_SSL" == "true" ]]; then
+    API_LISTEN="listen 443 ssl;\n    listen [::]:443 ssl;"
+    SSL_BLOCK=$(ssl_params \
+      | sed "s|CERT_FULLCHAIN_PLACEHOLDER|${CERT_FULLCHAIN}|g" \
+      | sed "s|CERT_KEY_PLACEHOLDER|${CERT_KEY}|g")
+  else
+    API_LISTEN="listen 80;\n    listen [::]:80;"
+  fi
+
+  cat > "$CONFIG_FILE" << NGINX_EOF
+# ============================================================
+# RobEurope - Nginx Config  |  Generado: $(date)
+#  api.${TEAM_DOMAIN}  →  backend localhost:${BACKEND_PORT}
+# ============================================================
+
+map \$http_upgrade \$connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+# ── Redirect HTTP → HTTPS ────────────────────────────────────
+$(if [[ "$WITH_SSL" == "true" ]]; then cat << REDIRECT
 server {
     listen 80;
     listen [::]:80;
     server_name api.${TEAM_DOMAIN};
+    return 301 https://\$host\$request_uri;
+}
+REDIRECT
+fi)
+
+# ── API: api.${TEAM_DOMAIN} ──────────────────────────────────
+server {
+    $(echo -e "$API_LISTEN")
+    server_name api.${TEAM_DOMAIN};
+$(echo "$SSL_BLOCK")
 
     access_log /var/log/nginx/robeurope_api_access.log;
     error_log  /var/log/nginx/robeurope_api_error.log;
 
     client_max_body_size 50M;
 
-    # WebSocket (Socket.IO)
     location /socket.io/ {
         proxy_pass         http://127.0.0.1:${BACKEND_PORT};
         proxy_http_version 1.1;
@@ -100,7 +118,6 @@ server {
         proxy_read_timeout 86400s;
     }
 
-    # API REST
     location / {
         proxy_pass         http://127.0.0.1:${BACKEND_PORT};
         proxy_http_version 1.1;
@@ -114,135 +131,145 @@ server {
     }
 }
 
-# ── EQUIPOS: <slug>.${TEAM_DOMAIN} ──────────────────────────
-#    Proxy transparente a Vercel.
-#    El navegador ve el subdominio (equipo.robeurope.samuelponce.es)
-#    por lo que el React detecta el slug y muestra la página del equipo.
-#    Las llamadas a la API van directamente a api.${TEAM_DOMAIN}.
-server {
-    listen 80;
-    listen [::]:80;
-
-    # Captura cualquier subdominio EXCEPTO "api" y "www"
-    server_name ~^(?P<team_slug>(?!api\$|www\$)[a-z0-9][a-z0-9\-]*)\.${DOMAIN_REGEX}\$;
-
-    access_log /var/log/nginx/robeurope_teams_access.log;
-    error_log  /var/log/nginx/robeurope_teams_error.log;
-
-    # ── Proxy transparente a Vercel ─────────────────────────
-    # Vercel sirve el build de React. El navegador sigue viendo
-    # el subdominio del equipo, así que la detección funciona.
-    location / {
-        proxy_pass          https://${VERCEL_HOST};
-        proxy_http_version  1.1;
-        proxy_ssl_server_name on;
-
-        # Host → Vercel para que sirva el proyecto correcto
-        proxy_set_header    Host              ${VERCEL_HOST};
-
-        # Preservar IP real
-        proxy_set_header    X-Real-IP         \$remote_addr;
-        proxy_set_header    X-Forwarded-For   \$proxy_add_x_forwarded_for;
-        proxy_set_header    X-Forwarded-Proto \$scheme;
-
-        # Pasar el slug para uso futuro (middleware Vercel, etc.)
-        proxy_set_header    X-Team-Slug       \$team_slug;
-
-        # Sin buffering para SSE/streams
-        proxy_buffering     off;
-        proxy_read_timeout  60s;
-
-        # Caché de assets estáticos (JS/CSS de Vite build)
-        location ~* \.(js|css|woff2?|png|jpg|svg|ico)\$ {
-            proxy_pass         https://${VERCEL_HOST};
-            proxy_http_version 1.1;
-            proxy_ssl_server_name on;
-            proxy_set_header   Host ${VERCEL_HOST};
-            proxy_cache_valid  200 1d;
-            add_header         Cache-Control "public, max-age=86400";
-        }
-    }
-}
 NGINX_EOF
 
-ok "Config escrita en $CONFIG_FILE"
+  ok "Config escrita $(if [[ "$WITH_SSL" == "true" ]]; then echo "(SSL)"; else echo "(HTTP)"; fi)"
+}
 
-# ── Activar sitio ────────────────────────────────────────────
-step "Activando sitio"
+# ============================================================
+# PASO 1 — Instalar nginx
+# ============================================================
+step "Verificando nginx"
+if ! command -v nginx &>/dev/null; then
+  log "Instalando nginx..."
+  if   command -v apt-get &>/dev/null; then apt-get update -qq && apt-get install -y nginx
+  elif command -v dnf     &>/dev/null; then dnf install -y nginx
+  elif command -v yum     &>/dev/null; then yum install -y nginx
+  else err "No se detectó gestor de paquetes (apt/dnf/yum)."; fi
+  ok "nginx instalado"
+else
+  ok "nginx ya disponible"
+fi
+
+# ============================================================
+# PASO 2 — Config HTTP inicial (necesaria antes del SSL)
+# ============================================================
+step "Generando config HTTP inicial"
+write_nginx_config false
+
 ln -sf "$CONFIG_FILE" "$SITES_ENABLED/$NGINX_CONF_NAME"
-ok "Symlink creado"
 
-# Preguntar sobre el default
-if [[ -f "$SITES_ENABLED/default" || -L "$SITES_ENABLED/default" ]]; then
-  warn "Sitio 'default' detectado en sites-enabled."
-  read -rp "  ¿Eliminarlo para evitar conflictos? [s/N] " ans
-  [[ "${ans,,}" == "s" ]] && rm "$SITES_ENABLED/default" && ok "Default eliminado"
+if [[ -L "$SITES_ENABLED/default" || -f "$SITES_ENABLED/default" ]]; then
+  warn "Eliminando sitio 'default' para evitar conflictos..."
+  rm -f "$SITES_ENABLED/default"
 fi
 
-# ── Test + Reload ────────────────────────────────────────────
-step "Probando configuración"
-nginx -t || err "Configuración inválida. Revisa $CONFIG_FILE"
-ok "Configuración válida"
-
-step "Recargando nginx"
-if systemctl is-active --quiet nginx; then
-  systemctl reload nginx; ok "nginx recargado"
+nginx -t || err "Config nginx inválida. Revisa $CONFIG_FILE"
+if systemctl is-active --quiet nginx 2>/dev/null; then
+  systemctl reload nginx
 else
-  systemctl enable nginx; systemctl start nginx; ok "nginx iniciado"
+  systemctl enable --now nginx
+fi
+ok "nginx arriba con config HTTP"
+
+# ============================================================
+# PASO 3 — SSL wildcard con Let's Encrypt + plugin DigitalOcean
+# ============================================================
+step "SSL wildcard (*.${TEAM_DOMAIN})"
+
+# ¿Ya existe el certificado?
+if [[ -f "$CERT_FULLCHAIN" && -f "$CERT_KEY" ]]; then
+  ok "Certificado wildcard ya existe en $CERT_DIR"
+  HAVE_CERT=true
+else
+  HAVE_CERT=false
 fi
 
-# ── SSL ──────────────────────────────────────────────────────
-step "SSL (Let's Encrypt)"
-SERVER_IP=$(hostname -I | awk '{print $1}' 2>/dev/null || echo "<ip>")
-
-echo ""
-echo -e "  ${CYAN}REGISTROS DNS NECESARIOS:${NC}"
-echo -e ""
-echo -e "  ${GREEN}# Frontend en Vercel (apex domain)${NC}"
-echo -e "  A      ${TEAM_DOMAIN}           → IP de Vercel  (76.76.21.21)"
-echo -e "  CNAME  www.${TEAM_DOMAIN}       → cname.vercel-dns.com"
-echo -e ""
-echo -e "  ${GREEN}# Backend en este servidor (${SERVER_IP})${NC}"
-echo -e "  A      api.${TEAM_DOMAIN}       → ${SERVER_IP}"
-echo -e "  A      *.${TEAM_DOMAIN}         → ${SERVER_IP}   (páginas de equipos)"
-echo -e ""
-echo -e "  ${YELLOW}IMPORTANTE:${NC} El registro A explícito para 'api' tiene"
-echo -e "  prioridad sobre el wildcard '*', así que ambos coexisten."
-echo ""
-
-if command -v certbot &>/dev/null; then
-  echo -e "  Para el wildcard SSL se necesita un desafío DNS."
-  echo -e "  ${CYAN}Opciones:${NC}"
-  echo -e "  1. Manual (cualquier DNS):"
-  echo -e "     ${CYAN}certbot certonly --manual --preferred-challenges dns \\\\"
-  echo -e "       -d api.${TEAM_DOMAIN} -d '*.${TEAM_DOMAIN}'${NC}"
+if [[ "$HAVE_CERT" == "false" ]]; then
   echo ""
-  echo -e "  2. Automático con plugin DigitalOcean:"
-  echo -e "     ${CYAN}apt install python3-certbot-dns-digitalocean"
-  echo -e "     certbot certonly --dns-digitalocean \\\\"
-  echo -e "       --dns-digitalocean-credentials ~/.do-certbot.ini \\\\"
-  echo -e "       -d api.${TEAM_DOMAIN} -d '*.${TEAM_DOMAIN}'${NC}"
+  echo -e "  El certificado wildcard requiere el ${CYAN}plugin DNS de DigitalOcean${NC}."
+  echo -e "  Necesitas un ${YELLOW}token de API de DigitalOcean${NC} con permiso de escritura en DNS."
   echo ""
-  read -rp "  ¿Configurar SSL para api.${TEAM_DOMAIN} ahora (sin wildcard)? [s/N] " ssl_ans
-  if [[ "${ssl_ans,,}" == "s" ]]; then
-    certbot --nginx -d "api.${TEAM_DOMAIN}" \
-      --agree-tos --redirect \
-      || warn "SSL de api.${TEAM_DOMAIN} no pudo configurarse automáticamente."
-    echo ""
-    warn "Para el wildcard (*.${TEAM_DOMAIN}) usa el método manual o el plugin DO."
+  read -rp "  ¿Configurar SSL wildcard ahora? [s/N] " ssl_ans
+  if [[ "${ssl_ans,,}" != "s" ]]; then
+    warn "SSL omitido. Los subdominios irán por HTTP por ahora."
+    warn "Vuelve a ejecutar este script cuando tengas el token de DO."
+    exit 0
   fi
-else
-  warn "certbot no instalado. Para HTTPS:"
-  echo -e "  ${CYAN}apt install certbot python3-certbot-nginx python3-certbot-dns-digitalocean${NC}"
+
+  # Instalar certbot + plugin DO
+  step "Instalando certbot + plugin DigitalOcean"
+  if command -v apt-get &>/dev/null; then
+    apt-get install -y certbot python3-certbot-nginx python3-certbot-dns-digitalocean
+  elif command -v dnf &>/dev/null; then
+    dnf install -y certbot python3-certbot-dns-digitalocean
+  else
+    pip3 install certbot certbot-dns-digitalocean 2>/dev/null \
+      || err "No se pudo instalar certbot. Instálalo manualmente."
+  fi
+  ok "certbot instalado"
+
+  # Token de DigitalOcean
+  echo ""
+  read -rsp "  Pega tu token de API de DigitalOcean (se guardará en $DO_CREDS_FILE): " DO_TOKEN
+  echo ""
+  [[ -z "$DO_TOKEN" ]] && err "Token vacío."
+
+  mkdir -p "$(dirname "$DO_CREDS_FILE")"
+  cat > "$DO_CREDS_FILE" << EOF
+dns_digitalocean_token = ${DO_TOKEN}
+EOF
+  chmod 600 "$DO_CREDS_FILE"
+  ok "Credenciales guardadas (modo 600)"
+
+  # Solicitar certificado wildcard + api
+  step "Solicitando certificado wildcard"
+  log "Esto puede tardar ~30 segundos mientras DigitalOcean propaga el registro DNS..."
+  certbot certonly \
+    --dns-digitalocean \
+    --dns-digitalocean-credentials "$DO_CREDS_FILE" \
+    --dns-digitalocean-propagation-seconds 30 \
+    --cert-name "$CERT_NAME" \
+    -d "*.${TEAM_DOMAIN}" \
+    --agree-tos --non-interactive \
+    --email "admin@${TEAM_DOMAIN}" \
+    || err "certbot falló. Revisa los logs: journalctl -u certbot"
+
+  ok "Certificado emitido en $CERT_DIR"
+  HAVE_CERT=true
+fi
+
+# ============================================================
+# PASO 4 — Reescribir config nginx con SSL
+# ============================================================
+if [[ "$HAVE_CERT" == "true" ]]; then
+  step "Generando config nginx con SSL"
+  write_nginx_config true
+  nginx -t || err "Config SSL inválida."
+  systemctl reload nginx
+  ok "nginx recargado con HTTPS"
+
+  # Auto-renovación
+  step "Auto-renovación de certificados"
+  if ! crontab -l 2>/dev/null | grep -q "certbot renew"; then
+    (crontab -l 2>/dev/null; echo "0 3 * * * certbot renew --quiet && systemctl reload nginx") | crontab -
+    ok "Cron de renovación añadido (03:00 diario)"
+  else
+    ok "Cron de renovación ya existe"
+  fi
 fi
 
 # ── Resumen ──────────────────────────────────────────────────
+SERVER_IP=$(hostname -I | awk '{print $1}' 2>/dev/null || echo "<ip>")
 echo ""
 echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}  ✓  nginx configurado para RobEurope (split-deploy)${NC}"
+echo -e "${GREEN}  ✓  nginx configurado para RobEurope${NC}"
 echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
-echo -e "  API backend  : https://api.${TEAM_DOMAIN}  → :${BACKEND_PORT}"
-echo -e "  Team pages   : https://<slug>.${TEAM_DOMAIN}  → Vercel proxy"
-echo -e "  WebSockets   : habilitados en /socket.io/"
+echo -e "  API backend  : https://api.${TEAM_DOMAIN}  →  :${BACKEND_PORT}"
+echo -e "  HTTP → HTTPS : redireccionamiento automático"
+echo -e "  Cert         : $CERT_DIR"
+echo ""
+echo -e "  ${CYAN}DNS requerido:${NC}"
+echo -e "  A  api.${TEAM_DOMAIN}  →  ${SERVER_IP}"
 echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
 echo ""

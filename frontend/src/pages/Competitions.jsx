@@ -13,6 +13,7 @@ import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { useApi } from '../hooks/useApi';
 import { useAuth } from '../hooks/useAuth';
+import { PageHeader } from '../components/ui/PageHeader';
 
 const CompetitionItem = ({ competition, isFavorite, onToggleFavorite, onSetActive, isAdmin }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -233,13 +234,11 @@ const Competitions = () => {
   };
 
   return (
-    <div className="space-y-8 container mx-auto px-4 py-8">
-      <div className="flex justify-between items-end">
-        <div>
-      <h1 className="text-4xl font-bold text-blue-900 dark:text-blue-100 mb-2">{t('competitions.hero.title')}{editMode && <span className="ml-3 text-xs px-2 py-1 rounded bg-amber-200 text-amber-800 align-top">EDIT MODE</span>}</h1>
-          <p className="text-slate-600 dark:text-slate-400 max-w-2xl">{t('competitions.hero.description')}</p>
-        </div>
-        {isAdmin && (
+    <div className="space-y-8">
+      <PageHeader
+        title={<>{t('competitions.hero.title')}{editMode && <span className="ml-3 text-xs px-2 py-1 rounded bg-amber-200 text-amber-800 align-top font-normal">EDIT MODE</span>}</>}
+        description={t('competitions.hero.description')}
+        action={isAdmin && (
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
@@ -318,7 +317,7 @@ const Competitions = () => {
             </DialogContent>
           </Dialog>
         )}
-      </div>
+      />
 
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-3 items-end">

@@ -11,4 +11,7 @@ RUN npm ci
 
 EXPOSE 5173
 
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# Run npm install on startup to pick up any packages added since the image
+# was built (e.g. after `docker compose exec ... npm install <pkg>`). The
+# named volume for node_modules persists between restarts, so this is fast.
+CMD ["sh", "-c", "npm install --prefer-offline --silent 2>/dev/null; exec npm run dev -- --host 0.0.0.0"]

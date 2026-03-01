@@ -39,11 +39,6 @@ export default function defineTeamsModel(sequelize, DataTypes) {
             type: DataTypes.STRING,
             allowNull: false
         },
-        slug: {
-            type: DataTypes.STRING(100),
-            allowNull: true,
-            unique: true
-        },
         country_id: {
             type: DataTypes.INTEGER, // coincide con countries.id (INTEGER)
             allowNull: true,      // ajusta según necesites
@@ -145,12 +140,6 @@ export default function defineTeamsModel(sequelize, DataTypes) {
             Team.belongsTo(models.Competition, {
                 foreignKey: 'competition_id',
                 as: 'competition'
-            });
-        }
-        if (models.TeamPage) {
-            Team.hasOne(models.TeamPage, {
-                foreignKey: 'team_id',
-                as: 'page'
             });
         }
     };

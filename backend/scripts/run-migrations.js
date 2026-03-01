@@ -30,6 +30,7 @@ import * as updateGalleryEnhanced from '../migrations/20260118-update-gallery-en
 import * as updateRegistrationCenterApproval from '../migrations/20260118-update-registration-center-approval.js';
 import * as addCenterAdminRequest from '../migrations/20251214-add-center-admin-request.js';
 import * as addTeamSlugAndPages from '../migrations/20260228-add-team-slug-and-pages.js';
+import * as createContactReviews from '../migrations/20260301-create-contact-reviews.js';
 
 async function run() {
   try {
@@ -299,6 +300,17 @@ async function run() {
       }
     } catch (e) {
       console.log('Skipping addTeamSlugAndPages:', e.message);
+    }
+
+    // Create ContactMessage and Review tables
+    try {
+      const upFn = createContactReviews.up || createContactReviews.default?.up;
+      if (upFn) {
+        await upFn(qi, Sequelize);
+        console.log('Created ContactMessage and Review tables');
+      }
+    } catch (e) {
+      console.log('Skipping createContactReviews (probably already exists):', e.message);
     }
 
     console.log('Migrations applied successfully');

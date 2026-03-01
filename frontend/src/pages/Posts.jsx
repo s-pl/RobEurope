@@ -13,6 +13,8 @@ import { Label } from '../components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
 import { resolveMediaUrl } from '../lib/apiClient';
 import { useToast } from '../hooks/useToast';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { RichTextEditor } from '../components/ui/RichTextEditor';
 import DOMPurify from 'dompurify';
 import { useSocket } from '../context/SocketContext';
@@ -27,6 +29,7 @@ const Posts = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', content: '', image: null });
@@ -238,19 +241,27 @@ const Posts = () => {
   };
 
   return (
-    <div className="container mx-auto max-w-3xl space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-blue-900 dark:text-blue-100">{t('posts.title')}{editMode && <span className="ml-3 text-xs px-2 py-1 rounded bg-amber-200 text-amber-800 align-top">EDIT MODE</span>}</h1>
-          <p className="text-slate-500 dark:text-slate-400">{t('posts.subtitle')}</p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <div className="relative w-full md:w-64">
+    <div className="max-w-3xl mx-auto space-y-6">
+      <PageHeader
+        title={<>{t('posts.title')}{editMode && <span className="ml-3 text-xs px-2 py-1 rounded bg-amber-200 text-amber-800 align-top font-normal">EDIT MODE</span>}</>}
+        description={t('posts.subtitle')}
+      />
+
+      {/* Tabs + Search row */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="all">{t('posts.tabs.all') || 'Todos'}</TabsTrigger>
+            <TabsTrigger value="pinned">{t('posts.tabs.pinned') || 'Destacados'}</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <Input 
-              placeholder={t('posts.search')} 
-              className="pl-9" 
+            <Input
+              placeholder={t('posts.search')}
+              className="pl-9"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -328,7 +339,9 @@ const Posts = () => {
             {t('posts.empty')}
           </div>
         ) : (
-          posts.map(post => (
+          posts
+            .filter(p => activeTab === 'pinned' ? p.is_pinned : true)
+            .map(post => (
             <Card key={post.id} className={`overflow-hidden border-slate-200 dark:border-slate-800 ${post.is_pinned ? 'border-blue-500 dark:border-blue-500 ring-1 ring-blue-500' : ''} ${post._isNew ? 'animate-pulse border-amber-400' : ''}`}>
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div className="flex items-center gap-3">

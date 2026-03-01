@@ -38,6 +38,8 @@ const allowedOrigins = [
   /^https?:\/\/(?:[a-z0-9-]+\.)?robeurope\.samuelponce\.es(?::\d+)?$/
 ];
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const app = express();
 
 // --- Request ID ---
@@ -47,8 +49,19 @@ app.use(requestId());
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
-    // Disable Content Security Policy entirely as requested
-    contentSecurityPolicy: false
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // needed for Swagger UI / admin EJS
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'", 'data:'],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        ...(isProduction && { upgradeInsecureRequests: [] }),
+      }
+    }
   })
 );
 
@@ -76,10 +89,13 @@ app.set('trust proxy', 1);
 // en peticiones cross-origin con credentials: 'include' necesitamos:
 //   domain: '.robeurope.samuelponce.es'  → válida en todos los subdominios
 //   sameSite: 'none' + secure: true      → permite cross-origin con HTTPS
-const isProduction = process.env.NODE_ENV === 'production';
 const cookieDomain = isProduction
   ? (process.env.COOKIE_DOMAIN || `.${(process.env.TEAM_DOMAIN || 'robeurope.samuelponce.es')}`)
   : undefined; // en dev no forzamos dominio (localhost)
+
+if (isProduction && !process.env.SESSION_SECRET) {
+  logger.error('CRITICAL: SESSION_SECRET env var is not set in production. Using an insecure default — set SESSION_SECRET immediately.');
+}
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'Session123456789100000',
@@ -193,8 +209,11 @@ app.get('/locale/:locale', (req, res) => {
 
   res.redirect(redirectParam || fallback);
 });
-// Apply rate limiting on API routes
-app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
+// Sensitive routes get a strict limit (login, register, password reset)
+// No-op in development (rateLimit.middleware.js skips when NODE_ENV !== 'production')
+app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, max: 40 }));
+// General API — generous limit in production
+app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 1000 }), apiRoutes);
 app.use('/api/admin', adminApiRoutes);
 app.use('/api/streams', streamRoutes);
 app.use('/api/media', mediaRoutes); 
