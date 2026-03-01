@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import { requestNotificationPermission } from '../../lib/notifications';
 import NotificationTestButton from '../notifications/NotificationTestButton';
 import { isBackendActive } from '../../lib/apiClient';
-
 const AppLayout = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
@@ -46,7 +45,7 @@ const AppLayout = () => {
           <main
             id="main-content"
             tabIndex={-1}
-            className="mx-auto w-full max-w-6xl flex-1 space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10"
+            className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 lg:px-8 lg:py-10"
           >
             <Outlet />
           </main>

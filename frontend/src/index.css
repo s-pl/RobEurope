@@ -58,66 +58,120 @@ a, button, input, select, textarea {
   @apply bg-slate-400 dark:bg-slate-600;
 }
 
-/* Animations */
+/* ── Keyframes ─────────────────────────────────────────────── */
 @keyframes fade-in {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
 @keyframes fade-in-up {
-  from { 
-    opacity: 0; 
-    transform: translateY(10px);
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slide-in-right {
-  from { 
-    opacity: 0; 
-    transform: translateX(-10px);
-  }
-  to { 
-    opacity: 1; 
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 @keyframes pulse-soft {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  50%       { opacity: 0.65; }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+/* Checkmark draw animation */
+@keyframes draw-check {
+  from { stroke-dashoffset: 50; }
+  to   { stroke-dashoffset: 0; }
 }
 
-.animate-fade-in-up {
-  animation: fade-in-up 0.4s ease-out;
+@keyframes pop-in {
+  0%   { opacity: 0; transform: scale(0.6); }
+  70%  { transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
-.animate-slide-in-right {
-  animation: slide-in-right 0.3s ease-out;
+/* ── Animation utility classes ─────────────────────────────── */
+.animate-fade-in        { animation: fade-in 0.25s ease-out both; }
+.animate-fade-in-up     { animation: fade-in-up 0.35s ease-out both; }
+.animate-fade-in-down   { animation: fade-in-down 0.3s ease-out both; }
+.animate-slide-in-left  { animation: slide-in-left 0.3s ease-out both; }
+.animate-slide-in-right { animation: slide-in-right 0.3s ease-out both; }
+.animate-scale-in       { animation: scale-in 0.25s ease-out both; }
+.animate-pop-in         { animation: pop-in 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+.animate-pulse-soft     { animation: pulse-soft 2s ease-in-out infinite; }
+
+/* Stagger helpers */
+.stagger-1  { animation-delay: 50ms; }
+.stagger-2  { animation-delay: 100ms; }
+.stagger-3  { animation-delay: 150ms; }
+.stagger-4  { animation-delay: 200ms; }
+.stagger-5  { animation-delay: 250ms; }
+.stagger-6  { animation-delay: 300ms; }
+
+/* ── Checkmark SVG ─────────────────────────────────────────── */
+.check-path {
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: draw-check 0.4s 0.15s ease-out forwards;
 }
 
-.animate-pulse-soft {
-  animation: pulse-soft 2s ease-in-out infinite;
+/* ── Button press effect ───────────────────────────────────── */
+button:not([disabled]):active { transform: scale(0.97); }
+a:active { transform: scale(0.98); }
+
+/* ── Card hover lift ───────────────────────────────────────── */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -8px rgba(0,0,0,0.12);
+}
+.dark .card-hover:hover {
+  box-shadow: 0 8px 25px -8px rgba(0,0,0,0.5);
 }
 
-/* Glass effect for cards */
+/* ── Glass effect ──────────────────────────────────────────── */
 .glass {
   @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg;
 }
 
-/* Gradient text */
+/* ── Gradient text ─────────────────────────────────────────── */
 .gradient-text {
   @apply bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent;
 }
 
-/* Loading skeleton */
+/* ── Loading skeleton ──────────────────────────────────────── */
 .skeleton {
   @apply bg-slate-200 dark:bg-slate-800 animate-pulse rounded;
 }
+
+/* ── Nav link underline slide ──────────────────────────────── */
+.nav-link-slide {
+  position: relative;
+}
+.nav-link-slide::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 0; height: 2px;
+  background: currentColor;
+  transition: width 0.25s ease;
+}
+.nav-link-slide:hover::after { width: 100%; }

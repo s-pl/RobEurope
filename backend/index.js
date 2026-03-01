@@ -209,8 +209,11 @@ app.get('/locale/:locale', (req, res) => {
 
   res.redirect(redirectParam || fallback);
 });
-// Apply rate limiting on API routes
-app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }), apiRoutes);
+// Sensitive routes get a strict limit (login, register, password reset)
+// No-op in development (rateLimit.middleware.js skips when NODE_ENV !== 'production')
+app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, max: 40 }));
+// General API — generous limit in production
+app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 1000 }), apiRoutes);
 app.use('/api/admin', adminApiRoutes);
 app.use('/api/streams', streamRoutes);
 app.use('/api/media', mediaRoutes); 

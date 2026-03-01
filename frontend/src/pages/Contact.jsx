@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
+import { PageHeader } from '../components/ui/PageHeader';
+import { AnimatedSuccess } from '../components/ui/AnimatedSuccess';
 
 const Contact = () => {
   const [form, setForm] = useState({ name: '', email: '', organization: '', message: '' });
@@ -27,11 +29,8 @@ const Contact = () => {
   };
 
   return (
-    <div className="space-y-8 container mx-auto px-4 py-8">
-      <div className="text-center max-w-2xl mx-auto mb-12">
-        <h1 className="text-4xl font-bold text-blue-900 dark:text-blue-100 mb-4">{t('contact.hero.title')}</h1>
-        <p className="text-slate-600 dark:text-slate-400 text-lg">{t('contact.hero.description')}</p>
-      </div>
+    <div className="space-y-8">
+      <PageHeader title={t('contact.hero.title')} description={t('contact.hero.description')} />
 
       <div className="grid gap-6 md:grid-cols-3 mb-12">
         {Array.isArray(contactChannels) && contactChannels.map((channel, index) => (
@@ -76,14 +75,11 @@ const Contact = () => {
           <div className="p-8 md:col-span-3">
             {submitted ? (
               <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-12">
-                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center">
-                  <Send className="h-8 w-8" />
-                </div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{t('contact.sentTitle')}</h3>
-                <p className="text-slate-600 dark:text-slate-400 max-w-xs mx-auto">
+                <AnimatedSuccess show={submitted} message={t('contact.sentTitle')} />
+                <p className="text-slate-500 dark:text-slate-400 max-w-xs mx-auto text-sm">
                   {t('contact.sentDesc')}
                 </p>
-                <Button variant="outline" onClick={() => setSubmitted(false)}>
+                <Button variant="outline" size="sm" onClick={() => setSubmitted(false)}>
                   {t('contact.sendAnother')}
                 </Button>
               </div>
@@ -111,7 +107,7 @@ const Contact = () => {
                 </div>
                 
                 <Button type="submit" className="w-full gap-2">
-                  <Send className="h-4 w-4" /> Enviar Mensaje
+                  <Send className="h-4 w-4" /> {t('contact.send') || 'Enviar mensaje'}
                 </Button>
               </form>
             )}

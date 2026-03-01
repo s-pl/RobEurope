@@ -9,9 +9,12 @@ RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json* ./
 RUN npm ci
 
+# Install nodemon globally so it's available regardless of volume mount state
+RUN npm install -g nodemon
+
 # Source code is mounted as a volume at runtime — no COPY needed.
 RUN mkdir -p uploads
 
 EXPOSE 85
 
-CMD ["npm", "run", "dev"]
+CMD ["nodemon", "index.js"]

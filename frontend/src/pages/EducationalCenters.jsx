@@ -2,6 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiRequest, resolveMediaUrl } from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Alert, AlertDescription } from '../components/ui/alert';
+import { Skeleton } from '../components/ui/skeleton';
+import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
+import { Card, CardContent } from '../components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Globe, Mail, MapPin, Building2 } from 'lucide-react';
 
 const EducationalCenters = () => {
     const { t } = useTranslation();
@@ -129,76 +137,58 @@ const EducationalCenters = () => {
     };
 
     const getStatusBadge = (approvalStatus) => {
-        const styles = {
-            approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-            pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-            rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-        };
+        const variantMap = { approved: 'success', pending: 'warning', rejected: 'destructive' };
         return (
-            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${styles[approvalStatus] || styles.pending}`}>
+            <Badge variant="outline" className={
+              approvalStatus === 'approved' ? 'border-emerald-200 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400' :
+              approvalStatus === 'rejected' ? 'border-red-200 text-red-700 dark:border-red-800 dark:text-red-400' :
+              'border-amber-200 text-amber-700 dark:border-amber-800 dark:text-amber-400'
+            }>
                 {t(`educationalCenters.status.${approvalStatus}`) || approvalStatus}
-            </span>
+            </Badge>
         );
     };
 
     return (
         <div className="space-y-8">
-            <header className="space-y-2 text-center">
-                <h1 className="text-3xl font-bold tracking-tight text-blue-900 sm:text-4xl lg:text-5xl dark:text-blue-100">
-                    {t('educationalCenters.title')}
-                </h1>
-                <p className="mx-auto max-w-2xl text-sm text-slate-600 sm:text-base dark:text-slate-400">
-                    {t('educationalCenters.description')}
-                </p>
-            </header>
+            <PageHeader
+                title={t('educationalCenters.title')}
+                description={t('educationalCenters.description')}
+                action={isAuthenticated && (
+                    <Button onClick={() => setShowCreateForm(v => !v)} variant={showCreateForm ? 'outline' : 'default'}>
+                        {showCreateForm ? t('actions.cancel') : t('educationalCenters.actions.create')}
+                    </Button>
+                )}
+            />
 
             {/* Filters */}
-            <div className="flex flex-wrap items-center gap-4">
-                <div>
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mr-2">
-                        {t('educationalCenters.fields.country')}:
-                    </label>
-                    <select
-                        value={selectedCountry}
-                        onChange={(e) => setSelectedCountry(e.target.value)}
-                        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-                    >
-                        <option value="">{t('educationalCenters.filters.countryAll')}</option>
-                        {countries.map((country) => (
-                            <option key={country.id} value={country.id}>{country.name}</option>
-                        ))}
-                    </select>
-                </div>
+            <div className="flex flex-wrap items-center gap-3">
+                <Select value={selectedCountry || 'all'} onValueChange={v => setSelectedCountry(v === 'all' ? '' : v)}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder={t('educationalCenters.filters.countryAll')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{t('educationalCenters.filters.countryAll')}</SelectItem>
+                        {countries.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
+                    </SelectContent>
+                </Select>
 
                 {isAdmin && (
-                    <div>
-                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mr-2">
-                            {t('status.label') || 'Estado'}:
-                        </label>
-                        <select
-                            value={selectedStatus}
-                            onChange={(e) => setSelectedStatus(e.target.value)}
-                            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-                        >
-                            <option value="">{t('educationalCenters.filters.statusAll')}</option>
-                            <option value="pending">{t('educationalCenters.status.pending')}</option>
-                            <option value="approved">{t('educationalCenters.status.approved')}</option>
-                            <option value="rejected">{t('educationalCenters.status.rejected')}</option>
-                        </select>
-                    </div>
-                )}
-
-                {isAuthenticated && (
-                    <button
-                        onClick={() => setShowCreateForm(!showCreateForm)}
-                        className="ml-auto inline-flex items-center justify-center rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-                    >
-                        {showCreateForm ? t('actions.cancel') : t('educationalCenters.actions.create')}
-                    </button>
+                    <Select value={selectedStatus || 'all'} onValueChange={v => setSelectedStatus(v === 'all' ? '' : v)}>
+                        <SelectTrigger className="w-[160px]">
+                            <SelectValue placeholder={t('educationalCenters.filters.statusAll')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">{t('educationalCenters.filters.statusAll')}</SelectItem>
+                            <SelectItem value="pending">{t('educationalCenters.status.pending')}</SelectItem>
+                            <SelectItem value="approved">{t('educationalCenters.status.approved')}</SelectItem>
+                            <SelectItem value="rejected">{t('educationalCenters.status.rejected')}</SelectItem>
+                        </SelectContent>
+                    </Select>
                 )}
             </div>
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950 sm:p-6 lg:p-8">
+            <section>
                 {/* Create form */}
                 {showCreateForm && isAuthenticated && (
                     <form onSubmit={handleCreate} className="rounded-xl border border-slate-200 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/50 sm:p-6 mb-6">
@@ -321,97 +311,101 @@ const EducationalCenters = () => {
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
-                            <button
-                                type="submit"
-                                disabled={createStatus.loading}
-                                className="inline-flex items-center justify-center rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-                            >
+                        <div className="space-y-3 mt-4">
+                            <Button type="submit" disabled={createStatus.loading} className="w-full sm:w-auto">
                                 {createStatus.loading ? t('common.loading') : t('actions.save')}
-                            </button>
-
-                            <div className="text-sm">
-                                {createStatus.error && <span className="text-red-600" role="alert">{createStatus.error}</span>}
-                                {!createStatus.error && createStatus.ok && <span className="text-green-700" role="status">{createStatus.ok}</span>}
-                            </div>
+                            </Button>
+                            {createStatus.error && (
+                                <Alert variant="destructive"><AlertDescription>{createStatus.error}</AlertDescription></Alert>
+                            )}
+                            {!createStatus.error && createStatus.ok && (
+                                <Alert variant="success"><AlertDescription>{createStatus.ok}</AlertDescription></Alert>
+                            )}
                         </div>
                     </form>
                 )}
 
-                {status.loading && <p className="text-slate-600">{t('common.loading')}</p>}
-                {!status.loading && status.error && <p className="text-red-600" role="alert">{status.error}</p>}
+                {status.loading && (
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="rounded-xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
+                                <Skeleton className="h-5 w-3/4" />
+                                <Skeleton className="h-4 w-1/2" />
+                                <Skeleton className="h-16 w-full" />
+                            </div>
+                        ))}
+                    </div>
+                )}
+                {!status.loading && status.error && (
+                    <Alert variant="destructive">
+                        <AlertDescription>{status.error}</AlertDescription>
+                    </Alert>
+                )}
 
                 {!status.loading && !status.error && (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {items.length === 0 && (
-                            <p className="col-span-full text-center text-slate-500 py-8">{t('charts.empty')}</p>
-                        )}
-                        
-                        {items.map((item) => (
-                            <div 
-                                key={item.id} 
-                                className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
-                            >
-                                <div className="flex items-start gap-4">
-                                    {item.logo_url && (
-                                        <img 
-                                            src={resolveMediaUrl(item.logo_url)} 
-                                            alt={item.name}
-                                            className="h-16 w-16 rounded-lg object-cover shrink-0"
-                                        />
-                                    )}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex flex-wrap items-center gap-2 mb-1">
-                                            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 truncate">
-                                                {item.name}
-                                            </h3>
-                                            {getStatusBadge(item.approval_status)}
-                                        </div>
-                                        
-                                        {item.city && item.Country && (
-                                            <p className="text-sm text-slate-600 dark:text-slate-400">
-                                                {item.city}, {item.Country.name}
-                                            </p>
-                                        )}
-                                        
-                                        {item.description && (
-                                            <p className="text-sm text-slate-500 dark:text-slate-500 mt-2 line-clamp-2">
-                                                {item.description}
-                                            </p>
-                                        )}
-                                    </div>
+                            <div className="col-span-full flex flex-col items-center py-20 gap-3 text-center">
+                                <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                                    <Building2 className="h-7 w-7 text-slate-400" />
                                 </div>
-
-                                <div className="flex flex-wrap items-center gap-2 mt-4 text-xs text-slate-500">
-                                    {item.email && (
-                                        <a href={`mailto:${item.email}`} className="hover:text-blue-600">
-                                            {item.email}
-                                        </a>
-                                    )}
-                                    {item.website_url && (
-                                        <a href={item.website_url} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">
-                                            {t('educationalCenters.fields.website')}
-                                        </a>
-                                    )}
-                                </div>
-
-                                {isAdmin && item.approval_status === 'pending' && (
-                                    <div className="flex gap-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-                                        <button
-                                            onClick={() => handleApprove(item.id)}
-                                            className="flex-1 inline-flex items-center justify-center rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-green-700"
-                                        >
-                                            {t('educationalCenters.actions.approve')}
-                                        </button>
-                                        <button
-                                            onClick={() => handleReject(item.id)}
-                                            className="flex-1 inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-100 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400"
-                                        >
-                                            {t('educationalCenters.actions.reject')}
-                                        </button>
-                                    </div>
-                                )}
+                                <p className="font-medium text-slate-900 dark:text-slate-100">{t('educationalCenters.empty') || 'No hay centros educativos'}</p>
                             </div>
+                        )}
+
+                        {items.map((item) => (
+                            <Card key={item.id} className="hover:shadow-md transition-shadow dark:bg-slate-900">
+                                <CardContent className="pt-5 space-y-4">
+                                    <div className="flex items-start gap-3">
+                                        {item.logo_url ? (
+                                            <img src={resolveMediaUrl(item.logo_url)} alt={item.name} className="h-14 w-14 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-slate-700" />
+                                        ) : (
+                                            <div className="h-14 w-14 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                                                <Building2 className="h-7 w-7 text-slate-400" />
+                                            </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <h3 className="font-semibold text-slate-900 dark:text-slate-50 truncate">{item.name}</h3>
+                                                {getStatusBadge(item.approval_status)}
+                                            </div>
+                                            {item.city && item.Country && (
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                                                    <MapPin className="h-3 w-3" />{item.city}, {item.Country.name}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {item.description && (
+                                        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">{item.description}</p>
+                                    )}
+
+                                    <div className="flex flex-wrap items-center gap-3 text-xs">
+                                        {item.email && (
+                                            <a href={`mailto:${item.email}`} className="flex items-center gap-1 text-blue-600 hover:underline dark:text-blue-400">
+                                                <Mail className="h-3 w-3" />{item.email}
+                                            </a>
+                                        )}
+                                        {item.website_url && (
+                                            <a href={item.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-600 hover:underline dark:text-blue-400">
+                                                <Globe className="h-3 w-3" />{t('educationalCenters.fields.website')}
+                                            </a>
+                                        )}
+                                    </div>
+
+                                    {isAdmin && item.approval_status === 'pending' && (
+                                        <div className="flex gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                                            <Button size="sm" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => handleApprove(item.id)}>
+                                                {t('educationalCenters.actions.approve')}
+                                            </Button>
+                                            <Button size="sm" variant="outline" className="flex-1 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-900/20" onClick={() => handleReject(item.id)}>
+                                                {t('educationalCenters.actions.reject')}
+                                            </Button>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
                         ))}
                     </div>
                 )}

@@ -1685,6 +1685,7 @@ const resources = {
           invite: "Invite",
           approve: "Approve",
           startStream: "Start LIVE",
+          stopStream: "Stop LIVE",
           register: "Request Registration"
         },
         overview: {
@@ -1756,6 +1757,7 @@ const resources = {
           registrationError: "Could not send request",
           streamUrlMissing: "You must save a stream URL first",
           streamStarted: "Broadcast started!",
+          streamStopped: "Broadcast stopped",
           streamError: "Error starting stream"
         }
       },
@@ -2538,6 +2540,7 @@ const resources = {
           invite: "Einladen",
           approve: "Genehmigen",
           startStream: "LIVE starten",
+          stopStream: "LIVE stoppen",
           register: "Anmeldung anfordern"
         },
         overview: {
@@ -2609,6 +2612,7 @@ const resources = {
           registrationError: "Konnte Anfrage nicht senden",
           streamUrlMissing: "Du musst zuerst eine Stream-URL speichern",
           streamStarted: "Übertragung gestartet!",
+          streamStopped: "Übertragung gestoppt",
           streamError: "Fehler beim Starten des Streams"
         }
       },

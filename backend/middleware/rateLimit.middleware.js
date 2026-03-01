@@ -20,8 +20,13 @@ const stores = new Map();
  * @returns {Express.RequestHandler}
  */
 export default function rateLimit(options = {}) {
+  // In development, rate limiting is disabled entirely
+  if (process.env.NODE_ENV !== 'production') {
+    return (_req, _res, next) => next();
+  }
+
   const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes
-  const max = options.max || 1e100; // (no limit by default)
+  const max = options.max || 1000; // generous default for production
 
   return (req, res, next) => {
     try {
