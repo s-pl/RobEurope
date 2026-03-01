@@ -43,15 +43,15 @@ jobs:
                echo "[deploy] escribiendo deploy-info.json..." &&
                echo "{\"deployed_at\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"commit\":\"$(git rev-parse HEAD)\",\"branch\":\"$(git rev-parse --abbrev-ref HEAD)\",\"triggered_by\":\"github-actions\"}" > backend/deploy-info.json &&
                echo "[deploy] docker compose build (prod)..." &&
-               sudo docker compose --profile prod build &&
+               sudo docker compose -f /opt/robeurope/docker-compose.yml --profile prod build &&
                echo "[deploy] docker compose up (prod)..." &&
-               sudo docker compose --profile prod up -d &&
+               sudo docker compose -f /opt/robeurope/docker-compose.yml --profile prod up -d &&
                echo "[deploy] esperando backend..." &&
                sleep 5 &&
                echo "[deploy] containers activos:" &&
-               sudo docker compose --profile prod ps &&
+               sudo docker compose -f /opt/robeurope/docker-compose.yml --profile prod ps &&
                echo "[deploy] migraciones..." &&
-               (sudo docker compose --profile prod exec -T backend sh -c "node scripts/run-migrations.js" || true) &&
+               (sudo docker compose -f /opt/robeurope/docker-compose.yml --profile prod exec -T backend sh -c "node scripts/run-migrations.js" || true) &&
                echo "[deploy] ✓ Deploy completado"'
 
       # ── 4. Limpiar clave privada ──────────────────────────────
