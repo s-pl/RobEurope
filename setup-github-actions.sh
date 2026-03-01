@@ -134,25 +134,36 @@ ok "Sudoers configurado en $SUDOERS_FILE"
 step "Script de deploy en servidor"
 
 DEPLOY_SCRIPT="$DEPLOY_PATH/deploy-server.sh"
-cat > "$DEPLOY_SCRIPT" << 'SCRIPT'
+cat > "$DEPLOY_SCRIPT" << SCRIPT
 #!/usr/bin/env bash
 # Ejecutado por GitHub Actions vía SSH
 set -euo pipefail
 
 DEPLOY_PATH="/opt/robeurope"
-cd "$DEPLOY_PATH"
+COMPOSE_FILE="\$DEPLOY_PATH/docker-compose.yml"
+cd "\$DEPLOY_PATH"
 
 echo "[deploy] git pull..."
 git pull origin main
 
+echo "[deploy] escribiendo deploy-info.json..."
+cat > "\$DEPLOY_PATH/backend/deploy-info.json" << JSON
+{
+  "deployed_at": "\$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "commit": "\$(git rev-parse HEAD)",
+  "branch": "\$(git rev-parse --abbrev-ref HEAD)",
+  "triggered_by": "github-actions"
+}
+JSON
+
 echo "[deploy] docker compose build (prod)..."
-docker compose --profile prod build --no-cache
+sudo docker compose -f "\$COMPOSE_FILE" --profile prod build
 
 echo "[deploy] docker compose up (prod)..."
-docker compose --profile prod up -d
+sudo docker compose -f "\$COMPOSE_FILE" --profile prod up -d
 
 echo "[deploy] migraciones..."
-docker compose --profile prod exec -T backend sh -c "node scripts/run-migrations.js" || true
+sudo docker compose -f "\$COMPOSE_FILE" --profile prod exec -T backend sh -c "node scripts/run-migrations.js" || true
 
 echo "[deploy] ✓ Deploy completado"
 SCRIPT

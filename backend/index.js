@@ -169,6 +169,10 @@ app.use('/api-docs', cors(corsOptions));
 // Ensure preflight requests succeed for all routes
 app.options('*', cors(corsOptions));
 
+// ── Health / Deploy info (public, no auth) ──────────────────
+import healthDeployRouter from './routes/api/health.route.js';
+app.use('/health/deploy/actions', healthDeployRouter);
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
