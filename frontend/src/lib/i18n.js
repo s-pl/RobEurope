@@ -521,6 +521,7 @@ const resources = {
         searchButton: 'Buscar',
         allCountries: 'Todos los países',
         searchCountry: 'Buscar país...',
+        noCountry: 'Sin especificar',
         members: 'Miembros',
         manage: 'Gestionar mi equipo',
         requestJoin: 'Solicitar Unirse',
@@ -726,10 +727,26 @@ const resources = {
         sentTitle: "¡Mensaje Enviado!",
         sentDesc: "Gracias por contactarnos. Te responderemos a la brevedad posible.",
         sendAnother: "Enviar otro mensaje",
+        send: "Enviar mensaje",
+        errorGeneric: "Error al enviar. Inténtalo de nuevo.",
         support: "Soporte 24/7 para equipos",
         placeholders: {
           name: "Tu nombre",
           email: "tu@email.com"
+        },
+        reviews: {
+          writeTitle: "Escribe tu opinión",
+          ratingLabel: "Valoración",
+          ratingRequired: "Selecciona una valoración",
+          messageLabel: "Tu opinión",
+          messagePlaceholder: "Cuéntanos tu experiencia con RobEurope...",
+          submit: "Publicar opinión",
+          submitted: "¡Opinión publicada!",
+          submitError: "No se pudo publicar la opinión",
+          alreadyReviewed: "Ya has publicado una opinión",
+          deleteReview: "Eliminar",
+          confirmDelete: "¿Eliminar tu opinión?",
+          empty: "Aún no hay opiniones. ¡Sé el primero!"
         }
       },
       profile: {
@@ -801,7 +818,8 @@ const resources = {
         form: {
           name: "Nombre del Equipo",
           city: "Ciudad",
-          country: "País (ID)",
+          country: "País",
+          noCountry: "Sin especificar",
           institution: "Institución / Centro",
           description: "Descripción",
           website: "Sitio Web",
@@ -914,6 +932,20 @@ const resources = {
           streamStarted: "¡Emisión iniciada!",
           streamStopped: "Emisión detenida",
           streamError: "Error al iniciar stream"
+        },
+        joinRequests: {
+          title: "Tus solicitudes de unión",
+          desc: "Estado de las solicitudes que has enviado a otros equipos",
+          empty: "No has enviado ninguna solicitud de unión",
+          pending: "pendientes",
+          cancel: "Cancelar solicitud",
+          confirmCancel: "¿Cancelar esta solicitud de unión?",
+          cancelled: "Solicitud cancelada",
+          status: {
+            pending: "Pendiente",
+            approved: "Aceptada",
+            rejected: "Rechazada"
+          }
         }
       },
       team: {
@@ -1402,6 +1434,7 @@ const resources = {
         searchButton: 'Search',
         allCountries: 'All countries',
         searchCountry: 'Search country...',
+        noCountry: 'Not specified',
         members: 'Members',
         manage: 'Manage my team',
         requestJoin: 'Request to Join',
@@ -1607,10 +1640,26 @@ const resources = {
         sentTitle: "Message Sent!",
         sentDesc: "Thank you for contacting us. We will respond shortly.",
         sendAnother: "Send another message",
+        send: "Send message",
+        errorGeneric: "Failed to send. Please try again.",
         support: "24/7 Team Support",
         placeholders: {
           name: "Your name",
           email: "you@email.com"
+        },
+        reviews: {
+          writeTitle: "Write your review",
+          ratingLabel: "Rating",
+          ratingRequired: "Please select a rating",
+          messageLabel: "Your review",
+          messagePlaceholder: "Tell us about your experience with RobEurope...",
+          submit: "Post review",
+          submitted: "Review published!",
+          submitError: "Could not post review",
+          alreadyReviewed: "You have already posted a review",
+          deleteReview: "Delete",
+          confirmDelete: "Delete your review?",
+          empty: "No reviews yet. Be the first!"
         }
       },
       profile: {
@@ -1682,7 +1731,8 @@ const resources = {
         form: {
           name: "Team Name",
           city: "City",
-          country: "Country (ID)",
+          country: "Country",
+          noCountry: "Not specified",
           institution: "Institution / Center",
           description: "Description",
           website: "Website",
@@ -1795,6 +1845,20 @@ const resources = {
           streamStarted: "Broadcast started!",
           streamStopped: "Broadcast stopped",
           streamError: "Error starting stream"
+        },
+        joinRequests: {
+          title: "Your join requests",
+          desc: "Status of the requests you have sent to other teams",
+          empty: "You have not sent any join requests",
+          pending: "pending",
+          cancel: "Cancel request",
+          confirmCancel: "Cancel this join request?",
+          cancelled: "Request cancelled",
+          status: {
+            pending: "Pending",
+            approved: "Accepted",
+            rejected: "Rejected"
+          }
         }
       },
       team: {
@@ -2283,6 +2347,7 @@ const resources = {
         searchButton: 'Suchen',
         allCountries: 'Alle Länder',
         searchCountry: 'Land suchen...',
+        noCountry: 'Nicht angegeben',
         members: 'Mitglieder',
         manage: 'Mein Team verwalten',
         requestJoin: 'Beitritt anfragen',
@@ -2488,10 +2553,26 @@ const resources = {
         sentTitle: "Nachricht gesendet!",
         sentDesc: "Danke für Ihre Nachricht. Wir werden uns in Kürze melden.",
         sendAnother: "Eine weitere Nachricht senden",
+        send: "Nachricht senden",
+        errorGeneric: "Senden fehlgeschlagen. Bitte erneut versuchen.",
         support: "24/7 Support für Teams",
         placeholders: {
           name: "Dein Name",
           email: "du@email.com"
+        },
+        reviews: {
+          writeTitle: "Bewertung schreiben",
+          ratingLabel: "Bewertung",
+          ratingRequired: "Bitte Bewertung auswählen",
+          messageLabel: "Deine Bewertung",
+          messagePlaceholder: "Erzähl uns von deiner Erfahrung mit RobEurope...",
+          submit: "Bewertung veröffentlichen",
+          submitted: "Bewertung veröffentlicht!",
+          submitError: "Bewertung konnte nicht veröffentlicht werden",
+          alreadyReviewed: "Du hast bereits eine Bewertung abgegeben",
+          deleteReview: "Löschen",
+          confirmDelete: "Deine Bewertung löschen?",
+          empty: "Noch keine Bewertungen. Sei der Erste!"
         }
       },
       profile: {
@@ -2555,7 +2636,8 @@ const resources = {
         form: {
           name: "Teamname",
           city: "Stadt",
-          country: "Land (ID)",
+          country: "Land",
+          noCountry: "Nicht angegeben",
           institution: "Institution / Zentrum",
           description: "Beschreibung",
           website: "Webseite",
@@ -2668,6 +2750,20 @@ const resources = {
           streamStarted: "Übertragung gestartet!",
           streamStopped: "Übertragung gestoppt",
           streamError: "Fehler beim Starten des Streams"
+        },
+        joinRequests: {
+          title: "Deine Beitrittsanfragen",
+          desc: "Status der Anfragen, die du an andere Teams gesendet hast",
+          empty: "Du hast noch keine Beitrittsanfragen gesendet",
+          pending: "ausstehend",
+          cancel: "Anfrage abbrechen",
+          confirmCancel: "Diese Beitrittsanfrage abbrechen?",
+          cancelled: "Anfrage abgebrochen",
+          status: {
+            pending: "Ausstehend",
+            approved: "Angenommen",
+            rejected: "Abgelehnt"
+          }
         }
       },
       team: {

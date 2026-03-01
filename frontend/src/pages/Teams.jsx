@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Users, Globe, Plus, UserPlus, LogIn, Check, MapPin } from 'lucide-react';
+import { Search, Users, Globe, Plus, UserPlus, LogIn, Check, MapPin, Clock, X, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useRef } from 'react';
@@ -167,7 +167,7 @@ const JoinButton = ({ teamId, onJoin, disabled, label, successLabel, errorLabel 
 
 const Teams = () => {
   const { isAuthenticated } = useAuth();
-  const { list, create, requestJoin, getMembers } = useTeams();
+  const { list, create, requestJoin, getMembers, getMyRequests, cancelRequest } = useTeams();
   const { countries, status: countriesStatus } = useCountries();
   const api = useApi();
   const { t } = useTranslation();
@@ -178,6 +178,9 @@ const Teams = () => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState({ ownsTeam: false, ownedTeamId: null, memberOfTeamId: null });
   const [creating, setCreating] = useState(false);
+  const [myJoinRequests, setMyJoinRequests] = useState([]);
+  const [cancellingId, setCancellingId] = useState(null);
+  const [requestsOpen, setRequestsOpen] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createSuccess, setCreateSuccess] = useState(false);
   const [form, setForm] = useState({ name: '', country_id: '', description: '', website_url: '' });
@@ -205,6 +208,12 @@ const Teams = () => {
 
   useEffect(() => { reload(); }, [countryFilter]); // eslint-disable-line
 
+  // Auto-search while typing (debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => { reload(); }, 380);
+    return () => clearTimeout(timer);
+  }, [q]); // eslint-disable-line
+
   useEffect(() => {
     let alive = true;
     if (isAuthenticated) {
@@ -219,6 +228,24 @@ const Teams = () => {
     }
     return () => { alive = false; };
   }, [isAuthenticated, api]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    getMyRequests().then(data => {
+      setMyJoinRequests(Array.isArray(data) ? data : []);
+    }).catch(() => {});
+  }, [isAuthenticated]); // eslint-disable-line
+
+  const onCancelRequest = async (id) => {
+    if (!confirm(t('myTeam.joinRequests.confirmCancel'))) return;
+    setCancellingId(id);
+    try {
+      await cancelRequest(id);
+      setMyJoinRequests(prev => prev.filter(r => r.id !== id));
+    } catch { /* error handled by api */ } finally {
+      setCancellingId(null);
+    }
+  };
 
   const onCreate = async (e) => {
     e.preventDefault();
@@ -317,20 +344,14 @@ const Teams = () => {
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="create-country">{t('teams.form.country')}</Label>
-                      <Select
-                        value={form.country_id}
-                        onValueChange={val => setForm({ ...form, country_id: val })}
-                        disabled={countriesStatus?.loading}
-                      >
-                        <SelectTrigger id="create-country">
-                          <SelectValue placeholder={countriesStatus?.loading ? t('general.countriesLoading') : t('teams.allCountries')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {countries.map(c => (
-                            <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <CountrySelect
+                        value={form.country_id || 'all'}
+                        onValueChange={val => setForm({ ...form, country_id: val === 'all' ? '' : val })}
+                        countries={countries}
+                        loading={countriesStatus?.loading}
+                        allLabel={t('teams.noCountry')}
+                        placeholder={t('teams.searchCountry')}
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="create-desc">{t('teams.form.description')}</Label>
@@ -405,6 +426,103 @@ const Teams = () => {
         </div>
         <Button variant="secondary" onClick={reload}>{t('teams.searchButton')}</Button>
       </motion.div>
+
+      {/* My sent join requests */}
+      {isAuthenticated && myJoinRequests.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden"
+        >
+          {/* Collapsible header */}
+          <button
+            type="button"
+            onClick={() => setRequestsOpen(o => !o)}
+            className="w-full px-5 py-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div>
+                <h2 className="font-semibold text-sm text-slate-900 dark:text-slate-100 text-left">{t('myTeam.joinRequests.title')}</h2>
+                <p className="text-xs text-slate-500 mt-0.5 text-left">{t('myTeam.joinRequests.desc')}</p>
+              </div>
+              {myJoinRequests.filter(r => r.status === 'pending').length > 0 && (
+                <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                  <Clock className="h-3 w-3" />
+                  {myJoinRequests.filter(r => r.status === 'pending').length} {t('myTeam.joinRequests.pending')}
+                </span>
+              )}
+            </div>
+            <motion.div
+              animate={{ rotate: requestsOpen ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronDown className="h-4 w-4 text-slate-400" />
+            </motion.div>
+          </button>
+
+          {/* Collapsible body */}
+          <AnimatePresence initial={false}>
+            {requestsOpen && (
+              <motion.div
+                key="body"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                style={{ overflow: 'hidden' }}
+              >
+                <div className="divide-y divide-slate-100 dark:divide-slate-800 border-t border-slate-100 dark:border-slate-800">
+                  <AnimatePresence>
+                    {myJoinRequests.map((r, i) => {
+                      const STATUS_MAP = {
+                        pending:  { label: t('myTeam.joinRequests.status.pending'),  cls: 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400' },
+                        approved: { label: t('myTeam.joinRequests.status.approved'), cls: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400' },
+                        rejected: { label: t('myTeam.joinRequests.status.rejected'), cls: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400' },
+                      };
+                      const cfg = STATUS_MAP[r.status] || STATUS_MAP.pending;
+                      return (
+                        <motion.div
+                          key={r.id}
+                          initial={{ opacity: 0, x: -6 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 24, transition: { duration: 0.2 } }}
+                          transition={{ delay: i * 0.04 }}
+                          className="flex items-center justify-between px-5 py-3.5"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 font-bold text-xs shrink-0">
+                              {(r.team?.name || '?').slice(0, 2).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{r.team?.name ?? `Team #${r.team_id}`}</p>
+                              <p className="text-xs text-slate-400 mt-0.5">{r.team?.city || new Date(r.created_at).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${cfg.cls}`}>{cfg.label}</span>
+                            {r.status === 'pending' && (
+                              <motion.button
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => onCancelRequest(r.id)}
+                                disabled={cancellingId === r.id}
+                                title={t('myTeam.joinRequests.cancel')}
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </motion.button>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      )}
 
       {/* Team grid */}
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">

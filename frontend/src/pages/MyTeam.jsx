@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
@@ -27,6 +28,8 @@ import {
 import TeamChat from '../components/teams/TeamChat';
 import TeamCompetitionDashboard from '../components/teams/TeamCompetitionDashboard';
 import { resolveMediaUrl } from '../lib/apiClient';
+import { CountrySelect } from '../components/ui/CountrySelect';
+import { useCountries } from '../hooks/useCountries';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -63,7 +66,7 @@ const Avatar = ({ src, name, size = 10 }) => {
 
 // ── Creation form ─────────────────────────────────────────────────────────────
 
-const CreateTeamForm = ({ onCreated, t, api }) => {
+const CreateTeamForm = ({ onCreated, t, api, countries = [], countriesLoading = false }) => {
   const { create } = useTeams();
   const { refreshTeamStatus } = useTeamContext();
   const [step, setStep] = useState(0); // 0 = basics, 1 = details, 2 = success
@@ -122,6 +125,19 @@ const CreateTeamForm = ({ onCreated, t, api }) => {
             <div>
               <Label htmlFor="cf-inst">{t('myTeam.form.institution')}</Label>
               <Input id="cf-inst" className="mt-1.5" value={form.institution} onChange={e => setForm({ ...form, institution: e.target.value })} placeholder="IES..." />
+            </div>
+          </div>
+          <div>
+            <Label>{t('myTeam.form.country')}</Label>
+            <div className="mt-1.5">
+              <CountrySelect
+                value={form.country_id ? String(form.country_id) : 'all'}
+                onValueChange={val => setForm({ ...form, country_id: val === 'all' ? '' : val })}
+                countries={countries}
+                loading={countriesLoading}
+                allLabel={t('myTeam.form.noCountry')}
+                placeholder={t('teams.searchCountry')}
+              />
             </div>
           </div>
           <div>
@@ -262,6 +278,7 @@ const MyTeam = () => {
   const { mine, update, invite, remove, listRequests, approveRequest, getMembers, removeMember, leave } = useTeams();
   const { list: listRegistrations, create: createRegistration, remove: removeRegistration } = useRegistrations();
   const { streams, createStream, deleteStream } = useStreams();
+  const { countries, loading: countriesLoading } = useCountries();
 
   const [team, setTeam] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -279,7 +296,6 @@ const MyTeam = () => {
   const [candidates, setCandidates] = useState([]);
   const [emailInvite, setEmailInvite] = useState('');
   const [saving, setSaving] = useState(false);
-
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast(t => ({ ...t, show: false })), 3500);
@@ -288,20 +304,33 @@ const MyTeam = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const tRes = await mine();
+        // Phase 1: kick off independent top-level fetches in parallel
+        const [teamResult, statusResult, compsResult] = await Promise.allSettled([
+          mine(),
+          api('/teams/status'),
+          api('/competitions')
+        ]);
+        const tRes = teamResult.status === 'fulfilled' ? teamResult.value : null;
+        const st   = statusResult.status === 'fulfilled' ? statusResult.value : {};
+        const comps = compsResult.status === 'fulfilled' ? compsResult.value : [];
+
+        setStatus({ ownedTeamId: st?.ownedTeamId ?? null, memberOfTeamId: st?.memberOfTeamId ?? null });
+        setCompetitions(Array.isArray(comps) ? comps : []);
+
         if (tRes) {
           setTeam(tRes);
           setForm({ name: tRes.name || '', city: tRes.city || '', institution: tRes.institution || '', country_id: tRes.country_id || '', description: tRes.description || '', website_url: tRes.website_url || '', stream_url: tRes.stream_url || '' });
-          try { const reqs = await listRequests(tRes.id); setRequests(Array.isArray(reqs) ? reqs : []); } catch { setRequests([]); }
-          const mem = await getMembers(tRes.id);
-          setMembers(Array.isArray(mem) ? mem : []);
-          const regs = await listRegistrations({ team_id: tRes.id });
-          setRegistrations(Array.isArray(regs) ? regs : []);
+          // Phase 2: load team details in parallel
+          const [reqs, mem, regs] = await Promise.allSettled([
+            listRequests(tRes.id),
+            getMembers(tRes.id),
+            listRegistrations({ team_id: tRes.id })
+          ]);
+          setRequests(reqs.status === 'fulfilled' && Array.isArray(reqs.value) ? reqs.value : []);
+          setMembers(mem.status === 'fulfilled' && Array.isArray(mem.value) ? mem.value : []);
+          setRegistrations(regs.status === 'fulfilled' && Array.isArray(regs.value) ? regs.value : []);
         }
-        const st = await api('/teams/status');
-        setStatus({ ownedTeamId: st?.ownedTeamId ?? null, memberOfTeamId: st?.memberOfTeamId ?? null });
       } catch { setTeam(null); }
-      try { const comps = await api('/competitions'); setCompetitions(Array.isArray(comps) ? comps : []); } catch {}
       setLoaded(true);
     };
     load();
@@ -467,19 +496,8 @@ const MyTeam = () => {
   }
 
   // ── Render: No team ───────────────────────────────────────────────────────
-  if (!team) {
-    return (
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{t('myTeam.createTitle')}</h1>
-          <p className="text-slate-500 mt-1">{t('myTeam.createDesc')}</p>
-        </div>
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-8">
-          <CreateTeamForm onCreated={onCreated} t={t} api={api} />
-        </div>
-      </motion.div>
-    );
-  }
+  if (!team) return <Navigate to="/" replace />;
+
 
   // ── Render: Has team ──────────────────────────────────────────────────────
   return (
@@ -920,6 +938,19 @@ const MyTeam = () => {
                     <div>
                       <Label className="text-xs">{t('myTeam.form.institution')}</Label>
                       <Input className="mt-1.5" value={form.institution} onChange={e => setForm({ ...form, institution: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label className="text-xs">{t('myTeam.form.country')}</Label>
+                      <div className="mt-1.5">
+                        <CountrySelect
+                          value={form.country_id ? String(form.country_id) : 'all'}
+                          onValueChange={val => setForm({ ...form, country_id: val === 'all' ? '' : val })}
+                          countries={countries}
+                          loading={countriesLoading}
+                          allLabel={t('myTeam.form.noCountry')}
+                          placeholder={t('teams.searchCountry')}
+                        />
+                      </div>
                     </div>
                     <div>
                       <Label className="text-xs">{t('myTeam.form.website')}</Label>

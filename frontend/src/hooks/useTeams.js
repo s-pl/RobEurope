@@ -67,5 +67,8 @@ export const useTeams = () => {
   const removeMember = useCallback((memberId) => api(`/team-members/${memberId}`, { method: 'DELETE' }), [api]);
   const leave = useCallback(() => api('/teams/leave', { method: 'POST' }), [api]);
 
-  return { list, create, invite, acceptInvite, requestJoin, approveRequest, registerInCompetition, mine, update, remove, listRequests, getMembers, removeMember, leave };
+  const getMyRequests = useCallback(() => api('/teams/my-requests'), [api]);
+  const cancelRequest = useCallback((requestId) => api(`/teams/requests/${requestId}`, { method: 'DELETE' }), [api]);
+
+  return { list, create, invite, acceptInvite, requestJoin, approveRequest, registerInCompetition, mine, update, remove, listRequests, getMembers, removeMember, leave, getMyRequests, cancelRequest };
 };

@@ -582,3 +582,45 @@ export const getMembershipStatus = async (req, res) => {
   }
 };
 
+/**
+ * Get all join requests the current user has sent to any team.
+ *
+ * @route GET /api/teams/my-requests
+ */
+export const getMyJoinRequests = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'No autorizado' });
+    const items = await TeamJoinRequest.findAll({ where: { user_id: userId }, order: [['created_at', 'DESC']] });
+    const teamIds = [...new Set(items.map(i => i.team_id))];
+    let teamsById = {};
+    if (teamIds.length) {
+      const teams = await Team.findAll({ where: { id: { [Op.in]: teamIds } }, attributes: ['id', 'name', 'city', 'description'] });
+      teamsById = Object.fromEntries(teams.map(t => [t.id, t]));
+    }
+    return res.json(items.map(i => ({ ...i.toJSON(), team: teamsById[i.team_id] || null })));
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * Cancel a pending join request (only the request's author can cancel).
+ *
+ * @route DELETE /api/teams/requests/:requestId
+ */
+export const cancelJoinRequest = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'No autorizado' });
+    const requestId = Number(req.params.requestId);
+    const jr = await TeamJoinRequest.findByPk(requestId);
+    if (!jr) return res.status(404).json({ error: 'Solicitud no encontrada' });
+    if (String(jr.user_id) !== String(userId)) return res.status(403).json({ error: 'No autorizado' });
+    if (jr.status !== 'pending') return res.status(400).json({ error: 'Solo se pueden cancelar solicitudes pendientes' });
+    await jr.destroy();
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
