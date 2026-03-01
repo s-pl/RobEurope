@@ -157,13 +157,13 @@ cat > "\$DEPLOY_PATH/backend/deploy-info.json" << JSON
 JSON
 
 echo "[deploy] docker compose build (prod)..."
-sudo docker compose -f "\$COMPOSE_FILE" --profile prod build
+sg docker -c "docker compose -f \"\$COMPOSE_FILE\" --profile prod build"
 
 echo "[deploy] docker compose up (prod)..."
-sudo docker compose -f "\$COMPOSE_FILE" --profile prod up -d
+sg docker -c "docker compose -f \"\$COMPOSE_FILE\" --profile prod up -d"
 
 echo "[deploy] migraciones..."
-sudo docker compose -f "\$COMPOSE_FILE" --profile prod exec -T backend sh -c "node scripts/run-migrations.js" || true
+sg docker -c "docker compose -f \"\$COMPOSE_FILE\" --profile prod exec -T backend sh -c 'node scripts/run-migrations.js'" || true
 
 echo "[deploy] ✓ Deploy completado"
 SCRIPT
