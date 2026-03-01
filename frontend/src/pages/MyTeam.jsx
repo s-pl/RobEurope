@@ -1,6 +1,7 @@
 import { createElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
+import { useTeamContext } from '../context/TeamContext';
 import { useTeams } from '../hooks/useTeams';
 import { useRegistrations } from '../hooks/useRegistrations';
 import { useStreams } from '../hooks/useStreams';
@@ -12,11 +13,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
 import {
-  Users, Settings, Trophy, Info, Plus,
-  LogOut, Trash2, Check, X, Video, UserPlus, MessageCircle, Code, Building2, ExternalLink
+  Users, Settings, Trophy, Info,
+  LogOut, Trash2, Check, X, Video, UserPlus, MessageCircle, Building2
 } from 'lucide-react';
 
-const TEAM_DOMAIN = import.meta.env.VITE_TEAM_DOMAIN || 'robeurope.samuelponce.es';
 import TeamChat from '../components/teams/TeamChat';
 import TeamCompetitionDashboard from '../components/teams/TeamCompetitionDashboard';
 import { resolveMediaUrl } from '../lib/apiClient';
@@ -47,6 +47,7 @@ const TabButton = ({ id, label, Icon, active, onSelect }) => (
 const MyTeam = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { refreshTeamStatus } = useTeamContext();
   const api = useApi();
   const { mine, update, invite, remove, listRequests, approveRequest, getMembers, removeMember, leave, create } = useTeams();
   const { list: listRegistrations, create: createRegistration } = useRegistrations();
@@ -168,6 +169,7 @@ const MyTeam = () => {
       setTeam(newTeam);
       setStatus({ ownedTeamId: newTeam.id, memberOfTeamId: newTeam.id });
       setFeedback(t('myTeam.feedback.created'));
+      refreshTeamStatus();
     } catch (err) {
       setFeedback(err.message || t('myTeam.feedback.createError'));
     }
@@ -271,6 +273,7 @@ const MyTeam = () => {
       setTeam(null);
       setMembers([]);
       setRegistrations([]);
+      refreshTeamStatus();
     } catch (err) {
       setFeedback(err.message || t('myTeam.feedback.leaveError'));
     }
@@ -284,6 +287,7 @@ const MyTeam = () => {
       setTeam(null);
       setStatus({ ownedTeamId: null, memberOfTeamId: null });
       setFeedback(t('myTeam.feedback.deleted'));
+      refreshTeamStatus();
     } catch (err) {
       setFeedback(err.message || t('myTeam.feedback.deleteError'));
     }
@@ -486,24 +490,8 @@ const MyTeam = () => {
           <p className="text-slate-500 text-sm mt-1">
             {team.institution} • {team.city}
           </p>
-          {team.slug && (
-            <a
-              href={`/teams/${team.slug}/page`}
-              className="inline-flex items-center gap-1 mt-1 text-xs text-blue-500 hover:underline"
-            >
-              <ExternalLink className="h-3 w-3" />
-              {team.slug}.{TEAM_DOMAIN} — Ver página pública
-            </a>
-          )}
         </div>
         <div className="flex gap-2">
-          {team.slug && (
-            <Button variant="ghost" size="sm" asChild>
-              <a href={`/teams/${team.slug}/page`}>
-                <ExternalLink className="h-4 w-4 mr-1" /> Página pública
-              </a>
-            </Button>
-          )}
           {!isOwner && (
             <Button variant="destructive" size="sm" onClick={onLeave} className="gap-2">
               <LogOut className="h-4 w-4" /> {t('myTeam.actions.leave')}

@@ -38,6 +38,8 @@ const allowedOrigins = [
   /^https?:\/\/(?:[a-z0-9-]+\.)?robeurope\.samuelponce\.es(?::\d+)?$/
 ];
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const app = express();
 
 // --- Request ID ---
@@ -47,8 +49,19 @@ app.use(requestId());
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
-    // Disable Content Security Policy entirely as requested
-    contentSecurityPolicy: false
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // needed for Swagger UI / admin EJS
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'", 'data:'],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        ...(isProduction && { upgradeInsecureRequests: [] }),
+      }
+    }
   })
 );
 
@@ -76,7 +89,6 @@ app.set('trust proxy', 1);
 // en peticiones cross-origin con credentials: 'include' necesitamos:
 //   domain: '.robeurope.samuelponce.es'  → válida en todos los subdominios
 //   sameSite: 'none' + secure: true      → permite cross-origin con HTTPS
-const isProduction = process.env.NODE_ENV === 'production';
 const cookieDomain = isProduction
   ? (process.env.COOKIE_DOMAIN || `.${(process.env.TEAM_DOMAIN || 'robeurope.samuelponce.es')}`)
   : undefined; // en dev no forzamos dominio (localhost)

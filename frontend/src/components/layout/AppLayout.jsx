@@ -15,7 +15,6 @@ const AppLayout = () => {
   const isAdmin = user?.role === 'super_admin';
 
   useEffect(() => {
-    // Ask permission once the layout mounts
     requestNotificationPermission();
   }, []);
 
@@ -27,12 +26,17 @@ const AppLayout = () => {
       >
         {t('common.skipToContent')}
       </a>
+      {!isBackendActive && (
+        <div className="bg-amber-100 text-amber-900 text-xs font-semibold text-center py-2 px-4 border-b border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800">
+          {t('common.backendOfflineBanner')}
+        </div>
+      )}
       {isAdmin && (
         <div className="bg-red-600 text-white text-xs font-bold text-center py-1 uppercase tracking-widest">
           {t('common.adminModeActive')}
         </div>
       )}
-      
+
       <div className="flex min-h-screen">
         <Sidebar />
         <div className="flex-1 flex flex-col min-w-0">
@@ -52,11 +56,6 @@ const AppLayout = () => {
       </div>
     </div>
   );
-      {!isBackendActive && (
-        <div className="bg-amber-100 text-amber-900 text-xs font-semibold text-center py-2 px-4 border-b border-amber-200">
-          {t('common.backendOfflineBanner')}
-        </div>
-      )}
 };
 
 export default AppLayout;

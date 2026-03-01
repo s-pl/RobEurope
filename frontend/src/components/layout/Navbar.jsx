@@ -2,14 +2,14 @@ import { Link, NavLink } from 'react-router-dom';
 import { Bot, User, Settings, LogOut, ChevronDown, Menu, X, Globe, Building2, Archive, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
-import { useApi } from '../../hooks/useApi';
+import { useTeamContext } from '../../context/TeamContext';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '../ui/sheet';
 import NotificationsBell from '../notifications/NotificationsBell';
 import { ThemeToggle } from '../ui/theme-toggle';
 import { resolveMediaUrl } from '../../lib/apiClient';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const navLinks = [
   { to: '/', key: 'nav.home' },
@@ -159,26 +159,9 @@ const NavItems = ({
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const { t, i18n } = useTranslation();
-  const api = useApi();
+  const { hasTeam } = useTeamContext();
   const avatarUrl = resolveMediaUrl(user?.profile_photo_url);
-  const [hasTeam, setHasTeam] = React.useState(false);
   const [isOpen, setIsOpen] = useState(false);
-
-  React.useEffect(() => {
-    let alive = true;
-    const load = async () => {
-      if (!isAuthenticated) { setHasTeam(false); return; }
-      try {
-        const st = await api('/teams/status');
-        if (!alive) return;
-        setHasTeam(Boolean(st?.ownedTeamId || st?.memberOfTeamId));
-      } catch {
-        // ignore
-      }
-    };
-    load();
-    return () => { alive = false; };
-  }, [api, isAuthenticated]);
 
   return (
     <header className="sticky top-0 z-20 border-b border-blue-200 bg-white/95 backdrop-blur shadow-sm dark:bg-slate-950/95 dark:border-slate-800">

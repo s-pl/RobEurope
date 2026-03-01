@@ -6,38 +6,12 @@
  */
 
 import db from '../models/index.js';
-const { Team, User, Country, TeamMembers, TeamInvite, TeamJoinRequest, Registration, Competition, Notification, TeamPage } = db;
+const { Team, User, Country, TeamMembers, TeamInvite, TeamJoinRequest, Registration, Competition, Notification } = db;
 import { Op } from 'sequelize';
 import { getFileInfo } from '../middleware/upload.middleware.js';
 import { v4 as uuidv4 } from 'uuid';
 import { emitToUser } from '../utils/realtime.js';
 
-/**
- * Generates a URL-safe slug from a team name.
- * Ensures uniqueness by appending a numeric suffix if needed.
- * @param {string} name - Team name.
- * @returns {Promise<string>} Unique slug.
- */
-async function generateTeamSlug(name) {
-  const base = name
-    .toLowerCase()
-    .trim()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove accents
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .substring(0, 60) || 'equipo';
-
-  let slug = base;
-  let suffix = 0;
-  while (true) {
-    const candidate = suffix === 0 ? slug : `${slug}-${suffix}`;
-    const existing = await Team.findOne({ where: { slug: candidate } });
-    if (!existing) return candidate;
-    suffix++;
-  }
-}
 
 /**
  * Create a new team (authenticated).
@@ -85,8 +59,6 @@ export const createTeam = async (req, res) => {
     const teamData = { ...req.body, created_by_user_id };
 
     // Auto-generate slug from team name
-    teamData.slug = await generateTeamSlug(teamData.name);
-
     // Handle file upload
     const fileInfo = getFileInfo(req);
     if (fileInfo) {
@@ -95,14 +67,6 @@ export const createTeam = async (req, res) => {
 
     const team = await Team.create(teamData);
 
-    // Auto-create a default TeamPage for this team
-    try {
-      await TeamPage.create({
-        team_id: team.id,
-        layout: getDefaultLayout(),
-        theme: 'default'
-      });
-    } catch (_) { /* non-fatal */ }
     // Make creator the owner in TeamMembers
     await TeamMembers.create({ team_id: team.id, user_id: created_by_user_id, role: 'owner', joined_at: new Date(), left_at: null });
     // optional: notify creator (could be useful for consistency)
@@ -618,132 +582,3 @@ export const getMembershipStatus = async (req, res) => {
   }
 };
 
-// ─── Team Public Page (slug-based) ─────────────────────────────────────────
-
-/**
- * Returns the default layout with pre-built modules for a new team page.
- * @returns {Array} Default layout array.
- */
-function getDefaultLayout() {
-  return [
-    {
-      id: uuidv4(), type: 'hero',
-      col: 0, row: 0, w: 12, h: 1,
-      config: { showLogo: true, showSocials: true }
-    },
-    {
-      id: uuidv4(), type: 'stats',
-      col: 0, row: 1, w: 4, h: 1,
-      config: {}
-    },
-    {
-      id: uuidv4(), type: 'competitions',
-      col: 4, row: 1, w: 8, h: 1,
-      config: { limit: 5 }
-    },
-    {
-      id: uuidv4(), type: 'members',
-      col: 0, row: 2, w: 5, h: 1,
-      config: { showRole: true }
-    },
-    {
-      id: uuidv4(), type: 'posts',
-      col: 5, row: 2, w: 7, h: 1,
-      config: { limit: 3 }
-    },
-    {
-      id: uuidv4(), type: 'about',
-      col: 0, row: 3, w: 12, h: 1,
-      config: {}
-    }
-  ];
-}
-
-/**
- * Get a team by its slug (public).
- *
- * @route GET /api/teams/by-slug/:slug
- */
-export const getTeamBySlug = async (req, res) => {
-  try {
-    const { slug } = req.params;
-    const team = await Team.findOne({ where: { slug } });
-    if (!team) return res.status(404).json({ error: 'Team not found' });
-
-    // Enrich with member count
-    const memberCount = await TeamMembers.count({ where: { team_id: team.id, left_at: null } });
-    const members = await TeamMembers.findAll({
-      where: { team_id: team.id, left_at: null },
-      include: [{ model: User, as: 'user', attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url'] }]
-    });
-
-    return res.json({ ...team.toJSON(), memberCount, members: members.map(m => ({
-      id: m.id,
-      role: m.role,
-      joined_at: m.joined_at,
-      user: m.user
-    })) });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-};
-
-/**
- * Get a team's public page layout (public endpoint).
- *
- * @route GET /api/teams/:id/page
- */
-export const getTeamPage = async (req, res) => {
-  try {
-    const teamId = Number(req.params.id);
-    const team = await Team.findByPk(teamId);
-    if (!team) return res.status(404).json({ error: 'Team not found' });
-
-    let page = await TeamPage.findOne({ where: { team_id: teamId } });
-    if (!page) {
-      // Auto-create with default layout if not exists
-      page = await TeamPage.create({ team_id: teamId, layout: getDefaultLayout(), theme: 'default' });
-    }
-    return res.json(page);
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-};
-
-/**
- * Update a team's page layout (members only).
- *
- * @route PUT /api/teams/:id/page
- */
-export const updateTeamPage = async (req, res) => {
-  try {
-    const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: 'No autorizado' });
-
-    const teamId = Number(req.params.id);
-
-    // Check membership
-    const membership = await TeamMembers.findOne({ where: { team_id: teamId, user_id: userId, left_at: null } });
-    if (!membership) return res.status(403).json({ error: 'Solo los miembros del equipo pueden editar la página' });
-
-    const { layout, theme, custom_css, hero_image_url, accent_color } = req.body || {};
-
-    let page = await TeamPage.findOne({ where: { team_id: teamId } });
-    if (!page) {
-      page = await TeamPage.create({ team_id: teamId, layout: layout || getDefaultLayout(), theme: theme || 'default', custom_css, hero_image_url, accent_color });
-    } else {
-      const updates = {};
-      if (layout !== undefined) updates.layout = layout;
-      if (theme !== undefined) updates.theme = theme;
-      if (custom_css !== undefined) updates.custom_css = custom_css;
-      if (hero_image_url !== undefined) updates.hero_image_url = hero_image_url;
-      if (accent_color !== undefined) updates.accent_color = accent_color;
-      updates.updated_at = new Date();
-      await page.update(updates);
-    }
-
-    return res.json(page);
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-};
