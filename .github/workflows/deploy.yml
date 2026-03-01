@@ -68,18 +68,11 @@ jobs:
             COMPOSE_RUN=''
           fi
 
-          echo "[deploy] docker compose build (prod)..."
+          echo "[deploy] docker compose up -d --build (prod)..."
           if [[ -n "$COMPOSE_RUN" ]]; then
-            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' --profile prod build"
+            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' --profile prod up -d --build"
           else
-            docker compose -f "$COMPOSE_FILE" --profile prod build
-          fi
-
-          echo "[deploy] docker compose up (prod)..."
-          if [[ -n "$COMPOSE_RUN" ]]; then
-            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' --profile prod up -d"
-          else
-            docker compose -f "$COMPOSE_FILE" --profile prod up -d
+            docker compose -f "$COMPOSE_FILE" --profile prod up -d --build
           fi
 
           echo "[deploy] esperando backend..."

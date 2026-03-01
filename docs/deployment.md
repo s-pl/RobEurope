@@ -740,7 +740,7 @@ sudo systemctl restart robeurope
 
 ### Zero-Downtime Update
 
-For zero-downtime deployments, consider using PM2 cluster mode or deploying to a staging environment first.
+For zero-downtime deployments, use rolling/containerized deployments with Docker Compose (or a staging environment) before promoting to production.
 
 ---
 
