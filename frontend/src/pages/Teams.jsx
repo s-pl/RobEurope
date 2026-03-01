@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Users, Globe, Plus, UserPlus, LogIn, Check, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useApi } from '../hooks/useApi';
@@ -16,7 +16,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Textarea } from '../components/ui/textarea';
-import { StaggerContainer, StaggerItem } from '../components/ui/PageTransition';
+import { CountrySelect } from '../components/ui/CountrySelect';
+
 import { PageHeader } from '../components/ui/PageHeader';
 
 // 3D tilt card with glare effect on hover
@@ -25,20 +26,19 @@ const TiltCard = ({ children }) => {
   const glareRef = useRef(null);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const smoothX = useSpring(mouseX, { stiffness: 150, damping: 20, mass: 0.5 });
-  const smoothY = useSpring(mouseY, { stiffness: 150, damping: 20, mass: 0.5 });
-  const rotateX = useTransform(smoothY, [-0.5, 0.5], [6, -6]);
-  const rotateY = useTransform(smoothX, [-0.5, 0.5], [-6, 6]);
+  // Direct transforms — no spring physics running every frame, much better FPS
+  const rotateX = useTransform(mouseY, [-0.5, 0.5], [5, -5]);
+  const rotateY = useTransform(mouseX, [-0.5, 0.5], [-5, 5]);
 
   const handleMouseMove = (e) => {
     const r = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width;
-    const y = (e.clientY - r.top) / r.height;
-    mouseX.set(x - 0.5);
-    mouseY.set(y - 0.5);
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
     if (glareRef.current) {
       glareRef.current.style.opacity = '1';
-      glareRef.current.style.backgroundImage = `radial-gradient(circle at ${(x * 100).toFixed(1)}% ${(y * 100).toFixed(1)}%, rgba(255,255,255,0.2) 0%, transparent 55%)`;
+      glareRef.current.style.backgroundImage = `radial-gradient(circle at ${((x + 0.5) * 100).toFixed(0)}% ${((y + 0.5) * 100).toFixed(0)}%, rgba(255,255,255,0.18) 0%, transparent 55%)`;
     }
   };
 
@@ -50,7 +50,7 @@ const TiltCard = ({ children }) => {
 
   return (
     <motion.div
-      style={{ rotateX, rotateY, transformPerspective: 900 }}
+      style={{ rotateX, rotateY, transformPerspective: 900, willChange: 'transform' }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className="h-full"
@@ -67,9 +67,10 @@ const TiltCard = ({ children }) => {
   );
 };
 
-// Per-card join button with success animation
-const JoinButton = ({ teamId, onJoin, disabled, label, successLabel }) => {
-  const [state, setState] = useState('idle'); // idle | loading | success
+// Per-card join button with success/error animation
+const JoinButton = ({ teamId, onJoin, disabled, label, successLabel, errorLabel }) => {
+  const [state, setState] = useState('idle'); // idle | loading | success | error
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleClick = async () => {
     if (state !== 'idle') return;
@@ -78,8 +79,10 @@ const JoinButton = ({ teamId, onJoin, disabled, label, successLabel }) => {
       await onJoin(teamId);
       setState('success');
       setTimeout(() => setState('idle'), 3000);
-    } catch {
-      setState('idle');
+    } catch (err) {
+      setErrorMsg(err?.message || errorLabel || 'Error');
+      setState('error');
+      setTimeout(() => setState('idle'), 4000);
     }
   };
 
@@ -91,6 +94,8 @@ const JoinButton = ({ teamId, onJoin, disabled, label, successLabel }) => {
       className={`w-full flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300 ${
         state === 'success'
           ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
+          : state === 'error'
+          ? 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'
           : state === 'loading'
           ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-wait dark:bg-slate-800 dark:border-slate-700'
           : disabled
@@ -129,6 +134,19 @@ const JoinButton = ({ teamId, onJoin, disabled, label, successLabel }) => {
             </motion.div>
             {successLabel}
           </motion.span>
+        ) : state === 'error' ? (
+          <motion.span
+            key="error"
+            initial={{ opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center gap-1.5 max-w-full overflow-hidden"
+          >
+            <svg viewBox="0 0 12 12" fill="none" className="w-3.5 h-3.5 shrink-0 stroke-red-500" strokeWidth={2} strokeLinecap="round">
+              <path d="M2 2l8 8M10 2l-8 8" />
+            </svg>
+            <span className="truncate text-xs">{errorMsg}</span>
+          </motion.span>
         ) : state === 'loading' ? (
           <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
             <motion.div
@@ -157,6 +175,7 @@ const Teams = () => {
   const [countryFilter, setCountryFilter] = useState('all');
   const [teams, setTeams] = useState([]);
   const [membersMap, setMembersMap] = useState({});
+  const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState({ ownsTeam: false, ownedTeamId: null, memberOfTeamId: null });
   const [creating, setCreating] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -164,17 +183,23 @@ const Teams = () => {
   const [form, setForm] = useState({ name: '', country_id: '', description: '', website_url: '' });
 
   const reload = async () => {
+    setLoading(true);
     try {
       const cId = countryFilter === 'all' ? '' : countryFilter;
       const data = await list(q, cId);
-      setTeams(Array.isArray(data) ? data : []);
-      const memberPromises = (Array.isArray(data) ? data : []).map(t =>
-        getMembers(t.id).then(m => [t.id, m]).catch(() => [t.id, []])
-      );
-      const results = await Promise.all(memberPromises);
-      setMembersMap(Object.fromEntries(results));
+      // Handle both plain array and { items: [...] } response shapes
+      const arr = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
+      setTeams(arr);
+      if (arr.length > 0) {
+        const memberPromises = arr.map(t =>
+          getMembers(t.id).then(m => [t.id, Array.isArray(m) ? m : []]).catch(() => [t.id, []])
+        );
+        setMembersMap(Object.fromEntries(await Promise.all(memberPromises)));
+      }
     } catch {
       setTeams([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -368,30 +393,45 @@ const Teams = () => {
             className="pl-9"
           />
         </div>
-        <div className="w-[180px]">
-          <Select value={countryFilter} onValueChange={setCountryFilter} disabled={countriesStatus?.loading}>
-            <SelectTrigger>
-              <SelectValue placeholder={t('teams.allCountries')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('teams.allCountries')}</SelectItem>
-              {countries.map(c => (
-                <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="w-[200px]">
+          <CountrySelect
+            value={countryFilter}
+            onValueChange={setCountryFilter}
+            countries={countries}
+            loading={countriesStatus?.loading}
+            allLabel={t('teams.allCountries')}
+            placeholder={t('teams.searchCountry')}
+          />
         </div>
         <Button variant="secondary" onClick={reload}>{t('teams.searchButton')}</Button>
       </motion.div>
 
-      {/* Team grid with stagger */}
-      <StaggerContainer className="grid gap-5 md:grid-cols-2 lg:grid-cols-3" staggerDelay={0.07}>
-        {teams.map(team => {
+      {/* Team grid */}
+      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <AnimatePresence mode="popLayout">
+        {loading && teams.length === 0
+          ? Array.from({ length: 3 }).map((_, i) => (
+              <motion.div
+                key={`sk-${i}`}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.28, delay: i * 0.07 }}
+              >
+                <div className="h-52 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
+              </motion.div>
+            ))
+          : null}
+        {!loading && teams.map((team, i) => {
           const memberCount = membersMap[team.id]?.length || 0;
           const isMyTeam = status.ownedTeamId === team.id || status.memberOfTeamId === team.id;
           const isMember = Boolean(status.ownedTeamId || status.memberOfTeamId);
           return (
-            <StaggerItem key={team.id}>
+            <motion.div
+              key={team.id}
+              initial={{ opacity: 0, y: 18, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.35, delay: i * 0.06, ease: [0.4, 0, 0.2, 1] }}
+            >
               <TiltCard>
               <div className="group flex flex-col h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden transition-shadow duration-200 hover:shadow-xl hover:border-slate-300 dark:hover:border-slate-700">
                 {/* Card top accent */}
@@ -450,6 +490,7 @@ const Teams = () => {
                         disabled={isMember}
                         label={t('teams.requestJoin')}
                         successLabel={t('teams.feedback.requestSent')}
+                        errorLabel={t('teams.feedback.joinError')}
                       />
                     )
                   ) : (
@@ -464,11 +505,12 @@ const Teams = () => {
                 </div>
               </div>
               </TiltCard>
-            </StaggerItem>
+            </motion.div>
           );
         })}
+        </AnimatePresence>
 
-        {teams.length === 0 && (
+        {!loading && teams.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -479,7 +521,7 @@ const Teams = () => {
             <p>{t('teams.noTeams')}</p>
           </motion.div>
         )}
-      </StaggerContainer>
+      </div>
     </div>
   );
 };

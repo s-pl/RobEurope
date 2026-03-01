@@ -70,7 +70,16 @@ const resources = {
         manageCenters: 'Gestionar Centros',
         manageArchives: 'Gestionar Archivos',
         managePosts: 'Gestionar Posts',
-        adminRequests: 'Solicitudes Admin'
+        adminRequests: 'Solicitudes Admin',
+        notifications: 'Notificaciones'
+      },
+      notifications: {
+        title: 'Notificaciones',
+        markAllRead: 'Marcar todo leído',
+        empty: 'Sin notificaciones',
+        hint: 'Desliza ← para eliminar · Clic para marcar como leído',
+        accept: 'Aceptar',
+        decline: 'Rechazar'
       },
       status: {
         connected: 'Conectado',
@@ -511,6 +520,7 @@ const resources = {
         searchPlaceholder: 'Buscar equipos...',
         searchButton: 'Buscar',
         allCountries: 'Todos los países',
+        searchCountry: 'Buscar país...',
         members: 'Miembros',
         manage: 'Gestionar mi equipo',
         requestJoin: 'Solicitar Unirse',
@@ -520,7 +530,8 @@ const resources = {
           created: 'Equipo creado exitosamente',
           createError: 'No se pudo crear el equipo',
           requestSent: 'Solicitud enviada',
-          requestError: 'No se pudo enviar la solicitud'
+          requestError: 'No se pudo enviar la solicitud',
+          joinError: 'No se pudo enviar la solicitud de unión'
         }
       },
       home: {
@@ -848,6 +859,13 @@ const resources = {
         },
         competitions: {
           registerTitle: "Inscribirse en Competición",
+          registerDesc: "Busca y selecciona una competición para inscribir a tu equipo.",
+          searchPlaceholder: "Buscar competición...",
+          noResults: "No se encontraron competiciones.",
+          alreadyRegistered: "Inscrito",
+          withdraw: "Retirar",
+          confirmWithdraw: "¿Retirar la solicitud de inscripción en esta competición?",
+          withdrawnSuccess: "Solicitud retirada correctamente.",
           selectLabel: "Seleccionar Competición",
           selectPlaceholder: "-- Seleccionar --",
           activeTitle: "Inscripciones Activas",
@@ -936,7 +954,16 @@ const resources = {
         manageCenters: 'Manage Centers',
         manageArchives: 'Manage Archives',
         managePosts: 'Manage Posts',
-        adminRequests: 'Admin Requests'
+        adminRequests: 'Admin Requests',
+        notifications: 'Notifications'
+      },
+      notifications: {
+        title: 'Notifications',
+        markAllRead: 'Mark all as read',
+        empty: 'No notifications',
+        hint: 'Swipe ← to dismiss · Tap to mark as read',
+        accept: 'Accept',
+        decline: 'Decline'
       },
       status: {
         connected: 'Online',
@@ -1374,6 +1401,7 @@ const resources = {
         searchPlaceholder: 'Search teams...',
         searchButton: 'Search',
         allCountries: 'All countries',
+        searchCountry: 'Search country...',
         members: 'Members',
         manage: 'Manage my team',
         requestJoin: 'Request to Join',
@@ -1383,7 +1411,8 @@ const resources = {
           created: 'Team created successfully',
           createError: 'Could not create team',
           requestSent: 'Request sent',
-          requestError: 'Could not send request'
+          requestError: 'Could not send request',
+          joinError: 'Could not send join request'
         }
       },
       home: {
@@ -1711,6 +1740,13 @@ const resources = {
         },
         competitions: {
           registerTitle: "Register for Competition",
+          registerDesc: "Search and select a competition to register your team.",
+          searchPlaceholder: "Search competition...",
+          noResults: "No competitions found.",
+          alreadyRegistered: "Registered",
+          withdraw: "Withdraw",
+          confirmWithdraw: "Withdraw the registration request for this competition?",
+          withdrawnSuccess: "Registration request withdrawn successfully.",
           selectLabel: "Select Competition",
           selectPlaceholder: "-- Select --",
           activeTitle: "Active Registrations",
@@ -1799,7 +1835,16 @@ const resources = {
         manageCenters: 'Zentren verwalten',
         manageArchives: 'Archiv verwalten',
         managePosts: 'Beiträge verwalten',
-        adminRequests: 'Admin-Anfragen'
+        adminRequests: 'Admin-Anfragen',
+        notifications: 'Benachrichtigungen'
+      },
+      notifications: {
+        title: 'Benachrichtigungen',
+        markAllRead: 'Alle als gelesen markieren',
+        empty: 'Keine Benachrichtigungen',
+        hint: 'Nach links wischen zum Löschen · Tippen zum Lesen',
+        accept: 'Annehmen',
+        decline: 'Ablehnen'
       },
       status: {
         connected: 'Verbunden',
@@ -2237,6 +2282,7 @@ const resources = {
         searchPlaceholder: 'Teams suchen...',
         searchButton: 'Suchen',
         allCountries: 'Alle Länder',
+        searchCountry: 'Land suchen...',
         members: 'Mitglieder',
         manage: 'Mein Team verwalten',
         requestJoin: 'Beitritt anfragen',
@@ -2246,7 +2292,8 @@ const resources = {
           created: 'Team erfolgreich erstellt',
           createError: 'Team konnte nicht erstellt werden',
           requestSent: 'Anfrage gesendet',
-          requestError: 'Anfrage konnte nicht gesendet werden'
+          requestError: 'Anfrage konnte nicht gesendet werden',
+          joinError: 'Beitrittsanfrage konnte nicht gesendet werden'
         }
       },
       home: {
@@ -2566,6 +2613,13 @@ const resources = {
         },
         competitions: {
           registerTitle: "Für Wettbewerb anmelden",
+          registerDesc: "Suche und wähle einen Wettbewerb aus, um dein Team anzumelden.",
+          searchPlaceholder: "Wettbewerb suchen...",
+          noResults: "Keine Wettbewerbe gefunden.",
+          alreadyRegistered: "Angemeldet",
+          withdraw: "Zurückziehen",
+          confirmWithdraw: "Die Anmeldeanfrage für diesen Wettbewerb zurückziehen?",
+          withdrawnSuccess: "Anmeldeanfrage erfolgreich zurückgezogen.",
           selectLabel: "Wettbewerb auswählen",
           selectPlaceholder: "-- Auswählen --",
           activeTitle: "Aktive Anmeldungen",

@@ -55,6 +55,17 @@ export const createRegistration = async (req, res) => {
       registration_date: new Date(),
       status: 'pending' // Ensure status is pending for new registrations
     };
+
+    // Prevent duplicate registrations: same team + same competition
+    if (payload.team_id && payload.competition_id) {
+      const existing = await Registration.findOne({
+        where: { team_id: payload.team_id, competition_id: payload.competition_id }
+      });
+      if (existing) {
+        return res.status(409).json({ error: 'Este equipo ya está inscrito en esta competición' });
+      }
+    }
+
     const item = await Registration.create(payload);
     res.status(201).json(item);
   } catch (err) {

@@ -12,9 +12,12 @@ export const useRegistrations = () => {
 
   const create = useCallback((payload) => api('/registrations', { method: 'POST', body: payload }), [api]);
 
+  const remove = useCallback((id) => api(`/registrations/${id}`, { method: 'DELETE' }), [api]);
+
   // Admin actions (optional on UI)
   const approve = useCallback((id, body = {}) => api(`/registrations/${id}/approve`, { method: 'POST', body }), [api]);
   const reject = useCallback((id, decision_reason) => api(`/registrations/${id}/reject`, { method: 'POST', body: { decision_reason } }), [api]);
 
-  return { list, create, approve, reject };
+  return { list, create, remove, approve, reject };
 };
+

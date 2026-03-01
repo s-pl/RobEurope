@@ -22,7 +22,7 @@ import {
   LogOut, Trash2, Check, X, Video,
   UserPlus, MessageCircle, Building2,
   Globe, MapPin, Hash, ChevronRight,
-  Wifi, WifiOff, Shield, Crown
+  Wifi, WifiOff, Shield, Crown, Search
 } from 'lucide-react';
 import TeamChat from '../components/teams/TeamChat';
 import TeamCompetitionDashboard from '../components/teams/TeamCompetitionDashboard';
@@ -260,7 +260,7 @@ const MyTeam = () => {
   const { refreshTeamStatus } = useTeamContext();
   const api = useApi();
   const { mine, update, invite, remove, listRequests, approveRequest, getMembers, removeMember, leave } = useTeams();
-  const { list: listRegistrations, create: createRegistration } = useRegistrations();
+  const { list: listRegistrations, create: createRegistration, remove: removeRegistration } = useRegistrations();
   const { streams, createStream, deleteStream } = useStreams();
 
   const [team, setTeam] = useState(null);
@@ -273,6 +273,7 @@ const MyTeam = () => {
   const [competitions, setCompetitions] = useState([]);
   const [registrations, setRegistrations] = useState([]);
   const [selectedCompetition, setSelectedCompetition] = useState('');
+  const [compSearch, setCompSearch] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
   const [query, setQuery] = useState('');
   const [candidates, setCandidates] = useState([]);
@@ -408,6 +409,12 @@ const MyTeam = () => {
     }
   };
 
+  const registeredCompIds = useMemo(() => new Set(registrations.map(r => r.competition_id)), [registrations]);
+  const filteredCompetitions = useMemo(() =>
+    competitions.filter(c => c.title?.toLowerCase().includes(compSearch.toLowerCase())),
+    [competitions, compSearch]
+  );
+
   const onRegister = async () => {
     if (!selectedCompetition) return;
     try {
@@ -416,6 +423,18 @@ const MyTeam = () => {
       const regs = await listRegistrations({ team_id: team.id });
       setRegistrations(Array.isArray(regs) ? regs : []);
       setSelectedCompetition('');
+      setCompSearch('');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const onWithdrawRegistration = async (id) => {
+    if (!confirm(t('myTeam.competitions.confirmWithdraw'))) return;
+    try {
+      await removeRegistration(id);
+      setRegistrations(prev => prev.filter(r => r.id !== id));
+      showToast(t('myTeam.competitions.withdrawnSuccess'));
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -550,15 +569,37 @@ const MyTeam = () => {
         </Card>
       </motion.div>
 
-      {/* Tabs with shadcn */}
+      {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-6">
+        {/* Scrollable tab navigation — no more cramped inline-flex */}
+        <div className="flex overflow-x-auto scrollbar-none border-b border-slate-200 dark:border-slate-800 mb-6">
           {tabs(t, isOwner).map(({ id, label, Icon }) => (
-            <TabsTrigger key={id} value={id} className="gap-2">
-              <Icon className="h-4 w-4" />{label}
-            </TabsTrigger>
+            <button
+              key={id}
+              type="button"
+              onClick={() => setActiveTab(id)}
+              className={`
+                relative flex items-center gap-2.5 px-5 py-3.5 text-sm font-medium
+                whitespace-nowrap shrink-0 transition-colors
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset
+                ${activeTab === id
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                }
+              `}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              <span>{label}</span>
+              {activeTab === id && (
+                <motion.span
+                  layoutId="myteam-tab-indicator"
+                  className="absolute bottom-0 inset-x-0 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-t-sm"
+                  transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                />
+              )}
+            </button>
           ))}
-        </TabsList>
+        </div>
 
         {/* ── OVERVIEW ────────────────────────────────────────────────── */}
         <TabsContent value="overview">
@@ -728,25 +769,78 @@ const MyTeam = () => {
         <TabsContent value="competitions">
           <div className="space-y-5">
             {isOwner && (
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5">
-                <h3 className="font-semibold text-sm mb-3 text-slate-900 dark:text-slate-100">{t('myTeam.competitions.registerTitle')}</h3>
-                <div className="flex gap-3 items-end">
-                  <div className="flex-1">
-                    <select
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={selectedCompetition}
-                      onChange={e => setSelectedCompetition(e.target.value)}
-                    >
-                      <option value="">{t('myTeam.competitions.selectPlaceholder')}</option>
-                      {competitions.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-                    </select>
-                  </div>
-                  <motion.div whileTap={{ scale: 0.96 }}>
-                    <Button onClick={onRegister} disabled={!selectedCompetition} className="gap-2">
-                      <Trophy className="h-4 w-4" /> {t('myTeam.actions.register')}
-                    </Button>
-                  </motion.div>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-3">
+                <div>
+                  <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">{t('myTeam.competitions.registerTitle')}</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">{t('myTeam.competitions.registerDesc')}</p>
                 </div>
+                <div className="space-y-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                    <Input
+                      className="pl-8 text-sm"
+                      placeholder={t('myTeam.competitions.searchPlaceholder')}
+                      value={compSearch}
+                      onChange={e => { setCompSearch(e.target.value); setSelectedCompetition(''); }}
+                    />
+                  </div>
+                  <AnimatePresence>
+                    {compSearch.trim() && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.15 }}
+                        className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden divide-y divide-slate-100 dark:divide-slate-800 max-h-52 overflow-y-auto shadow-sm"
+                      >
+                        {filteredCompetitions.length === 0 ? (
+                          <p className="px-3 py-3 text-xs text-slate-400 text-center">{t('myTeam.competitions.noResults')}</p>
+                        ) : filteredCompetitions.map(c => {
+                          const already = registeredCompIds.has(c.id);
+                          return (
+                            <button
+                              key={c.id}
+                              type="button"
+                              onClick={() => {
+                                if (!already) {
+                                  setSelectedCompetition(String(c.id));
+                                  setCompSearch(c.title);
+                                }
+                              }}
+                              disabled={already}
+                              className={`w-full flex items-center justify-between px-3 py-2.5 text-sm text-left transition-colors ${
+                                already
+                                  ? 'text-slate-400 dark:text-slate-600 cursor-not-allowed bg-slate-50 dark:bg-slate-800/30'
+                                  : String(c.id) === selectedCompetition
+                                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
+                                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                              }`}
+                            >
+                              <span className="truncate">{c.title}</span>
+                              {already && (
+                                <Badge className="ml-2 shrink-0 text-xs h-5 px-1.5 bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-500 border border-emerald-200 dark:border-emerald-800">
+                                  {t('myTeam.competitions.alreadyRegistered')}
+                                </Badge>
+                              )}
+                              {!already && String(c.id) === selectedCompetition && (
+                                <Check className="h-3.5 w-3.5 shrink-0 ml-2 text-blue-600" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <motion.div whileTap={{ scale: 0.96 }}>
+                  <Button
+                    onClick={onRegister}
+                    disabled={!selectedCompetition || registeredCompIds.has(Number(selectedCompetition))}
+                    className="gap-2 w-full"
+                  >
+                    <Trophy className="h-4 w-4" /> {t('myTeam.actions.register')}
+                  </Button>
+                </motion.div>
               </div>
             )}
 
@@ -763,18 +857,31 @@ const MyTeam = () => {
                 <div className="divide-y divide-slate-100 dark:divide-slate-800">
                   {registrations.map((r, i) => {
                     const displayStatus = r.status === 'pending' ? (r.center_approval_status || 'pending') : r.status;
+                    const comp = competitions.find(c => c.id === r.competition_id);
                     return (
                       <motion.div key={r.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                        <div className="flex items-center justify-between px-5 py-4">
-                          <div>
-                            <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                              {t('myTeam.competitions.compPrefix')}{r.competition_id}
+                        <div className="flex items-center justify-between px-5 py-4 gap-3">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+                              {comp?.title ?? `${t('myTeam.competitions.compPrefix')}${r.competition_id}`}
                             </p>
                             <p className="text-xs text-slate-400 mt-0.5">{new Date(r.registration_date).toLocaleDateString()}</p>
                           </div>
-                          <Badge variant={displayStatus === 'approved' ? 'default' : displayStatus === 'rejected' ? 'destructive' : 'secondary'}>
-                            {t(`myTeam.competitions.status.${displayStatus}`) || displayStatus}
-                          </Badge>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Badge variant={displayStatus === 'approved' ? 'default' : displayStatus === 'rejected' ? 'destructive' : 'secondary'}>
+                              {t(`myTeam.competitions.status.${displayStatus}`) || displayStatus}
+                            </Badge>
+                            {isOwner && displayStatus === 'pending' && (
+                              <motion.button
+                                whileTap={{ scale: 0.94 }}
+                                onClick={() => onWithdrawRegistration(r.id)}
+                                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:text-red-400 transition-colors"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                                {t('myTeam.competitions.withdraw')}
+                              </motion.button>
+                            )}
+                          </div>
                         </div>
                         {r.status === 'approved' && (
                           <div className="px-5 pb-4">
