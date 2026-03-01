@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge';
 import { useAuth } from '../hooks/useAuth';
 import { useApi } from '../hooks/useApi';
+import { ScrollReveal } from '../components/ui/scroll-reveal';
 
 const Home = () => {
   const { isAuthenticated } = useAuth();
@@ -103,21 +104,28 @@ const Home = () => {
     <div className="flex flex-col gap-20 pb-20">
      
       <section className="relative pt-10 lg:pt-20 text-center space-y-8">
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
         
+        <ScrollReveal>
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium uppercase tracking-wide dark:bg-blue-900/30 dark:text-blue-300 animate-fade-in-up">
           <Bot className="h-3 w-3" aria-hidden="true" />
           {t('home.hero.tagline')}
         </div>
+        </ScrollReveal>
         
+        <ScrollReveal delay={0.08}>
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white max-w-4xl mx-auto leading-tight">
           {t('home.hero.title')}
         </h1>
+        </ScrollReveal>
         
+        <ScrollReveal delay={0.12}>
         <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
           {t('home.hero.description')}
         </p>
+        </ScrollReveal>
         
+        <ScrollReveal delay={0.16}>
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Button asChild size="lg" className="h-12 px-8 text-lg shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 transition-all">
             <Link to="/competitions">
@@ -125,26 +133,30 @@ const Home = () => {
             </Link>
           </Button>
         </div>
+        </ScrollReveal>
 
     
+        <ScrollReveal delay={0.2}>
         <div className="flex justify-center mt-10">
             <div
               ref={robotRef}
-              className="relative flex h-48 w-48 items-center justify-center rounded-[40px] border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white shadow-xl dark:border-slate-700 dark:from-slate-800 dark:to-slate-900"
+              className="relative flex h-48 w-48 items-center justify-center rounded-[40px] border-2 border-blue-200 bg-blue-50 shadow-xl dark:border-slate-700 dark:bg-slate-900"
             >
               <span className="absolute inset-0 rounded-[40px] border border-dashed border-blue-300 dark:border-slate-600" />
               <span className="absolute left-6 top-6 robot-orbit-dot h-4 w-4 rounded-full bg-blue-500 shadow-lg" />
               <span className="absolute right-8 bottom-10 robot-orbit-dot h-2.5 w-2.5 rounded-full bg-blue-400" />
               <span className="absolute top-8 right-6 robot-orbit-dot h-3 w-3 rounded-full bg-blue-300" />
-              <div className="flex h-24 w-24 items-center justify-center rounded-[24px] bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg">
+              <div className="flex h-24 w-24 items-center justify-center rounded-[24px] bg-blue-600 text-white shadow-lg">
                 <Bot className="h-12 w-12" />
               </div>
             </div>
         </div>
+        </ScrollReveal>
       </section>
 
    
-      <section className="border-y border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50 py-12">
+      <ScrollReveal>
+      <section className="border-y border-slate-200 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-900/50 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="space-y-2">
                 <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">50+</div>
@@ -164,6 +176,7 @@ const Home = () => {
             </div>
         </div>
       </section>
+      </ScrollReveal>
 
     
       <section className="space-y-16">
@@ -175,10 +188,11 @@ const Home = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
-          <div className="hidden lg:block absolute top-12 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200 dark:from-blue-900 dark:via-blue-700 dark:to-blue-900 -z-10"></div>
+          <div className="hidden lg:block absolute top-12 left-[10%] right-[10%] h-0.5 bg-blue-200/70 dark:bg-blue-900/70 -z-10"></div>
           
           {steps.map((step, index) => (
-            <div key={index} className="relative group">
+            <ScrollReveal key={index} delay={index * 0.06}>
+            <div className="relative group">
               <div className="flex flex-col items-center text-center space-y-4 p-6 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 <div className={`h-16 w-16 rounded-2xl flex items-center justify-center ${step.color} shadow-sm group-hover:scale-110 transition-transform duration-300`}>
                   <step.icon className="h-8 w-8" />
@@ -189,11 +203,13 @@ const Home = () => {
                 </p>
               </div>
             </div>
+            </ScrollReveal>
           ))}
         </div>
       </section>
 
    
+      <ScrollReveal>
       <section className="space-y-10">
         <div className="text-center max-w-2xl mx-auto space-y-4">
             <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{t('home.latest.title')}</h2>
@@ -247,10 +263,12 @@ const Home = () => {
             </div>
         </div>
       </section>
+      </ScrollReveal>
 
   
-      <section className="relative rounded-3xl overflow-hidden bg-blue-600 text-white py-20 px-6 text-center">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?q=80&w=2069&auto=format&fit=crop')] bg-cover bg-center opacity-10 mix-blend-overlay"></div>
+      <ScrollReveal>
+      <section className="relative rounded-3xl overflow-hidden bg-blue-700 text-white py-20 px-6 text-center border border-blue-800/30">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?q=80&w=2069&auto=format&fit=crop')] bg-cover bg-center opacity-5"></div>
         <div className="relative z-10 max-w-3xl mx-auto space-y-8">
             <h2 className="text-4xl font-bold">{t('home.cta.title')}</h2>
             <p className="text-blue-100 text-lg">{t('home.cta.description')}</p>
@@ -259,6 +277,7 @@ const Home = () => {
             </Button>
         </div>
       </section>
+      </ScrollReveal>
     </div>
   );
 };

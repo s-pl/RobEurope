@@ -94,6 +94,23 @@ a, button, input, select, textarea {
   50%       { opacity: 0.65; }
 }
 
+@keyframes robot-run {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(calc(100vw + 8rem), 0, 0);
+    opacity: 0;
+  }
+}
+
 /* Checkmark draw animation */
 @keyframes draw-check {
   from { stroke-dashoffset: 50; }
@@ -115,6 +132,13 @@ a, button, input, select, textarea {
 .animate-scale-in       { animation: scale-in 0.25s ease-out both; }
 .animate-pop-in         { animation: pop-in 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
 .animate-pulse-soft     { animation: pulse-soft 2s ease-in-out infinite; }
+
+.robot-runner {
+  animation-name: robot-run;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
 
 /* Stagger helpers */
 .stagger-1  { animation-delay: 50ms; }
@@ -175,3 +199,14 @@ a:active { transform: scale(0.98); }
   transition: width 0.25s ease;
 }
 .nav-link-slide:hover::after { width: 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto;
+  }
+
+  .robot-runner {
+    animation: none;
+    display: none;
+  }
+}

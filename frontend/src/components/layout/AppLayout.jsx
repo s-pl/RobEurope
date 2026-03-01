@@ -8,17 +8,21 @@ import { useTranslation } from 'react-i18next';
 import { requestNotificationPermission } from '../../lib/notifications';
 import NotificationTestButton from '../notifications/NotificationTestButton';
 import { isBackendActive } from '../../lib/apiClient';
+import ElectronicsBackdrop3D from './ElectronicsBackdrop3D';
+import OnboardingTour from './OnboardingTour';
 const AppLayout = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const isAdmin = user?.role === 'super_admin';
+  const isAuthenticated = Boolean(user);
 
   useEffect(() => {
     requestNotificationPermission();
   }, []);
 
   return (
-    <div className={`min-h-screen bg-neutral-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50 ${isAdmin ? 'border-t-4 border-red-600' : ''}`}>
+    <div className={`relative isolate min-h-screen bg-neutral-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50 ${isAdmin ? 'border-t-4 border-red-600' : ''}`}>
+      <ElectronicsBackdrop3D />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-900 focus:shadow dark:focus:bg-slate-900 dark:focus:text-slate-50"
@@ -36,7 +40,7 @@ const AppLayout = () => {
         </div>
       )}
 
-      <div className="flex min-h-screen">
+      <div className="relative z-10 flex min-h-screen">
         <Sidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <div className="lg:hidden">
@@ -53,6 +57,7 @@ const AppLayout = () => {
           <Footer />
         </div>
       </div>
+      <OnboardingTour isAuthenticated={isAuthenticated} />
     </div>
   );
 };

@@ -116,6 +116,7 @@ const Register = () => {
       }
 
       await register(payload);
+      localStorage.setItem('robeurope_tour_force', '1');
       navigate('/', { replace: true });
     } catch (err) {
       setError(err.message || t('profile.feedback.error'));
