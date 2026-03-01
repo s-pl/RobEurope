@@ -93,6 +93,10 @@ const cookieDomain = isProduction
   ? (process.env.COOKIE_DOMAIN || `.${(process.env.TEAM_DOMAIN || 'robeurope.samuelponce.es')}`)
   : undefined; // en dev no forzamos dominio (localhost)
 
+if (isProduction && !process.env.SESSION_SECRET) {
+  logger.error('CRITICAL: SESSION_SECRET env var is not set in production. Using an insecure default — set SESSION_SECRET immediately.');
+}
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'Session123456789100000',
   store: sessionStore,
