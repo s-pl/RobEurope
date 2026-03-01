@@ -6,6 +6,8 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
+import { ConfirmDialog } from '../../components/ui/confirm-dialog';
+import { ReasonDialog } from '../../components/ui/reason-dialog';
 import { Building2, Check, X, Clock, Edit, Trash2, Plus, Search, Users } from 'lucide-react';
 
 const AdminCenters = () => {
@@ -30,6 +32,11 @@ const AdminCenters = () => {
   const [myCenterUsers, setMyCenterUsers] = useState([]);
   const [myCenterRegistrations, setMyCenterRegistrations] = useState([]);
   const [centerLoading, setCenterLoading] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, payload: null });
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [reasonDialog, setReasonDialog] = useState({ open: false, type: null, targetId: null });
+  const [reasonInput, setReasonInput] = useState('');
+  const [reasonLoading, setReasonLoading] = useState(false);
 
   const isSuperAdmin = user?.role === 'super_admin';
   const isCenterAdmin = user?.role === 'center_admin';
@@ -75,9 +82,7 @@ const AdminCenters = () => {
     }
   };
 
-  const handleCenterRejectRegistration = async (registrationId) => {
-    const reason = prompt(t('admin.centers.centerRejectReason') || 'Motivo del rechazo:');
-    if (reason === null) return;
+  const handleCenterRejectRegistration = async (registrationId, reason) => {
     try {
       await api(`/registrations/${registrationId}/center-reject`, {
         method: 'POST',
@@ -90,7 +95,6 @@ const AdminCenters = () => {
   };
 
   const handleRemoveCenterUser = async (userId) => {
-    if (!confirm(t('admin.centers.confirmRemoveUser') || '¿Eliminar este alumno del centro?')) return;
     try {
       await api(`/educational-centers/${user.educational_center_id}/users/${userId}`, { method: 'DELETE' });
       loadMyCenterData();
@@ -100,7 +104,6 @@ const AdminCenters = () => {
   };
 
   const handleRemoveCenterTeam = async (teamId) => {
-    if (!confirm(t('admin.centers.confirmRemoveTeam') || '¿Eliminar este equipo del centro?')) return;
     try {
       await api(`/educational-centers/${user.educational_center_id}/teams/${teamId}`, { method: 'DELETE' });
       loadMyCenterData();
@@ -137,9 +140,7 @@ const AdminCenters = () => {
     }
   };
 
-  const handleReject = async (centerId) => {
-    const reason = prompt(t('admin.centers.rejectReason') || 'Motivo del rechazo:');
-    if (reason === null) return;
+  const handleReject = async (centerId, reason) => {
     try {
       await api(`/educational-centers/${centerId}/reject`, { 
         method: 'PATCH',
@@ -153,7 +154,6 @@ const AdminCenters = () => {
   };
 
   const handleDelete = async (centerId) => {
-    if (!confirm(t('admin.centers.confirmDelete') || '¿Eliminar este centro?')) return;
     try {
       await api(`/educational-centers/${centerId}`, { method: 'DELETE' });
       setFeedback({ type: 'success', message: t('admin.centers.deleted') || 'Centro eliminado' });
@@ -208,6 +208,85 @@ const AdminCenters = () => {
     c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.city?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const openConfirm = (type, payload) => {
+    setConfirmDialog({ open: true, type, payload });
+  };
+
+  const confirmConfig = (() => {
+    switch (confirmDialog.type) {
+      case 'remove-user':
+        return {
+          title: t('actions.delete') || 'Eliminar',
+          description: t('admin.centers.confirmRemoveUser') || '¿Eliminar este alumno del centro?',
+        };
+      case 'remove-team':
+        return {
+          title: t('actions.delete') || 'Eliminar',
+          description: t('admin.centers.confirmRemoveTeam') || '¿Eliminar este equipo del centro?',
+        };
+      case 'delete-center':
+        return {
+          title: t('actions.delete') || 'Eliminar',
+          description: t('admin.centers.confirmDelete') || '¿Eliminar este centro?',
+        };
+      default:
+        return { title: '', description: '' };
+    }
+  })();
+
+  const onConfirmAction = async () => {
+    if (!confirmDialog.type) return;
+    setConfirmLoading(true);
+    try {
+      if (confirmDialog.type === 'remove-user') await handleRemoveCenterUser(confirmDialog.payload);
+      if (confirmDialog.type === 'remove-team') await handleRemoveCenterTeam(confirmDialog.payload);
+      if (confirmDialog.type === 'delete-center') await handleDelete(confirmDialog.payload);
+      setConfirmDialog({ open: false, type: null, payload: null });
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
+
+  const openReasonDialog = (type, targetId) => {
+    setReasonDialog({ open: true, type, targetId });
+    setReasonInput('');
+  };
+
+  const reasonConfig = (() => {
+    switch (reasonDialog.type) {
+      case 'reject-registration':
+        return {
+          title: t('common.reject') || 'Rechazar',
+          placeholder: t('admin.centers.centerRejectReason') || 'Motivo del rechazo:',
+        };
+      case 'reject-center':
+        return {
+          title: t('common.reject') || 'Rechazar',
+          placeholder: t('admin.centers.rejectReason') || 'Motivo del rechazo:',
+        };
+      default:
+        return { title: '', placeholder: '' };
+    }
+  })();
+
+  const onConfirmReason = async () => {
+    const reason = reasonInput.trim();
+    if (!reason || !reasonDialog.type || !reasonDialog.targetId) return;
+    setReasonLoading(true);
+    try {
+      if (reasonDialog.type === 'reject-registration') {
+        await handleCenterRejectRegistration(reasonDialog.targetId, reason);
+      }
+      if (reasonDialog.type === 'reject-center') {
+        await handleReject(reasonDialog.targetId, reason);
+      }
+      setReasonDialog({ open: false, type: null, targetId: null });
+      setReasonInput('');
+    } finally {
+      setReasonLoading(false);
+    }
+  };
 
   const getStatusBadge = (status) => {
     const badges = {
@@ -280,7 +359,7 @@ const AdminCenters = () => {
                       <Button size="sm" onClick={() => handleCenterApproveRegistration(reg.id)}>
                         {t('common.approve') || 'Aprobar'}
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleCenterRejectRegistration(reg.id)}>
+                      <Button size="sm" variant="outline" onClick={() => openReasonDialog('reject-registration', reg.id)}>
                         {t('common.reject') || 'Rechazar'}
                       </Button>
                     </div>
@@ -313,7 +392,7 @@ const AdminCenters = () => {
                         </p>
                         <p className="text-xs text-slate-500 truncate">{centerUser.email}</p>
                       </div>
-                      <Button size="sm" variant="outline" onClick={() => handleRemoveCenterUser(centerUser.id)}>
+                      <Button size="sm" variant="outline" onClick={() => openConfirm('remove-user', centerUser.id)}>
                         <Trash2 className="h-4 w-4 mr-1" />
                         {t('actions.delete') || 'Eliminar'}
                       </Button>
@@ -343,7 +422,7 @@ const AdminCenters = () => {
                         <p className="font-medium text-slate-900 dark:text-slate-100 truncate">{team.name}</p>
                         <p className="text-xs text-slate-500 truncate">{team.city || '—'}</p>
                       </div>
-                      <Button size="sm" variant="outline" onClick={() => handleRemoveCenterTeam(team.id)}>
+                      <Button size="sm" variant="outline" onClick={() => openConfirm('remove-team', team.id)}>
                         <Trash2 className="h-4 w-4 mr-1" />
                         {t('actions.delete') || 'Eliminar'}
                       </Button>
@@ -471,7 +550,7 @@ const AdminCenters = () => {
                       <Button size="sm" variant="outline" className="text-green-600" onClick={() => handleApprove(center.id)}>
                         <Check className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" className="text-red-600" onClick={() => handleReject(center.id)}>
+                      <Button size="sm" variant="outline" className="text-red-600" onClick={() => openReasonDialog('reject-center', center.id)}>
                         <X className="h-4 w-4" />
                       </Button>
                     </>
@@ -480,7 +559,7 @@ const AdminCenters = () => {
                     <Edit className="h-4 w-4" />
                   </Button>
                   {isSuperAdmin && (
-                    <Button size="sm" variant="outline" className="text-red-600" onClick={() => handleDelete(center.id)}>
+                    <Button size="sm" variant="outline" className="text-red-600" onClick={() => openConfirm('delete-center', center.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   )}
@@ -490,6 +569,36 @@ const AdminCenters = () => {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => {
+          setConfirmDialog(prev => (open ? prev : { open: false, type: null, payload: null }));
+        }}
+        title={confirmConfig.title}
+        description={confirmConfig.description}
+        confirmLabel={t('actions.delete') || 'Eliminar'}
+        cancelLabel={t('actions.cancel') || 'Cancelar'}
+        onConfirm={onConfirmAction}
+        loading={confirmLoading}
+      />
+
+      <ReasonDialog
+        open={reasonDialog.open}
+        onOpenChange={(open) => {
+          setReasonDialog(prev => (open ? prev : { open: false, type: null, targetId: null }));
+          if (!open) setReasonInput('');
+        }}
+        title={reasonConfig.title}
+        description={reasonConfig.placeholder}
+        placeholder={reasonConfig.placeholder}
+        value={reasonInput}
+        onValueChange={setReasonInput}
+        confirmLabel={t('common.reject') || 'Rechazar'}
+        cancelLabel={t('common.cancel') || 'Cancelar'}
+        onConfirm={onConfirmReason}
+        loading={reasonLoading}
+      />
     </div>
   );
 };

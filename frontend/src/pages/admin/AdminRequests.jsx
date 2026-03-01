@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useApi } from '../../hooks/useApi';
 import { Button } from '../../components/ui/button';
 import { Card, CardHeader, CardTitle } from '../../components/ui/card';
+import { ReasonDialog } from '../../components/ui/reason-dialog';
 import { Settings, Check, X, Clock, User, Building2, Mail } from 'lucide-react';
 
 const AdminRequests = () => {
@@ -12,6 +13,10 @@ const AdminRequests = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('pending');
   const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [requestToRejectId, setRequestToRejectId] = useState(null);
+  const [rejecting, setRejecting] = useState(false);
 
   useEffect(() => {
     loadRequests();
@@ -39,18 +44,29 @@ const AdminRequests = () => {
     }
   };
 
-  const handleReject = async (requestId) => {
-    const reason = prompt(t('admin.requests.rejectReason') || 'Motivo del rechazo:');
-    if (reason === null) return;
+  const handleReject = (requestId) => {
+    setRequestToRejectId(requestId);
+    setRejectReason('');
+    setRejectDialogOpen(true);
+  };
+
+  const confirmReject = async () => {
+    if (!requestToRejectId || !rejectReason.trim()) return;
+    setRejecting(true);
     try {
-      await api(`/admin/center-requests/${requestId}/reject`, {
+      await api(`/admin/center-requests/${requestToRejectId}/reject`, {
         method: 'PATCH',
-        body: { reason }
+        body: { reason: rejectReason.trim() }
       });
       setFeedback({ type: 'success', message: t('admin.requests.rejected') || 'Solicitud rechazada' });
       loadRequests();
     } catch (err) {
       setFeedback({ type: 'error', message: err.message });
+    } finally {
+      setRejecting(false);
+      setRejectDialogOpen(false);
+      setRequestToRejectId(null);
+      setRejectReason('');
     }
   };
 
@@ -113,6 +129,26 @@ const AdminRequests = () => {
           </Button>
         ))}
       </div>
+
+      <ReasonDialog
+        open={rejectDialogOpen}
+        onOpenChange={(open) => {
+          setRejectDialogOpen(open);
+          if (!open) {
+            setRequestToRejectId(null);
+            setRejectReason('');
+          }
+        }}
+        title={t('common.reject') || 'Rechazar'}
+        description={t('admin.requests.rejectReason') || 'Motivo del rechazo:'}
+        placeholder={t('admin.requests.rejectReason') || 'Motivo del rechazo:'}
+        value={rejectReason}
+        onValueChange={setRejectReason}
+        confirmLabel={t('common.reject') || 'Rechazar'}
+        cancelLabel={t('common.cancel') || 'Cancelar'}
+        onConfirm={confirmReject}
+        loading={rejecting}
+      />
 
       {/* Requests List */}
       {loading ? (

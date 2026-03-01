@@ -8,6 +8,7 @@ import { Button } from '../components/ui/button';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { PageHeader } from '../components/ui/PageHeader';
+import { ConfirmDialog } from '../components/ui/confirm-dialog';
 import { resolveMediaUrl } from '../lib/apiClient';
 
 const StarRating = ({ value, onChange, readonly = false }) => (
@@ -71,6 +72,8 @@ const Feedback = () => {
   const [reviewSuccess, setReviewSuccess] = useState(false);
   const [reviewError, setReviewError] = useState('');
   const [myReview, setMyReview] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     api('/contact/reviews').then(data => {
@@ -100,12 +103,16 @@ const Feedback = () => {
   };
 
   const handleDeleteReview = async () => {
-    if (!confirm(t('contact.reviews.confirmDelete'))) return;
+    setDeleteLoading(true);
     try {
       await api('/contact/reviews/me', { method: 'DELETE' });
       setReviews(prev => prev.filter(r => r.author?.id !== user.id));
       setMyReview(null);
     } catch { /* handled */ }
+    finally {
+      setDeleteLoading(false);
+      setDeleteDialogOpen(false);
+    }
   };
 
   return (
@@ -143,7 +150,7 @@ const Feedback = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl text-sm text-emerald-700 dark:text-emerald-400">
           <Star className="h-4 w-4 fill-emerald-500 text-emerald-500 shrink-0" />
           <span className="flex-1">{t('contact.reviews.alreadyReviewed')}</span>
-          <button onClick={handleDeleteReview} className="text-xs underline opacity-70 hover:opacity-100">{t('contact.reviews.deleteReview')}</button>
+          <button onClick={() => setDeleteDialogOpen(true)} className="text-xs underline opacity-70 hover:opacity-100">{t('contact.reviews.deleteReview')}</button>
         </motion.div>
       )}
 
@@ -164,6 +171,17 @@ const Feedback = () => {
           </AnimatePresence>
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title={t('contact.reviews.deleteReview')}
+        description={t('contact.reviews.confirmDelete')}
+        confirmLabel={t('actions.delete')}
+        cancelLabel={t('actions.cancel')}
+        onConfirm={handleDeleteReview}
+        loading={deleteLoading}
+      />
     </div>
   );
 };

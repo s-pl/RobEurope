@@ -5,6 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { RichTextEditor } from '../../components/ui/RichTextEditor';
+import { ConfirmDialog } from '../../components/ui/confirm-dialog';
 import { 
   FileText, Search, Edit, Trash2, Eye, Pin, PinOff, Plus, X, Save, Image
 } from 'lucide-react';
@@ -26,6 +27,9 @@ const AdminPosts = () => {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDeleteId, setPostToDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadPosts();
@@ -90,14 +94,23 @@ const AdminPosts = () => {
     }
   };
 
-  const handleDelete = async (postId) => {
-    if (!confirm(t('admin.posts.confirmDelete') || '¿Eliminar este post?')) return;
-    
+  const handleDelete = (postId) => {
+    setPostToDeleteId(postId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!postToDeleteId) return;
+    setDeleting(true);
     try {
-      await api(`/posts/${postId}`, { method: 'DELETE' });
+      await api(`/posts/${postToDeleteId}`, { method: 'DELETE' });
       loadPosts();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+      setPostToDeleteId(null);
     }
   };
 
@@ -318,6 +331,20 @@ const AdminPosts = () => {
           </table>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) setPostToDeleteId(null);
+        }}
+        title={t('common.delete') || 'Eliminar'}
+        description={t('admin.posts.confirmDelete') || '¿Eliminar este post?'}
+        confirmLabel={t('common.delete') || 'Eliminar'}
+        cancelLabel={t('common.cancel') || 'Cancelar'}
+        onConfirm={confirmDelete}
+        loading={deleting}
+      />
     </div>
   );
 };
