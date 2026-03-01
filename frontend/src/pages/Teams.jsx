@@ -17,6 +17,7 @@ import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Textarea } from '../components/ui/textarea';
 import { CountrySelect } from '../components/ui/CountrySelect';
+import { ConfirmDialog } from '../components/ui/confirm-dialog';
 
 import { PageHeader } from '../components/ui/PageHeader';
 
@@ -183,6 +184,8 @@ const Teams = () => {
   const [requestsOpen, setRequestsOpen] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createSuccess, setCreateSuccess] = useState(false);
+  const [cancelRequestDialogOpen, setCancelRequestDialogOpen] = useState(false);
+  const [requestToCancelId, setRequestToCancelId] = useState(null);
   const [form, setForm] = useState({ name: '', country_id: '', description: '', website_url: '' });
 
   const reload = async () => {
@@ -236,14 +239,21 @@ const Teams = () => {
     }).catch(() => {});
   }, [isAuthenticated]); // eslint-disable-line
 
-  const onCancelRequest = async (id) => {
-    if (!confirm(t('myTeam.joinRequests.confirmCancel'))) return;
-    setCancellingId(id);
+  const onCancelRequest = (id) => {
+    setRequestToCancelId(id);
+    setCancelRequestDialogOpen(true);
+  };
+
+  const onConfirmCancelRequest = async () => {
+    if (!requestToCancelId) return;
+    setCancellingId(requestToCancelId);
     try {
-      await cancelRequest(id);
-      setMyJoinRequests(prev => prev.filter(r => r.id !== id));
+      await cancelRequest(requestToCancelId);
+      setMyJoinRequests(prev => prev.filter(r => r.id !== requestToCancelId));
     } catch { /* error handled by api */ } finally {
       setCancellingId(null);
+      setCancelRequestDialogOpen(false);
+      setRequestToCancelId(null);
     }
   };
 
@@ -640,6 +650,21 @@ const Teams = () => {
           </motion.div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={cancelRequestDialogOpen}
+        onOpenChange={(open) => {
+          setCancelRequestDialogOpen(open);
+          if (!open) setRequestToCancelId(null);
+        }}
+        title={t('myTeam.joinRequests.cancel')}
+        description={t('myTeam.joinRequests.confirmCancel')}
+        confirmLabel={t('myTeam.joinRequests.cancel')}
+        cancelLabel={t('actions.cancel')}
+        onConfirm={onConfirmCancelRequest}
+        loading={Boolean(requestToCancelId) && cancellingId === requestToCancelId}
+        confirmVariant="destructive"
+      />
     </div>
   );
 };

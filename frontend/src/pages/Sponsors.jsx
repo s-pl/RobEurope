@@ -8,6 +8,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { Badge } from '../components/ui/badge';
+import { ConfirmDialog } from '../components/ui/confirm-dialog';
 import { Plus, Edit, Trash2, ExternalLink, Heart } from 'lucide-react';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Alert, AlertDescription } from '../components/ui/alert';
@@ -23,6 +24,9 @@ const Sponsors = () => {
   const [error, setError] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSponsor, setEditingSponsor] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [sponsorToDeleteId, setSponsorToDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     logo_url: '',
@@ -71,14 +75,23 @@ const Sponsors = () => {
     setDialogOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este sponsor?')) {
-      try {
-        await remove(id);
-        await loadSponsors();
-      } catch (err) {
-        setError(err.message || 'Error deleting sponsor');
-      }
+  const handleDelete = (id) => {
+    setSponsorToDeleteId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!sponsorToDeleteId) return;
+    setDeleting(true);
+    try {
+      await remove(sponsorToDeleteId);
+      await loadSponsors();
+    } catch (err) {
+      setError(err.message || 'Error deleting sponsor');
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+      setSponsorToDeleteId(null);
     }
   };
 
@@ -275,6 +288,20 @@ const Sponsors = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) setSponsorToDeleteId(null);
+        }}
+        title={t('actions.delete') || 'Eliminar'}
+        description={t('sponsors.confirmDelete') || '¿Estás seguro de que quieres eliminar este sponsor?'}
+        confirmLabel={t('actions.delete') || 'Eliminar'}
+        cancelLabel={t('actions.cancel') || 'Cancelar'}
+        onConfirm={confirmDelete}
+        loading={deleting}
+      />
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { apiRequest, resolveMediaUrl } from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
 import { PageHeader } from '../components/ui/PageHeader';
+import { ReasonDialog } from '../components/ui/reason-dialog';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Skeleton } from '../components/ui/skeleton';
 import { Badge } from '../components/ui/badge';
@@ -24,6 +25,10 @@ const EducationalCenters = () => {
     const [selectedStatus, setSelectedStatus] = useState('');
     const [status, setStatus] = useState({ loading: true, error: '' });
     const [createStatus, setCreateStatus] = useState({ loading: false, error: '', ok: '' });
+    const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+    const [rejectReason, setRejectReason] = useState('');
+    const [centerToRejectId, setCenterToRejectId] = useState(null);
+    const [rejecting, setRejecting] = useState(false);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [form, setForm] = useState({ 
         name: '', 
@@ -120,19 +125,29 @@ const EducationalCenters = () => {
         }
     };
 
-    const handleReject = async (id) => {
-        const reason = window.prompt(t('centerApproval.reason.placeholder'));
-        if (reason === null) return;
-        
+    const handleReject = (id) => {
+        setCenterToRejectId(id);
+        setRejectReason('');
+        setRejectDialogOpen(true);
+    };
+
+    const confirmReject = async () => {
+        if (!centerToRejectId || !rejectReason.trim()) return;
+        setRejecting(true);
         try {
-            await apiRequest(`/educational-centers/${id}/reject`, { 
+            await apiRequest(`/educational-centers/${centerToRejectId}/reject`, { 
                 method: 'PATCH',
-                body: JSON.stringify({ reason }),
+                body: JSON.stringify({ reason: rejectReason.trim() }),
                 headers: { 'Content-Type': 'application/json' }
             });
             load();
         } catch (e) {
             console.error('Error rejecting center:', e);
+        } finally {
+            setRejecting(false);
+            setRejectDialogOpen(false);
+            setCenterToRejectId(null);
+            setRejectReason('');
         }
     };
 
@@ -410,6 +425,26 @@ const EducationalCenters = () => {
                     </div>
                 )}
             </section>
+
+            <ReasonDialog
+                open={rejectDialogOpen}
+                onOpenChange={(open) => {
+                    setRejectDialogOpen(open);
+                    if (!open) {
+                        setCenterToRejectId(null);
+                        setRejectReason('');
+                    }
+                }}
+                title={t('educationalCenters.actions.reject') || 'Rechazar'}
+                description={t('centerApproval.reason.placeholder')}
+                placeholder={t('centerApproval.reason.placeholder')}
+                value={rejectReason}
+                onValueChange={setRejectReason}
+                confirmLabel={t('educationalCenters.actions.reject') || 'Rechazar'}
+                cancelLabel={t('actions.cancel') || 'Cancelar'}
+                onConfirm={confirmReject}
+                loading={rejecting}
+            />
         </div>
     );
 };

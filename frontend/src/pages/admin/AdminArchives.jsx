@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardHeader, CardTitle } from '../../components/ui/card';
+import { ConfirmDialog } from '../../components/ui/confirm-dialog';
 import { Archive, Upload, Trash2, Edit, Eye, EyeOff, Search, Plus, FileText, Image, Video, File } from 'lucide-react';
 
 const AdminArchives = () => {
@@ -29,6 +30,9 @@ const AdminArchives = () => {
     year: new Date().getFullYear()
   });
   const [file, setFile] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [archiveToDeleteId, setArchiveToDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const isSuperAdmin = user?.role === 'super_admin';
 
@@ -59,14 +63,24 @@ const AdminArchives = () => {
     }
   };
 
-  const handleDelete = async (archiveId) => {
-    if (!confirm(t('admin.archives.confirmDelete') || '¿Eliminar este archivo?')) return;
+  const handleDelete = (archiveId) => {
+    setArchiveToDeleteId(archiveId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!archiveToDeleteId) return;
+    setDeleting(true);
     try {
-      await api(`/archives/${archiveId}`, { method: 'DELETE' });
+      await api(`/archives/${archiveToDeleteId}`, { method: 'DELETE' });
       setFeedback({ type: 'success', message: t('admin.archives.deleted') || 'Archivo eliminado' });
       loadArchives();
     } catch (err) {
       setFeedback({ type: 'error', message: err.message });
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+      setArchiveToDeleteId(null);
     }
   };
 
@@ -360,6 +374,20 @@ const AdminArchives = () => {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) setArchiveToDeleteId(null);
+        }}
+        title={t('common.delete') || 'Eliminar'}
+        description={t('admin.archives.confirmDelete') || '¿Eliminar este archivo?'}
+        confirmLabel={t('common.delete') || 'Eliminar'}
+        cancelLabel={t('common.cancel') || 'Cancelar'}
+        onConfirm={confirmDelete}
+        loading={deleting}
+      />
     </div>
   );
 };

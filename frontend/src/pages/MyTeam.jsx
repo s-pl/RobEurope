@@ -18,6 +18,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Skeleton } from '../components/ui/skeleton';
+import { ConfirmDialog } from '../components/ui/confirm-dialog';
 import {
   Users, Settings, Trophy, Info,
   LogOut, Trash2, Check, X, Video,
@@ -296,6 +297,8 @@ const MyTeam = () => {
   const [candidates, setCandidates] = useState([]);
   const [emailInvite, setEmailInvite] = useState('');
   const [saving, setSaving] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, payload: null });
+  const [confirmLoading, setConfirmLoading] = useState(false);
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast(t => ({ ...t, show: false })), 3500);
@@ -404,7 +407,6 @@ const MyTeam = () => {
   };
 
   const onRemoveMember = async (memberId) => {
-    if (!confirm(t('myTeam.feedback.confirmRemoveMember'))) return;
     try {
       await removeMember(memberId);
       setMembers(prev => prev.filter(m => m.id !== memberId));
@@ -415,7 +417,6 @@ const MyTeam = () => {
   };
 
   const onLeave = async () => {
-    if (!confirm(t('myTeam.feedback.confirmLeave'))) return;
     try {
       await leave();
       setTeam(null); setMembers([]); setRegistrations([]);
@@ -428,7 +429,6 @@ const MyTeam = () => {
   };
 
   const onDelete = async () => {
-    if (!confirm(t('myTeam.feedback.confirmDelete'))) return;
     try {
       await remove(team.id);
       setTeam(null); setStatus({ ownedTeamId: null, memberOfTeamId: null });
@@ -459,7 +459,6 @@ const MyTeam = () => {
   };
 
   const onWithdrawRegistration = async (id) => {
-    if (!confirm(t('myTeam.competitions.confirmWithdraw'))) return;
     try {
       await removeRegistration(id);
       setRegistrations(prev => prev.filter(r => r.id !== id));
@@ -483,6 +482,66 @@ const MyTeam = () => {
       showToast(err.message, 'error');
     }
   };
+
+  const openConfirmDialog = (type, payload = null) => {
+    setConfirmDialog({ open: true, type, payload });
+  };
+
+  const closeConfirmDialog = () => {
+    if (confirmLoading) return;
+    setConfirmDialog({ open: false, type: null, payload: null });
+  };
+
+  const onConfirmDialogAction = async () => {
+    const { type, payload } = confirmDialog;
+    if (!type) return;
+
+    setConfirmLoading(true);
+    try {
+      if (type === 'remove-member') await onRemoveMember(payload);
+      if (type === 'leave-team') await onLeave();
+      if (type === 'delete-team') await onDelete();
+      if (type === 'withdraw-registration') await onWithdrawRegistration(payload);
+      setConfirmDialog({ open: false, type: null, payload: null });
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
+
+  const confirmDialogConfig = (() => {
+    switch (confirmDialog.type) {
+      case 'remove-member':
+        return {
+          title: t('myTeam.members.title'),
+          description: t('myTeam.feedback.confirmRemoveMember'),
+          confirmLabel: t('actions.delete'),
+        };
+      case 'leave-team':
+        return {
+          title: t('myTeam.actions.leave'),
+          description: t('myTeam.feedback.confirmLeave'),
+          confirmLabel: t('myTeam.actions.leave'),
+        };
+      case 'delete-team':
+        return {
+          title: t('myTeam.actions.delete'),
+          description: t('myTeam.feedback.confirmDelete'),
+          confirmLabel: t('myTeam.actions.delete'),
+        };
+      case 'withdraw-registration':
+        return {
+          title: t('myTeam.competitions.withdraw'),
+          description: t('myTeam.competitions.confirmWithdraw'),
+          confirmLabel: t('myTeam.competitions.withdraw'),
+        };
+      default:
+        return {
+          title: '',
+          description: '',
+          confirmLabel: t('actions.delete'),
+        };
+    }
+  })();
 
   // ── Render: Not loaded ────────────────────────────────────────────────────
   if (!loaded) {
@@ -578,7 +637,7 @@ const MyTeam = () => {
                 </Button>
               )}
               {!isOwner && (
-                <Button variant="outline" size="sm" onClick={onLeave} className="gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 dark:border-red-800">
+                <Button variant="outline" size="sm" onClick={() => openConfirmDialog('leave-team')} className="gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 dark:border-red-800">
                   <LogOut className="h-4 w-4" /> {t('myTeam.actions.leave')}
                 </Button>
               )}
@@ -697,7 +756,7 @@ const MyTeam = () => {
                       </div>
                     </div>
                     {isOwner && m.role !== 'owner' && (
-                      <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 h-7 px-2" onClick={() => onRemoveMember(m.id)}>
+                      <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 h-7 px-2" onClick={() => openConfirmDialog('remove-member', m.id)}>
                         <X className="h-3.5 w-3.5" />
                       </Button>
                     )}
@@ -892,7 +951,7 @@ const MyTeam = () => {
                             {isOwner && displayStatus === 'pending' && (
                               <motion.button
                                 whileTap={{ scale: 0.94 }}
-                                onClick={() => onWithdrawRegistration(r.id)}
+                                onClick={() => openConfirmDialog('withdraw-registration', r.id)}
                                 className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:text-red-400 transition-colors"
                               >
                                 <X className="h-3.5 w-3.5" />
@@ -1018,7 +1077,7 @@ const MyTeam = () => {
                 <div className="p-6 flex items-center justify-between gap-4">
                   <p className="text-sm text-slate-600 dark:text-slate-400">{t('myTeam.settings.deleteWarning')}</p>
                   <motion.div whileTap={{ scale: 0.95 }}>
-                    <Button variant="destructive" onClick={onDelete} className="gap-2 shrink-0">
+                    <Button variant="destructive" onClick={() => openConfirmDialog('delete-team')} className="gap-2 shrink-0">
                       <Trash2 className="h-4 w-4" /> {t('myTeam.actions.delete')}
                     </Button>
                   </motion.div>
@@ -1028,6 +1087,20 @@ const MyTeam = () => {
           </TabsContent>
         )}
       </Tabs>
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => {
+          if (!open) closeConfirmDialog();
+        }}
+        title={confirmDialogConfig.title}
+        description={confirmDialogConfig.description}
+        confirmLabel={confirmDialogConfig.confirmLabel}
+        cancelLabel={t('actions.cancel')}
+        onConfirm={onConfirmDialogAction}
+        loading={confirmLoading}
+        confirmVariant="destructive"
+      />
     </motion.div>
   );
 };

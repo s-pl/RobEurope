@@ -16,6 +16,7 @@ import { useToast } from '../hooks/useToast';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { RichTextEditor } from '../components/ui/RichTextEditor';
+import { ConfirmDialog } from '../components/ui/confirm-dialog';
 import DOMPurify from 'dompurify';
 import { useSocket } from '../context/SocketContext';
 
@@ -43,6 +44,9 @@ const Posts = () => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDeleteId, setPostToDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -138,14 +142,24 @@ const Posts = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm(t('posts.confirmDelete'))) return;
+  const handleDelete = (id) => {
+    setPostToDeleteId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!postToDeleteId) return;
+    setDeleting(true);
     try {
-      await api(`/posts/${id}`, { method: 'DELETE' });
-      setPosts(posts.filter(p => p.id !== id));
+      await api(`/posts/${postToDeleteId}`, { method: 'DELETE' });
+      setPosts(prev => prev.filter(p => p.id !== postToDeleteId));
       toast({ title: t('posts.deleted'), variant: 'success' });
     } catch (error) {
       toast({ title: t('posts.error'), description: error.message, variant: 'destructive' });
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+      setPostToDeleteId(null);
     }
   };
 
@@ -494,6 +508,20 @@ const Posts = () => {
             )}
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) setPostToDeleteId(null);
+        }}
+        title={t('common.delete') || 'Eliminar'}
+        description={t('posts.confirmDelete')}
+        confirmLabel={t('common.delete') || 'Eliminar'}
+        cancelLabel={t('common.cancel') || 'Cancelar'}
+        onConfirm={confirmDelete}
+        loading={deleting}
+      />
     </div>
   );
 };
