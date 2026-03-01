@@ -36,23 +36,47 @@ jobs:
               -o StrictHostKeyChecking=no \
               -o ConnectTimeout=15 \
               "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
-              'set -e &&
-               cd /opt/robeurope &&
-               echo "[deploy] git pull..." &&
-               git pull origin main &&
-               echo "[deploy] escribiendo deploy-info.json..." &&
-               echo "{\"deployed_at\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"commit\":\"$(git rev-parse HEAD)\",\"branch\":\"$(git rev-parse --abbrev-ref HEAD)\",\"triggered_by\":\"github-actions\"}" > backend/deploy-info.json &&
-               echo "[deploy] docker compose build (prod)..." &&
-               sudo docker compose -f /opt/robeurope/docker-compose.yml --profile prod build &&
-               echo "[deploy] docker compose up (prod)..." &&
-               sudo docker compose -f /opt/robeurope/docker-compose.yml --profile prod up -d &&
-               echo "[deploy] esperando backend..." &&
-               sleep 5 &&
-               echo "[deploy] containers activos:" &&
-               sudo docker compose -f /opt/robeurope/docker-compose.yml --profile prod ps &&
-               echo "[deploy] migraciones..." &&
-               (sudo docker compose -f /opt/robeurope/docker-compose.yml --profile prod exec -T backend sh -c "node scripts/run-migrations.js" || true) &&
-               echo "[deploy] ✓ Deploy completado"'
+              "bash -s" << 'REMOTE_SCRIPT'
+          set -euo pipefail
+
+          DEPLOY_PATH="/opt/robeurope"
+          cd "$DEPLOY_PATH"
+
+          echo "[deploy] git pull..."
+          git pull origin main
+
+          REPO_ROOT="$(git rev-parse --show-toplevel)"
+          COMPOSE_FILE="$(find "$REPO_ROOT" -maxdepth 2 -type f \( -name docker-compose.yml -o -name docker-compose.yaml \) | head -n 1)"
+
+          if [[ -z "$COMPOSE_FILE" ]]; then
+            echo "[deploy][error] No se encontró docker-compose.yml/docker-compose.yaml en $REPO_ROOT"
+            echo "[deploy][debug] Árbol del repo (nivel 2):"
+            find "$REPO_ROOT" -maxdepth 2 -type f | sed "s|$REPO_ROOT/||" | sort
+            exit 1
+          fi
+
+          echo "[deploy] compose file: $COMPOSE_FILE"
+
+          echo "[deploy] escribiendo deploy-info.json..."
+          echo "{\"deployed_at\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"commit\":\"$(git rev-parse HEAD)\",\"branch\":\"$(git rev-parse --abbrev-ref HEAD)\",\"triggered_by\":\"github-actions\"}" > "$REPO_ROOT/backend/deploy-info.json"
+
+          echo "[deploy] docker compose build (prod)..."
+          sudo docker compose -f "$COMPOSE_FILE" --profile prod build
+
+          echo "[deploy] docker compose up (prod)..."
+          sudo docker compose -f "$COMPOSE_FILE" --profile prod up -d
+
+          echo "[deploy] esperando backend..."
+          sleep 5
+
+          echo "[deploy] containers activos:"
+          sudo docker compose -f "$COMPOSE_FILE" --profile prod ps
+
+          echo "[deploy] migraciones..."
+          sudo docker compose -f "$COMPOSE_FILE" --profile prod exec -T backend sh -c "node scripts/run-migrations.js" || true
+
+          echo "[deploy] ✓ Deploy completado"
+          REMOTE_SCRIPT
 
       # ── 4. Limpiar clave privada ──────────────────────────────
       - name: Cleanup SSH key
