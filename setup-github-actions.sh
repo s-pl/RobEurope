@@ -140,7 +140,6 @@ cat > "$DEPLOY_SCRIPT" << SCRIPT
 set -euo pipefail
 
 DEPLOY_PATH="/opt/robeurope"
-COMPOSE_FILE="\$DEPLOY_PATH/docker-compose.yml"
 cd "\$DEPLOY_PATH"
 
 echo "[deploy] git pull..."
@@ -157,13 +156,13 @@ cat > "\$DEPLOY_PATH/backend/deploy-info.json" << JSON
 JSON
 
 echo "[deploy] docker compose build (prod)..."
-sg docker -c "docker compose -f \"\$COMPOSE_FILE\" --profile prod build"
+sg docker -c "cd \$DEPLOY_PATH && docker compose --profile prod build"
 
 echo "[deploy] docker compose up (prod)..."
-sg docker -c "docker compose -f \"\$COMPOSE_FILE\" --profile prod up -d"
+sg docker -c "cd \$DEPLOY_PATH && docker compose --profile prod up -d"
 
 echo "[deploy] migraciones..."
-sg docker -c "docker compose -f \"\$COMPOSE_FILE\" --profile prod exec -T backend sh -c 'node scripts/run-migrations.js'" || true
+sg docker -c "cd \$DEPLOY_PATH && docker compose --profile prod exec -T backend sh -c 'node scripts/run-migrations.js'" || true
 
 echo "[deploy] ✓ Deploy completado"
 SCRIPT
