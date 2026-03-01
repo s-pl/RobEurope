@@ -227,6 +227,34 @@ docker compose --profile prod up -d mysql redis backend
 El frontend se despliega automáticamente vía Vercel al hacer push a `main`.
 Asegúrate de que las variables de entorno de Vercel (`VITE_*`) apuntan a la URL del backend.
 
+### Backend con PM2 (sin Docker)
+
+Si ejecutas el backend directamente en el VPS y quieres que **no se apague al cerrar SSH**, usa PM2:
+
+```bash
+cd /ruta/a/RobEurope
+./setup-pm2-backend.sh
+```
+
+Comandos habituales:
+
+```bash
+pm2 list
+pm2 logs robeurope-backend
+pm2 restart robeurope-backend
+pm2 save
+```
+
+También puedes usar scripts npm del backend:
+
+```bash
+cd backend
+npm run start:pm2
+npm run restart:pm2
+npm run stop:pm2
+npm run logs:pm2
+```
+
 ---
 
 ## 7. Sistema de slugs y páginas de equipo
