@@ -36,10 +36,10 @@ jobs:
               -o StrictHostKeyChecking=no \
               -o ConnectTimeout=15 \
               "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
-              "bash -s" << 'REMOTE_SCRIPT'
+              "DEPLOY_PATH='${{ secrets.DEPLOY_PATH }}' bash -s" << 'REMOTE_SCRIPT'
           set -euo pipefail
 
-          DEPLOY_PATH="/opt/robeurope"
+          DEPLOY_PATH="${DEPLOY_PATH:-/opt/robeurope}"
           cd "$DEPLOY_PATH"
 
           echo "[deploy] git pull..."
@@ -56,24 +56,48 @@ jobs:
           fi
 
           echo "[deploy] compose file: $COMPOSE_FILE"
+          echo "[deploy] user: $(whoami)"
+          echo "[deploy] groups: $(id -nG)"
 
           echo "[deploy] escribiendo deploy-info.json..."
           echo "{\"deployed_at\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"commit\":\"$(git rev-parse HEAD)\",\"branch\":\"$(git rev-parse --abbrev-ref HEAD)\",\"triggered_by\":\"github-actions\"}" > "$REPO_ROOT/backend/deploy-info.json"
 
+          if command -v sg >/dev/null 2>&1 && getent group docker >/dev/null 2>&1; then
+            COMPOSE_RUN='sg docker -c'
+          else
+            COMPOSE_RUN=''
+          fi
+
           echo "[deploy] docker compose build (prod)..."
-          sudo docker compose -f "$COMPOSE_FILE" --profile prod build
+          if [[ -n "$COMPOSE_RUN" ]]; then
+            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' --profile prod build"
+          else
+            docker compose -f "$COMPOSE_FILE" --profile prod build
+          fi
 
           echo "[deploy] docker compose up (prod)..."
-          sudo docker compose -f "$COMPOSE_FILE" --profile prod up -d
+          if [[ -n "$COMPOSE_RUN" ]]; then
+            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' --profile prod up -d"
+          else
+            docker compose -f "$COMPOSE_FILE" --profile prod up -d
+          fi
 
           echo "[deploy] esperando backend..."
           sleep 5
 
           echo "[deploy] containers activos:"
-          sudo docker compose -f "$COMPOSE_FILE" --profile prod ps
+          if [[ -n "$COMPOSE_RUN" ]]; then
+            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' --profile prod ps"
+          else
+            docker compose -f "$COMPOSE_FILE" --profile prod ps
+          fi
 
           echo "[deploy] migraciones..."
-          sudo docker compose -f "$COMPOSE_FILE" --profile prod exec -T backend sh -c "node scripts/run-migrations.js" || true
+          if [[ -n "$COMPOSE_RUN" ]]; then
+            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' --profile prod exec -T backend sh -lc 'node scripts/run-migrations.js'" || true
+          else
+            docker compose -f "$COMPOSE_FILE" --profile prod exec -T backend sh -lc "node scripts/run-migrations.js" || true
+          fi
 
           echo "[deploy] ✓ Deploy completado"
           REMOTE_SCRIPT
