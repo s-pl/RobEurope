@@ -24,6 +24,7 @@ import authenticateToken from '../../middleware/auth.middleware.js';
 import adminApiRouter from './admin.route.js';
 import gdprRouter from './gdpr.route.js';
 import conversationsRouter from './conversations.route.js';
+import aiRouter from './ai.route.js';
 const router = express.Router();
 
 // Public routes (GET usually public, POST/PUT/DELETE protected inside)
@@ -42,6 +43,11 @@ router.use('/archives', archiveRouter);
 router.use('/contact', contactRouter);
 router.use('/stats', statsRouter);
 
+// Public: check if AI features are available (no auth needed)
+router.get('/isAIActive', (req, res) => {
+  res.json({ active: !!process.env.OPENROUTER_API_KEY });
+});
+
 // Protect all routes after this middleware: only authenticated users can access
 router.use(authenticateToken);
 
@@ -59,6 +65,7 @@ router.use('/robot-files', robotFilesRouter);
 router.use('/team-logs', teamLogsRouter);
 router.use('/admin', adminApiRouter);
 router.use('/conversations', conversationsRouter);
+router.use('/ai', aiRouter);
 
 
 export default router;

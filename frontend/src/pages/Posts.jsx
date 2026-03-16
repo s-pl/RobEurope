@@ -4,10 +4,12 @@ import { useTranslation } from 'react-i18next';
 import {
   Plus, Search, Image as ImageIcon, Heart, MessageCircle, Share2,
   MoreVertical, Trash2, Edit2, Pin, ChevronDown, ChevronUp, Lock,
-  X, Send, Reply, Eye, Loader2, Upload, GripVertical,
+  X, Send, Reply, Eye, Loader2, Upload, GripVertical, Sparkles,
 } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
 import { useAuth } from '../hooks/useAuth';
+import { useAiAction } from '../hooks/useAiAction';
+import { useAiStatus } from '../hooks/useAiStatus';
 import { Button } from '../components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '../components/ui/dialog';
 import { Label } from '../components/ui/label';
@@ -256,6 +258,10 @@ const Posts = () => {
   const api = useApi();
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { run: runAi } = useAiAction();
+  const { aiActive } = useAiStatus();
+  const [aiRewritingCreate, setAiRewritingCreate] = useState(false);
+  const [aiRewritingEdit, setAiRewritingEdit] = useState(false);
 
   // Posts state
   const [posts, setPosts] = useState([]);
@@ -296,6 +302,57 @@ const Posts = () => {
   const usedBytes = (() => {
     try { return new TextEncoder().encode(`${newPost.title}\n${newPost.content || ''}`).length; } catch { return (newPost.title?.length || 0) + (newPost.content?.length || 0); }
   })();
+
+  /* ── AI rewrite helpers ── */
+  const stripHtml = (html) => {
+    const div = document.createElement('div');
+    div.innerHTML = html || '';
+    return div.textContent || div.innerText || '';
+  };
+
+  const rewriteCreate = async () => {
+    const plain = stripHtml(newPost.content);
+    if (!plain.trim() && !newPost.title.trim()) {
+      toast({ title: 'Escribe algo primero', variant: 'default' });
+      return;
+    }
+    setAiRewritingCreate(true);
+    try {
+      let result = '';
+      await runAi({
+        systemPrompt: 'You are a professional content writer. Rewrite the given post to be clearer, more engaging and well-structured. Return only the improved content as plain text with paragraph breaks. Do not add any titles or preamble.',
+        prompt: `Title: ${newPost.title}\n\nContent: ${plain}`,
+        onDelta: (_, acc) => { result = acc; },
+      });
+      setNewPost(prev => ({ ...prev, content: result }));
+    } catch (err) {
+      toast({ title: 'Error al reescribir', description: err.message, variant: 'destructive' });
+    } finally {
+      setAiRewritingCreate(false);
+    }
+  };
+
+  const rewriteEdit = async () => {
+    const plain = stripHtml(editData.content);
+    if (!plain.trim() && !editData.title.trim()) {
+      toast({ title: 'Escribe algo primero', variant: 'default' });
+      return;
+    }
+    setAiRewritingEdit(true);
+    try {
+      let result = '';
+      await runAi({
+        systemPrompt: 'You are a professional content writer. Rewrite the given post to be clearer, more engaging and well-structured. Return only the improved content as plain text with paragraph breaks. Do not add any titles or preamble.',
+        prompt: `Title: ${editData.title}\n\nContent: ${plain}`,
+        onDelta: (_, acc) => { result = acc; },
+      });
+      setEditData(prev => ({ ...prev, content: result }));
+    } catch (err) {
+      toast({ title: 'Error al reescribir', description: err.message, variant: 'destructive' });
+    } finally {
+      setAiRewritingEdit(false);
+    }
+  };
 
   /* ── Fetch posts ── */
   const fetchPosts = useCallback(async () => {
@@ -666,7 +723,22 @@ const Posts = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="content" className="text-stone-700 dark:text-stone-300">{t('posts.form.content')}</Label>
+                    <div className="flex items-center justify-between mb-1">
+                      <Label htmlFor="content" className="text-stone-700 dark:text-stone-300">{t('posts.form.content')}</Label>
+                      {aiActive && (
+                        <button
+                          type="button"
+                          onClick={rewriteCreate}
+                          disabled={aiRewritingCreate}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/30 disabled:opacity-50 transition-colors border border-violet-200 dark:border-violet-800"
+                        >
+                          {aiRewritingCreate
+                            ? <Loader2 className="h-3 w-3 animate-spin" />
+                            : <Sparkles className="h-3 w-3" />}
+                          Reescribir con IA
+                        </button>
+                      )}
+                    </div>
                     <div className="mt-1">
                       <RichTextEditor
                         value={newPost.content}
@@ -850,6 +922,19 @@ const Posts = () => {
                       onChange={val => setEditData(prev => ({ ...prev, content: val }))}
                     />
                     <div className="flex items-center gap-2">
+                      {aiActive && (
+                        <button
+                          type="button"
+                          onClick={rewriteEdit}
+                          disabled={aiRewritingEdit}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/30 disabled:opacity-50 transition-colors border border-violet-200 dark:border-violet-800"
+                        >
+                          {aiRewritingEdit
+                            ? <Loader2 className="h-3 w-3 animate-spin" />
+                            : <Sparkles className="h-3 w-3" />}
+                          IA
+                        </button>
+                      )}
                       <button
                         onClick={() => saveEdit(post.id)}
                         disabled={editSaving}

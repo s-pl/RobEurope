@@ -49,9 +49,8 @@ export function getIO() {
  */
 export function emitToUser(userId, eventName, payload) {
   if (!ioInstance) return;
-  // We emit on an event name scoped by user, as the client listens directly
-  // e.g., eventName = 'notification'
-  ioInstance.emit(`${eventName}:${userId}`, payload);
+  // Emit to the user's personal room (user joins `user:${userId}` on identify)
+  ioInstance.to(`user:${userId}`).emit(eventName, payload);
 
   // Also mirror as a push notification when applicable
   if (eventName === 'notification' && userId) {

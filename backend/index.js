@@ -368,6 +368,37 @@ io.on('connection', (socket) => {
     }
   });
 
+  // DM: identify user so they receive events in their personal room
+  socket.on('identify', ({ userId }) => {
+    if (userId) {
+      socket.join(`user:${userId}`);
+      socket.data.userId = userId;
+      logger.info({ socket: 'identified', id: socket.id, userId });
+    }
+  });
+
+  // DM: join/leave conversation rooms for typing indicators
+  socket.on('join_conversation', (conversationId) => {
+    if (conversationId) socket.join(`conv:${conversationId}`);
+  });
+
+  socket.on('leave_conversation', (conversationId) => {
+    if (conversationId) socket.leave(`conv:${conversationId}`);
+  });
+
+  // DM: typing indicators
+  socket.on('dm_typing', ({ conversationId, user }) => {
+    if (conversationId) {
+      socket.to(`conv:${conversationId}`).emit('dm_typing', { conversationId, user });
+    }
+  });
+
+  socket.on('dm_stop_typing', ({ conversationId, user }) => {
+    if (conversationId) {
+      socket.to(`conv:${conversationId}`).emit('dm_stop_typing', { conversationId, user });
+    }
+  });
+
   socket.on('disconnect', (reason) => {
     logger.info({ socket: 'disconnected', id: socket.id, reason });
     if (socket.data.teamId) {
