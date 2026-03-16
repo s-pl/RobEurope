@@ -4,6 +4,7 @@ const { User, Country, EducationalCenter } = db;
 import bcrypt from 'bcryptjs';
 import { Op } from 'sequelize';
 import { getFileInfo } from '../middleware/upload.middleware.js';
+import { sanitizeUser } from '../utils/sanitize.js';
 
 /**
  * @fileoverview
@@ -29,7 +30,7 @@ export const createUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
    
     const user = await User.create({ ...req.body, password: hashedPassword });
-    res.json(user);
+    res.json(sanitizeUser(user));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -69,7 +70,7 @@ export const getUserById = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json(user);
+    res.json(sanitizeUser(user));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -101,7 +102,7 @@ export const updateUser = async (req, res) => {
     });
     if (!updated) return res.status(404).json({ error: 'User not found' });
     const updatedUser = await User.findByPk(req.params.id);
-    res.json(updatedUser);
+    res.json(sanitizeUser(updatedUser));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -137,6 +138,40 @@ export const searchUsers = async (req, res) => {
   }
 };
 
+/**
+ * Searches users by username, first_name, or last_name for team invitations.
+ *
+ * Requires authentication. Returns sanitized user data, limited to 10 results.
+ *
+ * @route GET /api/users/search?q=term
+ * @param {Express.Request} req Express request.
+ * @param {Express.Response} res Express response.
+ * @returns {Promise<void>}
+ */
+export const searchUsersForInvite = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Authentication required' });
+
+    const q = (req.query.q || '').trim();
+    if (!q) return res.json([]);
+
+    const users = await User.findAll({
+      where: {
+        [Op.or]: [
+          { username: { [Op.like]: `%${q}%` } },
+          { first_name: { [Op.like]: `%${q}%` } },
+          { last_name: { [Op.like]: `%${q}%` } }
+        ]
+      },
+      limit: 10
+    });
+    res.json(users.map(sanitizeUser));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 /**
  * Returns the current authenticated user.
@@ -149,9 +184,9 @@ export const getSelf = async (req, res) => {
   try {
     const id = req.user && req.user.id;
     if (!id) return res.status(401).json({ error: 'No autorizado' });
-    const user = await User.findByPk(id, { attributes: { exclude: ['password_hash'] } });
+    const user = await User.findByPk(id);
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json(user);
+    res.json(sanitizeUser(user));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -216,8 +251,8 @@ export const updateSelf = async (req, res) => {
     const [updated] = await User.update(updates, { where: { id } });
     if (!updated) return res.status(404).json({ error: 'User not found' });
 
-    const updatedUser = await User.findByPk(id, { attributes: { exclude: ['password_hash'] } });
-    res.json(updatedUser);
+    const updatedUser = await User.findByPk(id);
+    res.json(sanitizeUser(updatedUser));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

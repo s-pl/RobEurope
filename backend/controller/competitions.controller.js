@@ -92,7 +92,18 @@ export const getCompetitions = async (req, res) => {
       where,
       limit: Number(limit),
       offset: Number(offset),
-      order: [[sort, String(order).toUpperCase() === 'DESC' ? 'DESC' : 'ASC']]
+      order: [[sort, String(order).toUpperCase() === 'DESC' ? 'DESC' : 'ASC']],
+      // Include count of approved registrations as teams_registered
+      attributes: {
+        include: [
+          [
+            db.sequelize.literal(
+              '(SELECT COUNT(*) FROM `Registration` WHERE `Registration`.`competition_id` = `Competition`.`id` AND `Registration`.`status` = \'approved\')'
+            ),
+            'teams_registered'
+          ]
+        ]
+      }
     };
 
     if (String(withCount) === 'true') {

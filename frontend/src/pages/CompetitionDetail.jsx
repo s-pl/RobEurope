@@ -5,9 +5,20 @@ import { useApi } from '../hooks/useApi';
 import { resolveMediaUrl } from '../lib/apiClient';
 import { useAuthContext } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
-import { Calendar, Users, Video, ArrowLeft, Share2, FileText, Download } from 'lucide-react';
+import {
+  Calendar,
+  Users,
+  Video,
+  ArrowLeft,
+  Share2,
+  FileText,
+  Download,
+  MapPin,
+  Globe,
+  Lock,
+  ExternalLink,
+} from 'lucide-react';
 import { useToast } from '../hooks/useToast';
 
 const CompetitionDetail = () => {
@@ -31,17 +42,15 @@ const CompetitionDetail = () => {
           api(`/competitions/${id}`),
           api(`/streams?competition_id=${id}`),
           api(`/registrations?competition_id=${id}&status=approved`),
-          api(`/robot-files?competition_id=${id}`)
+          api(`/robot-files?competition_id=${id}`),
         ]);
         setCompetition(comp);
         setPublicFiles(pubFiles || []);
-        
-        // Load teams registered for this competition
-        const registeredTeams = regs.map(r => r.Team).filter(Boolean);
-        setTeams(registeredTeams);
-     
-        setStreams(competitionStreams);
 
+        const registeredTeams = regs.map((r) => r.Team).filter(Boolean);
+        setTeams(registeredTeams);
+
+        setStreams(competitionStreams);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -59,180 +68,382 @@ const CompetitionDetail = () => {
     });
   };
 
-  if (loading) return <div className="p-8 text-center">{t('competitions.detail.loading')}</div>;
-  if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
-  if (!competition) return <div className="p-8 text-center">{t('competitions.detail.notFound')}</div>;
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-pulse text-stone-400 text-lg">
+          {t('competitions.detail.loading')}
+        </div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <p className="text-red-600 text-lg">{error}</p>
+      </div>
+    );
+
+  if (!competition)
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <p className="text-stone-500 text-lg">{t('competitions.detail.notFound')}</p>
+      </div>
+    );
+
+  const isRestricted = !competition.is_approved;
+  const isAuthenticated = !!user;
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
-      <div className="flex justify-between items-center mb-4">
-        <Button variant="ghost" asChild>
+    <div className="max-w-6xl mx-auto px-4 py-6 sm:py-10">
+      {/* Top bar */}
+      <div className="flex items-center justify-between mb-8">
+        <Button variant="ghost" asChild className="text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 -ml-3">
           <Link to="/competitions" className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" /> {t('competitions.detail.back')}
+            <ArrowLeft className="h-4 w-4" />
+            <span className="text-sm font-medium">{t('competitions.detail.back')}</span>
           </Link>
         </Button>
-        <Button variant="outline" size="sm" onClick={handleShare} className="gap-2">
-          <Share2 className="h-4 w-4" /> {t('competitions.detail.share')}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleShare}
+          className="gap-2 border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800"
+        >
+          <Share2 className="h-4 w-4" />
+          <span className="hidden sm:inline">{t('competitions.detail.share')}</span>
         </Button>
       </div>
 
-      <div className="relative rounded-xl overflow-hidden bg-blue-900 text-white p-8 md:p-12">
-        <div className="relative z-10">
+      {/* Header */}
+      <header className="mb-10">
+        <div className="flex flex-wrap items-center gap-3 mb-3">
           {competition.is_active && (
-            <Badge className="mb-4 bg-green-500/50 hover:bg-green-500/70 border-none text-white">
-              {t('competitions.activeBadge')}
-            </Badge>
+            <Badge variant="success">{t('competitions.activeBadge')}</Badge>
           )}
-          {!competition.is_approved && (
-            <Badge className="mb-4 ml-2 bg-yellow-500/50 hover:bg-yellow-500/70 border-none text-white">
+          {isRestricted && (
+            <Badge variant="outline" className="border-amber-400 text-amber-600 dark:border-amber-500 dark:text-amber-400">
+              <Lock className="h-3 w-3 mr-1" />
               {t('competitions.restrictedBadge')}
             </Badge>
           )}
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{competition.title}</h1>
-          <div className="flex flex-wrap gap-6 text-blue-100">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              <span>{new Date(competition.start_date).toLocaleDateString()}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              <span>{competition.teams_registered || 0} {t('competitions.detail.teamsCount')}</span>
-            </div>
-          </div>
         </div>
-        
-      </div>
+        <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-stone-900 dark:text-stone-50 tracking-tight mb-4">
+          {competition.title}
+        </h1>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-stone-500 dark:text-stone-400 text-sm">
+          <span className="flex items-center gap-1.5">
+            <Calendar className="h-4 w-4 text-blue-600" />
+            {formatDate(competition.start_date)}
+            {competition.end_date && ` — ${formatDate(competition.end_date)}`}
+          </span>
+          {competition.location && (
+            <span className="flex items-center gap-1.5">
+              <MapPin className="h-4 w-4 text-blue-600" />
+              {competition.location}
+            </span>
+          )}
+          <span className="flex items-center gap-1.5">
+            <Users className="h-4 w-4 text-blue-600" />
+            {teams.length} {t('competitions.detail.teamsCount')}
+          </span>
+        </div>
+      </header>
 
-      <div className="grid gap-8 md:grid-cols-3">
-        <div className="md:col-span-2 space-y-8">
+      <div className="border-t border-stone-200 dark:border-stone-700" />
+
+      {/* Main content + sidebar */}
+      <div className="flex flex-col lg:flex-row gap-10 mt-10">
+        {/* Main column */}
+        <div className="flex-1 min-w-0 space-y-10">
+          {/* About */}
           <section>
-            <h2 className="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-4">{t('competitions.detail.aboutEvent')}</h2>
-            <div className="prose max-w-none text-slate-600 dark:text-slate-300">
-              <p>{competition.description || t('competitions.noDescription')}</p>
+            <h2 className="font-display text-xl font-semibold text-stone-800 dark:text-stone-200 mb-3">
+              {t('competitions.detail.aboutEvent')}
+            </h2>
+            <div className="text-stone-600 dark:text-stone-400 leading-relaxed whitespace-pre-line">
+              {competition.description || t('competitions.noDescription')}
             </div>
           </section>
 
+          <div className="border-t border-stone-200 dark:border-stone-700" />
+
+          {/* Streams */}
           <section>
-            <h2 className="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-4 flex items-center gap-2">
-              <Video className="h-6 w-6" /> {t('competitions.detail.liveStreams')}
+            <h2 className="font-display text-xl font-semibold text-stone-800 dark:text-stone-200 mb-4 flex items-center gap-2">
+              <Video className="h-5 w-5 text-blue-600" />
+              {t('competitions.detail.liveStreams')}
             </h2>
-            {!competition.is_approved ? (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-                <p className="text-yellow-800 font-medium">
-                  {t('competitions.restrictedMessage')}
-                </p>
+
+            {isRestricted || (!isAuthenticated && streams.length > 0) ? (
+              <div className="relative rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
+                <div className="absolute inset-0 bg-stone-100/80 dark:bg-stone-900/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+                  <Lock className="h-8 w-8 text-stone-400 dark:text-stone-500 mb-3" />
+                  <p className="text-stone-600 dark:text-stone-400 font-medium text-sm">
+                    {isRestricted
+                      ? t('competitions.restrictedMessage')
+                      : 'Register to access live streams'}
+                  </p>
+                  {!isAuthenticated && (
+                    <Button asChild size="sm" className="mt-3 bg-blue-600 hover:bg-blue-700 text-white">
+                      <Link to="/login">{t('competitions.detail.loginToAccess') || 'Log in'}</Link>
+                    </Button>
+                  )}
+                </div>
+                <div className="p-8 opacity-30 select-none pointer-events-none">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="h-28 rounded bg-stone-200 dark:bg-stone-800" />
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : streams.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {streams.map(stream => (
-                  <Card key={stream.id} className="overflow-hidden">
-                    <div className="aspect-video bg-slate-900 relative flex items-center justify-center">
-                      <span className="text-white/50">Preview</span>
+              <div className="space-y-3">
+                {streams.map((stream) => (
+                  <div
+                    key={stream.id}
+                    className="flex items-center justify-between py-3 border-b border-stone-100 dark:border-stone-800 last:border-b-0"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded bg-stone-100 dark:bg-stone-800 flex items-center justify-center flex-shrink-0">
+                        <Video className="h-4 w-4 text-stone-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-medium text-stone-800 dark:text-stone-200 truncate">
+                          {stream.title}
+                        </h3>
+                        {stream.status === 'live' && (
+                          <span className="inline-flex items-center gap-1 text-xs text-red-600">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                            LIVE
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-bold text-blue-900 dark:text-blue-100 truncate">{stream.title}</h3>
-                      {stream.stream_url ? (
-                        <a href={stream.stream_url} target="_blank" rel="noreferrer" className="text-sm text-blue-700 hover:underline dark:text-blue-400">
-                          {t('competitions.detail.watchOnPlatform')}
-                        </a>
-                      ) : (
-                        <span className="text-sm text-slate-500 italic">
-                          {t('competitions.streamRestricted')}
-                        </span>
-                      )}
-                    </CardContent>
-                  </Card>
+                    {stream.stream_url ? (
+                      <a
+                        href={stream.stream_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 flex-shrink-0"
+                      >
+                        {t('competitions.detail.watchOnPlatform')}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    ) : (
+                      <span className="text-sm text-stone-400 italic">
+                        {t('competitions.streamRestricted')}
+                      </span>
+                    )}
+                  </div>
                 ))}
               </div>
             ) : (
-              <p className="text-slate-500 italic">{t('competitions.noStreams')}</p>
+              <p className="text-stone-400 dark:text-stone-500 text-sm italic">
+                {t('competitions.noStreams')}
+              </p>
             )}
           </section>
 
+          <div className="border-t border-stone-200 dark:border-stone-700" />
+
+          {/* Teams */}
           <section>
-            <h2 className="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-4 flex items-center gap-2">
-              <Users className="h-6 w-6" /> {t('competitions.detail.participatingTeams')}
+            <h2 className="font-display text-xl font-semibold text-stone-800 dark:text-stone-200 mb-4 flex items-center gap-2">
+              <Users className="h-5 w-5 text-blue-600" />
+              {t('competitions.detail.participatingTeams')}
             </h2>
             {teams.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {teams.map(team => (
-                  <Link key={team.id} to={`/teams/${team.id}`}>
-                    <Card className="p-4 flex items-center gap-4 hover:shadow-md transition-shadow relative">
-                      {streams.some(s => s.team_id === team.id && s.status === 'live') && (
-                        <span className="absolute top-2 right-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full animate-pulse">
-                          LIVE
-                        </span>
+              <div className="space-y-0">
+                {teams.map((team) => (
+                  <Link
+                    key={team.id}
+                    to={`/teams/${team.id}`}
+                    className="flex items-center gap-3 py-3 border-b border-stone-100 dark:border-stone-800 last:border-b-0 hover:bg-stone-50 dark:hover:bg-stone-800/50 -mx-2 px-2 rounded transition-colors"
+                  >
+                    <div className="h-10 w-10 bg-stone-100 dark:bg-stone-800 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 border border-stone-200 dark:border-stone-700">
+                      {team.logo_url ? (
+                        <img
+                          src={team.logo_url}
+                          alt={team.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <Users className="h-4 w-4 text-stone-400" />
                       )}
-                      <div className="h-12 w-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-700">
-                        {team.logo_url ? (
-                          <img src={team.logo_url} alt={team.name} className="h-full w-full object-cover" />
-                        ) : (
-                          <Users className="h-6 w-6 text-slate-400" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-slate-900 dark:text-slate-100">{team.name}</h3>
-                      </div>
-                    </Card>
+                    </div>
+                    <span className="font-medium text-stone-800 dark:text-stone-200 text-sm">
+                      {team.name}
+                    </span>
+                    {streams.some(
+                      (s) => s.team_id === team.id && s.status === 'live'
+                    ) && (
+                      <span className="ml-auto inline-flex items-center gap-1 text-xs text-red-600 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                        LIVE
+                      </span>
+                    )}
                   </Link>
                 ))}
               </div>
             ) : (
-              <p className="text-slate-500 dark:text-slate-400 italic">{t('competitions.detail.noTeamsYet')}</p>
+              <p className="text-stone-400 dark:text-stone-500 text-sm italic">
+                {t('competitions.detail.noTeamsYet')}
+              </p>
             )}
           </section>
 
+          {/* Files */}
           {publicFiles.length > 0 && (
-            <section>
-              <h2 className="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-4 flex items-center gap-2">
-                <FileText className="h-6 w-6" /> {t('competitions.detail.publicFiles')}
-              </h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {publicFiles.map(file => (
-                  <Card key={file.id} className="p-4 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-bold text-slate-900 dark:text-slate-100 truncate max-w-[200px]">{file.file_name}</h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">{file.Team?.name}</p>
-                        <p className="text-xs text-slate-400 dark:text-slate-500">{file.description}</p>
-                      </div>
-                      <a 
-                        href={resolveMediaUrl(file.file_url)} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
-                      >
-                        <Download className="h-4 w-4" />
-                      </a>
+            <>
+              <div className="border-t border-stone-200 dark:border-stone-700" />
+              <section>
+                <h2 className="font-display text-xl font-semibold text-stone-800 dark:text-stone-200 mb-4 flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                  {t('competitions.detail.publicFiles')}
+                </h2>
+
+                {!isAuthenticated ? (
+                  <div className="relative rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
+                    <div className="absolute inset-0 bg-stone-100/80 dark:bg-stone-900/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+                      <Lock className="h-8 w-8 text-stone-400 dark:text-stone-500 mb-3" />
+                      <p className="text-stone-600 dark:text-stone-400 font-medium text-sm">
+                        Register to access files
+                      </p>
+                      <Button asChild size="sm" className="mt-3 bg-blue-600 hover:bg-blue-700 text-white">
+                        <Link to="/login">{t('competitions.detail.loginToAccess') || 'Log in'}</Link>
+                      </Button>
                     </div>
-                  </Card>
-                ))}
-              </div>
-            </section>
+                    <div className="p-8 opacity-30 select-none pointer-events-none">
+                      <div className="space-y-3">
+                        {[1, 2].map((i) => (
+                          <div key={i} className="h-12 rounded bg-stone-200 dark:bg-stone-800" />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-0">
+                    {publicFiles.map((file) => (
+                      <div
+                        key={file.id}
+                        className="flex items-center justify-between py-3 border-b border-stone-100 dark:border-stone-800 last:border-b-0"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-stone-800 dark:text-stone-200 text-sm truncate">
+                            {file.file_name}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            {file.Team?.name && (
+                              <span className="text-xs text-stone-400 dark:text-stone-500">
+                                {file.Team.name}
+                              </span>
+                            )}
+                            {file.description && (
+                              <>
+                                <span className="text-stone-300 dark:text-stone-600">·</span>
+                                <span className="text-xs text-stone-400 dark:text-stone-500 truncate">
+                                  {file.description}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <a
+                          href={resolveMediaUrl(file.file_url)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-4 p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors flex-shrink-0"
+                          title="Download"
+                        >
+                          <Download className="h-4 w-4" />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </>
           )}
         </div>
 
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('competitions.detail.information')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        {/* Sidebar */}
+        <aside className="w-full lg:w-72 flex-shrink-0">
+          <div className="lg:sticky lg:top-24 space-y-5 p-5 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-900/50">
+            <h3 className="font-display text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+              {t('competitions.detail.information')}
+            </h3>
+
+            <div className="space-y-4">
               <div>
-                <span className="text-sm text-slate-500 dark:text-slate-400 block">{t('competitions.detail.organizer')}</span>
-                <span className="font-medium">RobEurope</span>
+                <span className="text-xs text-stone-400 dark:text-stone-500 block mb-0.5">
+                  {t('competitions.detail.organizer')}
+                </span>
+                <span className="text-sm font-medium text-stone-700 dark:text-stone-300">
+                  RobEurope
+                </span>
               </div>
+
+              <div className="border-t border-stone-200 dark:border-stone-700" />
+
+              <div>
+                <span className="text-xs text-stone-400 dark:text-stone-500 block mb-0.5">
+                  {t('competitions.detail.dates') || 'Dates'}
+                </span>
+                <span className="text-sm text-stone-700 dark:text-stone-300">
+                  {formatDate(competition.start_date)}
+                  {competition.end_date && (
+                    <>
+                      <br />
+                      {formatDate(competition.end_date)}
+                    </>
+                  )}
+                </span>
+              </div>
+
+              <div className="border-t border-stone-200 dark:border-stone-700" />
+
+              <div>
+                <span className="text-xs text-stone-400 dark:text-stone-500 block mb-0.5">
+                  {t('competitions.detail.teamsCount')}
+                </span>
+                <span className="text-sm font-medium text-stone-700 dark:text-stone-300">
+                  {teams.length}
+                </span>
+              </div>
+
               {competition.website_url && (
-                <div>
-                  <span className="text-sm text-slate-500 dark:text-slate-400 block">{t('competitions.detail.website')}</span>
-                  <a href={competition.website_url} target="_blank" rel="noreferrer" className="text-blue-700 hover:underline truncate block dark:text-blue-400">
-                    {competition.website_url}
-                  </a>
-                </div>
+                <>
+                  <div className="border-t border-stone-200 dark:border-stone-700" />
+                  <div>
+                    <span className="text-xs text-stone-400 dark:text-stone-500 block mb-0.5">
+                      {t('competitions.detail.website')}
+                    </span>
+                    <a
+                      href={competition.website_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1 truncate"
+                    >
+                      <Globe className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span className="truncate">{competition.website_url.replace(/^https?:\/\//, '')}</span>
+                    </a>
+                  </div>
+                </>
               )}
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
   );

@@ -6,11 +6,29 @@
  */
 
 import db from '../models/index.js';
-const { Team, User, Country, TeamMembers, TeamInvite, TeamJoinRequest, Registration, Competition, Notification } = db;
+const { Team, User, Country, TeamMembers, TeamInvite, TeamJoinRequest, Registration, Competition, Notification, TeamLog } = db;
 import { Op } from 'sequelize';
 import { getFileInfo } from '../middleware/upload.middleware.js';
 import { v4 as uuidv4 } from 'uuid';
 import { emitToUser } from '../utils/realtime.js';
+
+/**
+ * Helper: create a TeamLog entry for activity tracking.
+ * Silently catches errors so it never breaks the main flow.
+ *
+ * @param {object} opts
+ * @param {number} opts.team_id
+ * @param {string} opts.content - Human-readable log message
+ * @param {string|number|null} [opts.author_id] - User who triggered the action
+ * @param {number|null} [opts.competition_id] - Related competition (0 if none)
+ */
+const logTeamActivity = async ({ team_id, content, author_id = null, competition_id = 0 }) => {
+  try {
+    if (TeamLog) {
+      await TeamLog.create({ team_id, competition_id, content, author_id });
+    }
+  } catch (_) { /* never break the main flow */ }
+};
 
 
 /**
@@ -79,6 +97,7 @@ export const createTeam = async (req, res) => {
       });
       emitToUser(created_by_user_id, 'notification', notif.toJSON());
     } catch (_) {}
+    await logTeamActivity({ team_id: team.id, content: `Team "${team.name}" created`, author_id: created_by_user_id });
     res.status(201).json(team);
   } catch (err) {
     // Map common DB constraint errors to 400 for better client experience
@@ -255,6 +274,7 @@ export const inviteToTeam = async (req, res) => {
       } catch (_) {}
     }
 
+    await logTeamActivity({ team_id: teamId, content: `Invitation sent${targetUserId ? ` to user #${targetUserId}` : ` to email ${email}`}`, author_id: req.user?.id });
     return res.status(201).json({ token: invite.token, invite });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -303,7 +323,7 @@ export const declineInvite = async (req, res) => {
         emitToUser(team.created_by_user_id, 'notification', notif.toJSON());
       }
     } catch (_) {}
-
+    await logTeamActivity({ team_id: invite.team_id, content: `Invitation declined by user #${userId}`, author_id: userId });
     return res.json({ success: true });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -352,6 +372,7 @@ export const acceptInvite = async (req, res) => {
         emitToUser(team.created_by_user_id, 'notification', notif.toJSON());
       }
     } catch (_) {}
+    await logTeamActivity({ team_id: invite.team_id, content: `Member added (user #${userId}) via invitation`, author_id: userId });
     return res.json({ success: true });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -436,6 +457,7 @@ export const approveJoinRequest = async (req, res) => {
       });
       emitToUser(jr.user_id, 'notification', notif.toJSON());
     } catch (_) {}
+    await logTeamActivity({ team_id: jr.team_id, content: `Join request approved for user #${jr.user_id}`, author_id: userId });
     return res.json({ success: true });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -467,6 +489,7 @@ export const registerTeamInCompetition = async (req, res) => {
     if (existing) return res.status(400).json({ error: 'El equipo ya está registrado en esta competición' });
 
     const reg = await Registration.create({ team_id: teamId, competition_id, status: 'pending', registration_date: new Date() });
+    await logTeamActivity({ team_id: teamId, content: `Registration sent for competition #${competition_id}`, author_id: req.user?.id, competition_id });
     return res.status(201).json(reg);
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -552,6 +575,7 @@ export const leaveTeam = async (req, res) => {
     if (!team) return res.status(404).json({ error: 'Team not found' });
     if (team.created_by_user_id === userId) return res.status(400).json({ error: 'El propietario no puede salir del equipo' });
     await membership.update({ left_at: new Date() });
+    await logTeamActivity({ team_id: membership.team_id, content: `Member removed (user #${userId} left the team)`, author_id: userId });
     return res.json({ success: true });
   } catch (err) {
     return res.status(500).json({ error: err.message });

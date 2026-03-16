@@ -23,13 +23,13 @@ export function ThemeToggle() {
         <Button
           variant="ghost"
           size="icon"
-          className="group relative overflow-hidden rounded-full focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
+          className="group relative overflow-hidden rounded-full focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-stone-950"
           aria-label={t('theme.toggle')}
           aria-pressed={effectiveTheme === 'dark'}
         >
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-br from-blue-50 to-white opacity-100 transition-opacity duration-300 dark:from-slate-900 dark:to-slate-800 motion-reduce:transition-none"
+            className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-br from-blue-50 to-white opacity-100 transition-opacity duration-300 dark:from-stone-900 dark:to-stone-800 motion-reduce:transition-none"
           />
           <span
             aria-hidden="true"
@@ -37,7 +37,7 @@ export function ThemeToggle() {
           />
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100 dark:bg-blue-400/10 motion-reduce:transition-none"
+            className="pointer-events-none absolute left-1/2 top-1/2 h-16 w-16 -transtone-x-1/2 -transtone-y-1/2 rounded-full bg-blue-500/10 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100 dark:bg-blue-400/10 motion-reduce:transition-none"
           />
 
           <Sun

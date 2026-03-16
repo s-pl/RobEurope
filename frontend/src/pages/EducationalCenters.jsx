@@ -1,28 +1,26 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AnimatePresence, motion } from 'framer-motion';
 import { apiRequest, resolveMediaUrl } from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
 import { PageHeader } from '../components/ui/PageHeader';
 import { ReasonDialog } from '../components/ui/reason-dialog';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Skeleton } from '../components/ui/skeleton';
-import { Badge } from '../components/ui/badge';
-import { Button } from '../components/ui/button';
-import { Card, CardContent } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Globe, Mail, MapPin, Building2 } from 'lucide-react';
+import { Building2, Globe, Mail, MapPin, Plus, Search, X } from 'lucide-react';
 
 const EducationalCenters = () => {
     const { t } = useTranslation();
     const { user, isAuthenticated } = useAuth();
 
     const isAdmin = useMemo(() => user?.role === 'admin' || user?.role === 'super_admin', [user?.role]);
-    const isCenterAdmin = useMemo(() => user?.role === 'center_admin', [user?.role]);
 
     const [items, setItems] = useState([]);
     const [countries, setCountries] = useState([]);
     const [selectedCountry, setSelectedCountry] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
     const [status, setStatus] = useState({ loading: true, error: '' });
     const [createStatus, setCreateStatus] = useState({ loading: false, error: '', ok: '' });
     const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -30,8 +28,8 @@ const EducationalCenters = () => {
     const [centerToRejectId, setCenterToRejectId] = useState(null);
     const [rejecting, setRejecting] = useState(false);
     const [showCreateForm, setShowCreateForm] = useState(false);
-    const [form, setForm] = useState({ 
-        name: '', 
+    const [form, setForm] = useState({
+        name: '',
         city: '',
         address: '',
         website_url: '',
@@ -39,7 +37,7 @@ const EducationalCenters = () => {
         email: '',
         description: '',
         country_id: '',
-        logo: null 
+        logo: null
     });
 
     const loadCountries = async () => {
@@ -59,9 +57,8 @@ const EducationalCenters = () => {
             if (selectedCountry) params.append('country_id', selectedCountry);
             if (selectedStatus) params.append('status', selectedStatus);
             if (params.toString()) url += `?${params.toString()}`;
-            
+
             const data = await apiRequest(url);
-            // API returns { items: [...] } or direct array
             const items = data?.items || (Array.isArray(data) ? data : []);
             setItems(items);
         } catch (e) {
@@ -79,6 +76,16 @@ const EducationalCenters = () => {
         load();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedCountry, selectedStatus]);
+
+    const filteredItems = useMemo(() => {
+        if (!searchQuery.trim()) return items;
+        const q = searchQuery.toLowerCase();
+        return items.filter((item) =>
+            item.name?.toLowerCase().includes(q) ||
+            item.city?.toLowerCase().includes(q) ||
+            item.Country?.name?.toLowerCase().includes(q)
+        );
+    }, [items, searchQuery]);
 
     const handleCreate = async (e) => {
         e.preventDefault();
@@ -135,7 +142,7 @@ const EducationalCenters = () => {
         if (!centerToRejectId || !rejectReason.trim()) return;
         setRejecting(true);
         try {
-            await apiRequest(`/educational-centers/${centerToRejectId}/reject`, { 
+            await apiRequest(`/educational-centers/${centerToRejectId}/reject`, {
                 method: 'PATCH',
                 body: JSON.stringify({ reason: rejectReason.trim() }),
                 headers: { 'Content-Type': 'application/json' }
@@ -151,46 +158,59 @@ const EducationalCenters = () => {
         }
     };
 
-    const getStatusBadge = (approvalStatus) => {
-        const variantMap = { approved: 'success', pending: 'warning', rejected: 'destructive' };
-        return (
-            <Badge variant="outline" className={
-              approvalStatus === 'approved' ? 'border-emerald-200 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400' :
-              approvalStatus === 'rejected' ? 'border-red-200 text-red-700 dark:border-red-800 dark:text-red-400' :
-              'border-amber-200 text-amber-700 dark:border-amber-800 dark:text-amber-400'
-            }>
-                {t(`educationalCenters.status.${approvalStatus}`) || approvalStatus}
-            </Badge>
-        );
+    const statusStyles = {
+        approved: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400',
+        pending: 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400',
+        rejected: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
     };
 
+    const inputClass = 'w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50';
+
     return (
-        <div className="space-y-8">
+        <div className="space-y-10">
             <PageHeader
                 title={t('educationalCenters.title')}
                 description={t('educationalCenters.description')}
                 action={isAuthenticated && (
-                    <Button onClick={() => setShowCreateForm(v => !v)} variant={showCreateForm ? 'outline' : 'default'}>
-                        {showCreateForm ? t('actions.cancel') : t('educationalCenters.actions.create')}
-                    </Button>
+                    <button
+                        onClick={() => setShowCreateForm((v) => !v)}
+                        className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors duration-200 ${showCreateForm
+                            ? 'border border-stone-200 text-stone-700 hover:bg-stone-50 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
+                    >
+                        {showCreateForm ? (
+                            <>
+                                <X className="h-4 w-4" />
+                                {t('actions.cancel')}
+                            </>
+                        ) : (
+                            <>
+                                <Plus className="h-4 w-4" />
+                                {t('educationalCenters.actions.create')}
+                            </>
+                        )}
+                    </button>
                 )}
             />
 
-            {/* Filters */}
+            {/* Inline filter bar */}
             <div className="flex flex-wrap items-center gap-3">
-                <Select value={selectedCountry || 'all'} onValueChange={v => setSelectedCountry(v === 'all' ? '' : v)}>
-                    <SelectTrigger className="w-[180px]">
+                <Select value={selectedCountry || 'all'} onValueChange={(v) => setSelectedCountry(v === 'all' ? '' : v)}>
+                    <SelectTrigger className="w-[180px] rounded-xl border-stone-200 dark:border-stone-700">
                         <SelectValue placeholder={t('educationalCenters.filters.countryAll')} />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">{t('educationalCenters.filters.countryAll')}</SelectItem>
-                        {countries.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
+                        {countries.map((c) => (
+                            <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
 
                 {isAdmin && (
-                    <Select value={selectedStatus || 'all'} onValueChange={v => setSelectedStatus(v === 'all' ? '' : v)}>
-                        <SelectTrigger className="w-[160px]">
+                    <Select value={selectedStatus || 'all'} onValueChange={(v) => setSelectedStatus(v === 'all' ? '' : v)}>
+                        <SelectTrigger className="w-[160px] rounded-xl border-stone-200 dark:border-stone-700">
                             <SelectValue placeholder={t('educationalCenters.filters.statusAll')} />
                         </SelectTrigger>
                         <SelectContent>
@@ -201,38 +221,49 @@ const EducationalCenters = () => {
                         </SelectContent>
                     </Select>
                 )}
+
+                <div className="relative flex-1 min-w-[200px] max-w-xs">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder={t('common.search') || 'Buscar...'}
+                        className="w-full rounded-xl border border-stone-200 bg-white pl-9 pr-3 py-2 text-sm text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50"
+                    />
+                </div>
             </div>
 
-            <section>
-                {/* Create form */}
+            {/* Create form dialog */}
+            <AnimatePresence>
                 {showCreateForm && isAuthenticated && (
-                    <form onSubmit={handleCreate} className="rounded-xl border border-slate-200 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/50 sm:p-6 mb-6">
-                        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4">
+                    <motion.form
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.25 }}
+                        onSubmit={handleCreate}
+                        className="rounded-xl border border-stone-200 bg-white p-5 sm:p-6 dark:border-stone-700 dark:bg-stone-900"
+                    >
+                        <h2 className="font-display text-lg font-semibold text-stone-900 dark:text-stone-50 mb-5">
                             {t('educationalCenters.actions.create')}
                         </h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                                     {t('educationalCenters.fields.name')} *
                                 </label>
-                                <input
-                                    type="text"
-                                    value={form.name}
-                                    required
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-                                    onChange={(ev) => setForm((p) => ({ ...p, name: ev.target.value }))}
-                                />
+                                <input type="text" value={form.name} required className={inputClass} onChange={(ev) => setForm((p) => ({ ...p, name: ev.target.value }))} />
                             </div>
-
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                                     {t('educationalCenters.fields.country')}
                                 </label>
                                 <select
                                     value={form.country_id}
                                     onChange={(e) => setForm((p) => ({ ...p, country_id: e.target.value }))}
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                                    className={inputClass}
                                 >
                                     <option value="">{t('educationalCenters.filters.countryAll')}</option>
                                     {countries.map((country) => (
@@ -240,191 +271,188 @@ const EducationalCenters = () => {
                                     ))}
                                 </select>
                             </div>
-
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                                     {t('educationalCenters.fields.city')}
                                 </label>
-                                <input
-                                    type="text"
-                                    value={form.city}
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-                                    onChange={(ev) => setForm((p) => ({ ...p, city: ev.target.value }))}
-                                />
+                                <input type="text" value={form.city} className={inputClass} onChange={(ev) => setForm((p) => ({ ...p, city: ev.target.value }))} />
                             </div>
-
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                                     {t('educationalCenters.fields.email')}
                                 </label>
-                                <input
-                                    type="email"
-                                    value={form.email}
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-                                    onChange={(ev) => setForm((p) => ({ ...p, email: ev.target.value }))}
-                                />
+                                <input type="email" value={form.email} className={inputClass} onChange={(ev) => setForm((p) => ({ ...p, email: ev.target.value }))} />
                             </div>
-
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                                     {t('educationalCenters.fields.phone')}
                                 </label>
-                                <input
-                                    type="tel"
-                                    value={form.phone}
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-                                    onChange={(ev) => setForm((p) => ({ ...p, phone: ev.target.value }))}
-                                />
+                                <input type="tel" value={form.phone} className={inputClass} onChange={(ev) => setForm((p) => ({ ...p, phone: ev.target.value }))} />
                             </div>
-
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                                     {t('educationalCenters.fields.website')}
                                 </label>
-                                <input
-                                    type="url"
-                                    value={form.website_url}
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-                                    onChange={(ev) => setForm((p) => ({ ...p, website_url: ev.target.value }))}
-                                />
+                                <input type="url" value={form.website_url} className={inputClass} onChange={(ev) => setForm((p) => ({ ...p, website_url: ev.target.value }))} />
                             </div>
-
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                                     {t('educationalCenters.fields.address')}
                                 </label>
-                                <input
-                                    type="text"
-                                    value={form.address}
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-                                    onChange={(ev) => setForm((p) => ({ ...p, address: ev.target.value }))}
-                                />
+                                <input type="text" value={form.address} className={inputClass} onChange={(ev) => setForm((p) => ({ ...p, address: ev.target.value }))} />
                             </div>
-
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                                     {t('educationalCenters.fields.description')}
                                 </label>
                                 <textarea
                                     value={form.description}
                                     rows={3}
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                                    className={inputClass}
                                     onChange={(ev) => setForm((p) => ({ ...p, description: ev.target.value }))}
                                 />
                             </div>
-
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                                     {t('educationalCenters.fields.logo')}
                                 </label>
                                 <input
                                     type="file"
                                     accept="image/*"
-                                    className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-slate-900 hover:file:bg-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 dark:file:bg-slate-800 dark:file:text-slate-50 dark:hover:file:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                                    className="block w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 file:mr-3 file:rounded-lg file:border-0 file:bg-stone-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-stone-900 hover:file:bg-stone-200 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50 dark:file:bg-stone-800 dark:file:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                                     onChange={(ev) => setForm((p) => ({ ...p, logo: ev.target.files?.[0] || null }))}
                                 />
                             </div>
                         </div>
 
-                        <div className="space-y-3 mt-4">
-                            <Button type="submit" disabled={createStatus.loading} className="w-full sm:w-auto">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center mt-5">
+                            <button
+                                type="submit"
+                                disabled={createStatus.loading}
+                                className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+                            >
                                 {createStatus.loading ? t('common.loading') : t('actions.save')}
-                            </Button>
+                            </button>
                             {createStatus.error && (
-                                <Alert variant="destructive"><AlertDescription>{createStatus.error}</AlertDescription></Alert>
+                                <span className="text-sm text-red-600 dark:text-red-400">{createStatus.error}</span>
                             )}
                             {!createStatus.error && createStatus.ok && (
-                                <Alert variant="success"><AlertDescription>{createStatus.ok}</AlertDescription></Alert>
+                                <span className="text-sm text-emerald-600 dark:text-emerald-400">{createStatus.ok}</span>
                             )}
                         </div>
-                    </form>
+                    </motion.form>
                 )}
+            </AnimatePresence>
 
-                {status.loading && (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {[...Array(6)].map((_, i) => (
-                            <div key={i} className="rounded-xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
-                                <Skeleton className="h-5 w-3/4" />
-                                <Skeleton className="h-4 w-1/2" />
-                                <Skeleton className="h-16 w-full" />
+            {/* Loading skeleton rows */}
+            {status.loading && (
+                <div className="divide-y divide-stone-200 dark:divide-stone-800">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="flex items-center gap-4 py-4">
+                            <Skeleton className="h-12 w-12 rounded-lg shrink-0" />
+                            <div className="flex-1 space-y-2">
+                                <Skeleton className="h-4 w-48" />
+                                <Skeleton className="h-3 w-32" />
                             </div>
-                        ))}
-                    </div>
-                )}
-                {!status.loading && status.error && (
-                    <Alert variant="destructive">
-                        <AlertDescription>{status.error}</AlertDescription>
-                    </Alert>
-                )}
+                            <Skeleton className="h-5 w-16 rounded-full" />
+                        </div>
+                    ))}
+                </div>
+            )}
 
-                {!status.loading && !status.error && (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {items.length === 0 && (
-                            <div className="col-span-full flex flex-col items-center py-20 gap-3 text-center">
-                                <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                                    <Building2 className="h-7 w-7 text-slate-400" />
-                                </div>
-                                <p className="font-medium text-slate-900 dark:text-slate-100">{t('educationalCenters.empty') || 'No hay centros educativos'}</p>
+            {!status.loading && status.error && (
+                <Alert variant="destructive">
+                    <AlertDescription>{status.error}</AlertDescription>
+                </Alert>
+            )}
+
+            {/* Centers list as rows */}
+            {!status.loading && !status.error && (
+                <>
+                    {filteredItems.length === 0 && (
+                        <div className="flex flex-col items-center py-20 gap-3 text-center">
+                            <div className="w-14 h-14 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+                                <Building2 className="h-7 w-7 text-stone-400" />
                             </div>
-                        )}
+                            <p className="font-display font-medium text-stone-900 dark:text-stone-50">
+                                {t('educationalCenters.empty') || 'No hay centros educativos'}
+                            </p>
+                        </div>
+                    )}
 
-                        {items.map((item) => (
-                            <Card key={item.id} className="hover:shadow-md transition-shadow dark:bg-slate-900">
-                                <CardContent className="pt-5 space-y-4">
-                                    <div className="flex items-start gap-3">
-                                        {item.logo_url ? (
-                                            <img src={resolveMediaUrl(item.logo_url)} alt={item.name} className="h-14 w-14 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-slate-700" />
-                                        ) : (
-                                            <div className="h-14 w-14 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
-                                                <Building2 className="h-7 w-7 text-slate-400" />
-                                            </div>
-                                        )}
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <h3 className="font-semibold text-slate-900 dark:text-slate-50 truncate">{item.name}</h3>
-                                                {getStatusBadge(item.approval_status)}
-                                            </div>
-                                            {item.city && item.Country && (
-                                                <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
-                                                    <MapPin className="h-3 w-3" />{item.city}, {item.Country.name}
-                                                </p>
+                    {filteredItems.length > 0 && (
+                        <div className="divide-y divide-stone-200 dark:divide-stone-800">
+                            {filteredItems.map((item) => (
+                                <div key={item.id} className="flex items-center gap-4 py-4 group">
+                                    {/* Logo */}
+                                    {item.logo_url ? (
+                                        <img
+                                            src={resolveMediaUrl(item.logo_url)}
+                                            alt={item.name}
+                                            className="h-12 w-12 rounded-lg object-cover shrink-0 border border-stone-200 dark:border-stone-700"
+                                        />
+                                    ) : (
+                                        <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0">
+                                            <Building2 className="h-6 w-6 text-stone-400" />
+                                        </div>
+                                    )}
+
+                                    {/* Name, city, links */}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h3 className="font-display font-semibold text-stone-900 dark:text-stone-50 truncate">
+                                                {item.name}
+                                            </h3>
+                                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[item.approval_status] || statusStyles.pending}`}>
+                                                {t(`educationalCenters.status.${item.approval_status}`) || item.approval_status}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex flex-wrap items-center gap-3 mt-0.5 text-xs text-stone-500 dark:text-stone-400">
+                                            {(item.city || item.Country) && (
+                                                <span className="inline-flex items-center gap-1">
+                                                    <MapPin className="h-3 w-3" />
+                                                    {[item.city, item.Country?.name].filter(Boolean).join(', ')}
+                                                </span>
+                                            )}
+                                            {item.email && (
+                                                <a href={`mailto:${item.email}`} className="inline-flex items-center gap-1 text-blue-600 hover:underline dark:text-blue-400">
+                                                    <Mail className="h-3 w-3" />{item.email}
+                                                </a>
+                                            )}
+                                            {item.website_url && (
+                                                <a href={item.website_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-600 hover:underline dark:text-blue-400">
+                                                    <Globe className="h-3 w-3" />{t('educationalCenters.fields.website')}
+                                                </a>
                                             )}
                                         </div>
                                     </div>
 
-                                    {item.description && (
-                                        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">{item.description}</p>
-                                    )}
-
-                                    <div className="flex flex-wrap items-center gap-3 text-xs">
-                                        {item.email && (
-                                            <a href={`mailto:${item.email}`} className="flex items-center gap-1 text-blue-600 hover:underline dark:text-blue-400">
-                                                <Mail className="h-3 w-3" />{item.email}
-                                            </a>
-                                        )}
-                                        {item.website_url && (
-                                            <a href={item.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-600 hover:underline dark:text-blue-400">
-                                                <Globe className="h-3 w-3" />{t('educationalCenters.fields.website')}
-                                            </a>
-                                        )}
-                                    </div>
-
+                                    {/* Admin approve/reject actions */}
                                     {isAdmin && item.approval_status === 'pending' && (
-                                        <div className="flex gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                                            <Button size="sm" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => handleApprove(item.id)}>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleApprove(item.id)}
+                                                className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors duration-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
+                                            >
                                                 {t('educationalCenters.actions.approve')}
-                                            </Button>
-                                            <Button size="sm" variant="outline" className="flex-1 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-900/20" onClick={() => handleReject(item.id)}>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleReject(item.id)}
+                                                className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium bg-red-50 text-red-700 hover:bg-red-100 transition-colors duration-200 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40"
+                                            >
                                                 {t('educationalCenters.actions.reject')}
-                                            </Button>
+                                            </button>
                                         </div>
                                     )}
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                )}
-            </section>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </>
+            )}
 
             <ReasonDialog
                 open={rejectDialogOpen}

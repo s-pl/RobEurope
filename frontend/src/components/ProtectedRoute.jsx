@@ -7,8 +7,8 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-neutral-50 text-slate-900">
-        <p className="text-lg text-slate-500">Comprobando sesión...</p>
+      <div className="flex min-h-screen items-center justify-center bg-neutral-50 text-stone-900">
+        <p className="text-lg text-stone-500">Comprobando sesión...</p>
       </div>
     );
   }

@@ -427,6 +427,8 @@ const resources = {
         delete: 'Eliminar',
         edit: 'Editar',
         create: 'Crear',
+        back: 'Atrás',
+        next: 'Siguiente',
         confirmDelete: '¿Estás seguro de eliminar este registro?'
       },
       charts: {
@@ -953,6 +955,35 @@ const resources = {
           tab: 'Chat',
           title: 'Chat de Equipo'
         }
+      },
+      tour: {
+        progress: 'Guía',
+        finish: 'Empezar',
+        skip: 'Saltar guía',
+        welcome: {
+          title: 'Bienvenido a RobEurope',
+          description: 'Aquí gestionas equipo, competiciones, publicaciones y galería en un solo sitio.'
+        },
+        team: {
+          title: '1) Crea o únete a un equipo',
+          description: 'Desde Teams puedes crear tu equipo o solicitar unión a uno existente.',
+          cta: 'Ir a Teams'
+        },
+        competitions: {
+          title: '2) Compite y envía registros',
+          description: 'En My Team gestionas miembros y te registras en competiciones.',
+          cta: 'Ver competiciones'
+        },
+        news: {
+          title: '3) Sigue noticias y avisos',
+          description: 'Posts y notificaciones te mantienen al día de cambios y eventos.',
+          cta: 'Abrir Posts'
+        },
+        gallery: {
+          title: '4) Explora la galería interactiva',
+          description: 'Abre imágenes, navega con teclado y marca tus favoritas.',
+          cta: 'Abrir galería'
+        }
       }
     }
   },
@@ -1204,7 +1235,8 @@ const resources = {
         hidePassword: 'Hide password',
         create: 'Create',
         approve: 'Approve',
-        reject: 'Reject'
+        reject: 'Reject',
+        backendOfflineBanner: 'Backend is off to save resources. Sample data (mockup) is shown with reduced functionality.'
       },
       status: {
         label: 'Status'
@@ -1341,6 +1373,8 @@ const resources = {
         delete: 'Delete',
         edit: 'Edit',
         create: 'Create',
+        back: 'Back',
+        next: 'Next',
         confirmDelete: 'Are you sure you want to delete this record?'
       },
       charts: {
@@ -1866,6 +1900,35 @@ const resources = {
           tab: 'Chat',
           title: 'Team Chat'
         }
+      },
+      tour: {
+        progress: 'Guide',
+        finish: 'Get Started',
+        skip: 'Skip tour',
+        welcome: {
+          title: 'Welcome to RobEurope',
+          description: 'Manage your team, competitions, posts and gallery all in one place.'
+        },
+        team: {
+          title: '1) Create or join a team',
+          description: 'From Teams you can create your team or request to join an existing one.',
+          cta: 'Go to Teams'
+        },
+        competitions: {
+          title: '2) Compete and register',
+          description: 'In My Team you manage members and register for competitions.',
+          cta: 'View competitions'
+        },
+        news: {
+          title: '3) Follow news and updates',
+          description: 'Posts and notifications keep you up to date with changes and events.',
+          cta: 'Open Posts'
+        },
+        gallery: {
+          title: '4) Explore the interactive gallery',
+          description: 'Open images, navigate with keyboard and bookmark your favorites.',
+          cta: 'Open gallery'
+        }
       }
     }
   },
@@ -2117,7 +2180,8 @@ const resources = {
         hidePassword: 'Passwort verbergen',
         create: 'Erstellen',
         approve: 'Genehmigen',
-        reject: 'Ablehnen'
+        reject: 'Ablehnen',
+        backendOfflineBanner: 'Backend ist zur Ressourcenschonung deaktiviert. Es werden Beispieldaten (Mockup) mit eingeschränkten Funktionen angezeigt.'
       },
       status: {
         label: 'Status'
@@ -2254,6 +2318,8 @@ const resources = {
         delete: 'Löschen',
         edit: 'Bearbeiten',
         create: 'Erstellen',
+        back: 'Zurück',
+        next: 'Weiter',
         confirmDelete: 'Sind Sie sicher, dass Sie diesen Eintrag löschen möchten?'
       },
       charts: {
@@ -2770,6 +2836,35 @@ const resources = {
         chat: {
           tab: 'Chat',
           title: 'Team-Chat'
+        }
+      },
+      tour: {
+        progress: 'Anleitung',
+        finish: 'Loslegen',
+        skip: 'Tour überspringen',
+        welcome: {
+          title: 'Willkommen bei RobEurope',
+          description: 'Verwalte dein Team, Wettbewerbe, Beiträge und Galerie an einem Ort.'
+        },
+        team: {
+          title: '1) Erstelle oder trete einem Team bei',
+          description: 'Unter Teams kannst du dein Team erstellen oder einem bestehenden beitreten.',
+          cta: 'Zu Teams'
+        },
+        competitions: {
+          title: '2) Wettkampf und Anmeldung',
+          description: 'In Mein Team verwaltest du Mitglieder und meldest dich für Wettbewerbe an.',
+          cta: 'Wettbewerbe ansehen'
+        },
+        news: {
+          title: '3) Nachrichten und Updates verfolgen',
+          description: 'Beiträge und Benachrichtigungen halten dich über Änderungen und Events auf dem Laufenden.',
+          cta: 'Beiträge öffnen'
+        },
+        gallery: {
+          title: '4) Interaktive Galerie erkunden',
+          description: 'Öffne Bilder, navigiere mit der Tastatur und merke dir deine Favoriten.',
+          cta: 'Galerie öffnen'
         }
       }
     }

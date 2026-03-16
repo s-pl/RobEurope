@@ -9,7 +9,7 @@ export const supportedLocales = ['es', 'en', 'de'];
 
 i18n.configure({
   locales: supportedLocales,
-  defaultLocale: 'es',
+  defaultLocale: 'en',
   directory: path.join(__dirname, '..', 'locales'),
   objectNotation: true,
   autoReload: process.env.NODE_ENV !== 'production',

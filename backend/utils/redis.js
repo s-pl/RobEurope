@@ -16,7 +16,11 @@ const redisClient = createClient({
 redisClient.on('error', (err) => logger.error('Redis Client Error', err));
 redisClient.on('connect', () => logger.info('Redis Client Connected'));
 
-await redisClient.connect();
+try {
+  await redisClient.connect();
+} catch (err) {
+  logger.error('Redis connection failed — the server will start but features that depend on Redis (rate-limit dedup, scheduler dedup, etc.) will be unavailable.', err);
+}
 
 /**
  * Connected Redis client instance.

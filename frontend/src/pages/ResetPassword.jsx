@@ -64,10 +64,10 @@ const ResetPassword = () => {
   const strength = pw ? getPasswordStrength(pw) : { score: 0, label: '', color: '#e5e7eb' };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-12 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
-      <Card className="w-full max-w-md border-slate-200 dark:border-slate-800">
+    <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-12 text-stone-900 dark:bg-stone-950 dark:text-stone-50">
+      <Card className="w-full max-w-md border-stone-200 dark:border-stone-800">
         <CardHeader className="space-y-2 text-center">
-          <p className="text-xs uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">{t('reset.tagline') || 'RESETEAR'}</p>
+          <p className="text-xs uppercase tracking-[0.4em] text-stone-500 dark:text-stone-400">{t('reset.tagline') || 'RESETEAR'}</p>
           <CardTitle className="text-3xl">{t('reset.title') || 'Restablecer contraseña'}</CardTitle>
           <CardDescription>{t('reset.description') || 'Introduce el token y tu nueva contraseña.'}</CardDescription>
         </CardHeader>
@@ -94,7 +94,7 @@ const ResetPassword = () => {
               <Input id="pw" type="password" required value={pw} onChange={(e)=>setPw(e.target.value)} className="mt-2" autoComplete="new-password" />
               {pw && (
                 <div className="mt-1">
-                  <div className="flex items-center justify-between text-xs text-slate-500">
+                  <div className="flex items-center justify-between text-xs text-stone-500">
                     <span>{t('forms.passwordStrength') || 'Fuerza'}</span>
                     <span style={{ color: strength.color }}>{strength.label}</span>
                   </div>

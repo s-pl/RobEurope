@@ -25,6 +25,16 @@ export default function defineCommentModel(sequelize, DataTypes) {
                 key: 'id'
             }
         },
+        parent_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'Comment',
+                key: 'id'
+            },
+            onUpdate: 'CASCADE',
+            onDelete: 'CASCADE'
+        },
         created_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW
@@ -40,6 +50,8 @@ export default function defineCommentModel(sequelize, DataTypes) {
     Comment.associate = (models) => {
         Comment.belongsTo(models.Post, { foreignKey: 'post_id' });
         Comment.belongsTo(models.User, { foreignKey: 'author_id' });
+        Comment.belongsTo(models.Comment, { as: 'parent', foreignKey: 'parent_id' });
+        Comment.hasMany(models.Comment, { as: 'replies', foreignKey: 'parent_id' });
     };
 
     return Comment;

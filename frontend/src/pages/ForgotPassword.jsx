@@ -112,9 +112,9 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-4 py-12 text-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:text-slate-50">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-4 py-12 text-stone-900 dark:from-stone-950 dark:via-stone-900 dark:to-stone-950 dark:text-stone-50">
       <div ref={containerRef} className="w-full max-w-md">
-        <Card className="border-slate-200 shadow-2xl dark:border-slate-800 dark:bg-slate-900/80 backdrop-blur-md">
+        <Card className="border-stone-200 shadow-2xl dark:border-stone-800 dark:bg-stone-900/80 backdrop-blur-md">
           <CardHeader className="space-y-2 text-center pb-8">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
               {step === 1 ? (
@@ -156,7 +156,7 @@ const ForgotPassword = () => {
                     {t('forms.email')}
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+                    <Mail className="absolute left-3 top-2.5 h-5 w-5 text-stone-400" />
                     <Input 
                       id="email" 
                       type="email" 
@@ -209,7 +209,7 @@ const ForgotPassword = () => {
                   <div className="space-y-2">
                     <Label htmlFor="newPassword">{t('forms.new_password')}</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+                      <Lock className="absolute left-3 top-2.5 h-5 w-5 text-stone-400" />
                       <Input 
                         id="newPassword" 
                         type="password" 
@@ -225,7 +225,7 @@ const ForgotPassword = () => {
                   <div className="space-y-2">
                     <Label htmlFor="confirmPassword">{t('forms.confirm_password')}</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+                      <Lock className="absolute left-3 top-2.5 h-5 w-5 text-stone-400" />
                       <Input 
                         id="confirmPassword" 
                         type="password" 
@@ -260,7 +260,7 @@ const ForgotPassword = () => {
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+                className="text-sm text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 transition-colors"
               >
                 {t('auth.backToLogin')}
               </button>

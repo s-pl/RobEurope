@@ -1,25 +1,25 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStreams } from '../hooks/useStreams';
-import { PageHeader } from '../components/ui/PageHeader';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { Eye, Building2 } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { Eye, Building2, Lock } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const Streams = () => {
   const { t } = useTranslation();
   const { streams, loading, error } = useStreams();
+  const { isAuthenticated } = useAuth();
 
   // Group streams by educational center
   const streamsByCenter = useMemo(() => {
     const grouped = {};
     const noCenter = { name: t('streams.noCenter') || 'Sin centro educativo', id: null };
-    
+
     streams.forEach(stream => {
       const center = stream.team?.educationalCenter || stream.team?.EducationalCenter;
       const centerName = center?.name || noCenter.name;
       const centerId = center?.id || 'none';
-      
+
       if (!grouped[centerId]) {
         grouped[centerId] = {
           center: { name: centerName, id: centerId === 'none' ? null : centerId },
@@ -28,121 +28,154 @@ const Streams = () => {
       }
       grouped[centerId].streams.push(stream);
     });
-    
+
     return Object.values(grouped);
   }, [streams, t]);
 
-  const getStatusBadge = (status) => {
-    const variants = {
-      live: 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800',
-      offline: 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700',
-      scheduled: 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800',
-    };
-
-    const labels = {
-      live: t('streams.status.live'),
-      offline: t('streams.status.offline'),
-      scheduled: t('streams.status.scheduled'),
-    };
-
-    return (
-      <Badge variant="outline" className={variants[status] || variants.offline}>
-        {labels[status] || t('streams.status.offline')}
-      </Badge>
-    );
+  const statusConfig = {
+    live: { dot: 'bg-green-500', label: t('streams.status.live'), pulse: true },
+    offline: { dot: 'bg-stone-400', label: t('streams.status.offline'), pulse: false },
+    scheduled: { dot: 'bg-yellow-500', label: t('streams.status.scheduled'), pulse: false },
   };
+
+  const getStatus = (status) => statusConfig[status] || statusConfig.offline;
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-slate-600 dark:text-slate-400">{t('streams.loading')}</div>
+      <div className="max-w-3xl mx-auto">
+        <div className="pt-2 pb-8">
+          <div className="h-8 w-48 bg-stone-100 dark:bg-stone-800 rounded animate-pulse mb-2" />
+          <div className="h-4 w-72 bg-stone-100 dark:bg-stone-800 rounded animate-pulse" />
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="py-5 border-b border-stone-200 dark:border-stone-800">
+              <div className="h-5 w-64 bg-stone-100 dark:bg-stone-800 rounded animate-pulse mb-2" />
+              <div className="h-4 w-48 bg-stone-100 dark:bg-stone-800 rounded animate-pulse" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center text-red-600 dark:text-red-400">{t('streams.error')} {error}</div>
+      <div className="max-w-3xl mx-auto pt-2">
+        <p className="text-center text-red-600 dark:text-red-400 py-12">{t('streams.error')} {error}</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <PageHeader title={t('streams.title')} description={t('streams.subtitle')} />
+    <div className="max-w-3xl mx-auto">
+      {/* Page header */}
+      <div className="pt-2 pb-8">
+        <h1 className="font-display text-3xl font-bold text-stone-900 dark:text-stone-50">
+          {t('streams.title')}
+        </h1>
+        <p className="text-stone-500 dark:text-stone-400 text-sm mt-1">
+          {t('streams.subtitle')}
+        </p>
+      </div>
 
       {streamsByCenter.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500">{t('streams.noStreams') || 'No hay streams disponibles.'}</p>
+        <div className="text-center py-16">
+          <p className="text-stone-400 text-sm">{t('streams.noStreams') || 'No hay streams disponibles.'}</p>
         </div>
       ) : (
-        <div className="space-y-8">
-          {streamsByCenter.map((group) => (
-            <div key={group.center.id || 'none'} className="space-y-4">
-              {/* Center Header */}
-              <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2">
-                <Building2 className="h-5 w-5 text-blue-600" />
-                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+        <div className="space-y-10">
+          {streamsByCenter.map((group, gi) => (
+            <motion.div
+              key={group.center.id || 'none'}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: gi * 0.05 }}
+            >
+              {/* Center section header */}
+              <div className="flex items-center gap-2 pb-3 mb-0 border-b border-stone-200 dark:border-stone-800">
+                <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <h2 className="font-display text-sm font-semibold text-stone-900 dark:text-stone-50 uppercase tracking-wider">
                   {group.center.name}
                 </h2>
-                <Badge variant="outline" className="ml-2">
+                <span className="text-xs text-stone-400 ml-1">
                   {group.streams.length} {group.streams.length === 1 ? 'stream' : 'streams'}
-                </Badge>
+                </span>
               </div>
 
-              {/* Streams Grid */}
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {group.streams.map((stream) => (
-                  <Card key={stream.id} className="hover:shadow-lg transition-shadow border-blue-200 dark:border-slate-700">
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-blue-900 dark:text-blue-100">{stream.title}</CardTitle>
-                          <div className="mt-2">
-                            {getStatusBadge(stream.status)}
-                          </div>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      {stream.description && (
-                        <p className="text-slate-600 dark:text-slate-400 mb-4">{stream.description}</p>
-                      )}
-
-                      <div className="mb-4">
-                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                          <span className="font-semibold">{t('streams.team')}:</span> {stream.team?.name || 'N/A'}
-                        </p>
-                        {stream.competition && (
-                          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                            <span className="font-semibold">{t('streams.competition')}:</span> {stream.competition.title}
-                          </p>
+              {/* Stream rows */}
+              <div className="divide-y divide-stone-100 dark:divide-stone-800/50">
+                {group.streams.map((stream, si) => {
+                  const status = getStatus(stream.status);
+                  return (
+                    <div
+                      key={stream.id}
+                      className="flex items-center gap-4 py-4 group"
+                    >
+                      {/* Status dot */}
+                      <div className="shrink-0 relative">
+                        <span className={`block w-2.5 h-2.5 rounded-full ${status.dot}`} />
+                        {status.pulse && (
+                          <span className={`absolute inset-0 w-2.5 h-2.5 rounded-full ${status.dot} animate-ping opacity-75`} />
                         )}
                       </div>
 
-                      {stream.stream_url && (
-                        <div className="mb-4">
-                          <a
-                            href={stream.stream_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-                          >
-                            <Eye className="w-4 h-4" />
-                            {t('streams.watch')}
-                          </a>
+                      {/* Stream info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-medium text-stone-900 dark:text-stone-50 truncate">
+                            {stream.title}
+                          </h3>
+                          <span className="text-xs text-stone-400 shrink-0">
+                            {status.label}
+                          </span>
                         </div>
-                      )}
-
-                      <div className="text-sm text-slate-500 dark:text-slate-400">
-                        <p>{t('streams.created') || 'Creado'}: {new Date(stream.created_at).toLocaleDateString()}</p>
+                        {stream.description && (
+                          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 truncate">
+                            {stream.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-3 mt-1 text-xs text-stone-400">
+                          <span>{t('streams.team')}: {stream.team?.name || 'N/A'}</span>
+                          {stream.competition && (
+                            <>
+                              <span className="text-stone-300 dark:text-stone-700">|</span>
+                              <span>{stream.competition.title}</span>
+                            </>
+                          )}
+                          <span className="text-stone-300 dark:text-stone-700">|</span>
+                          <span>{new Date(stream.created_at).toLocaleDateString()}</span>
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+
+                      {/* Watch link or locked overlay */}
+                      <div className="shrink-0">
+                        {isAuthenticated ? (
+                          stream.stream_url ? (
+                            <a
+                              href={stream.stream_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 transition-colors"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              {t('streams.watch')}
+                            </a>
+                          ) : (
+                            <span className="text-xs text-stone-400">{t('streams.status.offline')}</span>
+                          )
+                        ) : (
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg text-stone-400 bg-stone-100 dark:bg-stone-800 dark:text-stone-500">
+                            <Lock className="w-3 h-3" />
+                            {t('streams.registerToWatch') || 'Register to watch'}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}

@@ -175,8 +175,8 @@ const TeamChat = ({ teamId }) => {
   };
 
   return (
-    <div className="flex flex-col h-[600px] border rounded-lg bg-white dark:bg-slate-950 dark:border-slate-800">
-      <div className="p-4 border-b dark:border-slate-800 flex justify-between items-center">
+    <div className="flex flex-col h-[600px] border rounded-lg bg-white dark:bg-stone-950 dark:border-stone-800">
+      <div className="p-4 border-b dark:border-stone-800 flex justify-between items-center">
         <div>
           <h3 className="font-semibold text-lg">{t('team.chat.title')}</h3>
           {onlineUsers.length > 0 && (
@@ -188,18 +188,18 @@ const TeamChat = ({ teamId }) => {
         </div>
         <div className="flex -space-x-2">
           {onlineUsers.slice(0, 5).map(u => (
-            <div key={u.id} className="h-8 w-8 rounded-full border-2 border-white dark:border-slate-900 bg-slate-100 overflow-hidden" title={u.first_name}>
+            <div key={u.id} className="h-8 w-8 rounded-full border-2 border-white dark:border-stone-900 bg-stone-100 overflow-hidden" title={u.first_name}>
               {u.profile_photo_url ? (
                 <img src={resolveMediaUrl(u.profile_photo_url)} alt={u.first_name} className="h-full w-full object-cover" />
               ) : (
-                <div className="h-full w-full flex items-center justify-center text-xs font-bold text-slate-500">
+                <div className="h-full w-full flex items-center justify-center text-xs font-bold text-stone-500">
                   {u.first_name?.[0]}
                 </div>
               )}
             </div>
           ))}
           {onlineUsers.length > 5 && (
-            <div className="h-8 w-8 rounded-full border-2 border-white dark:border-slate-900 bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">
+            <div className="h-8 w-8 rounded-full border-2 border-white dark:border-stone-900 bg-stone-100 flex items-center justify-center text-xs font-bold text-stone-500">
               +{onlineUsers.length - 5}
             </div>
           )}
@@ -212,21 +212,21 @@ const TeamChat = ({ teamId }) => {
             const isMe = msg.user_id === user.id;
             return (
               <div key={msg.id} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}>
-                <div className="h-8 w-8 rounded-full bg-slate-100 overflow-hidden flex-shrink-0 border border-slate-200 dark:border-slate-700">
+                <div className="h-8 w-8 rounded-full bg-stone-100 overflow-hidden flex-shrink-0 border border-stone-200 dark:border-stone-700">
                   {msg.User?.profile_photo_url ? (
                     <img src={resolveMediaUrl(msg.User.profile_photo_url)} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    <div className="h-full w-full flex items-center justify-center text-slate-400 text-xs font-bold">
+                    <div className="h-full w-full flex items-center justify-center text-stone-400 text-xs font-bold">
                       {msg.User?.first_name?.[0]}
                     </div>
                   )}
                 </div>
                 <div className={`flex flex-col max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
                   <div className="flex items-baseline gap-2 mb-1">
-                    <span className="text-xs font-medium text-slate-500">{msg.User?.first_name}</span>
-                    <span className="text-[10px] text-slate-400">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    <span className="text-xs font-medium text-stone-500">{msg.User?.first_name}</span>
+                    <span className="text-[10px] text-stone-400">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
-                  <div className={`p-3 rounded-lg ${isMe ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100'}`}>
+                  <div className={`p-3 rounded-lg ${isMe ? 'bg-blue-600 text-white' : 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100'}`}>
                     {msg.content && <p className="whitespace-pre-wrap text-sm">{msg.content}</p>}
                     
                     {/* Multiple attachments */}
@@ -237,15 +237,15 @@ const TeamChat = ({ teamId }) => {
                             {att.type === 'image' ? (
                               <img src={resolveMediaUrl(att.url)} alt="attachment" className="max-w-full rounded-md max-h-[200px]" />
                             ) : (
-                              <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700 max-w-xs group transition-all hover:shadow-sm">
+                              <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-stone-900/50 rounded-lg border border-stone-200 dark:border-stone-700 max-w-xs group transition-all hover:shadow-sm">
                                 <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
                                   <FileText className="h-5 w-5 text-blue-700 dark:text-blue-400" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium truncate text-slate-700 dark:text-slate-200">
+                                  <p className="text-sm font-medium truncate text-stone-700 dark:text-stone-200">
                                     {att.name || 'Archivo adjunto'}
                                   </p>
-                                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">
+                                  <p className="text-xs text-stone-500 dark:text-stone-400 uppercase font-semibold">
                                     {att.url?.split('.').pop() || 'FILE'}
                                   </p>
                                 </div>
@@ -254,7 +254,7 @@ const TeamChat = ({ teamId }) => {
                                   target="_blank" 
                                   rel="noopener noreferrer" 
                                   download
-                                  className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-500 dark:text-slate-400"
+                                  className="p-2 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full transition-colors text-stone-500 dark:text-stone-400"
                                   title="Descargar"
                                 >
                                   <Download className="h-4 w-4" />
@@ -272,15 +272,15 @@ const TeamChat = ({ teamId }) => {
                         {msg.type === 'image' ? (
                           <img src={resolveMediaUrl(msg.file_url)} alt="attachment" className="max-w-full rounded-md max-h-[200px]" />
                         ) : (
-                          <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700 max-w-xs group transition-all hover:shadow-sm">
+                          <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-stone-900/50 rounded-lg border border-stone-200 dark:border-stone-700 max-w-xs group transition-all hover:shadow-sm">
                             <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
                               <FileText className="h-5 w-5 text-blue-700 dark:text-blue-400" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate text-slate-700 dark:text-slate-200">
+                              <p className="text-sm font-medium truncate text-stone-700 dark:text-stone-200">
                                 Archivo adjunto
                               </p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">
+                              <p className="text-xs text-stone-500 dark:text-stone-400 uppercase font-semibold">
                                 {msg.file_url?.split('.').pop() || 'FILE'}
                               </p>
                             </div>
@@ -289,7 +289,7 @@ const TeamChat = ({ teamId }) => {
                               target="_blank" 
                               rel="noopener noreferrer" 
                               download
-                              className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-500 dark:text-slate-400"
+                              className="p-2 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full transition-colors text-stone-500 dark:text-stone-400"
                               title="Descargar"
                             >
                               <Download className="h-4 w-4" />
@@ -305,18 +305,18 @@ const TeamChat = ({ teamId }) => {
           })}
           <div ref={scrollRef} />
           {typingUsers.length > 0 && (
-            <div className="text-xs text-slate-400 italic animate-pulse ml-10">
+            <div className="text-xs text-stone-400 italic animate-pulse ml-10">
               {typingUsers.map(u => u.first_name).join(', ')} {typingUsers.length === 1 ? 'está escribiendo...' : 'están escribiendo...'}
             </div>
           )}
         </div>
       </ScrollArea>
 
-      <div className="p-4 border-t dark:border-slate-800">
+      <div className="p-4 border-t dark:border-stone-800">
         {files.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-2">
             {files.map((f, i) => (
-              <div key={i} className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-md text-sm border border-slate-200 dark:border-slate-700">
+              <div key={i} className="flex items-center gap-2 p-2 bg-stone-50 dark:bg-stone-900 rounded-md text-sm border border-stone-200 dark:border-stone-700">
                 <Paperclip className="h-3 w-3 text-blue-500" />
                 <span className="truncate max-w-[150px]">{f.name}</span>
                 <button onClick={() => removeFile(i)} className="ml-auto hover:text-red-500">
@@ -336,7 +336,7 @@ const TeamChat = ({ teamId }) => {
               onChange={handleFileSelect}
             />
             <Button type="button" variant="ghost" size="icon" onClick={() => document.getElementById('chat-file').click()}>
-              <Paperclip className="h-5 w-5 text-slate-500" aria-hidden="true" />
+              <Paperclip className="h-5 w-5 text-stone-500" aria-hidden="true" />
               <span className="sr-only">{t('common.attachFile') || 'Attach file'}</span>
             </Button>
           </div>

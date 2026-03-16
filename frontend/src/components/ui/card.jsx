@@ -3,7 +3,10 @@ import { cn } from '../../lib/utils';
 
 const Card = ({ className, ...props }) => (
   <div
-    className={cn('rounded-3xl border border-blue-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-900 dark:border-slate-800', className)}
+    className={cn(
+      'rounded-xl border border-stone-200 bg-white p-6 dark:border-stone-800 dark:bg-stone-900',
+      className
+    )}
     {...props}
   />
 );
@@ -14,12 +17,12 @@ const CardHeader = ({ className, ...props }) => (
 
 const CardTitle = ({ className, as: Component = 'h3', ...props }) =>
   createElement(Component, {
-    className: cn('text-xl font-semibold tracking-tight text-blue-900 dark:text-blue-100', className),
+    className: cn('font-display text-xl font-semibold tracking-tight text-stone-900 dark:text-stone-50', className),
     ...props,
   });
 
 const CardDescription = ({ className, ...props }) => (
-  <p className={cn('text-sm text-blue-700 dark:text-blue-400', className)} {...props} />
+  <p className={cn('text-sm text-stone-500 dark:text-stone-400', className)} {...props} />
 );
 
 const CardContent = ({ className, ...props }) => (

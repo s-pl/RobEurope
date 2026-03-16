@@ -63,7 +63,14 @@ export default async function defineNotificationModel(sequelize, DataTypes) {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW
         }
-        
+
+    }, {
+        indexes: [
+            {
+                name: 'idx_notifications_user_read_created',
+                fields: ['user_id', 'is_read', { attribute: 'created_at', order: 'DESC' }]
+            }
+        ]
     });
 
     

@@ -19,8 +19,11 @@ import galleryRouter from './gallery.route.js';
 import educationalCenterRouter from './educational_center.route.js';
 import archiveRouter from './archive.route.js';
 import contactRouter from './contact.route.js';
+import statsRouter from './stats.route.js';
 import authenticateToken from '../../middleware/auth.middleware.js';
 import adminApiRouter from './admin.route.js';
+import gdprRouter from './gdpr.route.js';
+import conversationsRouter from './conversations.route.js';
 const router = express.Router();
 
 // Public routes (GET usually public, POST/PUT/DELETE protected inside)
@@ -37,6 +40,7 @@ router.use('/gallery', galleryRouter);
 router.use('/educational-centers', educationalCenterRouter);
 router.use('/archives', archiveRouter);
 router.use('/contact', contactRouter);
+router.use('/stats', statsRouter);
 
 // Protect all routes after this middleware: only authenticated users can access
 router.use(authenticateToken);
@@ -46,6 +50,7 @@ router.get('/whoami', (req, res) => {
 	return res.json({ user: req.user || null });
 });
 
+router.use('/gdpr', gdprRouter);
 router.use('/notifications', notificationsRouter);
 router.use('/notifications/push', pushRouter);
 router.use('/registrations', registrationRouter);
@@ -53,6 +58,7 @@ router.use('/system-logs', systemLogRouter);
 router.use('/robot-files', robotFilesRouter);
 router.use('/team-logs', teamLogsRouter);
 router.use('/admin', adminApiRouter);
+router.use('/conversations', conversationsRouter);
 
 
 export default router;

@@ -4,6 +4,7 @@ import { requireOwnership } from '../../middleware/ownership.middleware.js';
 import { uploadMiddleware } from '../../middleware/upload.middleware.js';
 import {
   searchUsers,
+  searchUsersForInvite,
   getUserById,
   deleteUser,
   updateUser,
@@ -15,6 +16,7 @@ import {
 const router = express.Router();
 
 router.get('/', searchUsers);
+router.get('/search', authenticateToken, searchUsersForInvite);
 
 // rutas para el usuario autenticado: MUST be before "/:id"
 router.get('/me', authenticateToken, getSelf);

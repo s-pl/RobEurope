@@ -1,16 +1,40 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiRequest, resolveMediaUrl } from '../lib/apiClient';
+import { useAuth } from '../hooks/useAuth';
 import { PageHeader } from '../components/ui/PageHeader';
-import { Alert, AlertTitle, AlertDescription } from '../components/ui/alert';
+import { Alert, AlertDescription } from '../components/ui/alert';
 import { Skeleton } from '../components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { Download, Trophy as TrophyIcon, Calendar } from 'lucide-react';
+import { Download, FileText, FileArchive, File, Calendar, Lock, Globe, EyeOff } from 'lucide-react';
+
+const fileTypeIcon = (name) => {
+  if (!name) return File;
+  const ext = name.split('.').pop()?.toLowerCase();
+  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return FileArchive;
+  if (['pdf', 'doc', 'docx', 'txt', 'odt'].includes(ext)) return FileText;
+  return File;
+};
+
+const visibilityConfig = {
+  public: {
+    icon: Globe,
+    style: 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300',
+  },
+  restricted: {
+    icon: Lock,
+    style: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  },
+  hidden: {
+    icon: EyeOff,
+    style: 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  },
+};
 
 const Archive = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'super_admin' || user?.role === 'center_admin';
 
   const [items, setItems] = useState([]);
   const [competitions, setCompetitions] = useState([]);
@@ -50,43 +74,30 @@ const Archive = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCompetition]);
 
-  const getVisibilityBadge = (visibility) => {
-    const styles = {
-      public: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-      hidden: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400',
-      restricted: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-    };
-    return (
-      <Badge variant="outline" className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border-0 ${styles[visibility] || styles.hidden}`}>
-        {t(`archives.visibility.${visibility}`) || visibility}
-      </Badge>
-    );
-  };
-
-  const getContentTypeBadge = (contentType) => {
-    const styles = {
-      file: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-      text: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-      mixed: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
-    };
-    return (
-      <Badge variant="outline" className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border-0 ${styles[contentType] || styles.text}`}>
-        {t(`archives.contentType.${contentType}`) || contentType}
-      </Badge>
-    );
+  const handleDownload = (item) => {
+    if (item.file_url) {
+      const link = document.createElement('a');
+      link.href = resolveMediaUrl(item.file_url);
+      link.download = item.file_name || 'download';
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <PageHeader title={t('archives.title')} description={t('archives.description')} />
 
-      {/* Filtro por competición */}
-      <div className="flex flex-wrap items-center gap-4">
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+      {/* Inline filter bar */}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-sm font-medium text-stone-600 dark:text-stone-400">
           {t('archives.fields.competition')}:
-        </label>
+        </span>
         <Select value={selectedCompetition} onValueChange={setSelectedCompetition}>
-          <SelectTrigger className="w-56">
+          <SelectTrigger className="w-56 rounded-xl border-stone-200 dark:border-stone-700">
             <SelectValue placeholder={t('archives.filters.competitionAll')} />
           </SelectTrigger>
           <SelectContent>
@@ -98,86 +109,112 @@ const Archive = () => {
         </Select>
       </div>
 
-      <div>
-        {status.loading && (
-          <div className="space-y-4">
-            {[...Array(4)].map((_, i) => (
-              <Card key={i} className="p-0">
-                <CardHeader className="pb-2">
-                  <Skeleton className="h-5 w-48 rounded" />
-                  <div className="flex gap-2 mt-2">
-                    <Skeleton className="h-4 w-16 rounded-full" />
-                    <Skeleton className="h-4 w-16 rounded-full" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-4 w-full rounded" />
-                  <Skeleton className="h-4 w-2/3 rounded mt-2" />
-                </CardContent>
-              </Card>
-            ))}
+      {/* Loading skeleton rows */}
+      {status.loading && (
+        <div className="space-y-0 divide-y divide-stone-200 dark:divide-stone-800">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex items-center gap-4 py-4">
+              <Skeleton className="h-10 w-10 rounded-lg shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-48" />
+                <Skeleton className="h-3 w-72" />
+              </div>
+              <Skeleton className="h-8 w-8 rounded-lg" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!status.loading && status.error && (
+        <Alert variant="destructive">
+          <AlertDescription>{status.error}</AlertDescription>
+        </Alert>
+      )}
+
+      {!status.loading && !status.error && items.length === 0 && (
+        <div className="flex flex-col items-center py-20 gap-3 text-center">
+          <div className="w-14 h-14 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+            <FileText className="h-7 w-7 text-stone-400" />
           </div>
-        )}
+          <p className="font-display font-medium text-stone-900 dark:text-stone-50">
+            {t('archives.empty') || 'No hay archivos'}
+          </p>
+        </div>
+      )}
 
-        {!status.loading && status.error && (
-          <Alert variant="destructive">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{status.error}</AlertDescription>
-          </Alert>
-        )}
+      {/* File list as clean rows */}
+      {!status.loading && !status.error && items.length > 0 && (
+        <div className="divide-y divide-stone-200 dark:divide-stone-800">
+          {items.map((item) => {
+            const Icon = fileTypeIcon(item.file_name);
+            const visCfg = visibilityConfig[item.visibility] || visibilityConfig.hidden;
+            const VisIcon = visCfg.icon;
+            return (
+              <div key={item.id} className="flex items-center gap-4 py-4 group">
+                {/* File type icon */}
+                <div className="h-10 w-10 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0">
+                  <Icon className="h-5 w-5 text-stone-500 dark:text-stone-400" />
+                </div>
 
-        {!status.loading && !status.error && items.length === 0 && (
-          <p className="text-sm text-slate-500">{t('archives.empty') || 'No hay archivos'}</p>
-        )}
-
-        {!status.loading && !status.error && items.length > 0 && (
-          <div className="space-y-4">
-            {items.map((item) => (
-              <Card key={item.id} className="p-0 overflow-hidden">
-                <CardHeader className="pb-2 px-5 pt-5">
+                {/* Title + description + meta */}
+                <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <CardTitle as="h3" className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+                    <h3 className="font-display font-semibold text-stone-900 dark:text-stone-50 truncate">
                       {item.title}
-                    </CardTitle>
-                    {getVisibilityBadge(item.visibility)}
-                    {getContentTypeBadge(item.content_type)}
-                  </div>
-                </CardHeader>
+                    </h3>
 
-                <CardContent className="px-5 pb-5 space-y-3">
-                  {item.description && (
-                    <p className="text-sm text-slate-600 dark:text-slate-400">{item.description}</p>
-                  )}
-
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                    {item.Competition?.title && (
-                      <span className="inline-flex items-center gap-1">
-                        <TrophyIcon className="h-4 w-4" />
-                        {item.Competition.title}
+                    {/* Competition badge - use lowercase 'competition' alias */}
+                    {(item.competition?.title || item.Competition?.title) && (
+                      <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
+                        {item.competition?.title || item.Competition?.title}
                       </span>
                     )}
-                    {item.file_url && (
-                      <a
-                        href={resolveMediaUrl(item.file_url)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                      >
-                        <Download className="h-4 w-4" />
-                        {item.file_name || t('archives.actions.download')}
-                      </a>
+
+                    {/* Visibility badge - only show to admin users */}
+                    {isAdmin && (
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${visCfg.style}`}>
+                        <VisIcon className="h-3 w-3" />
+                        {t(`archives.visibility.${item.visibility}`) || item.visibility}
+                      </span>
                     )}
-                    <span className="inline-flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5" />
+
+                    {/* Restricted indicator for regular users */}
+                    {!isAdmin && item.visibility === 'restricted' && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                        <Lock className="h-3 w-3" />
+                        {t('archives.visibility.restricted') || 'Restringido'}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 mt-0.5">
+                    {item.description && (
+                      <p className="text-sm text-stone-500 dark:text-stone-400 truncate max-w-md">
+                        {item.description}
+                      </p>
+                    )}
+                    <span className="inline-flex items-center gap-1 text-xs text-stone-400 dark:text-stone-500">
+                      <Calendar className="h-3 w-3" />
                       {new Date(item.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                </div>
+
+                {/* Download button */}
+                {item.file_url && (
+                  <button
+                    onClick={() => handleDownload(item)}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-stone-500 hover:text-blue-600 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors duration-200 shrink-0"
+                    aria-label={item.file_name || t('archives.actions.download')}
+                  >
+                    <Download className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

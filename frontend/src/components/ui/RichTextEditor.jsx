@@ -54,7 +54,7 @@ export const RichTextEditor = ({ value, onChange, placeholder }) => {
   }), []);
 
   return (
-    <div className="rich-text-editor [&_.ql-editor]:min-h-[200px] [&_.ql-editor]:max-h-[300px] [&_.ql-editor]:overflow-y-auto [&_.ql-container]:rounded-b-md [&_.ql-toolbar]:rounded-t-md [&_.ql-container]:border-slate-200 [&_.ql-toolbar]:border-slate-200 dark:[&_.ql-container]:border-slate-800 dark:[&_.ql-toolbar]:border-slate-800 dark:[&_.ql-toolbar]:bg-slate-900 dark:[&_.ql-container]:bg-slate-950 dark:[&_.ql-picker]:text-slate-200 dark:[&_.ql-stroke]:stroke-slate-200 dark:[&_.ql-fill]:fill-slate-200">
+    <div className="rich-text-editor [&_.ql-editor]:min-h-[200px] [&_.ql-editor]:max-h-[300px] [&_.ql-editor]:overflow-y-auto [&_.ql-container]:rounded-b-md [&_.ql-toolbar]:rounded-t-md [&_.ql-container]:border-stone-200 [&_.ql-toolbar]:border-stone-200 dark:[&_.ql-container]:border-stone-800 dark:[&_.ql-toolbar]:border-stone-800 dark:[&_.ql-toolbar]:bg-stone-900 dark:[&_.ql-container]:bg-stone-950 dark:[&_.ql-picker]:text-stone-200 dark:[&_.ql-stroke]:stroke-stone-200 dark:[&_.ql-fill]:fill-stone-200">
       <ReactQuill
         ref={quillRef}
         theme="snow"

@@ -17,32 +17,57 @@ const MAX_CONTENT_BYTES = Number(process.env.POST_CONTENT_MAX_BYTES || 200 * 102
  * - `POST_CONTENT_MAX_BYTES` limits post content size to prevent oversized payloads.
  */
 
+// Simple in-memory set to track view increments per session/user/post
+const viewedPosts = new Map(); // key: `${userId||ip}_${postId}`, value: timestamp
+
+/**
+ * Clean up old view tracking entries every 30 minutes.
+ */
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamp] of viewedPosts) {
+    if (now - timestamp > 30 * 60 * 1000) {
+      viewedPosts.delete(key);
+    }
+  }
+}, 30 * 60 * 1000);
+
 /**
  * Creates a new post.
  *
- * Accepts optional file upload (multipart/form-data) and stores the uploaded file URL in `media_urls`.
+ * Accepts multiple file uploads (multipart/form-data, field 'images', up to 5).
+ * Falls back to single 'image' field for backwards compatibility.
  *
  * @route POST /api/posts
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const createPost = async (req, res) => {
   try {
     const postData = { ...req.body };
+
+    // Always set author to the authenticated user
+    postData.author_id = req.user.id;
 
     // Enforce content max size to avoid oversized payloads (e.g., pasted base64)
     if (postData.content && Buffer.byteLength(postData.content, 'utf8') > MAX_CONTENT_BYTES) {
       return res.status(413).json({ error: `Content too large. Max ${Math.floor(MAX_CONTENT_BYTES/1024)}KB` });
     }
 
-    // Handle file upload
-    const fileInfo = getFileInfo(req);
-    if (fileInfo) {
-      postData.media_urls = [fileInfo.url]; // Assuming single image for now
+    // Handle file uploads - support both single and multiple
+    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+      // Multiple files from upload.array('images', 5)
+      postData.media_urls = req.files.map(f => `/uploads/${f.filename}`);
+    } else if (req.file) {
+      // Single file fallback
+      postData.media_urls = [`/uploads/${req.file.filename}`];
+    } else if (postData.media_urls && typeof postData.media_urls === 'string') {
+      try {
+        postData.media_urls = JSON.parse(postData.media_urls);
+      } catch {
+        // ignore
+      }
     }
 
-  const item = await Post.create(postData);
+    const item = await Post.create(postData);
 
     // Log post creation
     await SystemLogger.logCreate('Post', item.id, {
@@ -76,9 +101,6 @@ export const createPost = async (req, res) => {
  * - `limit`, `offset`: pagination
  *
  * @route GET /api/posts
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getPosts = async (req, res) => {
   try {
@@ -90,10 +112,10 @@ export const getPosts = async (req, res) => {
     ];
     if (author_id) where.author_id = author_id;
 
-    const items = await Post.findAll({ 
-      where, 
-      limit: Number(limit), 
-      offset: Number(offset), 
+    const items = await Post.findAll({
+      where,
+      limit: Number(limit),
+      offset: Number(offset),
       order: [
         ['is_pinned', 'DESC'],
         ['created_at', 'DESC']
@@ -121,10 +143,8 @@ export const getPosts = async (req, res) => {
 
 /**
  * Retrieves a single post by id (includes author, likes, and comments).
+ * Increments views_count once per user/session.
  * @route GET /api/posts/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getPostById = async (req, res) => {
   try {
@@ -140,14 +160,33 @@ export const getPostById = async (req, res) => {
         },
         {
             model: Comment,
-            include: [{
+            include: [
+              {
                 model: User,
                 attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url']
-            }]
+              },
+              {
+                model: Comment,
+                as: 'replies',
+                include: [{
+                  model: User,
+                  attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url']
+                }]
+              }
+            ]
         }
       ]
     });
     if (!item) return res.status(404).json({ error: 'Post not found' });
+
+    // Increment views_count (simple dedup by user/ip + post)
+    const viewerKey = `${req.user?.id || req.ip}_${item.id}`;
+    if (!viewedPosts.has(viewerKey)) {
+      viewedPosts.set(viewerKey, Date.now());
+      await Post.increment('views_count', { where: { id: item.id } });
+      item.views_count = (item.views_count || 0) + 1;
+    }
+
     res.json(item);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -158,11 +197,9 @@ export const getPostById = async (req, res) => {
  * Updates a post by id.
  *
  * Accepts optional file upload and enforces the content size limit.
+ * Sets is_edited flag when content or title changes.
  *
  * @route PUT /api/posts/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const updatePost = async (req, res) => {
   try {
@@ -177,15 +214,38 @@ export const updatePost = async (req, res) => {
       return res.status(413).json({ error: `Content too large. Max ${Math.floor(MAX_CONTENT_BYTES/1024)}KB` });
     }
 
-    // Handle file upload
-    const fileInfo = getFileInfo(req);
-    if (fileInfo) {
-      updates.media_urls = [fileInfo.url]; // Assuming single image for now
+    // Handle file uploads - support both single and multiple
+    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+      updates.media_urls = req.files.map(f => `/uploads/${f.filename}`);
+    } else if (req.file) {
+      updates.media_urls = [`/uploads/${req.file.filename}`];
+    } else if (updates.media_urls && typeof updates.media_urls === 'string') {
+      try {
+        updates.media_urls = JSON.parse(updates.media_urls);
+      } catch {
+        // ignore
+      }
     }
+
+    // Set is_edited flag if content or title changes
+    if (
+      (updates.content && updates.content !== currentPost.content) ||
+      (updates.title && updates.title !== currentPost.title)
+    ) {
+      updates.is_edited = true;
+    }
+
+    updates.updated_at = new Date();
 
     const [updated] = await Post.update(updates, { where: { id: req.params.id } });
     if (!updated) return res.status(404).json({ error: 'Post not found' });
-    const updatedItem = await Post.findByPk(req.params.id);
+    const updatedItem = await Post.findByPk(req.params.id, {
+      include: [
+        { model: User, attributes: ['id','username','first_name','last_name','profile_photo_url'] },
+        { model: PostLike, attributes: ['user_id'] },
+        { model: Comment, attributes: ['id'] }
+      ]
+    });
 
     // Log post update
     await SystemLogger.logUpdate('Post', updatedItem.id, {
@@ -198,8 +258,8 @@ export const updatePost = async (req, res) => {
       media_urls: updatedItem.media_urls
     }, req, 'Post updated');
 
-  getIO()?.emit('post_updated', updatedItem);
-  res.json(updatedItem);
+    getIO()?.emit('post_updated', updatedItem);
+    res.json(updatedItem);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -208,9 +268,6 @@ export const updatePost = async (req, res) => {
 /**
  * Deletes a post by id.
  * @route DELETE /api/posts/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const deletePost = async (req, res) => {
   try {
@@ -228,8 +285,8 @@ export const deletePost = async (req, res) => {
       media_urls: post.media_urls
     }, req, 'Post deleted');
 
-  getIO()?.emit('post_deleted', { id: req.params.id });
-  res.json({ message: 'Post deleted' });
+    getIO()?.emit('post_deleted', { id: req.params.id });
+    res.json({ message: 'Post deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -238,9 +295,6 @@ export const deletePost = async (req, res) => {
 /**
  * Toggles the current user's like on a post.
  * @route POST /api/posts/:id/like
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const toggleLike = async (req, res) => {
     try {
@@ -267,23 +321,41 @@ export const toggleLike = async (req, res) => {
 
 /**
  * Adds a comment to a post.
+ * Supports nested replies via optional `parent_id`.
  * @route POST /api/posts/:id/comments
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const addComment = async (req, res) => {
     try {
         const { id } = req.params;
-        const { content } = req.body;
+        const { content, parent_id } = req.body;
         const author_id = req.user.id;
+
+        if (!content || !content.trim()) {
+          return res.status(400).json({ error: 'Comment content is required' });
+        }
+
+        // Validate parent_id if provided
+        if (parent_id) {
+          const parentComment = await Comment.findByPk(parent_id);
+          if (!parentComment) {
+            return res.status(404).json({ error: 'Parent comment not found' });
+          }
+          if (String(parentComment.post_id) !== String(id)) {
+            return res.status(400).json({ error: 'Parent comment does not belong to this post' });
+          }
+          // Only allow 1 level of nesting
+          if (parentComment.parent_id) {
+            return res.status(400).json({ error: 'Cannot reply to a reply. Only one level of nesting is allowed.' });
+          }
+        }
 
         const comment = await Comment.create({
             post_id: id,
             author_id,
-            content
+            content: content.trim(),
+            parent_id: parent_id || null
         });
-        
+
         const commentWithUser = await Comment.findByPk(comment.id, {
              include: [{
                 model: User,
@@ -291,8 +363,8 @@ export const addComment = async (req, res) => {
             }]
         });
 
-  getIO()?.emit('comment_added', commentWithUser);
-  res.status(201).json(commentWithUser);
+    getIO()?.emit('comment_added', commentWithUser);
+    res.status(201).json(commentWithUser);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -300,20 +372,34 @@ export const addComment = async (req, res) => {
 
 /**
  * Lists comments for a post.
+ * Returns comments as a tree: top-level comments with nested replies.
  * @route GET /api/posts/:id/comments
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getComments = async (req, res) => {
     try {
         const { id } = req.params;
+
+        // Fetch all top-level comments (no parent_id) with their replies
         const comments = await Comment.findAll({
-            where: { post_id: id },
-            include: [{
+            where: {
+              post_id: id,
+              parent_id: null
+            },
+            include: [
+              {
                 model: User,
                 attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url']
-            }],
+              },
+              {
+                model: Comment,
+                as: 'replies',
+                include: [{
+                  model: User,
+                  attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url']
+                }],
+                order: [['created_at', 'ASC']]
+              }
+            ],
             order: [['created_at', 'ASC']]
         });
         res.json(comments);
@@ -323,11 +409,41 @@ export const getComments = async (req, res) => {
 };
 
 /**
+ * Deletes a comment.
+ * Only the comment author or super_admin can delete.
+ * @route DELETE /api/posts/:id/comments/:commentId
+ */
+export const deleteComment = async (req, res) => {
+  try {
+    const { id, commentId } = req.params;
+    const comment = await Comment.findByPk(commentId);
+
+    if (!comment) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    if (String(comment.post_id) !== String(id)) {
+      return res.status(400).json({ error: 'Comment does not belong to this post' });
+    }
+
+    // Only author or super_admin can delete
+    if (String(comment.author_id) !== String(req.user.id) && req.user.role !== 'super_admin') {
+      return res.status(403).json({ error: 'Not authorized to delete this comment' });
+    }
+
+    // Delete the comment (cascade will handle replies due to model config)
+    await comment.destroy();
+
+    getIO()?.emit('comment_deleted', { post_id: id, comment_id: commentId });
+    res.json({ message: 'Comment deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
  * Toggles the pinned status of a post.
  * @route POST /api/posts/:id/pin
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const togglePin = async (req, res) => {
     try {
@@ -338,8 +454,8 @@ export const togglePin = async (req, res) => {
         post.is_pinned = !post.is_pinned;
         await post.save();
 
-  getIO()?.emit('post_pinned', { id: post.id, is_pinned: post.is_pinned });
-  res.json({ is_pinned: post.is_pinned });
+    getIO()?.emit('post_pinned', { id: post.id, is_pinned: post.is_pinned });
+    res.json({ is_pinned: post.is_pinned });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

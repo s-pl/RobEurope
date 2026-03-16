@@ -8,8 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { requestNotificationPermission } from '../../lib/notifications';
 import NotificationTestButton from '../notifications/NotificationTestButton';
 import { isBackendActive } from '../../lib/apiClient';
-import FloatingRobots from './FloatingRobots';
 import OnboardingTour from './OnboardingTour';
+
 const AppLayout = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
@@ -21,11 +21,10 @@ const AppLayout = () => {
   }, []);
 
   return (
-    <div className={`relative isolate min-h-screen bg-neutral-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50 ${isAdmin ? 'border-t-4 border-red-600' : ''}`}>
-      <FloatingRobots />
+    <div className={`relative isolate min-h-screen bg-[#f8f7f4] text-stone-900 dark:bg-[#0c0a09] dark:text-stone-50 ${isAdmin ? 'border-t-4 border-red-600' : ''}`}>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-900 focus:shadow dark:focus:bg-slate-900 dark:focus:text-slate-50"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-stone-900 focus:shadow dark:focus:bg-stone-900 dark:focus:text-stone-50"
       >
         {t('common.skipToContent')}
       </a>
