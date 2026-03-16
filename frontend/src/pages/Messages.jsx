@@ -861,13 +861,13 @@ const Messages = () => {
 
     const handleRead = (data) => {
       const { conversation_id, user_id } = data;
-      if (conversation_id === activeConvId) {
+      if (String(conversation_id) === String(activeConvId)) {
         // Could update read receipts UI here
       }
     };
 
     const handleParticipantsAdded = (data) => {
-      if (data.conversation_id === activeConvId) {
+      if (String(data.conversation_id) === String(activeConvId)) {
         loadConversations();
         loadMessages(activeConvId);
       } else {
