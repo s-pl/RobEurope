@@ -28,7 +28,7 @@ export default function defineDirectMessageModel(sequelize, DataTypes) {
             allowNull: true
         },
         type: {
-            type: DataTypes.ENUM('text', 'file', 'image', 'system'),
+            type: DataTypes.ENUM('text', 'file', 'image', 'system', 'ai'),
             defaultValue: 'text'
         },
         file_url: {

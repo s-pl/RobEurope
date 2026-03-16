@@ -92,6 +92,7 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GITHUB_CLIENT_ID:     ${GITHUB_CLIENT_ID:-}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      OPENROUTER_API_KEY:   ${OPENROUTER_API_KEY:-}
     volumes:
       - ./backend:/app
       - backend_node_modules:/app/node_modules
@@ -158,6 +159,7 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GITHUB_CLIENT_ID:     ${GITHUB_CLIENT_ID:-}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      OPENROUTER_API_KEY:   ${OPENROUTER_API_KEY:-}
     volumes:
       - backend_uploads:/app/uploads
     ports:

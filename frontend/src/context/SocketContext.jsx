@@ -12,6 +12,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import io from 'socket.io-client';
 import { getApiOrigin, isBackendActive } from '../lib/apiClient';
+import { useAuth } from '../hooks/useAuth';
 
 /**
  * React context for Socket.IO client.
@@ -35,22 +36,28 @@ const SocketContext = createContext(null);
  */
 export const SocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
+  const { user } = useAuth();
 
   const socketUrl = useMemo(() => (isBackendActive ? getApiOrigin() : ''), []);
 
   const socket = useMemo(() => {
     if (!isBackendActive || !socketUrl) return null;
-    return io(socketUrl, { transports: ['websocket', 'polling'] });
+    return io(socketUrl, { transports: ['websocket', 'polling'], withCredentials: true });
   }, [socketUrl]);
 
   useEffect(() => {
     if (!socket) return undefined;
-    socket.on('connect', () => setConnected(true));
+    const handleConnect = () => {
+      setConnected(true);
+      // Join personal room so emitToUser() delivers events to us
+      if (user?.id) socket.emit('identify', { userId: user.id });
+    };
+    socket.on('connect', handleConnect);
     socket.on('disconnect', () => setConnected(false));
     return () => {
       socket.disconnect();
     };
-  }, [socket]);
+  }, [socket, user?.id]);
 
   const value = useMemo(() => ({ socket, connected }), [socket, connected]);
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;

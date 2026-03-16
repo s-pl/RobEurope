@@ -64,11 +64,17 @@ function resolveUpFunction(migrationModule) {
   return null;
 }
 
+function expectsContextObject(fn) {
+  const source = String(fn || '');
+  return /\(\s*\{\s*context\b/.test(source);
+}
+
 async function executeMigrationUp(upFn, queryInterface) {
-  if (upFn.length <= 1) {
+  if (upFn.length === 1 && expectsContextObject(upFn)) {
     await upFn({ context: queryInterface, Sequelize });
     return;
   }
+
   await upFn(queryInterface, Sequelize);
 }
 

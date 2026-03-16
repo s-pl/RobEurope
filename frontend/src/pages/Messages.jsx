@@ -1,21 +1,25 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   MessageCircle, Search, Send, Paperclip, X, ArrowLeft,
   Users, UserPlus, Plus, File, FileText, Download,
   Image as ImageIcon, Check, CheckCheck, ChevronDown,
-  LogOut as LeaveIcon, Trash2, CornerUpRight,
+  LogOut as LeaveIcon, Trash2, CornerUpRight, Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useApi } from '../hooks/useApi';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../hooks/useToast';
+import { useAiStatus } from '../hooks/useAiStatus';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { ScrollArea } from '../components/ui/scroll-area';
-import { resolveMediaUrl } from '../lib/apiClient';
+import { resolveMediaUrl, getApiOrigin } from '../lib/apiClient';
+import { SLASH_COMMANDS, parseSlashCommand, filterCommands, HELP_TEXT } from '../lib/slashCommands';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -165,6 +169,7 @@ const getLastMessagePreview = (conv, currentUserId) => {
   if (msg.type === 'system') return msg.content || '';
   if (msg.type === 'image') return `${prefix}Photo`;
   if (msg.type === 'file') return `${prefix}File`;
+  if (msg.type === 'ai') return `${prefix}AI response`;
   return `${prefix}${msg.content || ''}`;
 };
 
@@ -186,6 +191,46 @@ const panelVariants = {
   center: { x: 0, opacity: 1 },
   exit: (direction) => ({ x: direction > 0 ? '-100%' : '100%', opacity: 0 }),
 };
+
+const MarkdownContent = ({ content, isMe = false }) => (
+  <ReactMarkdown
+    remarkPlugins={[remarkGfm]}
+    components={{
+      p: ({ children }) => <p className="mb-1 last:mb-0 whitespace-pre-wrap break-words">{children}</p>,
+      a: ({ href, children, ...props }) => (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={isMe ? 'underline opacity-80 hover:opacity-100' : 'text-blue-600 dark:text-blue-400 underline decoration-blue-300 hover:decoration-blue-500'}
+          {...props}
+        >
+          {children}
+        </a>
+      ),
+      pre: ({ children, ...props }) => (
+        <pre className={`rounded-lg p-3 overflow-x-auto text-xs leading-relaxed mt-1 mb-1 ${isMe ? 'bg-blue-700/40' : 'bg-stone-900 dark:bg-stone-950 text-stone-100'}`} {...props}>
+          {children}
+        </pre>
+      ),
+      code: ({ inline, children, ...props }) =>
+        inline ? (
+          <code className={`rounded px-1 py-0.5 text-[0.86em] font-mono ${isMe ? 'bg-blue-700/40' : 'bg-stone-200/80 dark:bg-stone-700/70'}`} {...props}>
+            {children}
+          </code>
+        ) : (
+          <code {...props}>{children}</code>
+        ),
+      ul: ({ children }) => <ul className="list-disc list-inside mb-1 space-y-0.5">{children}</ul>,
+      ol: ({ children }) => <ol className="list-decimal list-inside mb-1 space-y-0.5">{children}</ol>,
+      strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+      em: ({ children }) => <em className="italic">{children}</em>,
+      blockquote: ({ children }) => <blockquote className={`border-l-2 pl-2 my-1 opacity-80 ${isMe ? 'border-white/40' : 'border-stone-400 dark:border-stone-600'}`}>{children}</blockquote>,
+    }}
+  >
+    {content || ''}
+  </ReactMarkdown>
+);
 
 // ── User Search Result ──────────────────────────────────────────────────────
 
@@ -278,6 +323,50 @@ const MessageBubble = ({ msg, isMe, showSender, isGroup, onReply }) => {
     );
   }
 
+  if (msg.type === 'ai') {
+    return (
+      <motion.div variants={messageVariants} initial="initial" animate="animate" className="flex gap-2">
+        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center shrink-0">
+          <Sparkles className="h-4 w-4 text-white" />
+        </div>
+        <div className="flex flex-col max-w-[75%] sm:max-w-[65%] items-start">
+          <span className="text-[11px] font-medium text-violet-500 dark:text-violet-400 mb-0.5 px-1">AI</span>
+          <div className="px-3.5 py-2.5 rounded-2xl rounded-tl-sm bg-gradient-to-br from-violet-50 to-blue-50 dark:from-violet-900/20 dark:to-blue-900/20 border border-violet-200/50 dark:border-violet-700/30">
+            <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1 prose-pre:my-2 prose-table:my-2 prose-th:px-2 prose-th:py-1 prose-td:px-2 prose-td:py-1 prose-table:border prose-table:border-stone-300 dark:prose-table:border-stone-700">
+              <MarkdownContent content={msg.content} />
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (msg._aiLoading) {
+    return (
+      <motion.div variants={messageVariants} initial="initial" animate="animate" className="flex gap-2">
+        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center shrink-0">
+          <Sparkles className="h-4 w-4 text-white" />
+        </div>
+        <div className="flex flex-col max-w-[75%] sm:max-w-[65%] items-start">
+          <span className="text-[11px] font-medium text-violet-500 dark:text-violet-400 mb-0.5 px-1">AI</span>
+          <div className="px-3.5 py-2.5 rounded-2xl rounded-tl-sm bg-gradient-to-br from-violet-50 to-blue-50 dark:from-violet-900/20 dark:to-blue-900/20 border border-violet-200/50 dark:border-violet-700/30 min-w-[60px]">
+            {msg.content ? (
+              <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1 prose-pre:my-2 prose-table:my-2 prose-th:px-2 prose-th:py-1 prose-td:px-2 prose-td:py-1 prose-table:border prose-table:border-stone-300 dark:prose-table:border-stone-700">
+                <MarkdownContent content={msg.content} />
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 py-1">
+                <div className="h-2 w-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="h-2 w-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="h-2 w-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       variants={messageVariants}
@@ -320,7 +409,9 @@ const MessageBubble = ({ msg, isMe, showSender, isGroup, onReply }) => {
             : 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 rounded-bl-md'
         }`}>
           {msg.content && (
-            <p className="whitespace-pre-wrap text-[14px] leading-relaxed break-words">{msg.content}</p>
+            <div className="text-[14px] leading-relaxed">
+              <MarkdownContent content={msg.content} isMe={isMe} />
+            </div>
           )}
 
           {/* Image attachment */}
@@ -704,6 +795,7 @@ const Messages = () => {
   const { user } = useAuth();
   const { socket } = useSocket();
   const { toast } = useToast();
+  const { aiActive } = useAiStatus();
 
   // ── State ───────────────────────────────────────────────────────────────
   const [conversations, setConversations] = useState([]);
@@ -722,12 +814,17 @@ const Messages = () => {
   const [files, setFiles] = useState([]);
   const [sending, setSending] = useState(false);
   const [mobileView, setMobileView] = useState('list'); // 'list' | 'chat'
+  const [typingUsers, setTypingUsers] = useState([]); // users currently typing
+  const [showCommandMenu, setShowCommandMenu] = useState(false);
+  const [commandFilter, setCommandFilter] = useState('');
 
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
   const oldestMsgIdRef = useRef(null);
+  const prevConvIdRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
   const activeConv = useMemo(
     () => conversations.find(c => c.id === activeConvId),
@@ -779,6 +876,15 @@ const Messages = () => {
 
   // ── Select conversation ───────────────────────────────────────────────
   const selectConversation = useCallback((convId) => {
+    // Leave old conversation room
+    if (socket && prevConvIdRef.current) {
+      socket.emit('leave_conversation', prevConvIdRef.current);
+    }
+    // Join new conversation room
+    if (socket) {
+      socket.emit('join_conversation', convId);
+    }
+    prevConvIdRef.current = convId;
     setActiveConvId(convId);
     setMessages([]);
     setHasMoreMsgs(true);
@@ -787,6 +893,7 @@ const Messages = () => {
     setMessageText('');
     setFiles([]);
     setMobileView('chat');
+    setTypingUsers([]);
     loadMessages(convId);
 
     // Mark as read
@@ -794,7 +901,7 @@ const Messages = () => {
     setConversations(prev =>
       prev.map(c => c.id === convId ? { ...c, unread_count: 0 } : c)
     );
-  }, [api, loadMessages]);
+  }, [api, loadMessages, socket]);
 
   // ── Load more messages on scroll up ───────────────────────────────────
   const loadMoreMessages = useCallback(() => {
@@ -812,8 +919,9 @@ const Messages = () => {
   // ── Auto-scroll to bottom ─────────────────────────────────────────────
   const scrollToBottom = useCallback((smooth = true) => {
     requestAnimationFrame(() => {
-      if (messagesEndRef.current) {
-        messagesEndRef.current.scrollIntoView({ behavior: smooth ? 'smooth' : 'instant' });
+      const container = messagesContainerRef.current;
+      if (container) {
+        container.scrollTo({ top: container.scrollHeight, behavior: smooth ? 'smooth' : 'instant' });
       }
     });
   }, []);
@@ -898,11 +1006,26 @@ const Messages = () => {
       }
     };
 
+    const handleTyping = ({ conversationId, user: typingUser }) => {
+      if (String(conversationId) !== String(activeConvId)) return;
+      setTypingUsers(prev => {
+        if (prev.find(u => u.id === typingUser.id)) return prev;
+        return [...prev, typingUser];
+      });
+    };
+
+    const handleStopTyping = ({ conversationId, user: typingUser }) => {
+      if (String(conversationId) !== String(activeConvId)) return;
+      setTypingUsers(prev => prev.filter(u => u.id !== typingUser.id));
+    };
+
     socket.on('dm_message', handleNewMessage);
     socket.on('dm_read', handleRead);
     socket.on('dm_conversation_created', handleConversationCreated);
     socket.on('dm_participants_added', handleParticipantsAdded);
     socket.on('dm_participant_removed', handleParticipantRemoved);
+    socket.on('dm_typing', handleTyping);
+    socket.on('dm_stop_typing', handleStopTyping);
 
     return () => {
       socket.off('dm_message', handleNewMessage);
@@ -910,6 +1033,8 @@ const Messages = () => {
       socket.off('dm_conversation_created', handleConversationCreated);
       socket.off('dm_participants_added', handleParticipantsAdded);
       socket.off('dm_participant_removed', handleParticipantRemoved);
+      socket.off('dm_typing', handleTyping);
+      socket.off('dm_stop_typing', handleStopTyping);
     };
   }, [socket, user?.id, activeConvId, api, loadConversations, loadMessages]);
 
@@ -959,6 +1084,134 @@ const Messages = () => {
   // ── Send message ──────────────────────────────────────────────────────
   const handleSend = async () => {
     if ((!messageText.trim() && files.length === 0) || !activeConvId || sending) return;
+
+    // Stop typing indicator
+    if (socket && activeConvId && user) {
+      clearTimeout(typingTimeoutRef.current);
+      socket.emit('dm_stop_typing', { conversationId: activeConvId, user: { id: user.id, first_name: user.first_name } });
+    }
+    setShowCommandMenu(false);
+
+    // Check for slash command
+    const parsed = messageText.trim().startsWith('/') ? parseSlashCommand(messageText.trim(), user?.first_name || 'User') : null;
+
+    if (parsed) {
+      if (parsed.type === 'local') {
+        // Show help as a local system message (not saved)
+        const localMsg = { id: `local-${Date.now()}`, type: 'system', content: parsed.text, created_at: new Date().toISOString(), sender_id: null };
+        setMessages(prev => [...prev, localMsg]);
+        setMessageText('');
+        if (textareaRef.current) textareaRef.current.style.height = 'auto';
+        return;
+      }
+
+      if (parsed.type === 'backend' && parsed.name === '/ai') {
+        if (!aiActive) {
+          toast({ title: 'IA no disponible', description: 'El servicio de IA no está configurado en el servidor.', variant: 'destructive' });
+          return;
+        }
+        const prompt = parsed.args;
+        if (!prompt) {
+          toast({ title: 'Usage', description: '/ai <your question>', variant: 'default' });
+          return;
+        }
+        setMessageText('');
+        if (textareaRef.current) textareaRef.current.style.height = 'auto';
+
+        // Add loading bubble
+        const tempId = `ai-loading-${Date.now()}`;
+        const loadingMsg = { id: tempId, type: 'ai', _aiLoading: true, content: '', created_at: new Date().toISOString(), sender_id: null };
+        setMessages(prev => [...prev, loadingMsg]);
+
+        try {
+          const apiBase = getApiOrigin();
+          const response = await fetch(`${apiBase}/api/ai/chat`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ conversationId: activeConvId, prompt }),
+          });
+
+          if (!response.ok) {
+            const err = await response.json().catch(() => ({ error: 'AI request failed' }));
+            setMessages(prev => prev.filter(m => m.id !== tempId));
+            toast({ title: 'AI Error', description: err.error || 'Request failed', variant: 'destructive' });
+            return;
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let accumulated = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            for (const line of chunk.split('\n')) {
+              if (!line.startsWith('data: ')) continue;
+              const raw = line.slice(6);
+              if (raw === '[DONE]') continue;
+              try {
+                const parsed2 = JSON.parse(raw);
+                if (parsed2.error) {
+                  toast({ title: 'AI Error', description: parsed2.error, variant: 'destructive' });
+                  break;
+                }
+                if (parsed2.delta) {
+                  accumulated += parsed2.delta;
+                  setMessages(prev => prev.map(m =>
+                    m.id === tempId ? { ...m, content: accumulated } : m
+                  ));
+                }
+              } catch { /* ignore */ }
+            }
+          }
+
+          // Finalize bubble (remove _aiLoading flag)
+          setMessages(prev => prev.map(m =>
+            m.id === tempId ? { ...m, _aiLoading: false } : m
+          ));
+        } catch (err) {
+          setMessages(prev => prev.filter(m => m.id !== tempId));
+          toast({ title: 'AI Error', description: err.message, variant: 'destructive' });
+        }
+        return;
+      }
+
+      // 'replace' type — use modified text, fall through to normal send
+      if (parsed.type === 'replace') {
+        // Will use parsed.text as the message content below
+        setSending(true);
+        try {
+          const formData = new FormData();
+          formData.append('content', parsed.text);
+          const sentMessage = normalizeMessage(await api(`/conversations/${activeConvId}/messages`, {
+            method: 'POST',
+            body: formData,
+            formData: true,
+          }));
+          setMessages(prev => (prev.find(m => m.id === sentMessage.id) ? prev : [...prev, sentMessage]));
+          setConversations(prev => {
+            const updated = prev.map(c => {
+              if (String(c.id) === String(activeConvId)) {
+                return { ...c, last_message: sentMessage, last_message_at: sentMessage.created_at };
+              }
+              return c;
+            });
+            return sortConversationsByLastActivity(updated);
+          });
+          setMessageText('');
+          setFiles([]);
+          setReplyTo(null);
+          if (textareaRef.current) textareaRef.current.style.height = 'auto';
+        } catch (err) {
+          toast({ title: 'Error', description: err.message || 'Failed to send message', variant: 'destructive' });
+        } finally {
+          setSending(false);
+        }
+        return;
+      }
+    }
 
     setSending(true);
     try {
@@ -1020,11 +1273,30 @@ const Messages = () => {
   };
 
   const handleTextareaInput = (e) => {
-    setMessageText(e.target.value);
+    const val = e.target.value;
+    setMessageText(val);
     // Auto-resize
     const el = e.target;
     el.style.height = 'auto';
     el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+
+    // Slash command autocomplete
+    if (val.startsWith('/') && !val.includes(' ')) {
+      setCommandFilter(val);
+      setShowCommandMenu(true);
+    } else {
+      setShowCommandMenu(false);
+      setCommandFilter('');
+    }
+
+    // Typing indicator
+    if (socket && activeConvId && user) {
+      socket.emit('dm_typing', { conversationId: activeConvId, user: { id: user.id, first_name: user.first_name } });
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => {
+        socket.emit('dm_stop_typing', { conversationId: activeConvId, user: { id: user.id, first_name: user.first_name } });
+      }, 1500);
+    }
   };
 
   // ── File handling ─────────────────────────────────────────────────────
@@ -1379,6 +1651,56 @@ const Messages = () => {
               ))}
             </div>
           )}
+
+          {/* Slash command autocomplete */}
+          <AnimatePresence>
+            {showCommandMenu && filterCommands(commandFilter).filter(c => c.name !== '/ai' || aiActive).length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 8 }}
+                transition={{ duration: 0.15 }}
+                className="mb-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-lg overflow-hidden"
+              >
+                {filterCommands(commandFilter).filter(c => c.name !== '/ai' || aiActive).map(cmd => (
+                  <button
+                    key={cmd.name}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      setMessageText(cmd.name + ' ');
+                      setShowCommandMenu(false);
+                      textareaRef.current?.focus();
+                    }}
+                  >
+                    <span className="text-sm font-mono font-semibold text-blue-600 dark:text-blue-400 w-28 shrink-0">{cmd.name}</span>
+                    <span className="text-xs text-stone-500 dark:text-stone-400 truncate">{cmd.description}</span>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Typing indicator */}
+          <AnimatePresence>
+            {typingUsers.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-1 px-1"
+              >
+                <p className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1.5">
+                  <span className="flex gap-0.5">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-stone-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-stone-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-stone-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </span>
+                  {typingUsers.map(u => u.first_name).join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Input row */}
           <div className="flex items-end gap-2">
