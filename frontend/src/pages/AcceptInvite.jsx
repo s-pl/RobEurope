@@ -28,7 +28,7 @@ const AcceptInvite = () => {
     run();
   }, [acceptInvite, nav, token]);
 
-  return <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700">{msg}</div>;
+  return <div className="rounded-xl border border-stone-200 bg-white p-4 text-sm text-stone-700">{msg}</div>;
 };
 
 export default AcceptInvite;

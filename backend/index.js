@@ -25,6 +25,7 @@ import db from './models/index.js';
 import adminRoutes from './routes/admin.route.js';
 import adminApiRoutes from './routes/admin.routes.js';
 import requestId from './middleware/requestId.middleware.js';
+import responseTime from './middleware/responseTime.middleware.js';
 import redisClient from './utils/redis.js';
 import passport from 'passport';
 import './config/passport.js';
@@ -45,6 +46,8 @@ const app = express();
 // --- Request ID ---
 app.use(requestId());
 
+// --- Response Time ---
+app.use(responseTime());
 
 app.use(
   helmet({
@@ -216,6 +219,10 @@ app.get('/locale/:locale', (req, res) => {
 // Sensitive routes get a strict limit (login, register, password reset)
 // No-op in development (rateLimit.middleware.js skips when NODE_ENV !== 'production')
 app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, max: 40 }));
+// GDPR account deletion: max 3 requests per hour
+app.use('/api/gdpr/my-account', rateLimit({ windowMs: 60 * 60 * 1000, max: 3 }));
+// Notifications: max 100 requests per minute to prevent abuse
+app.use('/api/notifications', rateLimit({ windowMs: 60 * 1000, max: 100 }));
 // General API — generous limit in production
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 1000 }), apiRoutes);
 app.use('/api/admin', adminApiRoutes);

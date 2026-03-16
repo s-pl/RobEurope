@@ -16,6 +16,7 @@ import {
   reorderArchives
 } from '../../controller/archive.controller.js';
 import authenticateToken from '../../middleware/auth.middleware.js';
+import { optionalAuth } from '../../middleware/auth.middleware.js';
 import { requireAnyRole } from '../../middleware/role.middleware.js';
 import { uploadFile } from '../../middleware/upload.middleware.js';
 
@@ -46,7 +47,7 @@ const requireAdminRole = requireAnyRole(['center_admin', 'super_admin']);
  *           type: string
  *           enum: [hidden, public, restricted]
  */
-router.get('/', listArchives);
+router.get('/', optionalAuth, listArchives);
 
 /**
  * @swagger
@@ -55,7 +56,7 @@ router.get('/', listArchives);
  *     summary: Get archives grouped by competition
  *     tags: [Archives]
  */
-router.get('/by-competition', getArchivesByCompetition);
+router.get('/by-competition', optionalAuth, getArchivesByCompetition);
 
 /**
  * @swagger
@@ -70,7 +71,7 @@ router.get('/by-competition', getArchivesByCompetition);
  *         schema:
  *           type: integer
  */
-router.get('/:id', getArchiveById);
+router.get('/:id', optionalAuth, getArchiveById);
 
 // Protected routes - require authentication
 router.use(authenticateToken);

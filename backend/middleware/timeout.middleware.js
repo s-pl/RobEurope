@@ -1,3 +1,5 @@
+import logger from '../utils/logger.js';
+
 const timeoutMiddleware = (req, res, next) => {
   const TIMEOUT_MS = 15000; // 15 seconds
   let finished = false;

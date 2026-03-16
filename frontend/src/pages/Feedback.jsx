@@ -4,58 +4,74 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { useApi } from '../hooks/useApi';
-import { Button } from '../components/ui/button';
 import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import { PageHeader } from '../components/ui/PageHeader';
 import { ConfirmDialog } from '../components/ui/confirm-dialog';
 import { resolveMediaUrl } from '../lib/apiClient';
 
-const StarRating = ({ value, onChange, readonly = false }) => (
-  <div className="flex gap-1">
+const StarRating = ({ value, onChange, readonly = false, hoverValue = 0 }) => (
+  <div className="flex gap-0.5">
     {[1, 2, 3, 4, 5].map(n => (
       <button
         key={n}
         type="button"
         disabled={readonly}
         onClick={() => !readonly && onChange?.(n)}
-        className={`transition-transform ${readonly ? 'cursor-default' : 'cursor-pointer hover:scale-110'}`}
+        className={`transition-transform duration-150 ${readonly ? 'cursor-default' : 'cursor-pointer hover:scale-110'}`}
       >
-        <Star className={`h-5 w-5 transition-colors ${n <= value ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-600'}`} />
+        <Star className={`h-5 w-5 transition-colors duration-150 ${
+          n <= (hoverValue || value)
+            ? 'fill-blue-600 text-blue-600'
+            : 'text-stone-300 dark:text-stone-600'
+        }`} />
       </button>
     ))}
   </div>
 );
 
-const ReviewCard = ({ review, onDelete, currentUserId }) => {
+const ReviewItem = ({ review, onDelete, currentUserId }) => {
+  const [hovered, setHovered] = useState(false);
   const name = review.author
     ? `${review.author.first_name ?? ''} ${review.author.last_name ?? ''}`.trim() || review.author.username
     : '?';
   const photo = review.author?.profile_photo_url ? resolveMediaUrl(review.author.profile_photo_url) : null;
   const isOwn = review.author?.id === currentUserId;
+
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-3 h-full">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          {photo
-            ? <img src={photo} alt={name} className="w-9 h-9 rounded-full object-cover shrink-0" />
-            : <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shrink-0">{name.slice(0, 2).toUpperCase()}</div>
-          }
-          <div>
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{name}</p>
-            <p className="text-xs text-slate-400">{new Date(review.created_at).toLocaleDateString()}</p>
+    <div
+      className="flex gap-4 py-5 border-b border-stone-200 dark:border-stone-800 last:border-b-0 group"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Author info - left */}
+      <div className="flex flex-col items-center shrink-0 w-20">
+        {photo ? (
+          <img src={photo} alt={name} className="w-9 h-9 rounded-full object-cover" />
+        ) : (
+          <div className="w-9 h-9 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center text-stone-500 font-bold text-xs border border-stone-200 dark:border-stone-700">
+            {name.slice(0, 2).toUpperCase()}
           </div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
+        )}
+        <p className="text-xs font-medium text-stone-900 dark:text-stone-50 mt-1.5 text-center leading-tight">{name}</p>
+        <p className="text-xs text-stone-400 mt-0.5">{new Date(review.created_at).toLocaleDateString()}</p>
+      </div>
+
+      {/* Content - right */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2 mb-1.5">
           <StarRating value={review.rating} readonly />
           {isOwn && (
-            <button onClick={() => onDelete()} className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+            <button
+              onClick={() => onDelete()}
+              className={`p-1.5 rounded-md text-stone-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-150 ${
+                hovered ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
+        <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">{review.message}</p>
       </div>
-      <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{review.message}</p>
     </div>
   );
 };
@@ -74,6 +90,7 @@ const Feedback = () => {
   const [myReview, setMyReview] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
 
   useEffect(() => {
     api('/contact/reviews').then(data => {
@@ -116,56 +133,125 @@ const Feedback = () => {
   };
 
   return (
-    <div className="space-y-8">
-      <PageHeader title={t('feedback.Title')} description={t('feedback.Description')} />
+    <div className="max-w-2xl mx-auto">
+      {/* Page header */}
+      <div className="pt-2 pb-8">
+        <h1 className="font-display text-3xl font-bold text-stone-900 dark:text-stone-50">
+          {t('feedback.Title')}
+        </h1>
+        <p className="text-stone-500 dark:text-stone-400 text-sm mt-1">
+          {t('feedback.Description')}
+        </p>
+      </div>
 
+      {/* Inline review form at top */}
       {isAuthenticated && !myReview && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-4">{t('contact.reviews.writeTitle')}</h3>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="pb-8 mb-8 border-b border-stone-200 dark:border-stone-800"
+        >
+          <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-50 mb-4">
+            {t('contact.reviews.writeTitle')}
+          </h3>
           <form onSubmit={handleReviewSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label>{t('contact.reviews.ratingLabel')}</Label>
-              <StarRating value={reviewForm.rating} onChange={r => setReviewForm(f => ({ ...f, rating: r }))} />
+              <Label className="text-sm font-medium text-stone-700 dark:text-stone-300">{t('contact.reviews.ratingLabel')}</Label>
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map(n => (
+                  <button
+                    key={n}
+                    type="button"
+                    onMouseEnter={() => setHoverRating(n)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    onClick={() => setReviewForm(f => ({ ...f, rating: n }))}
+                    className="cursor-pointer transition-transform duration-150 hover:scale-110"
+                  >
+                    <Star className={`h-6 w-6 transition-colors duration-150 ${
+                      n <= (hoverRating || reviewForm.rating)
+                        ? 'fill-blue-600 text-blue-600'
+                        : 'text-stone-300 dark:text-stone-600'
+                    }`} />
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="reviewMsg">{t('contact.reviews.messageLabel')}</Label>
-              <Textarea id="reviewMsg" rows={3} value={reviewForm.message} onChange={e => setReviewForm(f => ({ ...f, message: e.target.value }))} required placeholder={t('contact.reviews.messagePlaceholder')} />
+              <Label htmlFor="reviewMsg" className="text-sm font-medium text-stone-700 dark:text-stone-300">{t('contact.reviews.messageLabel')}</Label>
+              <textarea
+                id="reviewMsg"
+                rows={3}
+                value={reviewForm.message}
+                onChange={e => setReviewForm(f => ({ ...f, message: e.target.value }))}
+                required
+                placeholder={t('contact.reviews.messagePlaceholder')}
+                className="w-full px-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors resize-none"
+              />
             </div>
             {reviewError && <p className="text-sm text-red-500">{reviewError}</p>}
             <AnimatePresence>
               {reviewSuccess && (
-                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-sm text-emerald-600 dark:text-emerald-400">
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="text-sm text-emerald-600 dark:text-emerald-400">
                   {t('contact.reviews.submitted')}
                 </motion.p>
               )}
             </AnimatePresence>
-            <Button type="submit" size="sm" className="gap-2" disabled={reviewSubmitting}>
+            <button
+              type="submit"
+              disabled={reviewSubmitting}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
               <Star className="h-4 w-4" /> {t('contact.reviews.submit')}
-            </Button>
+            </button>
           </form>
         </motion.div>
       )}
 
+      {/* Already reviewed banner */}
       {myReview && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl text-sm text-emerald-700 dark:text-emerald-400">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className="flex items-center gap-3 px-4 py-3 mb-8 border-b border-stone-200 dark:border-stone-800 text-sm text-emerald-700 dark:text-emerald-400"
+        >
           <Star className="h-4 w-4 fill-emerald-500 text-emerald-500 shrink-0" />
           <span className="flex-1">{t('contact.reviews.alreadyReviewed')}</span>
-          <button onClick={() => setDeleteDialogOpen(true)} className="text-xs underline opacity-70 hover:opacity-100">{t('contact.reviews.deleteReview')}</button>
+          <button onClick={() => setDeleteDialogOpen(true)} className="text-xs text-stone-400 hover:text-red-500 transition-colors">
+            {t('contact.reviews.deleteReview')}
+          </button>
         </motion.div>
       )}
 
+      {/* Reviews list / timeline */}
       {reviewsLoading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map(i => <div key={i} className="h-36 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />)}
+        <div className="space-y-0 divide-y divide-stone-200 dark:divide-stone-800">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="py-5 flex gap-4">
+              <div className="w-9 h-9 rounded-full bg-stone-100 dark:bg-stone-800 animate-pulse shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-24 bg-stone-100 dark:bg-stone-800 rounded animate-pulse" />
+                <div className="h-3 w-full bg-stone-100 dark:bg-stone-800 rounded animate-pulse" />
+                <div className="h-3 w-2/3 bg-stone-100 dark:bg-stone-800 rounded animate-pulse" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : reviews.length === 0 ? (
-        <p className="text-center text-slate-400 py-10">{t('contact.reviews.empty')}</p>
+        <p className="text-center text-stone-400 py-16 text-sm">{t('contact.reviews.empty')}</p>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div>
           <AnimatePresence>
             {reviews.map((r, i) => (
-              <motion.div key={r.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ delay: i * 0.05 }}>
-                <ReviewCard review={r} onDelete={handleDeleteReview} currentUserId={user?.id} />
+              <motion.div
+                key={r.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2, delay: i * 0.03 }}
+              >
+                <ReviewItem review={r} onDelete={handleDeleteReview} currentUserId={user?.id} />
               </motion.div>
             ))}
           </AnimatePresence>
@@ -187,4 +273,3 @@ const Feedback = () => {
 };
 
 export default Feedback;
-

@@ -1,14 +1,10 @@
 import { motion, useReducedMotion } from 'framer-motion';
 
-/**
- * Lightweight in-view reveal animation.
- * Uses transform + opacity only for performance.
- */
 export const ScrollReveal = ({
   children,
   delay = 0,
-  y = 18,
-  duration = 0.45,
+  y = 12,
+  duration = 0.3,
   once = true,
   amount = 0.2,
   className,
@@ -25,7 +21,7 @@ export const ScrollReveal = ({
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once, amount }}
-      transition={{ duration, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration, delay, ease: 'easeOut' }}
     >
       {children}
     </motion.div>

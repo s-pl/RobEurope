@@ -1,20 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useApi } from '../../hooks/useApi';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
+import { Badge } from '../../components/ui/badge';
 import { RichTextEditor } from '../../components/ui/RichTextEditor';
 import { ConfirmDialog } from '../../components/ui/confirm-dialog';
-import { 
-  FileText, Search, Edit, Trash2, Eye, Pin, PinOff, Plus, X, Save, Image
+import {
+  AdaptiveModal,
+  AdaptiveModalContent,
+  AdaptiveModalFooter,
+} from '../../components/ui/adaptive-modal';
+import {
+  FileText, Search, Edit, Trash2, Eye, Pin, PinOff, Plus, Save, Loader2, Inbox,
 } from 'lucide-react';
 
+/* ------------------------------------------------------------------ */
+/*  AdminPosts                                                         */
+/* ------------------------------------------------------------------ */
 const AdminPosts = () => {
   const { t } = useTranslation();
   const api = useApi();
   const { user } = useAuth();
-  
+
+  /* ── state ── */
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -23,18 +34,28 @@ const AdminPosts = () => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    is_pinned: false
+    is_pinned: false,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDeleteId, setPostToDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  /* ── effects ── */
   useEffect(() => {
     loadPosts();
   }, []);
 
+  useEffect(() => {
+    if (successMsg) {
+      const id = setTimeout(() => setSuccessMsg(null), 4000);
+      return () => clearTimeout(id);
+    }
+  }, [successMsg]);
+
+  /* ── api ── */
   const loadPosts = async () => {
     try {
       setLoading(true);
@@ -53,18 +74,14 @@ const AdminPosts = () => {
     setFormData({
       title: post.title || '',
       content: post.content || '',
-      is_pinned: post.is_pinned || false
+      is_pinned: post.is_pinned || false,
     });
     setShowForm(true);
   };
 
   const handleCreate = () => {
     setEditingPost(null);
-    setFormData({
-      title: '',
-      content: '',
-      is_pinned: false
-    });
+    setFormData({ title: '', content: '', is_pinned: false });
     setShowForm(true);
   };
 
@@ -77,12 +94,12 @@ const AdminPosts = () => {
       if (editingPost) {
         await api(`/posts/${editingPost.id}`, {
           method: 'PUT',
-          body: formData
+          body: formData,
         });
       } else {
         await api('/posts', {
           method: 'POST',
-          body: formData
+          body: formData,
         });
       }
       setShowForm(false);
@@ -118,7 +135,7 @@ const AdminPosts = () => {
     try {
       await api(`/posts/${post.id}`, {
         method: 'PUT',
-        body: { is_pinned: !post.is_pinned }
+        body: { is_pinned: !post.is_pinned },
       });
       loadPosts();
     } catch (err) {
@@ -126,205 +143,254 @@ const AdminPosts = () => {
     }
   };
 
-  const filteredPosts = posts.filter(post => 
-    post.title?.toLowerCase().includes(search.toLowerCase()) ||
-    post.content?.toLowerCase().includes(search.toLowerCase())
+  /* ── derived ── */
+  const filteredPosts = posts.filter(
+    (post) =>
+      post.title?.toLowerCase().includes(search.toLowerCase()) ||
+      post.content?.toLowerCase().includes(search.toLowerCase()),
   );
 
+  /* ── loading state ── */
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
       </div>
     );
   }
 
+  /* ── render ── */
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      {/* ── Header ── */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <FileText className="h-7 w-7 text-amber-600" />
-            {t('admin.posts.title') || 'Gestión de Posts'}
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-1">
-            {t('admin.posts.description') || 'Crea, edita y elimina publicaciones del sistema.'}
-          </p>
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-100 dark:bg-blue-900/30 shrink-0">
+            <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-display font-bold text-stone-900 dark:text-stone-50">
+              {t('admin.posts.title') || 'Gestión de Posts'}
+            </h1>
+            <p className="text-stone-500 dark:text-stone-400 mt-0.5 text-sm">
+              {t('admin.posts.description') || 'Crea, edita y elimina publicaciones del sistema.'}
+            </p>
+          </div>
         </div>
-        <Button onClick={handleCreate} className="bg-amber-600 hover:bg-amber-700 text-white">
-          <Plus className="h-4 w-4 mr-2" />
+        <Button onClick={handleCreate} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2">
+          <Plus className="h-4 w-4" />
           {t('admin.posts.create') || 'Nuevo Post'}
         </Button>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300">
-          {error}
-        </div>
-      )}
+      {/* ── Feedback banners ── */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="border border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-2xl mb-6 text-sm"
+          >
+            {error}
+          </motion.div>
+        )}
+        {successMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 px-4 py-3 rounded-2xl mb-6 text-sm"
+          >
+            {successMsg}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Search */}
+      {/* ── Search ── */}
       <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
         <Input
           type="text"
           placeholder={t('admin.posts.searchPlaceholder') || 'Buscar posts...'}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-10"
+          className="pl-10 rounded-xl border-stone-200 dark:border-stone-800 focus:border-blue-300 focus:ring-blue-200"
         />
       </div>
 
-      {/* Form Modal */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b dark:border-slate-800">
-              <h2 className="text-lg font-semibold">
-                {editingPost ? (t('admin.posts.edit') || 'Editar Post') : (t('admin.posts.create') || 'Nuevo Post')}
-              </h2>
-              <button onClick={() => setShowForm(false)} className="text-slate-500 hover:text-slate-700">
-                <X className="h-5 w-5" />
-              </button>
+      {/* ── Form Modal (AdaptiveModal) ── */}
+      <AdaptiveModal open={showForm} onOpenChange={setShowForm}>
+        <AdaptiveModalContent
+          title={editingPost ? (t('admin.posts.edit') || 'Editar Post') : (t('admin.posts.create') || 'Nuevo Post')}
+          className="sm:max-w-2xl"
+        >
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">
+                {t('admin.posts.titleLabel') || 'Título'}
+              </label>
+              <Input
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="rounded-xl border-stone-200 dark:border-stone-800 focus:border-blue-300 focus:ring-blue-200"
+                required
+              />
             </div>
-            <form onSubmit={handleSubmit} className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">{t('admin.posts.titleLabel') || 'Título'}</label>
-                <Input
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">{t('admin.posts.contentLabel') || 'Contenido'}</label>
-                <div className="mt-1">
-                  <RichTextEditor
-                    value={formData.content}
-                    onChange={(val) => setFormData({ ...formData, content: val })}
-                    placeholder={t('admin.posts.contentLabel') || 'Contenido'}
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="is_pinned"
-                  checked={formData.is_pinned}
-                  onChange={(e) => setFormData({ ...formData, is_pinned: e.target.checked })}
-                  className="rounded"
-                />
-                <label htmlFor="is_pinned" className="text-sm">{t('admin.posts.pinPost') || 'Fijar post'}</label>
-              </div>
-              <div className="flex gap-2 justify-end pt-4 border-t dark:border-slate-800">
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
-                  {t('common.cancel') || 'Cancelar'}
-                </Button>
-                <Button type="submit" disabled={saving} className="bg-amber-600 hover:bg-amber-700">
-                  <Save className="h-4 w-4 mr-2" />
-                  {saving ? (t('common.saving') || 'Guardando...') : (t('common.save') || 'Guardar')}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            <div>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">
+                {t('admin.posts.contentLabel') || 'Contenido'}
+              </label>
+              <RichTextEditor
+                value={formData.content}
+                onChange={(val) => setFormData({ ...formData, content: val })}
+                placeholder={t('admin.posts.contentLabel') || 'Contenido'}
+              />
+            </div>
+            <div className="flex items-center gap-2.5">
+              <input
+                type="checkbox"
+                id="is_pinned"
+                checked={formData.is_pinned}
+                onChange={(e) => setFormData({ ...formData, is_pinned: e.target.checked })}
+                className="h-4 w-4 rounded border-stone-300 dark:border-stone-700 text-blue-600 focus:ring-blue-200"
+              />
+              <label htmlFor="is_pinned" className="text-sm text-stone-700 dark:text-stone-300">
+                {t('admin.posts.pinPost') || 'Fijar post'}
+              </label>
+            </div>
+            <AdaptiveModalFooter>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setShowForm(false)}
+                className="rounded-xl"
+              >
+                {t('common.cancel') || 'Cancelar'}
+              </Button>
+              <Button
+                type="submit"
+                disabled={saving}
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2"
+              >
+                {saving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                {saving ? (t('common.saving') || 'Guardando...') : (t('common.save') || 'Guardar')}
+              </Button>
+            </AdaptiveModalFooter>
+          </form>
+        </AdaptiveModalContent>
+      </AdaptiveModal>
 
-      {/* Posts List */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden">
+      {/* ── Posts Table ── */}
+      <div className="bg-white dark:bg-stone-950 rounded-2xl border border-stone-200 dark:border-stone-800 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-50 dark:bg-slate-800/50">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-slate-600 dark:text-slate-300">
+            <thead>
+              <tr className="border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/50">
+                <th className="px-5 py-3.5 text-left text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   {t('admin.posts.tableTitle') || 'Título'}
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-slate-600 dark:text-slate-300 hidden md:table-cell">
+                <th className="px-5 py-3.5 text-left text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider hidden md:table-cell">
                   {t('admin.posts.tableAuthor') || 'Autor'}
                 </th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-slate-600 dark:text-slate-300 hidden sm:table-cell">
+                <th className="px-5 py-3.5 text-center text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider hidden sm:table-cell">
                   <Eye className="h-4 w-4 inline" />
                 </th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-slate-600 dark:text-slate-300">
+                <th className="px-5 py-3.5 text-center text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   {t('admin.posts.tableStatus') || 'Estado'}
                 </th>
-                <th className="px-4 py-3 text-right text-sm font-medium text-slate-600 dark:text-slate-300">
+                <th className="px-5 py-3.5 text-right text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   {t('admin.posts.tableActions') || 'Acciones'}
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y dark:divide-slate-800">
+            <tbody className="divide-y divide-stone-100 dark:divide-stone-800/60">
               {filteredPosts.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-4 py-8 text-center text-slate-500">
-                    {t('admin.posts.noPosts') || 'No hay posts para mostrar.'}
+                  <td colSpan="5" className="px-5 py-16 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-stone-100 dark:bg-stone-800">
+                        <Inbox className="h-6 w-6 text-stone-400" />
+                      </div>
+                      <p className="text-sm text-stone-400 dark:text-stone-500">
+                        {t('admin.posts.noPosts') || 'No hay posts para mostrar.'}
+                      </p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 filteredPosts.map((post) => (
-                  <tr key={post.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        {post.is_pinned && <Pin className="h-4 w-4 text-amber-500" />}
-                        <div>
-                          <p className="font-medium text-slate-900 dark:text-white">{post.title}</p>
-                          <p className="text-sm text-slate-500 dark:text-slate-400 truncate max-w-xs">
-                            {post.content?.substring(0, 60)}...
+                  <motion.tr
+                    key={post.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="hover:bg-stone-50/70 dark:hover:bg-stone-900/30 transition-colors"
+                  >
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2.5">
+                        {post.is_pinned && (
+                          <Pin className="h-4 w-4 text-blue-500 shrink-0" />
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-medium text-stone-900 dark:text-stone-100 truncate">
+                            {post.title}
+                          </p>
+                          <p className="text-xs text-stone-400 dark:text-stone-500 truncate max-w-xs">
+                            {post.content?.replace(/<[^>]*>/g, '').substring(0, 60)}...
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="text-sm text-slate-600 dark:text-slate-400">
+                    <td className="px-5 py-3.5 hidden md:table-cell">
+                      <span className="text-sm text-stone-600 dark:text-stone-400">
                         {post.User?.first_name || post.User?.username || 'Anónimo'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-center hidden sm:table-cell">
-                      <span className="text-sm text-slate-600 dark:text-slate-400">
+                    <td className="px-5 py-3.5 text-center hidden sm:table-cell">
+                      <span className="text-sm text-stone-500 dark:text-stone-400 tabular-nums">
                         {post.views_count || 0}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-5 py-3.5 text-center">
                       {post.is_pinned ? (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                          <Pin className="h-3 w-3 mr-1" />
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800">
+                          <Pin className="h-3 w-3" />
                           {t('admin.posts.pinned') || 'Fijado'}
                         </span>
                       ) : (
-                        <span className="text-slate-400 text-xs">—</span>
+                        <span className="text-stone-300 dark:text-stone-600 text-xs">&mdash;</span>
                       )}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-5 py-3.5">
                       <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        <button
                           onClick={() => togglePin(post)}
                           title={post.is_pinned ? 'Desfijar' : 'Fijar'}
+                          className="p-2 rounded-xl text-stone-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                         >
-                          {post.is_pinned ? (
-                            <PinOff className="h-4 w-4 text-amber-600" />
-                          ) : (
-                            <Pin className="h-4 w-4 text-slate-400" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                          {post.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                        </button>
+                        <button
                           onClick={() => handleEdit(post)}
+                          title={t('common.edit') || 'Editar'}
+                          className="p-2 rounded-xl text-stone-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                         >
-                          <Edit className="h-4 w-4 text-blue-600" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
                           onClick={() => handleDelete(post.id)}
+                          title={t('common.delete') || 'Eliminar'}
+                          className="p-2 rounded-xl text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                         >
-                          <Trash2 className="h-4 w-4 text-red-600" />
-                        </Button>
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))
               )}
             </tbody>
@@ -332,6 +398,7 @@ const AdminPosts = () => {
         </div>
       </div>
 
+      {/* ── Delete Confirm ── */}
       <ConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={(open) => {

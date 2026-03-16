@@ -377,7 +377,7 @@ export default function NotFoundScene({ className = '' }) {
   if (failed) {
     return (
       <div
-        className={`grid h-full w-full place-items-center border border-blue-200 bg-gradient-to-br from-blue-50 to-white text-blue-700 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-800 dark:text-blue-400 ${className}`}
+        className={`grid h-full w-full place-items-center border border-blue-200 bg-gradient-to-br from-blue-50 to-white text-blue-700 shadow-sm dark:border-stone-800 dark:from-stone-900 dark:to-stone-800 dark:text-blue-400 ${className}`}
         aria-hidden="true"
       >
         <Bot className="h-10 w-10" aria-hidden="true" />

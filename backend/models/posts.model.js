@@ -39,6 +39,10 @@ export default function definePostsModel(sequelize, DataTypes) {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },
+        is_edited: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        },
         created_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW

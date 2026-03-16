@@ -1,21 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Heart, X } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, Heart, LogIn, X } from 'lucide-react';
 import { apiRequest, resolveMediaUrl } from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Skeleton } from '../components/ui/skeleton';
-import { Alert, AlertTitle, AlertDescription } from '../components/ui/alert';
-import { Button } from '../components/ui/button';
-import { Card } from '../components/ui/card';
-import { Dialog, DialogContent } from '../components/ui/dialog';
+import { Alert, AlertDescription } from '../components/ui/alert';
 import { ScrollReveal } from '../components/ui/scroll-reveal';
 
 const FAVORITES_KEY = 'robeurope_gallery_favorites_v1';
 
 const Gallery = () => {
-
     const { t } = useTranslation();
     const { user, isAuthenticated } = useAuth();
 
@@ -26,8 +22,8 @@ const Gallery = () => {
     const [uploadStatus, setUploadStatus] = useState({ loading: false, error: '', ok: '' });
     const [deleteStatus, setDeleteStatus] = useState({ loadingId: null, error: '' });
     const [form, setForm] = useState({ title: '', description: '', file: null });
-    const [expandedItems, setExpandedItems] = useState({});
     const [activeIndex, setActiveIndex] = useState(-1);
+    const [uploadOpen, setUploadOpen] = useState(false);
     const [favorites, setFavorites] = useState(() => {
         try {
             const parsed = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
@@ -121,229 +117,255 @@ const Gallery = () => {
         setFavorites((prev) => prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]);
     };
 
+    const inputClass = 'w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50';
+
     return (
-        <div className="space-y-8">
+        <div className="space-y-10">
             <ScrollReveal>
                 <PageHeader title={t('gallery.galleryTitle')} description={t('gallery.galleryDescription')} />
             </ScrollReveal>
 
-            <div>
+            {/* Admin upload -- collapsible */}
+            {isAuthenticated && isAdmin && (
+                <ScrollReveal>
+                    <div>
+                        <button
+                            type="button"
+                            onClick={() => setUploadOpen((v) => !v)}
+                            className="inline-flex items-center gap-2 text-sm font-medium text-stone-900 dark:text-stone-50 hover:text-blue-600 transition-colors duration-200"
+                        >
+                            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${uploadOpen ? 'rotate-180' : ''}`} />
+                            {t('gallery.adminUploadTitle') || 'Subir foto a la galeria'}
+                        </button>
 
-                    {isAuthenticated && isAdmin && (
-                        <ScrollReveal>
-                        <form onSubmit={handleUpload} className="rounded-xl border border-slate-200 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/50 sm:p-6 mb-6">
-                            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4">{t('gallery.adminUploadTitle') || 'Subir foto a la galería'}</h2>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="md:col-span-1">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('gallery.uploadImage') || 'Imagen'}</label>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-slate-900 hover:file:bg-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 dark:file:bg-slate-800 dark:file:text-slate-50 dark:hover:file:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
-                                        onChange={(ev) => setForm((p) => ({ ...p, file: ev.target.files?.[0] || null }))}
-                                    />
-                                </div>
-
-                                <div className="md:col-span-1">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('gallery.uploadTitle') || 'Título (opcional)'}</label>
-                                    <input
-                                        type="text"
-                                        value={form.title}
-                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
-                                        onChange={(ev) => setForm((p) => ({ ...p, title: ev.target.value }))}
-                                    />
-                                </div>
-
-                                <div className="md:col-span-1">
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('gallery.uploadDescription') || 'Descripción (opcional)'}</label>
-                                    <input
-                                        type="text"
-                                        value={form.description}
-                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
-                                        onChange={(ev) => setForm((p) => ({ ...p, description: ev.target.value }))}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
-                                <Button
-                                    type="submit"
-                                    disabled={uploadStatus.loading}
+                        <AnimatePresence>
+                            {uploadOpen && (
+                                <motion.form
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.25 }}
+                                    onSubmit={handleUpload}
+                                    className="overflow-hidden mt-4"
                                 >
-                                    {uploadStatus.loading ? (t('gallery.uploading') || 'Subiendo...') : (t('gallery.uploadCta') || 'Subir')}
-                                </Button>
+                                    <div className="border-t border-stone-200 dark:border-stone-700 pt-5 space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                                                    {t('gallery.uploadImage') || 'Imagen'}
+                                                </label>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="block w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 file:mr-3 file:rounded-lg file:border-0 file:bg-stone-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-stone-900 hover:file:bg-stone-200 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50 dark:file:bg-stone-800 dark:file:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                                                    onChange={(ev) => setForm((p) => ({ ...p, file: ev.target.files?.[0] || null }))}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                                                    {t('gallery.uploadTitle') || 'Titulo (opcional)'}
+                                                </label>
+                                                <input type="text" value={form.title} className={inputClass} onChange={(ev) => setForm((p) => ({ ...p, title: ev.target.value }))} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                                                    {t('gallery.uploadDescription') || 'Descripcion (opcional)'}
+                                                </label>
+                                                <input type="text" value={form.description} className={inputClass} onChange={(ev) => setForm((p) => ({ ...p, description: ev.target.value }))} />
+                                            </div>
+                                        </div>
 
-                                <div className="text-sm">
-                                    {uploadStatus.error && (
-                                        <Alert variant="destructive" className="py-2">
-                                            <AlertDescription>{uploadStatus.error}</AlertDescription>
-                                        </Alert>
-                                    )}
-                                    {!uploadStatus.error && uploadStatus.ok && (
-                                        <Alert variant="success" className="py-2">
-                                            <AlertDescription>{uploadStatus.ok}</AlertDescription>
-                                        </Alert>
-                                    )}
-                                </div>
-                            </div>
-                        </form>
-                        </ScrollReveal>
-                    )}
+                                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                                            <button
+                                                type="submit"
+                                                disabled={uploadStatus.loading}
+                                                className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+                                            >
+                                                {uploadStatus.loading ? (t('gallery.uploading') || 'Subiendo...') : (t('gallery.uploadCta') || 'Subir')}
+                                            </button>
 
-                    {status.loading && (
-                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
-                            {[...Array(8)].map((_, i) => (
-                                <div key={i} className="aspect-square rounded-xl">
-                                    <Skeleton className="h-full w-full rounded-xl" />
-                                </div>
-                            ))}
+                                            {uploadStatus.error && (
+                                                <span className="text-sm text-red-600 dark:text-red-400">{uploadStatus.error}</span>
+                                            )}
+                                            {!uploadStatus.error && uploadStatus.ok && (
+                                                <span className="text-sm text-emerald-600 dark:text-emerald-400">{uploadStatus.ok}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </motion.form>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </ScrollReveal>
+            )}
+
+            {/* Login prompt for non-auth users */}
+            {!isAuthenticated && (
+                <div className="flex items-center gap-2 text-sm text-stone-500 dark:text-stone-400">
+                    <LogIn className="h-4 w-4" />
+                    <span>{t('gallery.loginForFavorites') || 'Inicia sesion para guardar favoritos'}</span>
+                </div>
+            )}
+
+            {/* Loading skeleton -- masonry-like */}
+            {status.loading && (
+                <div className="columns-2 sm:columns-3 lg:columns-4 gap-4 space-y-4">
+                    {[180, 240, 160, 220, 200, 260, 180, 210].map((h, i) => (
+                        <div key={i} className="break-inside-avoid">
+                            <Skeleton className="w-full rounded-lg" style={{ height: h }} />
                         </div>
-                    )}
-                    {!status.loading && status.error && (
-                        <Alert variant="destructive">
-                            <AlertTitle>Error</AlertTitle>
-                            <AlertDescription>{status.error}</AlertDescription>
-                        </Alert>
-                    )}
+                    ))}
+                </div>
+            )}
 
-                    {!status.loading && !status.error && (
-                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
-                            {items.map((item, index) => {
-                                const isFav = favorites.includes(item.id);
-                                return (
-                                <ScrollReveal key={item.id} delay={(index % 8) * 0.04}>
-                                <Card className="overflow-hidden group cursor-pointer p-0 card-hover">
-                                    <div className="relative aspect-square bg-slate-50 dark:bg-slate-900">
-                                        <img
-                                            src={resolveMediaUrl(item.url)}
-                                            alt={item.title || item.original_name || 'Imagen'}
-                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                                            loading="lazy"
-                                            onClick={() => setActiveIndex(index)}
-                                        />
+            {!status.loading && status.error && (
+                <Alert variant="destructive">
+                    <AlertDescription>{status.error}</AlertDescription>
+                </Alert>
+            )}
+
+            {/* Masonry gallery grid */}
+            {!status.loading && !status.error && (
+                <div className="columns-2 sm:columns-3 lg:columns-4 gap-4 space-y-4">
+                    {items.map((item, index) => {
+                        const isFav = favorites.includes(item.id);
+                        return (
+                            <ScrollReveal key={item.id} delay={(index % 8) * 0.04}>
+                                <div className="break-inside-avoid group relative rounded-lg overflow-hidden cursor-pointer">
+                                    <img
+                                        src={resolveMediaUrl(item.url)}
+                                        alt={item.title || item.original_name || 'Imagen'}
+                                        className="w-full block transition-transform duration-250 group-hover:scale-[1.02]"
+                                        loading="lazy"
+                                        onClick={() => setActiveIndex(index)}
+                                    />
+
+                                    {/* Hover overlay with title */}
+                                    <div
+                                        className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/40 transition-colors duration-250 pointer-events-none"
+                                        onClick={() => setActiveIndex(index)}
+                                    />
+                                    {item.title && (
+                                        <div className="absolute bottom-0 left-0 right-0 px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-250 pointer-events-none">
+                                            <p className="text-sm font-medium text-white truncate">{item.title}</p>
+                                        </div>
+                                    )}
+
+                                    {/* Favorite heart -- only on hover (or if already fav) */}
+                                    {isAuthenticated && (
                                         <button
                                             type="button"
-                                            onClick={() => toggleFavorite(item.id)}
-                                            className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/85 text-slate-700 shadow hover:bg-white dark:bg-slate-900/85 dark:text-slate-100"
-                                            aria-label={isFav ? (t('gallery.unfavorite') || 'Quitar favorito') : (t('gallery.favorite') || 'Añadir favorito')}
+                                            onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id); }}
+                                            className={`absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-full transition-opacity duration-200 ${isFav ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} bg-white/90 dark:bg-stone-800/90 text-stone-700 dark:text-stone-200 hover:bg-white dark:hover:bg-stone-800`}
+                                            aria-label={isFav ? (t('gallery.unfavorite') || 'Quitar favorito') : (t('gallery.favorite') || 'Anadir favorito')}
                                         >
                                             <Heart className={`h-4 w-4 ${isFav ? 'fill-current text-rose-500' : ''}`} />
                                         </button>
-                                    </div>
-                                    {(item.title || item.description || (isAuthenticated && isAdmin)) && (
-                                        <div className="p-3">
-                                            {item.title && <p className="font-semibold text-slate-900 truncate dark:text-slate-50">{item.title}</p>}
-                                            {item.description && (
-                                                <div className="text-sm text-slate-600 dark:text-slate-400">
-                                                    <p className={expandedItems[item.id] ? '' : 'line-clamp-2'}>
-                                                        {item.description}
-                                                    </p>
-                                                    {item.description.length > 80 && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setExpandedItems(prev => ({ ...prev, [item.id]: !prev[item.id] }))}
-                                                            className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium mt-1"
-                                                        >
-                                                            {expandedItems[item.id] ? t('gallery.seeLess') : t('gallery.seeMore')}
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            {isAuthenticated && isAdmin && (
-                                                <div className="mt-3 flex items-center justify-between">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleDelete(item.id)}
-                                                        disabled={deleteStatus.loadingId === item.id}
-                                                        className="inline-flex items-center rounded-md px-2 py-1 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-900/20"
-                                                    >
-                                                        {deleteStatus.loadingId === item.id ? (t('gallery.deleting') || 'Eliminando...') : (t('gallery.delete') || 'Eliminar')}
-                                                    </button>
-
-                                                    {deleteStatus.error && (
-                                                        <span className="text-xs text-red-600" role="alert">{deleteStatus.error}</span>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
                                     )}
-                                </Card>
-                                </ScrollReveal>
-                            )})}
-                        </div>
-                    )}
 
-            </div>
-
-            <Dialog open={Boolean(activeItem)} onOpenChange={(open) => { if (!open) setActiveIndex(-1); }}>
-                <DialogContent className="max-w-4xl border-slate-200 bg-white p-0 dark:border-slate-800 dark:bg-slate-950">
-                    {activeItem && (
-                        <div className="relative">
-                            <button
-                                type="button"
-                                onClick={() => setActiveIndex(-1)}
-                                className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70"
-                                aria-label={t('common.close') || 'Cerrar'}
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-
-                            <div className="relative flex min-h-[300px] items-center justify-center bg-slate-950">
-                                <AnimatePresence mode="wait">
-                                    <motion.img
-                                        key={activeItem.id}
-                                        initial={{ opacity: 0.2, scale: 0.98 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0.2, scale: 0.98 }}
-                                        transition={{ duration: 0.2 }}
-                                        src={resolveMediaUrl(activeItem.url)}
-                                        alt={activeItem.title || activeItem.original_name || 'Imagen'}
-                                        className="max-h-[70vh] w-full object-contain"
-                                    />
-                                </AnimatePresence>
-
-                                <button
-                                    type="button"
-                                    disabled={activeIndex <= 0}
-                                    onClick={() => setActiveIndex((prev) => Math.max(0, prev - 1))}
-                                    className="absolute left-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white disabled:opacity-40"
-                                    aria-label={t('common.previous') || 'Anterior'}
-                                >
-                                    <ChevronLeft className="h-5 w-5" />
-                                </button>
-
-                                <button
-                                    type="button"
-                                    disabled={activeIndex >= items.length - 1}
-                                    onClick={() => setActiveIndex((prev) => Math.min(items.length - 1, prev + 1))}
-                                    className="absolute right-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white disabled:opacity-40"
-                                    aria-label={t('common.next') || 'Siguiente'}
-                                >
-                                    <ChevronRight className="h-5 w-5" />
-                                </button>
-                            </div>
-
-                            <div className="space-y-2 p-4">
-                                <div className="flex items-center justify-between gap-3">
-                                    <p className="font-semibold text-slate-900 dark:text-slate-50">
-                                        {activeItem.title || (t('gallery.image') || 'Imagen')}
-                                    </p>
-                                    <span className="text-xs text-slate-500 dark:text-slate-400">
-                                        {activeIndex + 1}/{items.length}
-                                    </span>
+                                    {/* Admin delete */}
+                                    {isAuthenticated && isAdmin && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
+                                            disabled={deleteStatus.loadingId === item.id}
+                                            className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 inline-flex items-center rounded-lg px-2 py-1 text-xs font-medium text-white bg-red-600/80 hover:bg-red-600 disabled:opacity-50"
+                                        >
+                                            {deleteStatus.loadingId === item.id ? (t('gallery.deleting') || 'Eliminando...') : (t('gallery.delete') || 'Eliminar')}
+                                        </button>
+                                    )}
                                 </div>
-                                {activeItem.description && (
-                                    <p className="text-sm text-slate-600 dark:text-slate-300">{activeItem.description}</p>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                </DialogContent>
-            </Dialog>
-        </div>
-    )
-}
+                            </ScrollReveal>
+                        );
+                    })}
+                </div>
+            )}
 
-export default Gallery
+            {deleteStatus.error && (
+                <div className="text-sm text-red-600 dark:text-red-400" role="alert">{deleteStatus.error}</div>
+            )}
+
+            {/* Lightbox -- full-screen dark overlay */}
+            <AnimatePresence>
+                {activeItem && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/90"
+                        onClick={() => setActiveIndex(-1)}
+                    >
+                        {/* Close button */}
+                        <button
+                            type="button"
+                            onClick={() => setActiveIndex(-1)}
+                            className="absolute top-5 right-5 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full text-white/70 hover:text-white transition-colors duration-200"
+                            aria-label={t('common.close') || 'Cerrar'}
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+
+                        {/* Counter */}
+                        <span className="absolute top-6 left-6 text-sm text-white/50 font-medium">
+                            {activeIndex + 1} / {items.length}
+                        </span>
+
+                        {/* Previous */}
+                        <button
+                            type="button"
+                            disabled={activeIndex <= 0}
+                            onClick={(e) => { e.stopPropagation(); setActiveIndex((prev) => Math.max(0, prev - 1)); }}
+                            className="absolute left-4 inline-flex h-10 w-10 items-center justify-center rounded-full text-white/60 hover:text-white disabled:opacity-30 transition-colors duration-200"
+                            aria-label={t('common.previous') || 'Anterior'}
+                        >
+                            <ChevronLeft className="h-6 w-6" />
+                        </button>
+
+                        {/* Image */}
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeItem.id}
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -8 }}
+                                transition={{ duration: 0.2 }}
+                                className="max-w-5xl w-full px-16 flex flex-col items-center"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <img
+                                    src={resolveMediaUrl(activeItem.url)}
+                                    alt={activeItem.title || activeItem.original_name || 'Imagen'}
+                                    className="max-h-[75vh] w-auto max-w-full object-contain rounded-lg"
+                                />
+                                {(activeItem.title || activeItem.description) && (
+                                    <div className="mt-4 text-center max-w-lg">
+                                        {activeItem.title && (
+                                            <p className="text-base font-medium text-white">{activeItem.title}</p>
+                                        )}
+                                        {activeItem.description && (
+                                            <p className="mt-1 text-sm text-white/60">{activeItem.description}</p>
+                                        )}
+                                    </div>
+                                )}
+                            </motion.div>
+                        </AnimatePresence>
+
+                        {/* Next */}
+                        <button
+                            type="button"
+                            disabled={activeIndex >= items.length - 1}
+                            onClick={(e) => { e.stopPropagation(); setActiveIndex((prev) => Math.min(items.length - 1, prev + 1)); }}
+                            className="absolute right-4 inline-flex h-10 w-10 items-center justify-center rounded-full text-white/60 hover:text-white disabled:opacity-30 transition-colors duration-200"
+                            aria-label={t('common.next') || 'Siguiente'}
+                        >
+                            <ChevronRight className="h-6 w-6" />
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
+export default Gallery;

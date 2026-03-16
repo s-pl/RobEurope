@@ -1,7 +1,7 @@
 /**
  * @fileoverview
  * API handlers for Archive (Global Information Page).
- * 
+ *
  * Archives store files, text and mixed content organized by competition/year
  * with configurable visibility (hidden, public, restricted by email).
  * @module controller/ArchiveController
@@ -23,7 +23,17 @@ const { Archive, Competition, User } = db;
 const isSuperAdmin = (user) => user?.role === 'super_admin';
 
 /**
+ * Checks if user is any admin role.
+ * @param {Object} user - Session user.
+ * @returns {boolean}
+ */
+const isAdmin = (user) => user?.role === 'super_admin' || user?.role === 'center_admin';
+
+/**
  * Checks if user has access to restricted content.
+ * - super_admin: always
+ * - center_admin: always (sees all restricted)
+ * - Regular user: only if email is in allowed_emails or they uploaded it
  * @param {Object} archive - Archive item.
  * @param {Object} user - Session user.
  * @returns {boolean}
@@ -34,13 +44,18 @@ const hasAccessToRestricted = (archive, user) => {
   if (user.role === 'center_admin') return true;
   if (user.id && archive.uploaded_by && String(user.id) === String(archive.uploaded_by)) return true;
   if (!user.email) return false;
-  
+
   const allowedEmails = archive.allowed_emails || [];
   return allowedEmails.includes(user.email.toLowerCase());
 };
 
 /**
  * Filters archives based on visibility and user access.
+ * - super_admin: sees ALL (including hidden)
+ * - center_admin: sees public + ALL restricted (not hidden)
+ * - Regular authenticated user: sees public + restricted if email is in allowed_emails
+ * - Unauthenticated: sees only public
+ * - Hidden is NEVER shown to non-super_admin users
  * @param {Array} archives - Array of archive items.
  * @param {Object} user - Session user.
  * @returns {Array} Filtered archives.
@@ -49,18 +64,18 @@ const filterByVisibility = (archives, user) => {
   return archives.filter(archive => {
     // Super admin sees everything
     if (isSuperAdmin(user)) return true;
-    
-    // Hidden content is only visible to admins
+
+    // Hidden content is only visible to super_admin
     if (archive.visibility === 'hidden') return false;
-    
+
     // Public content is visible to all
     if (archive.visibility === 'public') return true;
-    
-    // Restricted content requires email check
+
+    // Restricted content requires access check
     if (archive.visibility === 'restricted') {
       return hasAccessToRestricted(archive, user);
     }
-    
+
     return false;
   });
 };
@@ -68,6 +83,8 @@ const filterByVisibility = (archives, user) => {
 /**
  * Lists archive items.
  * Filters based on user visibility permissions.
+ * Note: Fetches all matching records then filters by visibility in JS to ensure
+ * correct access control. Pagination is applied after filtering.
  *
  * @route GET /api/archives
  * @param {Express.Request} req Express request.
@@ -78,36 +95,42 @@ export const listArchives = async (req, res) => {
   try {
     const { competition_id, content_type, visibility, limit = 50, offset = 0 } = req.query;
     const where = {};
-    
+
     if (competition_id) {
       where.competition_id = competition_id;
     }
-    
+
     if (content_type) {
       where.content_type = content_type;
     }
-    
-    // Only super_admin can filter by visibility or see non-public content
+
+    // Only super_admin can filter by visibility directly
     if (visibility && isSuperAdmin(req.user)) {
       where.visibility = visibility;
     }
-    
+
+    // For non-super-admin, pre-filter at DB level to exclude hidden
+    if (!isSuperAdmin(req.user)) {
+      where.visibility = { [Op.ne]: 'hidden' };
+    }
+
     const archives = await Archive.findAll({
       where,
       include: [
         { model: Competition, as: 'competition', attributes: ['id', 'title', 'slug'] },
         { model: User, as: 'uploader', attributes: ['id', 'username', 'first_name', 'last_name'] }
       ],
-      order: [['sort_order', 'ASC'], ['created_at', 'DESC']],
-      limit: Number(limit),
-      offset: Number(offset)
+      order: [['sort_order', 'ASC'], ['created_at', 'DESC']]
     });
-    
-    // Filter by visibility
+
+    // Filter by visibility (handles restricted email checks)
     const filteredArchives = filterByVisibility(archives, req.user);
-    
+
+    // Apply pagination after filtering
+    const paginatedArchives = filteredArchives.slice(Number(offset), Number(offset) + Number(limit));
+
     res.json({
-      items: filteredArchives,
+      items: paginatedArchives,
       total: filteredArchives.length,
       limit: Number(limit),
       offset: Number(offset)
@@ -132,9 +155,9 @@ export const getArchivesByCompetition = async (req, res) => {
       order: [['start_date', 'DESC']],
       attributes: ['id', 'title', 'slug', 'start_date', 'end_date']
     });
-    
+
     const result = [];
-    
+
     for (const competition of competitions) {
       const archives = await Archive.findAll({
         where: { competition_id: competition.id },
@@ -143,9 +166,9 @@ export const getArchivesByCompetition = async (req, res) => {
         ],
         order: [['sort_order', 'ASC'], ['created_at', 'DESC']]
       });
-      
+
       const filteredArchives = filterByVisibility(archives, req.user);
-      
+
       if (filteredArchives.length > 0 || isSuperAdmin(req.user)) {
         result.push({
           competition,
@@ -153,7 +176,7 @@ export const getArchivesByCompetition = async (req, res) => {
         });
       }
     }
-    
+
     // Also get archives without competition
     const noCompetitionArchives = await Archive.findAll({
       where: { competition_id: null },
@@ -162,16 +185,16 @@ export const getArchivesByCompetition = async (req, res) => {
       ],
       order: [['sort_order', 'ASC'], ['created_at', 'DESC']]
     });
-    
+
     const filteredNoCompetition = filterByVisibility(noCompetitionArchives, req.user);
-    
+
     if (filteredNoCompetition.length > 0 || isSuperAdmin(req.user)) {
       result.push({
         competition: null,
         archives: filteredNoCompetition
       });
     }
-    
+
     res.json({ items: result });
   } catch (err) {
     console.error('Error getting archives by competition:', err);
@@ -181,6 +204,7 @@ export const getArchivesByCompetition = async (req, res) => {
 
 /**
  * Gets a single archive by ID.
+ * Enforces the same visibility rules as listArchives.
  *
  * @route GET /api/archives/:id
  * @param {Express.Request} req Express request.
@@ -190,27 +214,28 @@ export const getArchivesByCompetition = async (req, res) => {
 export const getArchiveById = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const archive = await Archive.findByPk(id, {
       include: [
         { model: Competition, as: 'competition', attributes: ['id', 'title', 'slug'] },
         { model: User, as: 'uploader', attributes: ['id', 'username', 'first_name', 'last_name'] }
       ]
     });
-    
+
     if (!archive) {
       return res.status(404).json({ error: 'Archivo no encontrado' });
     }
-    
-    // Check visibility
+
+    // Hidden: only super_admin
     if (archive.visibility === 'hidden' && !isSuperAdmin(req.user)) {
       return res.status(404).json({ error: 'Archivo no encontrado' });
     }
-    
+
+    // Restricted: check access
     if (archive.visibility === 'restricted' && !hasAccessToRestricted(archive, req.user)) {
       return res.status(403).json({ error: 'No tienes acceso a este contenido' });
     }
-    
+
     res.json(archive);
   } catch (err) {
     console.error('Error getting archive:', err);
@@ -231,24 +256,24 @@ export const createArchive = async (req, res) => {
     if (!req.user || !isSuperAdmin(req.user)) {
       return res.status(403).json({ error: 'Solo el administrador general puede crear archivos' });
     }
-    
-    const { 
-      title, 
-      description, 
-      content_type = 'text', 
-      competition_id, 
+
+    const {
+      title,
+      description,
+      content_type = 'text',
+      competition_id,
       visibility = 'hidden',
       allowed_emails = [],
       sort_order = 0
     } = req.body;
-    
+
     if (!title || !title.trim()) {
       return res.status(400).json({ error: 'El título es requerido' });
     }
-    
+
     let fileData = {};
     const fileInfo = getFileInfo(req);
-    
+
     if (fileInfo) {
       fileData = {
         file_url: fileInfo.url,
@@ -257,7 +282,7 @@ export const createArchive = async (req, res) => {
         file_size: fileInfo.size
       };
     }
-    
+
     // Validate content_type based on what's provided
     let finalContentType = content_type;
     if (fileInfo && description) {
@@ -267,15 +292,29 @@ export const createArchive = async (req, res) => {
     } else if (!fileInfo && description) {
       finalContentType = 'text';
     }
-    
-    // Normalize allowed_emails
+
+    // Normalize allowed_emails - handle JSON string, array, or comma-separated
     let normalizedEmails = [];
-    if (allowed_emails && Array.isArray(allowed_emails)) {
-      normalizedEmails = allowed_emails.map(e => e.toLowerCase().trim()).filter(e => e);
-    } else if (typeof allowed_emails === 'string') {
-      normalizedEmails = allowed_emails.split(',').map(e => e.toLowerCase().trim()).filter(e => e);
+    if (allowed_emails) {
+      let emailsInput = allowed_emails;
+      // Handle JSON-stringified array from FormData
+      if (typeof emailsInput === 'string') {
+        try {
+          const parsed = JSON.parse(emailsInput);
+          if (Array.isArray(parsed)) {
+            emailsInput = parsed;
+          }
+        } catch {
+          // Not JSON, treat as comma-separated
+        }
+      }
+      if (Array.isArray(emailsInput)) {
+        normalizedEmails = emailsInput.map(e => String(e).toLowerCase().trim()).filter(e => e);
+      } else if (typeof emailsInput === 'string') {
+        normalizedEmails = emailsInput.split(',').map(e => e.toLowerCase().trim()).filter(e => e);
+      }
     }
-    
+
     const archive = await Archive.create({
       title: title.trim(),
       description: description?.trim() || null,
@@ -287,7 +326,7 @@ export const createArchive = async (req, res) => {
       uploaded_by: req.user.id,
       ...fileData
     });
-    
+
     res.status(201).json(archive);
   } catch (err) {
     console.error('Error creating archive:', err);
@@ -308,27 +347,27 @@ export const updateArchive = async (req, res) => {
     if (!req.user || !isSuperAdmin(req.user)) {
       return res.status(403).json({ error: 'Solo el administrador general puede editar archivos' });
     }
-    
+
     const { id } = req.params;
     const archive = await Archive.findByPk(id);
-    
+
     if (!archive) {
       return res.status(404).json({ error: 'Archivo no encontrado' });
     }
-    
-    const { 
-      title, 
-      description, 
-      competition_id, 
+
+    const {
+      title,
+      description,
+      competition_id,
       visibility,
       allowed_emails,
       sort_order
     } = req.body;
-    
+
     // Handle file upload if present
     let fileData = {};
     const fileInfo = getFileInfo(req);
-    
+
     if (fileInfo) {
       // Delete old file if exists
       if (archive.file_url) {
@@ -337,7 +376,7 @@ export const updateArchive = async (req, res) => {
           fs.unlinkSync(oldFilePath);
         }
       }
-      
+
       fileData = {
         file_url: fileInfo.url,
         file_name: fileInfo.originalname,
@@ -345,17 +384,29 @@ export const updateArchive = async (req, res) => {
         file_size: fileInfo.size
       };
     }
-    
-    // Normalize allowed_emails
+
+    // Normalize allowed_emails - handle JSON string, array, or comma-separated
     let normalizedEmails = archive.allowed_emails;
     if (allowed_emails !== undefined) {
-      if (Array.isArray(allowed_emails)) {
-        normalizedEmails = allowed_emails.map(e => e.toLowerCase().trim()).filter(e => e);
-      } else if (typeof allowed_emails === 'string') {
-        normalizedEmails = allowed_emails.split(',').map(e => e.toLowerCase().trim()).filter(e => e);
+      let emailsInput = allowed_emails;
+      // Handle JSON-stringified array from FormData
+      if (typeof emailsInput === 'string') {
+        try {
+          const parsed = JSON.parse(emailsInput);
+          if (Array.isArray(parsed)) {
+            emailsInput = parsed;
+          }
+        } catch {
+          // Not JSON, treat as comma-separated
+        }
+      }
+      if (Array.isArray(emailsInput)) {
+        normalizedEmails = emailsInput.map(e => String(e).toLowerCase().trim()).filter(e => e);
+      } else if (typeof emailsInput === 'string') {
+        normalizedEmails = emailsInput.split(',').map(e => e.toLowerCase().trim()).filter(e => e);
       }
     }
-    
+
     const updateData = {
       title: title?.trim() || archive.title,
       description: description !== undefined ? description?.trim() : archive.description,
@@ -366,7 +417,7 @@ export const updateArchive = async (req, res) => {
       updated_at: new Date(),
       ...fileData
     };
-    
+
     // Update content_type based on current state
     const hasFile = fileData.file_url || archive.file_url;
     const hasText = updateData.description;
@@ -377,9 +428,9 @@ export const updateArchive = async (req, res) => {
     } else {
       updateData.content_type = 'text';
     }
-    
+
     await archive.update(updateData);
-    
+
     res.json(archive);
   } catch (err) {
     console.error('Error updating archive:', err);
@@ -400,26 +451,26 @@ export const updateArchiveVisibility = async (req, res) => {
     if (!req.user || !isSuperAdmin(req.user)) {
       return res.status(403).json({ error: 'Solo el administrador general puede cambiar la visibilidad' });
     }
-    
+
     const { id } = req.params;
     const { visibility, allowed_emails } = req.body;
-    
+
     if (!visibility || !['hidden', 'public', 'restricted'].includes(visibility)) {
       return res.status(400).json({ error: 'Visibilidad inválida. Opciones: hidden, public, restricted' });
     }
-    
+
     const archive = await Archive.findByPk(id);
     if (!archive) {
       return res.status(404).json({ error: 'Archivo no encontrado' });
     }
-    
+
     const updateData = { visibility, updated_at: new Date() };
-    
+
     if (visibility === 'restricted') {
       if (!allowed_emails || allowed_emails.length === 0) {
         return res.status(400).json({ error: 'Se requieren emails cuando la visibilidad es restringida' });
       }
-      
+
       let normalizedEmails = [];
       if (Array.isArray(allowed_emails)) {
         normalizedEmails = allowed_emails.map(e => e.toLowerCase().trim()).filter(e => e);
@@ -427,10 +478,13 @@ export const updateArchiveVisibility = async (req, res) => {
         normalizedEmails = allowed_emails.split(',').map(e => e.toLowerCase().trim()).filter(e => e);
       }
       updateData.allowed_emails = normalizedEmails;
+    } else {
+      // Clear allowed_emails when not restricted
+      updateData.allowed_emails = [];
     }
-    
+
     await archive.update(updateData);
-    
+
     res.json({ message: 'Visibilidad actualizada', archive });
   } catch (err) {
     console.error('Error updating archive visibility:', err);
@@ -451,14 +505,14 @@ export const deleteArchive = async (req, res) => {
     if (!req.user || !isSuperAdmin(req.user)) {
       return res.status(403).json({ error: 'Solo el administrador general puede eliminar archivos' });
     }
-    
+
     const { id } = req.params;
     const archive = await Archive.findByPk(id);
-    
+
     if (!archive) {
       return res.status(404).json({ error: 'Archivo no encontrado' });
     }
-    
+
     // Delete file if exists
     if (archive.file_url) {
       const filePath = path.join(process.cwd(), 'uploads', path.basename(archive.file_url));
@@ -466,9 +520,9 @@ export const deleteArchive = async (req, res) => {
         fs.unlinkSync(filePath);
       }
     }
-    
+
     await archive.destroy();
-    
+
     res.status(204).send();
   } catch (err) {
     console.error('Error deleting archive:', err);
@@ -489,13 +543,13 @@ export const reorderArchives = async (req, res) => {
     if (!req.user || !isSuperAdmin(req.user)) {
       return res.status(403).json({ error: 'Solo el administrador general puede reordenar archivos' });
     }
-    
+
     const { items } = req.body;
-    
+
     if (!items || !Array.isArray(items)) {
       return res.status(400).json({ error: 'Se requiere un array de items con id y sort_order' });
     }
-    
+
     for (const item of items) {
       if (item.id && typeof item.sort_order === 'number') {
         await Archive.update(
@@ -504,7 +558,7 @@ export const reorderArchives = async (req, res) => {
         );
       }
     }
-    
+
     res.json({ message: 'Orden actualizado' });
   } catch (err) {
     console.error('Error reordering archives:', err);

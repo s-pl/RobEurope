@@ -2,12 +2,14 @@
  * @fileoverview Toast state store + hook.
  *
  * Implements a small in-memory toast store with subscribe/update/dismiss helpers.
+ * Auto-dismisses toasts after 5 seconds by default.
  */
 
 import * as React from "react"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_LIMIT = 3
+const TOAST_REMOVE_DELAY = 300
+const TOAST_AUTO_DISMISS_DELAY = 5000
 
 let count = 0
 
@@ -17,6 +19,7 @@ function genId() {
 }
 
 const toastTimeouts = new Map()
+const autoDismissTimeouts = new Map()
 
 const addToRemoveQueue = (toastId) => {
   if (toastTimeouts.has(toastId)) {
@@ -61,9 +64,17 @@ export const reducer = (state, action) => {
 
       if (toastId) {
         addToRemoveQueue(toastId)
+        if (autoDismissTimeouts.has(toastId)) {
+          clearTimeout(autoDismissTimeouts.get(toastId))
+          autoDismissTimeouts.delete(toastId)
+        }
       } else {
         state.toasts.forEach((toast) => {
           addToRemoveQueue(toast.id)
+          if (autoDismissTimeouts.has(toast.id)) {
+            clearTimeout(autoDismissTimeouts.get(toast.id))
+            autoDismissTimeouts.delete(toast.id)
+          }
         })
       }
 
@@ -104,7 +115,17 @@ function dispatch(action) {
   })
 }
 
-function toast({ ...props }) {
+/**
+ * Create a toast notification.
+ *
+ * @param {Object} props
+ * @param {string} [props.title] - Toast title
+ * @param {string} [props.description] - Toast description
+ * @param {string} [props.variant] - 'default' | 'success' | 'destructive'
+ * @param {number} [props.duration] - Auto-dismiss duration in ms (default 5000)
+ * @returns {{ id: string, dismiss: Function, update: Function }}
+ */
+function toast({ duration = TOAST_AUTO_DISMISS_DELAY, ...props }) {
   const id = genId()
 
   const update = (props) =>
@@ -125,6 +146,15 @@ function toast({ ...props }) {
       },
     },
   })
+
+  // Auto-dismiss after duration
+  if (duration > 0) {
+    const autoDismissTimeout = setTimeout(() => {
+      autoDismissTimeouts.delete(id)
+      dismiss()
+    }, duration)
+    autoDismissTimeouts.set(id, autoDismissTimeout)
+  }
 
   return {
     id: id,

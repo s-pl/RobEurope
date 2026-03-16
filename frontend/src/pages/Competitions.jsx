@@ -38,7 +38,7 @@ const CompetitionItem = ({ competition, isFavorite, onToggleFavorite, onSetActiv
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-4 text-sm text-stone-500 dark:text-stone-400">
               <span className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 {new Date(competition.start_date).toLocaleDateString()}
@@ -52,7 +52,7 @@ const CompetitionItem = ({ competition, isFavorite, onToggleFavorite, onSetActiv
                 variant="ghost"
                 size="icon"
                 onClick={(e)=>{ e.stopPropagation(); onToggleFavorite(competition.id, isFavorite); }}
-                className={isFavorite ? 'text-yellow-500' : 'text-slate-400 dark:text-slate-500'}
+                className={isFavorite ? 'text-yellow-500' : 'text-stone-400 dark:text-stone-500'}
                 title={isFavorite ? (t('competitions.removeFavorite')||'Quitar de favoritos') : (t('competitions.addFavorite')||'Añadir a favoritos')}
               >
                 <Star className="h-5 w-5" fill={isFavorite ? 'currentColor' : 'none'} aria-hidden="true" />
@@ -71,7 +71,7 @@ const CompetitionItem = ({ competition, isFavorite, onToggleFavorite, onSetActiv
                 {competition.is_active ? (t('competitions.deactivate')) : (t('competitions.setActive'))}
               </Button>
             )}
-            <Button variant="ghost" size="icon" className="text-slate-500 dark:text-slate-400">
+            <Button variant="ghost" size="icon" className="text-stone-500 dark:text-stone-400">
               {isOpen ? <ChevronUp aria-hidden="true" /> : <ChevronDown aria-hidden="true" />}
               <span className="sr-only">{isOpen ? t('common.collapse') || 'Colapsar' : t('common.expand') || 'Expandir'}</span>
             </Button>
@@ -81,13 +81,13 @@ const CompetitionItem = ({ competition, isFavorite, onToggleFavorite, onSetActiv
 
       {isOpen && (
         <CardContent className="pt-0 pb-6 px-6 animate-in slide-in-from-top-2 duration-200">
-          <div className="border-t border-slate-100 dark:border-slate-800 pt-4 mt-2">
-            <p className="text-slate-600 dark:text-slate-300 mb-6 line-clamp-3">
+          <div className="border-t border-stone-100 dark:border-stone-800 pt-4 mt-2">
+            <p className="text-stone-600 dark:text-stone-300 mb-6 line-clamp-3">
               {competition.description || t('competitions.noDescription')}
             </p>
             
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+              <div className="flex items-center gap-2 text-sm text-stone-500 dark:text-stone-400">
                 <Users className="h-4 w-4" />
                 <span>{competition.teams_registered || 0} / {competition.max_teams || '∞'} {t('competitions.card.teams')}</span>
               </div>
@@ -359,7 +359,7 @@ const Competitions = () => {
         ))}
         
         {!loading && competitions.length === 0 && (
-          <div className="text-center py-12 text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+          <div className="text-center py-12 text-stone-500 dark:text-stone-400 bg-stone-50 dark:bg-stone-900 rounded-xl border border-dashed border-stone-200 dark:border-stone-800">
             {t('competitions.noActive')}
           </div>
         )}

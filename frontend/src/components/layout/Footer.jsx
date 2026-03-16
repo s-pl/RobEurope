@@ -1,76 +1,145 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Bot } from 'lucide-react';
+import { Bot, Github, Linkedin, Twitter } from 'lucide-react';
 
 const Footer = () => {
-    const { t } = useTranslation();
-    return (
-        <footer className="w-full border-t border-slate-200 bg-white/60 dark:border-slate-800 dark:bg-slate-950/40">
-            <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row items-start justify-between gap-10 py-10 border-b border-slate-200/70 dark:border-slate-800">
+  const { t } = useTranslation();
 
-                <div className="max-w-md">
-                    <div className="flex items-center gap-2">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white text-blue-700 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-800 dark:text-blue-400">
-                            <Bot className="h-5 w-5" aria-hidden="true" />
-                        </span>
-                        <span className="text-sm font-semibold text-slate-900 dark:text-slate-50">RobEurope</span>
-                    </div>
-                    <p className="mt-6 text-sm text-slate-600 dark:text-slate-400">
-                        {t('footer.description')}
-                    </p>
-                    <div className="flex items-center gap-2 mt-3">
-                        <a href="https://x.com/robeurope-robotics" aria-label={t('footer.social.twitter')}>
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path d="M19.167 2.5a9.1 9.1 0 0 1-2.617 1.275 3.733 3.733 0 0 0-6.55 2.5v.833a8.88 8.88 0 0 1-7.5-3.775s-3.333 7.5 4.167 10.833a9.7 9.7 0 0 1-5.834 1.667C8.333 20 17.5 15.833 17.5 6.25q0-.35-.067-.692A6.43 6.43 0 0 0 19.167 2.5" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                        </a>
-                        <a href="https://github.com/s-pl/RobEurope" aria-label={t('footer.social.github')}>
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path d="M7.5 15.833c-4.167 1.25-4.167-2.084-5.833-2.5m11.666 5v-3.225a2.8 2.8 0 0 0-.783-2.175c2.616-.292 5.366-1.283 5.366-5.833a4.53 4.53 0 0 0-1.25-3.125 4.22 4.22 0 0 0-.075-3.142s-.983-.292-3.258 1.233a11.15 11.15 0 0 0-5.833 0C5.225.541 4.242.833 4.242.833a4.22 4.22 0 0 0-.075 3.142 4.53 4.53 0 0 0-1.25 3.15c0 4.516 2.75 5.508 5.366 5.833a2.8 2.8 0 0 0-.783 2.15v3.225" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                        </a>
-                        <a href="https://es.linkedin.com/robeurope" aria-label={t('footer.social.linkedin')}>
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path d="M13.333 6.667a5 5 0 0 1 5 5V17.5H15v-5.833a1.667 1.667 0 0 0-3.334 0V17.5H8.333v-5.833a5 5 0 0 1 5-5M5 7.5H1.667v10H5zM3.333 5a1.667 1.667 0 1 0 0-3.333 1.667 1.667 0 0 0 0 3.333" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                        </a>
-                    </div>
-                </div>
+  const linkColumns = [
+    {
+      title: t('footer.projects'),
+      links: [
+        { to: '/competitions', label: t('footer.competitions') },
+        { to: '/teams', label: t('footer.teams') },
+        { to: '/streams', label: t('footer.streaming') },
+      ],
+    },
+    {
+      title: t('footer.resources'),
+      links: [
+        { to: '/sponsors', label: t('footer.sponsors') },
+        { to: '/gallery', label: t('footer.gallery') },
+        { to: '/feedback', label: t('footer.feedback') },
+      ],
+    },
+    {
+      title: t('footer.company'),
+      links: [
+        { to: '#', label: t('footer.about'), isAnchor: true },
+        { to: '/contact', label: t('footer.contact') },
+        { to: '/terms', label: t('footer.terms') },
+      ],
+    },
+  ];
 
-                <div className="w-full md:w-1/2 flex flex-wrap md:flex-nowrap justify-between gap-10 md:gap-6">
-                    <div>
-                        <h2 className="font-semibold text-slate-900 dark:text-slate-50 mb-5">{t('footer.projects')}
-                        </h2>
-                        <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2 list-none">
-                            <li><Link to="/competitions" className="hover:text-slate-900 dark:hover:text-slate-100">{t('footer.competitions')}</Link></li>
-                            <li><Link to="/teams" className="hover:text-slate-900 dark:hover:text-slate-100">{t('footer.teams')}</Link></li>
-                            <li><Link to="/streams" className="hover:text-slate-900 dark:hover:text-slate-100">{t('footer.streaming')}</Link></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h2 className="font-semibold text-slate-900 dark:text-slate-50 mb-5">{t('footer.resources')}</h2>
-                        <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2 list-none">
-                            <li><Link to="/sponsors" className="hover:text-slate-900 dark:hover:text-slate-100">{t('footer.sponsors')}</Link></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h2 className="font-semibold text-slate-900 dark:text-slate-50 mb-5">{t('footer.company')}</h2>
-                        <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-2 list-none">
-                            <li><a href="#" className="hover:text-slate-900 dark:hover:text-slate-100">{t('footer.about')}</a></li>
-                            <li><Link to="/contact" className="hover:text-slate-900 dark:hover:text-slate-100">{t('footer.contact')}</Link></li>
-                            <li><Link to="/terms" className="hover:text-slate-900 dark:hover:text-slate-100">{t('footer.terms')}</Link></li>
-                        </ul>
-                    </div>
-                </div>
+  const socials = [
+    {
+      href: 'https://x.com/robeurope-robotics',
+      label: t('footer.social.twitter'),
+      icon: <Twitter className="h-5 w-5" />,
+    },
+    {
+      href: 'https://github.com/s-pl/RobEurope',
+      label: t('footer.social.github'),
+      icon: <Github className="h-5 w-5" />,
+    },
+    {
+      href: 'https://es.linkedin.com/robeurope',
+      label: t('footer.social.linkedin'),
+      icon: <Linkedin className="h-5 w-5" />,
+    },
+  ];
 
+  return (
+    <footer className="w-full border-t border-stone-200 bg-white dark:bg-stone-950 dark:border-stone-800">
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+        {/* Main footer content */}
+        <div className="grid grid-cols-1 gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Brand column */}
+          <div className="sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-2">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-stone-200 bg-[#f8f7f4] text-stone-700 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300">
+                <Bot className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <span
+                className="text-sm font-semibold text-stone-900 dark:text-stone-50"
+                style={{ fontFamily: 'var(--font-display, inherit)' }}
+              >
+                RobEurope
+              </span>
             </div>
-            <p className="py-4 text-center text-xs md:text-sm text-slate-500 dark:text-slate-400">
-                Copyright {new Date().getFullYear()} © <a href="#">Samuel Ponce Luna & Angel Lallave Herrera</a>. {t('footer.copyright')}
+
+            <p
+              className="mt-5 text-sm leading-relaxed text-stone-500 dark:text-stone-400"
+              style={{ fontFamily: 'var(--font-body, inherit)' }}
+            >
+              {t('footer.description')}
             </p>
+
+            {/* Social icons */}
+            <div className="mt-5 flex items-center gap-3">
+              {socials.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  aria-label={s.label}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-stone-500 transition-colors duration-150 hover:border-blue-300 hover:text-blue-600 dark:border-stone-700 dark:text-stone-400 dark:hover:border-blue-600 dark:hover:text-blue-400"
+                >
+                  {s.icon}
+                </a>
+              ))}
             </div>
-        </footer>
-    );
+          </div>
+
+          {/* Link columns */}
+          {linkColumns.map((col) => (
+            <div key={col.title}>
+              <h2
+                className="text-xs font-semibold uppercase tracking-wider text-stone-900 dark:text-stone-50"
+                style={{ fontFamily: 'var(--font-display, inherit)' }}
+              >
+                {col.title}
+              </h2>
+              <ul className="mt-4 space-y-2.5 text-sm">
+                {col.links.map((link) => (
+                  <li key={link.label}>
+                    {link.isAnchor ? (
+                      <a
+                        href={link.to}
+                        className="text-stone-500 transition-colors duration-150 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-50"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        to={link.to}
+                        className="text-stone-500 transition-colors duration-150 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-50"
+                      >
+                        {link.label}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Copyright */}
+        <div className="border-t border-stone-200 py-5 dark:border-stone-800">
+          <p className="text-center text-xs text-stone-500 dark:text-stone-400 md:text-sm">
+            Copyright {new Date().getFullYear()} &copy;{' '}
+            <a href="#" className="hover:text-stone-700 dark:hover:text-stone-300">
+              Samuel Ponce Luna &amp; Angel Lallave Herrera
+            </a>
+            . {t('footer.copyright')}
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
 };
 
 export default Footer;

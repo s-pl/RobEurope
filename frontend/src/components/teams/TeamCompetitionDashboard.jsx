@@ -153,7 +153,7 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
   return (
     <div className="space-y-6 mt-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Team Dashboard</h2>
+        <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Team Dashboard</h2>
         <Button variant="outline" size="sm" onClick={refreshData} className="gap-2">
           <RefreshCw className="h-4 w-4" />
           Refresh
@@ -226,15 +226,15 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-500 dark:text-slate-400">Files Uploaded</span>
+                    <span className="text-stone-500 dark:text-stone-400">Files Uploaded</span>
                     <Badge variant="secondary">{robotFiles.length}</Badge>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-500 dark:text-slate-400">Log Entries</span>
+                    <span className="text-stone-500 dark:text-stone-400">Log Entries</span>
                     <Badge variant="secondary">{logs.length}</Badge>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-500 dark:text-slate-400">Public Files</span>
+                    <span className="text-stone-500 dark:text-stone-400">Public Files</span>
                     <Badge variant="secondary">{robotFiles.filter(f => f.is_public).length}</Badge>
                   </div>
                 </CardContent>
@@ -329,11 +329,11 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
                   <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium text-slate-900 dark:text-slate-100">{file.file_name}</p>
+                        <p className="font-medium text-stone-900 dark:text-stone-100">{file.file_name}</p>
                         {file.is_public && <Badge variant="success" className="bg-green-100 text-green-800 hover:bg-green-200">Public</Badge>}
                       </div>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">{file.description}</p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-sm text-stone-500 dark:text-stone-400 mb-1">{file.description}</p>
+                      <p className="text-xs text-stone-400">
                         Uploaded by {file.uploader?.username} on {new Date(file.created_at).toLocaleDateString()}
                       </p>
                     </div>
@@ -342,7 +342,7 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
                         variant="ghost"
                         size="sm"
                         onClick={() => toggleFileVisibility(file.id)}
-                        className={file.is_public ? "text-yellow-600" : "text-slate-600"}
+                        className={file.is_public ? "text-yellow-600" : "text-stone-600"}
                       >
                         {file.is_public ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
                         {file.is_public ? 'Make Private' : 'Make Public'}
@@ -357,7 +357,7 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
                 </Card>
               ))}
               {robotFiles.length === 0 && (
-                <div className="text-center py-8 text-slate-500">No files uploaded yet.</div>
+                <div className="text-center py-8 text-stone-500">No files uploaded yet.</div>
               )}
             </div>
           </div>
@@ -390,12 +390,12 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
                 <div key={log.id} className="flex gap-4">
                   <div className="flex flex-col items-center">
                     <div className="w-2 h-2 rounded-full bg-blue-500 mt-2"></div>
-                    <div className="w-0.5 h-full bg-slate-200 dark:bg-slate-800 my-1"></div>
+                    <div className="w-0.5 h-full bg-stone-200 dark:bg-stone-800 my-1"></div>
                   </div>
                   <Card className="flex-1 mb-4">
                     <CardContent className="p-4">
-                      <p className="text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{log.content}</p>
-                      <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
+                      <p className="text-stone-800 dark:text-stone-200 whitespace-pre-wrap">{log.content}</p>
+                      <div className="flex items-center gap-2 mt-2 text-xs text-stone-500">
                         <span className="font-medium">{log.author?.username}</span>
                         <span>•</span>
                         <span>{new Date(log.created_at).toLocaleString()}</span>
@@ -405,7 +405,7 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
                 </div>
               ))}
               {logs.length === 0 && (
-                <div className="text-center py-8 text-slate-500">No logs yet.</div>
+                <div className="text-center py-8 text-stone-500">No logs yet.</div>
               )}
             </div>
           </div>

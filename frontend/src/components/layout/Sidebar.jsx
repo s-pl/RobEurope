@@ -2,7 +2,7 @@ import { Link, NavLink } from 'react-router-dom';
 import {
   Bot, User, LogOut, Globe, ChevronRight,
   Home, Newspaper, Trophy, Users, Heart, Tv, Mail, Shield, Image, MessageSquare,
-  Archive, Building2, Settings, FileText,
+  Archive, Building2, Settings, FileText, MessageCircle,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
@@ -13,7 +13,7 @@ import NotificationsBell from '../notifications/NotificationsBell';
 import { ThemeToggle } from '../ui/theme-toggle';
 import { resolveMediaUrl } from '../../lib/apiClient';
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const navLinks = [
   { to: '/', key: 'nav.home', icon: Home },
@@ -35,107 +35,42 @@ const languages = [
   { code: 'de', label: 'DE' },
 ];
 
-// Nav link with a shared layoutId sliding pill behind the active item
-const MotionNavLink = ({ to, icon: Icon, label, collapsed, pillId = 'nav-pill' }) => (
+const SidebarNavLink = ({ to, icon: Icon, label, collapsed }) => (
   <NavLink
     to={to}
     end={to === '/'}
     title={collapsed ? label : undefined}
     className={({ isActive }) =>
-      `relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
+      `relative flex items-center gap-3 px-3 py-2 text-sm font-medium transition-colors duration-150 ${
         collapsed ? 'justify-center px-2' : ''
       } ${
         isActive
-          ? 'text-blue-900 dark:text-blue-100'
-          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-50'
+          ? 'text-stone-900 dark:text-stone-50 border-l-2 border-blue-600'
+          : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-50 border-l-2 border-transparent'
       }`
     }
   >
-    {({ isActive }) => (
-      <>
-        {/* Sliding pill background */}
-        {isActive && (
-          <motion.div
-            layoutId={pillId}
-            className="absolute inset-0 rounded-lg bg-blue-50 dark:bg-blue-900/20"
-            transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
-          />
-        )}
-
-        {/* Icon with spring bounce on hover */}
-        <motion.span
-          className="relative z-10 shrink-0"
-          whileHover={{ scale: 1.22, rotate: isActive ? 0 : -10 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 18 }}
-        >
-          <Icon className="h-5 w-5" />
-        </motion.span>
-
-        {/* Label fades/slides when sidebar collapses */}
-        <AnimatePresence initial={false}>
-          {!collapsed && (
-            <motion.span
-              className="relative z-10 truncate"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.16 }}
-            >
-              {label}
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </>
-    )}
+    <Icon className="h-5 w-5 shrink-0" />
+    {!collapsed && <span className="truncate">{label}</span>}
   </NavLink>
 );
 
-// Admin variant of nav link (amber accent)
 const AdminNavLink = ({ to, icon: Icon, label, collapsed }) => (
   <NavLink
     to={to}
     title={collapsed ? label : undefined}
     className={({ isActive }) =>
-      `relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+      `relative flex items-center gap-3 px-3 py-2 text-sm font-medium transition-colors duration-150 ${
         collapsed ? 'justify-center px-2' : ''
       } ${
         isActive
-          ? 'text-amber-900 dark:text-amber-100'
-          : 'text-amber-600 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-100'
+          ? 'text-amber-700 dark:text-amber-300 border-l-2 border-amber-500'
+          : 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 border-l-2 border-transparent'
       }`
     }
   >
-    {({ isActive }) => (
-      <>
-        {isActive && (
-          <motion.div
-            layoutId="nav-pill-admin"
-            className="absolute inset-0 rounded-lg bg-amber-50 dark:bg-amber-900/20"
-            transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
-          />
-        )}
-        <motion.span
-          className="relative z-10 shrink-0"
-          whileHover={{ scale: 1.22, rotate: isActive ? 0 : -10 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 18 }}
-        >
-          <Icon className="h-5 w-5" />
-        </motion.span>
-        <AnimatePresence initial={false}>
-          {!collapsed && (
-            <motion.span
-              className="relative z-10 truncate"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.16 }}
-            >
-              {label}
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </>
-    )}
+    <Icon className="h-5 w-5 shrink-0" />
+    {!collapsed && <span className="truncate">{label}</span>}
   </NavLink>
 );
 
@@ -164,50 +99,29 @@ const Sidebar = () => {
   return (
     <motion.aside
       animate={{ width: collapsed ? 80 : 256 }}
-      transition={{ type: 'spring', stiffness: 280, damping: 30 }}
-      className="hidden lg:flex h-screen flex-col border-r border-blue-200 bg-white dark:bg-slate-950 dark:border-slate-800 sticky top-0 overflow-hidden shrink-0"
+      transition={{ duration: 0.2, ease: 'easeInOut' }}
+      className="hidden lg:flex h-screen flex-col border-r border-stone-200 bg-white dark:bg-stone-950 dark:border-stone-800 sticky top-0 overflow-hidden shrink-0"
     >
       {/* Collapse toggle */}
-      <motion.button
+      <button
         onClick={() => setCollapsed(c => !c)}
-        whileHover={{ scale: 1.15 }}
-        whileTap={{ scale: 0.88 }}
-        className="absolute -right-3 top-9 flex h-6 w-6 items-center justify-center rounded-full border border-blue-200 bg-white text-blue-900 shadow-sm hover:bg-blue-50 dark:border-slate-800 dark:bg-slate-900 dark:text-blue-100 z-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+        className="absolute -right-3 top-9 flex h-6 w-6 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 hover:text-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400 dark:hover:text-stone-50 z-50 transition-colors duration-150"
         aria-label={collapsed ? t('common.expand') || 'Expand' : t('common.collapse') || 'Collapse'}
       >
-        <motion.div
-          animate={{ rotate: collapsed ? 0 : 180 }}
-          transition={{ type: 'spring', stiffness: 320, damping: 26 }}
-        >
-          <ChevronRight className="h-3 w-3" />
-        </motion.div>
-      </motion.button>
+        <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${collapsed ? '' : 'rotate-180'}`} />
+      </button>
 
       {/* Logo */}
       <div className={`p-6 ${collapsed ? 'px-4 flex justify-center' : ''}`}>
         <Link
           to="/"
-          className="flex items-center gap-2 text-lg font-semibold text-blue-900 hover:text-blue-700 transition-colors dark:text-blue-100 dark:hover:text-blue-300"
+          className="flex items-center gap-2 text-lg font-semibold text-stone-900 hover:text-blue-600 transition-colors duration-150 dark:text-stone-50 dark:hover:text-blue-400"
+          style={{ fontFamily: 'var(--font-display, inherit)' }}
         >
-          <motion.span
-            whileHover={{ rotate: [0, -12, 12, -6, 0], scale: 1.06 }}
-            transition={{ duration: 0.5 }}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white text-blue-700 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-800 dark:text-blue-400 shrink-0"
-          >
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-stone-200 bg-[#f8f7f4] text-stone-700 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300 shrink-0">
             <Bot className="h-6 w-6" />
-          </motion.span>
-          <AnimatePresence initial={false}>
-            {!collapsed && (
-              <motion.span
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -12 }}
-                transition={{ duration: 0.17 }}
-              >
-                RobEurope
-              </motion.span>
-            )}
-          </AnimatePresence>
+          </span>
+          {!collapsed && <span>RobEurope</span>}
         </Link>
       </div>
 
@@ -217,7 +131,7 @@ const Sidebar = () => {
         className="flex-1 px-3 space-y-0.5 overflow-y-auto overflow-x-hidden"
       >
         {navLinks.map(item => (
-          <MotionNavLink
+          <SidebarNavLink
             key={item.to}
             to={item.to}
             icon={item.icon}
@@ -228,28 +142,21 @@ const Sidebar = () => {
 
         {isAuthenticated && (
           <>
-            <div className="my-3 border-t border-slate-100 dark:border-slate-800" />
-            <MotionNavLink to="/profile" icon={User} label={t('nav.profile')} collapsed={collapsed} />
+            <div className="my-3 border-t border-stone-200 dark:border-stone-800" />
+            <SidebarNavLink to="/profile" icon={User} label={t('nav.profile')} collapsed={collapsed} />
+            <SidebarNavLink to="/messages" icon={MessageCircle} label={t('nav.messages', 'Messages')} collapsed={collapsed} />
             {hasTeam && (
-              <MotionNavLink to="/my-team" icon={Shield} label={t('nav.myTeam')} collapsed={collapsed} />
+              <SidebarNavLink to="/my-team" icon={Shield} label={t('nav.myTeam')} collapsed={collapsed} />
             )}
 
             {(user?.role === 'center_admin' || user?.role === 'super_admin') && (
               <>
                 <div className="my-3 border-t border-amber-200 dark:border-amber-800" />
-                <AnimatePresence initial={false}>
-                  {!collapsed && (
-                    <motion.p
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -8 }}
-                      transition={{ duration: 0.15 }}
-                      className="px-3 py-1 text-xs font-semibold uppercase text-amber-600 dark:text-amber-400"
-                    >
-                      {t('nav.adminSection') || 'Administración'}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
+                {!collapsed && (
+                  <p className="px-3 py-1 text-xs font-semibold uppercase text-amber-600 dark:text-amber-400">
+                    {t('nav.adminSection') || 'Administracion'}
+                  </p>
+                )}
                 <AdminNavLink to="/admin/centers" icon={Building2} label={t('nav.manageCenters') || 'Gestionar Centros'} collapsed={collapsed} />
                 {user?.role === 'super_admin' && (
                   <>
@@ -265,12 +172,12 @@ const Sidebar = () => {
       </nav>
 
       {/* Bottom bar */}
-      <div className={`p-4 border-t border-blue-200 dark:border-slate-800 space-y-4 ${collapsed ? 'items-center flex flex-col' : ''}`}>
+      <div className={`p-4 border-t border-stone-200 dark:border-stone-800 space-y-4 ${collapsed ? 'items-center flex flex-col' : ''}`}>
         <div className={`flex items-center ${collapsed ? 'flex-col gap-4' : 'justify-between'}`}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
-                <Globe className="h-5 w-5 text-blue-900 dark:text-blue-400" aria-hidden="true" />
+                <Globe className="h-5 w-5 text-stone-600 dark:text-stone-400" aria-hidden="true" />
                 <span className="sr-only">{t('nav.language')}</span>
               </Button>
             </DropdownMenuTrigger>
@@ -288,45 +195,33 @@ const Sidebar = () => {
 
         {isAuthenticated ? (
           <div className={`flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
-            <motion.div
-              whileHover={{ scale: 1.08 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-              className="h-10 w-10 overflow-hidden rounded-full border border-blue-200 bg-blue-50 shrink-0"
-            >
+            <div className="h-10 w-10 overflow-hidden rounded-lg border border-stone-200 bg-[#f8f7f4] dark:border-stone-700 dark:bg-stone-900 shrink-0">
               {avatarUrl ? (
                 <img src={avatarUrl} alt={t('profile.avatarAlt') || 'Profile photo'} className="h-full w-full object-cover" />
               ) : (
-                <User className="h-5 w-5 m-auto mt-2 text-blue-400" />
+                <User className="h-5 w-5 m-auto mt-2 text-stone-400" />
               )}
-            </motion.div>
-            <AnimatePresence initial={false}>
-              {!collapsed && (
-                <motion.div
-                  className="flex-1 overflow-hidden"
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -8 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  <p className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
-                    {user?.first_name}
-                  </p>
-                  <button onClick={logout} className="text-xs text-red-600 hover:underline flex items-center gap-1">
-                    <LogOut className="h-3 w-3" /> {t('nav.logout')}
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            </div>
+            {!collapsed && (
+              <div className="flex-1 overflow-hidden">
+                <p className="truncate text-sm font-medium text-stone-900 dark:text-stone-100">
+                  {user?.first_name}
+                </p>
+                <button onClick={logout} className="text-xs text-blue-600 hover:underline flex items-center gap-1 transition-colors duration-150">
+                  <LogOut className="h-3 w-3" /> {t('nav.logout')}
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className={`grid gap-2 ${collapsed ? 'w-full' : ''}`}>
             <Link to="/login" title={collapsed ? t('nav.login') : ''}>
-              <Button variant="ghost" className={`w-full ${collapsed ? 'justify-center px-0' : 'justify-start'}`}>
+              <Button variant="ghost" className={`w-full rounded-lg ${collapsed ? 'justify-center px-0' : 'justify-start'}`}>
                 {collapsed ? <LogOut className="h-5 w-5 rotate-180" /> : t('nav.login')}
               </Button>
             </Link>
             <Link to="/register" title={collapsed ? t('nav.register') : ''}>
-              <Button className={`w-full bg-blue-600 text-white hover:bg-blue-700 ${collapsed ? 'justify-center px-0' : 'justify-start'}`}>
+              <Button className={`w-full rounded-lg bg-blue-600 text-white hover:bg-blue-700 ${collapsed ? 'justify-center px-0' : 'justify-start'}`}>
                 {collapsed ? <User className="h-5 w-5" /> : t('nav.register')}
               </Button>
             </Link>

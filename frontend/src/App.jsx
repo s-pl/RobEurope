@@ -22,6 +22,8 @@ import Archive from './pages/Archive';
 import EducationalCenters from './pages/EducationalCenters';
 import Feedback from './pages/Feedback';
 import Terms from './pages/Terms';
+import Notifications from './pages/Notifications';
+import Messages from './pages/Messages';
 import NotFound from './pages/NotFound';
 import { Toaster } from './components/ui/toast';
 import { EditModeProvider } from './context/EditModeContext';
@@ -81,6 +83,8 @@ function App() {
           <Route path="sponsors" element={<Sponsors />} />
           <Route path="streams" element={<Streams />} />
           <Route path="terms" element={<Terms />} />
+          <Route path="notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+          <Route path="messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
 
           {/* Admin Routes */}
           <Route path="admin/centers" element={<AdminRoute><AdminCenters /></AdminRoute>} />

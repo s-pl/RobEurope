@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 const alertVariants = {
-  default: 'bg-slate-50 border-slate-200 text-slate-900 dark:bg-slate-900/40 dark:border-slate-700 dark:text-slate-100 [&>svg]:text-slate-600 dark:[&>svg]:text-slate-400',
+  default: 'bg-stone-50 border-stone-200 text-stone-900 dark:bg-stone-900/40 dark:border-stone-700 dark:text-stone-100 [&>svg]:text-stone-600 dark:[&>svg]:text-stone-400',
   destructive: 'bg-red-50 border-red-200 text-red-900 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200 [&>svg]:text-red-600 dark:[&>svg]:text-red-400',
   success: 'bg-emerald-50 border-emerald-200 text-emerald-900 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-200 [&>svg]:text-emerald-600 dark:[&>svg]:text-emerald-400',
   warning: 'bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-200 [&>svg]:text-amber-600 dark:[&>svg]:text-amber-400',

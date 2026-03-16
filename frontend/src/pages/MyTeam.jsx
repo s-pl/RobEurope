@@ -13,10 +13,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Alert, AlertDescription } from '../components/ui/alert';
+import { Tabs, TabsContent } from '../components/ui/tabs';
 import { Skeleton } from '../components/ui/skeleton';
 import { ConfirmDialog } from '../components/ui/confirm-dialog';
 import {
@@ -24,7 +21,9 @@ import {
   LogOut, Trash2, Check, X, Video,
   UserPlus, MessageCircle, Building2,
   Globe, MapPin, Hash, ChevronRight,
-  Wifi, WifiOff, Shield, Crown, Search
+  Wifi, WifiOff, Shield, Crown, Search,
+  Mail, ExternalLink, Zap, Clock,
+  ArrowRight, Pencil
 } from 'lucide-react';
 import TeamChat from '../components/teams/TeamChat';
 import TeamCompetitionDashboard from '../components/teams/TeamCompetitionDashboard';
@@ -39,9 +38,14 @@ const debounce = (fn, ms = 300) => {
   return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
 };
 
-// ── Tab definitions ──────────────────────────────────────────────────────────
+const stagger = {
+  container: { animate: { transition: { staggerChildren: 0.06 } } },
+  item: { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] } } },
+};
 
-const tabs = (t, isOwner) => [
+// ── Tab config ──────────────────────────────────────────────────────────────
+
+const tabConfig = (t, isOwner) => [
   { id: 'overview',     label: t('myTeam.tabs.overview'),     Icon: Info },
   { id: 'chat',         label: t('team.chat.tab'),            Icon: MessageCircle },
   { id: 'members',      label: t('myTeam.tabs.members'),      Icon: Users },
@@ -49,33 +53,88 @@ const tabs = (t, isOwner) => [
   ...(isOwner ? [{ id: 'settings', label: t('myTeam.tabs.settings'), Icon: Settings }] : []),
 ];
 
-// ── Member avatar ─────────────────────────────────────────────────────────────
+// ── Avatar ──────────────────────────────────────────────────────────────────
 
-const Avatar = ({ src, name, size = 10 }) => {
+const Avatar = ({ src, name, size = 'md' }) => {
   const initials = (name || '??').slice(0, 2).toUpperCase();
-  const colors = ['bg-blue-100 text-blue-700', 'bg-violet-100 text-violet-700', 'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-rose-100 text-rose-700'];
-  const color = colors[initials.charCodeAt(0) % colors.length];
+  const palettes = [
+    'bg-blue-600 text-blue-50',
+    'bg-violet-600 text-violet-50',
+    'bg-emerald-600 text-emerald-50',
+    'bg-amber-600 text-amber-50',
+    'bg-rose-600 text-rose-50',
+    'bg-cyan-600 text-cyan-50',
+  ];
+  const palette = palettes[initials.charCodeAt(0) % palettes.length];
+  const sizeClasses = { sm: 'h-8 w-8 text-[10px]', md: 'h-10 w-10 text-xs', lg: 'h-14 w-14 text-sm' };
+
   return (
-    <div className={`h-${size} w-${size} rounded-full overflow-hidden shrink-0 flex items-center justify-center ${!src ? color : 'bg-slate-100 dark:bg-slate-800'}`}>
+    <div className={`${sizeClasses[size]} rounded-xl overflow-hidden shrink-0 flex items-center justify-center font-bold ${!src ? palette : 'bg-stone-100 dark:bg-stone-800'}`}>
       {src
         ? <img src={src} alt={name} className="h-full w-full object-cover" />
-        : <span className="text-xs font-bold">{initials}</span>
+        : <span>{initials}</span>
       }
     </div>
   );
 };
 
-// ── Creation form ─────────────────────────────────────────────────────────────
+// ── Inline toast ─────────────────────────────────────────────────────────────
+
+const InlineToast = ({ toast }) => (
+  <AnimatePresence>
+    {toast.show && (
+      <motion.div
+        key="toast"
+        initial={{ opacity: 0, y: -12, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -8, scale: 0.95 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+        className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-lg text-sm font-medium border backdrop-blur-sm ${
+          toast.type === 'success'
+            ? 'bg-emerald-50/95 text-emerald-800 border-emerald-200 dark:bg-emerald-950/90 dark:text-emerald-300 dark:border-emerald-800'
+            : toast.type === 'error'
+            ? 'bg-red-50/95 text-red-800 border-red-200 dark:bg-red-950/90 dark:text-red-300 dark:border-red-800'
+            : 'bg-white/95 text-stone-800 border-stone-200 dark:bg-stone-900/90 dark:text-stone-200 dark:border-stone-700'
+        }`}
+      >
+        {toast.type === 'success' && (
+          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 shrink-0">
+            <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
+              <motion.path d="M2 6l3 3 5-5" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.3 }} />
+            </svg>
+          </div>
+        )}
+        {toast.type === 'error' && (
+          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-red-500 shrink-0">
+            <X className="h-3 w-3 text-white" />
+          </div>
+        )}
+        {toast.message}
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+// ── Spinner ─────────────────────────────────────────────────────────────────
+
+const Spinner = ({ className = 'w-4 h-4' }) => (
+  <motion.div
+    animate={{ rotate: 360 }}
+    transition={{ duration: 0.7, repeat: Infinity, ease: 'linear' }}
+    className={`${className} border-2 border-current/25 border-t-current rounded-full`}
+  />
+);
+
+// ── Creation form ────────────────────────────────────────────────────────────
 
 const CreateTeamForm = ({ onCreated, t, api, countries = [], countriesLoading = false }) => {
   const { create } = useTeams();
   const { refreshTeamStatus } = useTeamContext();
-  const [step, setStep] = useState(0); // 0 = basics, 1 = details, 2 = success
+  const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: '', city: '', institution: '', country_id: '', description: '', website_url: '' });
   const [educationalCenters, setEducationalCenters] = useState([]);
   const [centerId, setCenterId] = useState('');
-  const canCreateCenter = false; // simplify: only admins
 
   useEffect(() => {
     api('/educational-centers?status=approved').then(r => {
@@ -101,81 +160,76 @@ const CreateTeamForm = ({ onCreated, t, api, countries = [], countriesLoading = 
     }
   };
 
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
   const steps = [
     {
       title: t('myTeam.createTitle'),
-      subtitle: 'Información básica del equipo',
+      subtitle: 'Informacion basica del equipo',
       content: (
-        <div className="space-y-4">
-          <div>
+        <motion.div variants={stagger.container} initial="initial" animate="animate" className="space-y-5">
+          <motion.div variants={stagger.item}>
             <Label htmlFor="cf-name">{t('myTeam.form.name')} *</Label>
-            <Input
-              id="cf-name"
-              className="mt-1.5"
-              value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
-              placeholder="Nombre del equipo..."
-              required
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+            <Input id="cf-name" className="mt-2" value={form.name} onChange={e => set('name', e.target.value)} placeholder="Nombre del equipo..." required />
+          </motion.div>
+          <motion.div variants={stagger.item} className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="cf-city">{t('myTeam.form.city')}</Label>
-              <Input id="cf-city" className="mt-1.5" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} placeholder="Madrid..." />
+              <Input id="cf-city" className="mt-2" value={form.city} onChange={e => set('city', e.target.value)} placeholder="Madrid..." />
             </div>
             <div>
               <Label htmlFor="cf-inst">{t('myTeam.form.institution')}</Label>
-              <Input id="cf-inst" className="mt-1.5" value={form.institution} onChange={e => setForm({ ...form, institution: e.target.value })} placeholder="IES..." />
+              <Input id="cf-inst" className="mt-2" value={form.institution} onChange={e => set('institution', e.target.value)} placeholder="IES..." />
             </div>
-          </div>
-          <div>
+          </motion.div>
+          <motion.div variants={stagger.item}>
             <Label>{t('myTeam.form.country')}</Label>
-            <div className="mt-1.5">
+            <div className="mt-2">
               <CountrySelect
                 value={form.country_id ? String(form.country_id) : 'all'}
-                onValueChange={val => setForm({ ...form, country_id: val === 'all' ? '' : val })}
+                onValueChange={val => set('country_id', val === 'all' ? '' : val)}
                 countries={countries}
                 loading={countriesLoading}
                 allLabel={t('myTeam.form.noCountry')}
                 placeholder={t('teams.searchCountry')}
               />
             </div>
-          </div>
-          <div>
+          </motion.div>
+          <motion.div variants={stagger.item}>
             <Label htmlFor="cf-desc">{t('myTeam.form.description')}</Label>
-            <Textarea id="cf-desc" className="mt-1.5 resize-none" rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
-          </div>
-        </div>
+            <Textarea id="cf-desc" className="mt-2 resize-none" rows={3} value={form.description} onChange={e => set('description', e.target.value)} />
+          </motion.div>
+        </motion.div>
       ),
       nextDisabled: !form.name.trim()
     },
     {
       title: 'Detalles adicionales',
-      subtitle: 'Opcional — puedes completar esto después',
+      subtitle: 'Opcional — puedes completar esto despues',
       content: (
-        <div className="space-y-4">
-          <div>
+        <motion.div variants={stagger.container} initial="initial" animate="animate" className="space-y-5">
+          <motion.div variants={stagger.item}>
             <Label htmlFor="cf-web">{t('myTeam.form.website')}</Label>
-            <Input id="cf-web" className="mt-1.5" type="url" value={form.website_url} onChange={e => setForm({ ...form, website_url: e.target.value })} placeholder="https://..." />
-          </div>
-          <div>
+            <Input id="cf-web" className="mt-2" type="url" value={form.website_url} onChange={e => set('website_url', e.target.value)} placeholder="https://..." />
+          </motion.div>
+          <motion.div variants={stagger.item}>
             <Label htmlFor="cf-center">{t('myTeam.form.selectCenter')}</Label>
             <select
               id="cf-center"
               value={centerId}
               onChange={e => setCenterId(e.target.value)}
-              className="mt-1.5 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-2 w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-sm text-stone-900 transition-colors focus:border-stone-900 focus:outline-none focus:ring-1 focus:ring-stone-900 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50 dark:focus:border-stone-400 dark:focus:ring-stone-400"
             >
               <option value="">{t('myTeam.form.noCenter')}</option>
               {educationalCenters.map(c => (
                 <option key={c.id} value={c.id}>{c.name}{c.city ? ` (${c.city})` : ''}</option>
               ))}
             </select>
-          </div>
-          {!canCreateCenter && (
-            <p className="text-xs text-slate-400 dark:text-slate-500">{t('myTeam.form.onlyAdminsCanCreate')}</p>
-          )}
-        </div>
+          </motion.div>
+          <motion.div variants={stagger.item}>
+            <p className="text-xs text-stone-400 dark:text-stone-500">{t('myTeam.form.onlyAdminsCanCreate')}</p>
+          </motion.div>
+        </motion.div>
       ),
       nextDisabled: false
     }
@@ -187,80 +241,76 @@ const CreateTeamForm = ({ onCreated, t, api, countries = [], countriesLoading = 
         {step === 2 ? (
           <motion.div
             key="success"
-            initial={{ opacity: 0, scale: 0.85 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-            className="flex flex-col items-center gap-5 py-16"
+            transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="flex flex-col items-center gap-6 py-20"
           >
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 20, delay: 0.1 }}
-              className="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center"
+              transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.1 }}
+              className="w-20 h-20 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center"
             >
-              <svg viewBox="0 0 24 24" fill="none" className="w-10 h-10 stroke-emerald-500" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                <motion.path d="M5 13l4 4L19 7" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.5, delay: 0.2 }} />
+              <svg viewBox="0 0 24 24" fill="none" className="w-10 h-10 stroke-emerald-600 dark:stroke-emerald-400" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                <motion.path d="M5 13l4 4L19 7" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.5, delay: 0.3 }} />
               </svg>
             </motion.div>
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="text-center">
-              <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t('myTeam.feedback.created')}</p>
-              <p className="text-sm text-slate-500 mt-1">Redirigiendo a tu equipo...</p>
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="text-center">
+              <p className="text-xl font-display font-bold text-stone-900 dark:text-stone-50">{t('myTeam.feedback.created')}</p>
+              <p className="text-sm text-stone-500 mt-2">Redirigiendo a tu equipo...</p>
             </motion.div>
           </motion.div>
         ) : (
-          <motion.div key={`step-${step}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.22 }} className="space-y-6">
-            {/* Step indicator */}
-            <div className="flex items-center gap-2">
-              {steps.map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= step ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'}`}
+          <motion.div key={`step-${step}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
+            <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 overflow-hidden">
+              {/* Progress bar */}
+              <div className="h-1 bg-stone-100 dark:bg-stone-800">
+                <motion.div
+                  className="h-full bg-stone-900 dark:bg-stone-50"
+                  initial={false}
+                  animate={{ width: `${((step + 1) / steps.length) * 100}%` }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
                 />
-              ))}
-            </div>
+              </div>
 
-            {/* Header */}
-            <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{steps[step].title}</h2>
-              <p className="text-sm text-slate-500 mt-0.5">{steps[step].subtitle}</p>
-            </div>
+              <div className="p-8 space-y-6">
+                {/* Step label */}
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-stone-900 text-white text-xs font-bold dark:bg-stone-50 dark:text-stone-900">
+                    {step + 1}
+                  </span>
+                  <div>
+                    <h2 className="text-lg font-display font-bold text-stone-900 dark:text-stone-50">{steps[step].title}</h2>
+                    <p className="text-xs text-stone-400 mt-0.5">{steps[step].subtitle}</p>
+                  </div>
+                </div>
 
-            {/* Content */}
-            {steps[step].content}
+                {steps[step].content}
 
-            {/* Actions */}
-            <div className="flex gap-3 pt-2">
-              {step > 0 && (
-                <Button type="button" variant="ghost" onClick={() => setStep(s => s - 1)} className="flex-1">
-                  Atrás
-                </Button>
-              )}
-              {step < steps.length - 1 ? (
-                <Button
-                  type="button"
-                  onClick={() => setStep(s => s + 1)}
-                  disabled={steps[step].nextDisabled}
-                  className="flex-1 gap-2"
-                >
-                  Siguiente <ChevronRight className="h-4 w-4" />
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={saving}
-                  className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  {saving ? (
-                    <>
-                      <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
-                      Creando...
-                    </>
-                  ) : (
-                    <>{t('myTeam.form.submitCreate')} <ChevronRight className="h-4 w-4" /></>
+                {/* Actions */}
+                <div className="flex gap-3 pt-3 border-t border-stone-100 dark:border-stone-800">
+                  {step > 0 && (
+                    <Button type="button" variant="ghost" onClick={() => setStep(s => s - 1)} className="flex-1">
+                      Atras
+                    </Button>
                   )}
-                </Button>
-              )}
+                  {step < steps.length - 1 ? (
+                    <Button
+                      type="button"
+                      onClick={() => setStep(s => s + 1)}
+                      disabled={steps[step].nextDisabled}
+                      className="flex-1 gap-2"
+                    >
+                      Siguiente <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 gap-2">
+                      {saving ? <><Spinner /> Creando...</> : <>{t('myTeam.form.submitCreate')} <ArrowRight className="h-4 w-4" /></>}
+                    </Button>
+                  )}
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
@@ -269,7 +319,122 @@ const CreateTeamForm = ({ onCreated, t, api, countries = [], countriesLoading = 
   );
 };
 
-// ── Main component ────────────────────────────────────────────────────────────
+// ── Stat card ────────────────────────────────────────────────────────────────
+
+const StatCard = ({ label, value, Icon, delay = 0 }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+    className="group relative rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 p-5 overflow-hidden transition-all duration-300 hover:border-stone-300 dark:hover:border-stone-700"
+  >
+    <div className="absolute top-0 right-0 w-24 h-24 -translate-y-8 translate-x-8 opacity-[0.04] dark:opacity-[0.06]">
+      <Icon className="w-full h-full" />
+    </div>
+    <div className="relative">
+      <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 flex items-center justify-center mb-3 transition-colors group-hover:bg-stone-900 dark:group-hover:bg-stone-50">
+        <Icon className="h-4.5 w-4.5 text-stone-600 dark:text-stone-400 transition-colors group-hover:text-white dark:group-hover:text-stone-900" />
+      </div>
+      <p className="text-3xl font-display font-bold text-stone-900 dark:text-stone-50 tracking-tight">{value}</p>
+      <p className="text-xs text-stone-500 mt-1 font-medium">{label}</p>
+    </div>
+  </motion.div>
+);
+
+// ── Member row ───────────────────────────────────────────────────────────────
+
+const MemberRow = ({ member, isOwner, onRemove, t, index }) => {
+  const roleIcons = { owner: Crown, admin: Shield };
+  const roleColors = { owner: 'text-amber-500', admin: 'text-blue-500' };
+  const RoleIcon = roleIcons[member.role];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.04, duration: 0.25 }}
+      className="flex items-center justify-between px-5 py-3.5 group hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors"
+    >
+      <div className="flex items-center gap-3.5">
+        <Avatar src={resolveMediaUrl(member.user_photo)} name={member.user_username} size="md" />
+        <div>
+          <p className="text-sm font-medium text-stone-900 dark:text-stone-50">
+            {member.user_username || `${t('myTeam.members.userPrefix')}${member.user_id}`}
+          </p>
+          <p className="text-xs text-stone-500 capitalize flex items-center gap-1.5 mt-0.5">
+            {RoleIcon && <RoleIcon className={`h-3 w-3 ${roleColors[member.role]}`} />}
+            {member.role}
+          </p>
+        </div>
+      </div>
+      {isOwner && member.role !== 'owner' && (
+        <Button
+          size="sm"
+          variant="ghost"
+          className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 h-8 px-2.5 transition-all"
+          onClick={() => onRemove(member.id)}
+        >
+          <X className="h-3.5 w-3.5" />
+        </Button>
+      )}
+    </motion.div>
+  );
+};
+
+// ── Registration row ─────────────────────────────────────────────────────────
+
+const RegistrationRow = ({ reg, comp, isOwner, onWithdraw, t, index, teamId }) => {
+  const displayStatus = reg.status === 'pending' ? (reg.center_approval_status || 'pending') : reg.status;
+  const statusStyles = {
+    approved: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800',
+    rejected: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800',
+    pending:  'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800',
+  };
+  const statusIcons = { approved: Check, rejected: X, pending: Clock };
+  const StatusIcon = statusIcons[displayStatus] || Clock;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05, duration: 0.25 }}
+    >
+      <div className="flex items-center justify-between px-5 py-4 gap-4 hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium text-stone-900 dark:text-stone-50 truncate">
+            {comp?.title ?? `${t('myTeam.competitions.compPrefix')}${reg.competition_id}`}
+          </p>
+          <p className="text-xs text-stone-400 mt-0.5 flex items-center gap-1.5">
+            <Clock className="h-3 w-3" />
+            {new Date(reg.registration_date).toLocaleDateString()}
+          </p>
+        </div>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border ${statusStyles[displayStatus] || statusStyles.pending}`}>
+            <StatusIcon className="h-3 w-3" />
+            {t(`myTeam.competitions.status.${displayStatus}`) || displayStatus}
+          </span>
+          {isOwner && displayStatus === 'pending' && (
+            <button
+              onClick={() => onWithdraw(reg.id)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 dark:text-red-400 transition-colors"
+            >
+              <X className="h-3 w-3" />
+              {t('myTeam.competitions.withdraw')}
+            </button>
+          )}
+        </div>
+      </div>
+      {reg.status === 'approved' && (
+        <div className="px-5 pb-4">
+          <TeamCompetitionDashboard competitionId={reg.competition_id} teamId={teamId} />
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
+// ── Main component ──────────────────────────────────────────────────────────
 
 const MyTeam = () => {
   const { t } = useTranslation();
@@ -283,7 +448,7 @@ const MyTeam = () => {
 
   const [team, setTeam] = useState(null);
   const [loaded, setLoaded] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: '', type: 'info' }); // type: info|success|error
+  const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
   const [form, setForm] = useState({ name: '', city: '', institution: '', country_id: '', description: '', website_url: '', stream_url: '' });
   const [requests, setRequests] = useState([]);
   const [members, setMembers] = useState([]);
@@ -299,6 +464,7 @@ const MyTeam = () => {
   const [saving, setSaving] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, payload: null });
   const [confirmLoading, setConfirmLoading] = useState(false);
+
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast(t => ({ ...t, show: false })), 3500);
@@ -307,7 +473,6 @@ const MyTeam = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        // Phase 1: kick off independent top-level fetches in parallel
         const [teamResult, statusResult, compsResult] = await Promise.allSettled([
           mine(),
           api('/teams/status'),
@@ -323,7 +488,6 @@ const MyTeam = () => {
         if (tRes) {
           setTeam(tRes);
           setForm({ name: tRes.name || '', city: tRes.city || '', institution: tRes.institution || '', country_id: tRes.country_id || '', description: tRes.description || '', website_url: tRes.website_url || '', stream_url: tRes.stream_url || '' });
-          // Phase 2: load team details in parallel
           const [reqs, mem, regs] = await Promise.allSettled([
             listRequests(tRes.id),
             getMembers(tRes.id),
@@ -483,19 +647,12 @@ const MyTeam = () => {
     }
   };
 
-  const openConfirmDialog = (type, payload = null) => {
-    setConfirmDialog({ open: true, type, payload });
-  };
-
-  const closeConfirmDialog = () => {
-    if (confirmLoading) return;
-    setConfirmDialog({ open: false, type: null, payload: null });
-  };
+  const openConfirmDialog = (type, payload = null) => setConfirmDialog({ open: true, type, payload });
+  const closeConfirmDialog = () => { if (!confirmLoading) setConfirmDialog({ open: false, type: null, payload: null }); };
 
   const onConfirmDialogAction = async () => {
     const { type, payload } = confirmDialog;
     if (!type) return;
-
     setConfirmLoading(true);
     try {
       if (type === 'remove-member') await onRemoveMember(payload);
@@ -510,497 +667,445 @@ const MyTeam = () => {
 
   const confirmDialogConfig = (() => {
     switch (confirmDialog.type) {
-      case 'remove-member':
-        return {
-          title: t('myTeam.members.title'),
-          description: t('myTeam.feedback.confirmRemoveMember'),
-          confirmLabel: t('actions.delete'),
-        };
-      case 'leave-team':
-        return {
-          title: t('myTeam.actions.leave'),
-          description: t('myTeam.feedback.confirmLeave'),
-          confirmLabel: t('myTeam.actions.leave'),
-        };
-      case 'delete-team':
-        return {
-          title: t('myTeam.actions.delete'),
-          description: t('myTeam.feedback.confirmDelete'),
-          confirmLabel: t('myTeam.actions.delete'),
-        };
-      case 'withdraw-registration':
-        return {
-          title: t('myTeam.competitions.withdraw'),
-          description: t('myTeam.competitions.confirmWithdraw'),
-          confirmLabel: t('myTeam.competitions.withdraw'),
-        };
-      default:
-        return {
-          title: '',
-          description: '',
-          confirmLabel: t('actions.delete'),
-        };
+      case 'remove-member': return { title: t('myTeam.members.title'), description: t('myTeam.feedback.confirmRemoveMember'), confirmLabel: t('actions.delete') };
+      case 'leave-team': return { title: t('myTeam.actions.leave'), description: t('myTeam.feedback.confirmLeave'), confirmLabel: t('myTeam.actions.leave') };
+      case 'delete-team': return { title: t('myTeam.actions.delete'), description: t('myTeam.feedback.confirmDelete'), confirmLabel: t('myTeam.actions.delete') };
+      case 'withdraw-registration': return { title: t('myTeam.competitions.withdraw'), description: t('myTeam.competitions.confirmWithdraw'), confirmLabel: t('myTeam.competitions.withdraw') };
+      default: return { title: '', description: '', confirmLabel: t('actions.delete') };
     }
   })();
 
-  // ── Render: Not loaded ────────────────────────────────────────────────────
+  // ── Loading state ─────────────────────────────────────────────────────
   if (!loaded) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-32 w-full rounded-xl" />
-        <Skeleton className="h-10 w-full rounded-xl" />
-        <Skeleton className="h-64 w-full rounded-xl" />
+      <div className="space-y-6 py-8 max-w-4xl mx-auto">
+        <Skeleton className="h-32 w-full rounded-2xl" />
+        <div className="flex gap-3">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-10 w-24 rounded-lg" />)}
+        </div>
+        <Skeleton className="h-72 w-full rounded-2xl" />
       </div>
     );
   }
 
-  // ── Render: No team ───────────────────────────────────────────────────────
+  // ── No team ────────────────────────────────────────────────────────────
   if (!team) return <Navigate to="/" replace />;
 
+  const tabItems = tabConfig(t, isOwner);
 
-  // ── Render: Has team ──────────────────────────────────────────────────────
+  // ── Main render ────────────────────────────────────────────────────────
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }} className="space-y-5">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="max-w-5xl mx-auto space-y-8"
+    >
+      <InlineToast toast={toast} />
 
-      {/* Toast */}
-      <AnimatePresence>
-        {toast.show && (
-          <motion.div
-            key="toast"
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-            className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl text-sm font-medium border ${
-              toast.type === 'success'
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800'
-                : toast.type === 'error'
-                ? 'bg-red-50 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800'
-                : 'bg-white text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
-            }`}
-          >
-            {toast.type === 'success' && (
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500 }}
-                className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 shrink-0">
-                <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
-                  <motion.path d="M2 6l3 3 5-5" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.3 }} />
-                </svg>
-              </motion.div>
-            )}
-            {toast.type === 'error' && <X className="h-4 w-4 text-red-500 shrink-0" />}
-            {toast.message}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Team header card */}
+      {/* ────────────────── Team Header ────────────────── */}
       <motion.div
-        initial={{ opacity: 0, y: -8 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="relative rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 overflow-hidden"
       >
-        <Card className="overflow-hidden p-0 rounded-xl">
-          {/* Top bar */}
-          <div className="h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
-          <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              {/* Team logo or initials */}
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-700 dark:text-blue-300 font-bold text-xl shrink-0">
+        <div className="p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+            <div className="flex items-center gap-5">
+              {/* Team initials badge */}
+              <div className="w-16 h-16 rounded-2xl bg-stone-900 dark:bg-stone-50 flex items-center justify-center text-white dark:text-stone-900 font-display font-bold text-xl shrink-0 shadow-lg shadow-stone-900/20 dark:shadow-stone-50/10">
                 {team.name.slice(0, 2).toUpperCase()}
               </div>
               <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">{team.name}</h1>
-                  <Badge variant={isOwner ? 'default' : 'secondary'} className="text-xs">
-                    {isOwner ? <><Crown className="h-3 w-3 mr-1" />{t('myTeam.roles.owner')}</> : t('myTeam.roles.member')}
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-2xl font-display font-bold text-stone-900 dark:text-stone-50 tracking-tight">{team.name}</h1>
+                  <Badge variant={isOwner ? 'default' : 'secondary'} className="text-xs gap-1">
+                    {isOwner ? <><Crown className="h-3 w-3" />{t('myTeam.roles.owner')}</> : t('myTeam.roles.member')}
                   </Badge>
                   {activeStream && (
-                    <motion.div animate={{ opacity: [1, 0.5, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
-                      className="flex items-center gap-1 px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold rounded-full border border-red-200 dark:border-red-800">
+                    <motion.div
+                      animate={{ opacity: [1, 0.5, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                      className="flex items-center gap-1.5 px-2.5 py-1 bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-bold rounded-full border border-red-200 dark:border-red-800"
+                    >
                       <Wifi className="h-3 w-3" /> LIVE
                     </motion.div>
                   )}
                 </div>
-                <div className="flex items-center gap-3 mt-1 text-sm text-slate-500 dark:text-slate-400 flex-wrap">
-                  {team.city && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{team.city}</span>}
-                  {team.institution && <span className="flex items-center gap-1"><Building2 className="h-3.5 w-3.5" />{team.institution}</span>}
-                  <span className="flex items-center gap-1"><Hash className="h-3.5 w-3.5" />{team.id}</span>
+                <div className="flex items-center gap-4 mt-2 text-sm text-stone-500 dark:text-stone-400 flex-wrap">
+                  {team.city && <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />{team.city}</span>}
+                  {team.institution && <span className="flex items-center gap-1.5"><Building2 className="h-3.5 w-3.5" />{team.institution}</span>}
+                  <span className="flex items-center gap-1.5"><Hash className="h-3.5 w-3.5" />{team.id}</span>
                 </div>
               </div>
             </div>
             <div className="flex gap-2 shrink-0">
               {team.website_url && (
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="outline" size="sm" asChild>
                   <a href={team.website_url} target="_blank" rel="noreferrer" className="gap-1.5">
-                    <Globe className="h-4 w-4" /> Web
+                    <ExternalLink className="h-3.5 w-3.5" /> Web
                   </a>
                 </Button>
               )}
               {!isOwner && (
-                <Button variant="outline" size="sm" onClick={() => openConfirmDialog('leave-team')} className="gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 dark:border-red-800">
-                  <LogOut className="h-4 w-4" /> {t('myTeam.actions.leave')}
+                <Button variant="ghost" size="sm" onClick={() => openConfirmDialog('leave-team')} className="gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30">
+                  <LogOut className="h-3.5 w-3.5" /> {t('myTeam.actions.leave')}
                 </Button>
               )}
             </div>
           </div>
-        </Card>
+        </div>
       </motion.div>
 
-      {/* Tabs */}
+      {/* ────────────────── Tab Navigation ────────────────── */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        {/* Scrollable tab navigation — no more cramped inline-flex */}
-        <div className="flex overflow-x-auto scrollbar-none border-b border-slate-200 dark:border-slate-800 mb-6">
-          {tabs(t, isOwner).map(({ id, label, Icon }) => (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
+          className="flex overflow-x-auto scrollbar-none -mb-px"
+        >
+          {tabItems.map(({ id, label, Icon }) => (
             <button
               key={id}
               type="button"
               onClick={() => setActiveTab(id)}
               className={`
-                relative flex items-center gap-2.5 px-5 py-3.5 text-sm font-medium
-                whitespace-nowrap shrink-0 transition-colors
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset
+                relative flex items-center gap-2 px-5 py-3 text-sm font-medium
+                whitespace-nowrap shrink-0 transition-all duration-200
+                rounded-t-xl border border-b-0
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-inset
                 ${activeTab === id
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                  ? 'text-stone-900 dark:text-stone-50 bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800 -mb-px z-10'
+                  : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 border-transparent bg-transparent hover:bg-stone-50 dark:hover:bg-stone-800/30'
                 }
               `}
             >
               <Icon className="h-4 w-4 shrink-0" />
               <span>{label}</span>
-              {activeTab === id && (
-                <motion.span
-                  layoutId="myteam-tab-indicator"
-                  className="absolute bottom-0 inset-x-0 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-t-sm"
-                  transition={{ type: 'spring', stiffness: 500, damping: 38 }}
-                />
-              )}
             </button>
           ))}
-        </div>
+        </motion.div>
 
-        {/* ── OVERVIEW ────────────────────────────────────────────────── */}
-        <TabsContent value="overview">
-          <div className="grid gap-5 md:grid-cols-3">
-            {/* About */}
-            <div className="md:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-5">
-              <h2 className="font-semibold text-slate-900 dark:text-slate-100">{t('myTeam.overview.about')}</h2>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                {team.description || <span className="italic text-slate-400">{t('myTeam.overview.noDesc')}</span>}
-              </p>
-              {team.website_url && (
-                <a href={team.website_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:underline dark:text-blue-400">
-                  <Globe className="h-4 w-4" /> {team.website_url}
-                </a>
-              )}
-            </div>
-            {/* Stats */}
-            <div className="space-y-3">
-              {[
-                { label: t('myTeam.overview.membersCount'), value: members.length, Icon: Users, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-                { label: t('myTeam.overview.compsCount'), value: registrations.length, Icon: Trophy, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-              ].map(({ label, value, Icon, color, bg }) => (
-                <motion.div
-                  key={label}
-                  whileHover={{ scale: 1.02 }}
-                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex items-center gap-4"
-                >
-                  <div className={`w-10 h-10 rounded-lg ${bg} flex items-center justify-center`}>
-                    <Icon className={`h-5 w-5 ${color}`} />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{value}</p>
-                    <p className="text-xs text-slate-500">{label}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </TabsContent>
+        <div className="rounded-2xl rounded-tl-none border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 overflow-hidden">
 
-        {/* ── CHAT ────────────────────────────────────────────────────── */}
-        <TabsContent value="chat">
-          <TeamChat teamId={team.id} />
-        </TabsContent>
-
-        {/* ── MEMBERS ─────────────────────────────────────────────────── */}
-        <TabsContent value="members">
-          <div className="space-y-5">
-            {/* Member list */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-              <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800">
-                <h2 className="font-semibold text-slate-900 dark:text-slate-100">{t('myTeam.members.title')}</h2>
-                <p className="text-xs text-slate-500 mt-0.5">{t('myTeam.members.desc')}</p>
+          {/* ────────────────── OVERVIEW ────────────────── */}
+          <TabsContent value="overview">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="p-6 sm:p-8 space-y-8"
+            >
+              {/* Stats grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <StatCard label={t('myTeam.overview.membersCount')} value={members.length} Icon={Users} delay={0.05} />
+                <StatCard label={t('myTeam.overview.compsCount')} value={registrations.length} Icon={Trophy} delay={0.1} />
               </div>
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {members.length === 0 ? (
-                  <p className="px-5 py-8 text-center text-sm text-slate-400">{t('myTeam.members.noMembers')}</p>
-                ) : members.map((m, i) => (
-                  <motion.div
-                    key={m.id}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.04 }}
-                    className="flex items-center justify-between px-5 py-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Avatar src={resolveMediaUrl(m.user_photo)} name={m.user_username} size={9} />
-                      <div>
-                        <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                          {m.user_username || `${t('myTeam.members.userPrefix')}${m.user_id}`}
-                        </p>
-                        <p className="text-xs text-slate-500 capitalize flex items-center gap-1">
-                          {m.role === 'owner' && <Crown className="h-3 w-3 text-amber-500" />}
-                          {m.role === 'admin' && <Shield className="h-3 w-3 text-blue-500" />}
-                          {m.role}
-                        </p>
-                      </div>
-                    </div>
-                    {isOwner && m.role !== 'owner' && (
-                      <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 h-7 px-2" onClick={() => openConfirmDialog('remove-member', m.id)}>
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-                  </motion.div>
-                ))}
-              </div>
-            </div>
 
-            {/* Invite section (owner only) */}
-            {isOwner && (
-              <div className="grid gap-5 md:grid-cols-2">
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4">
-                  <div>
-                    <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">{t('myTeam.members.inviteTitle')}</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">{t('myTeam.members.inviteDesc')}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">{t('myTeam.members.searchUser')}</Label>
-                    <div className="relative">
-                      <Input value={query} onChange={e => setQuery(e.target.value)} placeholder="Username..." className="text-sm" />
-                    </div>
-                    <AnimatePresence>
-                      {candidates.length > 0 && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -4 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -4 }}
-                          className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden divide-y divide-slate-100 dark:divide-slate-800 max-h-36 overflow-y-auto"
-                        >
-                          {candidates.map(u => (
-                            <div key={u.id} className="flex items-center justify-between px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                              <span className="text-slate-700 dark:text-slate-300">{u.username}</span>
-                              <Button size="sm" variant="ghost" className="h-6 px-2 text-xs text-blue-600" onClick={() => onInviteUsername(u.username)}>
-                                <UserPlus className="h-3 w-3 mr-1" /> {t('myTeam.actions.invite')}
-                              </Button>
-                            </div>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                  <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                    <Label className="text-xs">{t('myTeam.members.inviteEmail')}</Label>
-                    <form onSubmit={onInviteEmail} className="flex gap-2">
-                      <Input value={emailInvite} onChange={e => setEmailInvite(e.target.value)} placeholder="email@..." className="text-sm" type="email" />
-                      <Button type="submit" size="sm" className="shrink-0"><UserPlus className="h-4 w-4" /></Button>
-                    </form>
-                  </div>
+              {/* About */}
+              <div>
+                <h2 className="font-display font-bold text-stone-900 dark:text-stone-50 mb-3">{t('myTeam.overview.about')}</h2>
+                <div className="rounded-xl bg-stone-50 dark:bg-stone-900 p-5 border border-stone-100 dark:border-stone-800">
+                  <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
+                    {team.description || <span className="italic text-stone-400">{t('myTeam.overview.noDesc')}</span>}
+                  </p>
+                  {team.website_url && (
+                    <a href={team.website_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 mt-4 font-medium">
+                      <Globe className="h-4 w-4" /> {team.website_url}
+                    </a>
+                  )}
                 </div>
+              </div>
+            </motion.div>
+          </TabsContent>
 
-                {/* Join requests */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-                  <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">{t('myTeam.members.requestsTitle')}</h3>
-                      <p className="text-xs text-slate-500 mt-0.5">{t('myTeam.members.requestsDesc')}</p>
-                    </div>
-                    {requests.length > 0 && (
-                      <Badge className="bg-blue-600 text-white">{requests.length}</Badge>
-                    )}
+          {/* ────────────────── CHAT ────────────────── */}
+          <TabsContent value="chat">
+            <div className="p-6 sm:p-8">
+              <TeamChat teamId={team.id} />
+            </div>
+          </TabsContent>
+
+          {/* ────────────────── MEMBERS ────────────────── */}
+          <TabsContent value="members">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="p-6 sm:p-8 space-y-8">
+              {/* Member list */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="font-display font-bold text-stone-900 dark:text-stone-50">{t('myTeam.members.title')}</h2>
+                    <p className="text-xs text-stone-500 mt-0.5">{t('myTeam.members.desc')}</p>
                   </div>
-                  <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {requests.length === 0 ? (
-                      <p className="px-5 py-6 text-center text-xs text-slate-400">{t('myTeam.members.noRequests')}</p>
-                    ) : requests.map(r => (
-                      <div key={r.id} className="flex items-center justify-between px-5 py-3">
-                        <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{r.user_username || `User ${r.user_id}`}</p>
-                        {r.status === 'pending' && (
-                          <motion.button
-                            whileTap={{ scale: 0.94 }}
-                            onClick={() => onApprove(r.id)}
-                            className="flex items-center gap-1 px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium transition-colors dark:bg-emerald-900/20 dark:hover:bg-emerald-900/40 dark:text-emerald-400"
-                          >
-                            <Check className="h-3.5 w-3.5" /> {t('myTeam.actions.approve')}
-                          </motion.button>
-                        )}
+                  <Badge variant="secondary" className="text-xs">{members.length}</Badge>
+                </div>
+                <div className="rounded-xl border border-stone-200 dark:border-stone-800 overflow-hidden">
+                  <div className="divide-y divide-stone-100 dark:divide-stone-800">
+                    {members.length === 0 ? (
+                      <div className="px-5 py-12 text-center">
+                        <Users className="h-8 w-8 mx-auto mb-2 text-stone-300 dark:text-stone-700" />
+                        <p className="text-sm text-stone-400">{t('myTeam.members.noMembers')}</p>
                       </div>
+                    ) : members.map((m, i) => (
+                      <MemberRow key={m.id} member={m} isOwner={isOwner} onRemove={(id) => openConfirmDialog('remove-member', id)} t={t} index={i} />
                     ))}
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-        </TabsContent>
 
-        {/* ── COMPETITIONS ─────────────────────────────────────────────── */}
-        <TabsContent value="competitions">
-          <div className="space-y-5">
-            {isOwner && (
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-3">
-                <div>
-                  <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">{t('myTeam.competitions.registerTitle')}</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">{t('myTeam.competitions.registerDesc')}</p>
-                </div>
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
-                    <Input
-                      className="pl-8 text-sm"
-                      placeholder={t('myTeam.competitions.searchPlaceholder')}
-                      value={compSearch}
-                      onChange={e => { setCompSearch(e.target.value); setSelectedCompetition(''); }}
-                    />
-                  </div>
-                  <AnimatePresence>
-                    {compSearch.trim() && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        transition={{ duration: 0.15 }}
-                        className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden divide-y divide-slate-100 dark:divide-slate-800 max-h-52 overflow-y-auto shadow-sm"
-                      >
-                        {filteredCompetitions.length === 0 ? (
-                          <p className="px-3 py-3 text-xs text-slate-400 text-center">{t('myTeam.competitions.noResults')}</p>
-                        ) : filteredCompetitions.map(c => {
-                          const already = registeredCompIds.has(c.id);
-                          return (
-                            <button
-                              key={c.id}
-                              type="button"
-                              onClick={() => {
-                                if (!already) {
-                                  setSelectedCompetition(String(c.id));
-                                  setCompSearch(c.title);
-                                }
-                              }}
-                              disabled={already}
-                              className={`w-full flex items-center justify-between px-3 py-2.5 text-sm text-left transition-colors ${
-                                already
-                                  ? 'text-slate-400 dark:text-slate-600 cursor-not-allowed bg-slate-50 dark:bg-slate-800/30'
-                                  : String(c.id) === selectedCompetition
-                                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
-                                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-                              }`}
+              {/* Invite section (owner only) */}
+              {isOwner && (
+                <div className="grid gap-6 lg:grid-cols-2">
+                  {/* Invite */}
+                  <div className="rounded-xl border border-stone-200 dark:border-stone-800 p-6">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
+                        <UserPlus className="h-4.5 w-4.5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-display font-bold text-sm text-stone-900 dark:text-stone-50">{t('myTeam.members.inviteTitle')}</h3>
+                        <p className="text-xs text-stone-500">{t('myTeam.members.inviteDesc')}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-5">
+                      {/* Search by username */}
+                      <div className="space-y-2">
+                        <Label className="text-xs">{t('myTeam.members.searchUser')}</Label>
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-stone-400 pointer-events-none" />
+                          <Input value={query} onChange={e => setQuery(e.target.value)} placeholder="Username..." className="pl-9" />
+                        </div>
+                        <AnimatePresence>
+                          {candidates.length > 0 && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -4 }}
+                              transition={{ duration: 0.15 }}
+                              className="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden divide-y divide-stone-100 dark:divide-stone-800 max-h-36 overflow-y-auto"
                             >
-                              <span className="truncate">{c.title}</span>
-                              {already && (
-                                <Badge className="ml-2 shrink-0 text-xs h-5 px-1.5 bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-500 border border-emerald-200 dark:border-emerald-800">
-                                  {t('myTeam.competitions.alreadyRegistered')}
-                                </Badge>
-                              )}
-                              {!already && String(c.id) === selectedCompetition && (
-                                <Check className="h-3.5 w-3.5 shrink-0 ml-2 text-blue-600" />
-                              )}
-                            </button>
-                          );
-                        })}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-                <motion.div whileTap={{ scale: 0.96 }}>
-                  <Button
-                    onClick={onRegister}
-                    disabled={!selectedCompetition || registeredCompIds.has(Number(selectedCompetition))}
-                    className="gap-2 w-full"
-                  >
-                    <Trophy className="h-4 w-4" /> {t('myTeam.actions.register')}
-                  </Button>
-                </motion.div>
-              </div>
-            )}
+                              {candidates.map(u => (
+                                <div key={u.id} className="flex items-center justify-between px-4 py-2.5 text-sm hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors">
+                                  <span className="text-stone-700 dark:text-stone-300 font-medium">{u.username}</span>
+                                  <Button size="sm" variant="ghost" className="h-7 px-2.5 text-xs text-blue-600 gap-1" onClick={() => onInviteUsername(u.username)}>
+                                    <UserPlus className="h-3 w-3" /> {t('myTeam.actions.invite')}
+                                  </Button>
+                                </div>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-              <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800">
-                <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">{t('myTeam.competitions.activeTitle')}</h3>
-              </div>
-              {registrations.length === 0 ? (
-                <div className="px-5 py-10 text-center">
-                  <Trophy className="h-8 w-8 mx-auto mb-2 text-slate-300 dark:text-slate-700" />
-                  <p className="text-sm text-slate-400">{t('myTeam.competitions.noRegistrations')}</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {registrations.map((r, i) => {
-                    const displayStatus = r.status === 'pending' ? (r.center_approval_status || 'pending') : r.status;
-                    const comp = competitions.find(c => c.id === r.competition_id);
-                    return (
-                      <motion.div key={r.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                        <div className="flex items-center justify-between px-5 py-4 gap-3">
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
-                              {comp?.title ?? `${t('myTeam.competitions.compPrefix')}${r.competition_id}`}
-                            </p>
-                            <p className="text-xs text-slate-400 mt-0.5">{new Date(r.registration_date).toLocaleDateString()}</p>
+                      {/* Invite by email */}
+                      <div className="border-t border-stone-100 dark:border-stone-800 pt-5 space-y-2">
+                        <Label className="text-xs">{t('myTeam.members.inviteEmail')}</Label>
+                        <form onSubmit={onInviteEmail} className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-stone-400 pointer-events-none" />
+                            <Input value={emailInvite} onChange={e => setEmailInvite(e.target.value)} placeholder="email@..." className="pl-9" type="email" />
                           </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <Badge variant={displayStatus === 'approved' ? 'default' : displayStatus === 'rejected' ? 'destructive' : 'secondary'}>
-                              {t(`myTeam.competitions.status.${displayStatus}`) || displayStatus}
-                            </Badge>
-                            {isOwner && displayStatus === 'pending' && (
-                              <motion.button
-                                whileTap={{ scale: 0.94 }}
-                                onClick={() => openConfirmDialog('withdraw-registration', r.id)}
-                                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:text-red-400 transition-colors"
+                          <Button type="submit" size="sm" className="shrink-0 h-10 w-10 p-0">
+                            <UserPlus className="h-4 w-4" />
+                          </Button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Join requests */}
+                  <div className="rounded-xl border border-stone-200 dark:border-stone-800 p-6">
+                    <div className="flex items-center justify-between mb-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center">
+                          <Clock className="h-4.5 w-4.5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div>
+                          <h3 className="font-display font-bold text-sm text-stone-900 dark:text-stone-50">{t('myTeam.members.requestsTitle')}</h3>
+                          <p className="text-xs text-stone-500">{t('myTeam.members.requestsDesc')}</p>
+                        </div>
+                      </div>
+                      {requests.length > 0 && (
+                        <Badge className="bg-blue-600 text-white text-xs">{requests.length}</Badge>
+                      )}
+                    </div>
+                    <div className="rounded-xl border border-stone-200 dark:border-stone-800 overflow-hidden">
+                      <div className="divide-y divide-stone-100 dark:divide-stone-800">
+                        {requests.length === 0 ? (
+                          <div className="px-5 py-8 text-center">
+                            <Check className="h-6 w-6 mx-auto mb-1.5 text-stone-300 dark:text-stone-700" />
+                            <p className="text-xs text-stone-400">{t('myTeam.members.noRequests')}</p>
+                          </div>
+                        ) : requests.map(r => (
+                          <div key={r.id} className="flex items-center justify-between px-4 py-3 hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <Avatar name={r.user_username} size="sm" />
+                              <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{r.user_username || `User ${r.user_id}`}</p>
+                            </div>
+                            {r.status === 'pending' && (
+                              <button
+                                onClick={() => onApprove(r.id)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors"
                               >
-                                <X className="h-3.5 w-3.5" />
-                                {t('myTeam.competitions.withdraw')}
-                              </motion.button>
+                                <Check className="h-3.5 w-3.5" /> {t('myTeam.actions.approve')}
+                              </button>
                             )}
                           </div>
-                        </div>
-                        {r.status === 'approved' && (
-                          <div className="px-5 pb-4">
-                            <TeamCompetitionDashboard competitionId={r.competition_id} teamId={team.id} />
-                          </div>
-                        )}
-                      </motion.div>
-                    );
-                  })}
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
-            </div>
-          </div>
-        </TabsContent>
+            </motion.div>
+          </TabsContent>
 
-        {/* ── SETTINGS ─────────────────────────────────────────────────── */}
-        {isOwner && (
-          <TabsContent value="settings">
-            <div className="space-y-5">
-              {/* Edit info */}
-              <Card className="p-0 rounded-xl overflow-hidden">
-                <CardHeader className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 mb-0">
-                  <CardTitle as="h3" className="font-semibold text-slate-900 dark:text-slate-100 text-base">{t('myTeam.settings.editTitle')}</CardTitle>
-                  <p className="text-xs text-slate-500 mt-0.5">{t('myTeam.settings.editDesc')}</p>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <form onSubmit={onSave} className="p-6 grid gap-4 md:grid-cols-2">
-                    <div>
-                      <Label className="text-xs">{t('myTeam.form.name')}</Label>
-                      <Input className="mt-1.5" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+          {/* ────────────────── COMPETITIONS ────────────────── */}
+          <TabsContent value="competitions">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="p-6 sm:p-8 space-y-8">
+              {/* Register */}
+              {isOwner && (
+                <div className="rounded-xl border border-stone-200 dark:border-stone-800 p-6">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center">
+                      <Zap className="h-4.5 w-4.5 text-amber-600 dark:text-amber-400" />
                     </div>
                     <div>
-                      <Label className="text-xs">{t('myTeam.form.city')}</Label>
-                      <Input className="mt-1.5" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} />
+                      <h2 className="font-display font-bold text-sm text-stone-900 dark:text-stone-50">{t('myTeam.competitions.registerTitle')}</h2>
+                      <p className="text-xs text-stone-500">{t('myTeam.competitions.registerDesc')}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-stone-400 pointer-events-none" />
+                      <Input
+                        className="pl-9"
+                        placeholder={t('myTeam.competitions.searchPlaceholder')}
+                        value={compSearch}
+                        onChange={e => { setCompSearch(e.target.value); setSelectedCompetition(''); }}
+                      />
+                    </div>
+                    <AnimatePresence>
+                      {compSearch.trim() && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          transition={{ duration: 0.15 }}
+                          className="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden divide-y divide-stone-100 dark:divide-stone-800 max-h-52 overflow-y-auto"
+                        >
+                          {filteredCompetitions.length === 0 ? (
+                            <p className="px-4 py-4 text-xs text-stone-400 text-center">{t('myTeam.competitions.noResults')}</p>
+                          ) : filteredCompetitions.map(c => {
+                            const already = registeredCompIds.has(c.id);
+                            return (
+                              <button
+                                key={c.id}
+                                type="button"
+                                onClick={() => {
+                                  if (!already) {
+                                    setSelectedCompetition(String(c.id));
+                                    setCompSearch(c.title);
+                                  }
+                                }}
+                                disabled={already}
+                                className={`w-full flex items-center justify-between px-4 py-3 text-sm text-left transition-colors ${
+                                  already
+                                    ? 'text-stone-400 dark:text-stone-600 cursor-not-allowed bg-stone-50 dark:bg-stone-800/30'
+                                    : String(c.id) === selectedCompetition
+                                    ? 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-50'
+                                    : 'text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/50'
+                                }`}
+                              >
+                                <span className="truncate font-medium">{c.title}</span>
+                                {already && (
+                                  <Badge variant="success" className="ml-2 shrink-0 text-xs">
+                                    {t('myTeam.competitions.alreadyRegistered')}
+                                  </Badge>
+                                )}
+                                {!already && String(c.id) === selectedCompetition && (
+                                  <Check className="h-4 w-4 shrink-0 ml-2 text-stone-900 dark:text-stone-50" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <Button
+                      onClick={onRegister}
+                      disabled={!selectedCompetition || registeredCompIds.has(Number(selectedCompetition))}
+                      className="gap-2 w-full"
+                    >
+                      <Trophy className="h-4 w-4" /> {t('myTeam.actions.register')}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Active registrations */}
+              <div>
+                <h2 className="font-display font-bold text-stone-900 dark:text-stone-50 mb-4">{t('myTeam.competitions.activeTitle')}</h2>
+                {registrations.length === 0 ? (
+                  <div className="py-16 text-center rounded-xl border border-dashed border-stone-200 dark:border-stone-800">
+                    <Trophy className="h-10 w-10 mx-auto mb-3 text-stone-300 dark:text-stone-700" />
+                    <p className="text-sm text-stone-400 font-medium">{t('myTeam.competitions.noRegistrations')}</p>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-stone-200 dark:border-stone-800 overflow-hidden divide-y divide-stone-100 dark:divide-stone-800">
+                    {registrations.map((r, i) => (
+                      <RegistrationRow
+                        key={r.id}
+                        reg={r}
+                        comp={competitions.find(c => c.id === r.competition_id)}
+                        isOwner={isOwner}
+                        onWithdraw={(id) => openConfirmDialog('withdraw-registration', id)}
+                        t={t}
+                        index={i}
+                        teamId={team.id}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </TabsContent>
+
+          {/* ────────────────── SETTINGS ────────────────── */}
+          {isOwner && (
+            <TabsContent value="settings">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="p-6 sm:p-8 space-y-8">
+                {/* Edit info */}
+                <div>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+                      <Pencil className="h-4.5 w-4.5 text-stone-600 dark:text-stone-400" />
                     </div>
                     <div>
-                      <Label className="text-xs">{t('myTeam.form.institution')}</Label>
-                      <Input className="mt-1.5" value={form.institution} onChange={e => setForm({ ...form, institution: e.target.value })} />
+                      <h2 className="font-display font-bold text-stone-900 dark:text-stone-50">{t('myTeam.settings.editTitle')}</h2>
+                      <p className="text-xs text-stone-500">{t('myTeam.settings.editDesc')}</p>
+                    </div>
+                  </div>
+
+                  <form onSubmit={onSave} className="grid gap-5 md:grid-cols-2">
+                    <div>
+                      <Label>{t('myTeam.form.name')}</Label>
+                      <Input className="mt-2" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
                     </div>
                     <div>
-                      <Label className="text-xs">{t('myTeam.form.country')}</Label>
-                      <div className="mt-1.5">
+                      <Label>{t('myTeam.form.city')}</Label>
+                      <Input className="mt-2" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>{t('myTeam.form.institution')}</Label>
+                      <Input className="mt-2" value={form.institution} onChange={e => setForm({ ...form, institution: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>{t('myTeam.form.country')}</Label>
+                      <div className="mt-2">
                         <CountrySelect
                           value={form.country_id ? String(form.country_id) : 'all'}
                           onValueChange={val => setForm({ ...form, country_id: val === 'all' ? '' : val })}
@@ -1012,87 +1117,84 @@ const MyTeam = () => {
                       </div>
                     </div>
                     <div>
-                      <Label className="text-xs">{t('myTeam.form.website')}</Label>
-                      <Input className="mt-1.5" value={form.website_url} onChange={e => setForm({ ...form, website_url: e.target.value })} placeholder="https://..." />
+                      <Label>{t('myTeam.form.website')}</Label>
+                      <Input className="mt-2" value={form.website_url} onChange={e => setForm({ ...form, website_url: e.target.value })} placeholder="https://..." />
                     </div>
                     <div className="md:col-span-2">
-                      <Label className="text-xs">{t('myTeam.form.description')}</Label>
-                      <Textarea className="mt-1.5 resize-none" rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+                      <Label>{t('myTeam.form.description')}</Label>
+                      <Textarea className="mt-2 resize-none" rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
                     </div>
                     <div className="md:col-span-2 flex justify-end">
-                      <motion.div whileTap={{ scale: 0.96 }}>
-                        <Button type="submit" disabled={saving} className="min-w-[120px]">
-                          {saving ? (
-                            <span className="flex items-center gap-2">
-                              <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full" />
-                              {t('buttons.saving')}
-                            </span>
-                          ) : t('myTeam.form.submitSave')}
-                        </Button>
-                      </motion.div>
+                      <Button type="submit" disabled={saving} className="min-w-[140px] gap-2">
+                        {saving ? <><Spinner /> {t('buttons.saving')}</> : t('myTeam.form.submitSave')}
+                      </Button>
                     </div>
                   </form>
-                </CardContent>
-              </Card>
+                </div>
 
-              {/* Stream */}
-              <Card className="p-0 rounded-xl overflow-hidden">
-                <CardHeader className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 mb-0">
-                  <CardTitle as="h3" className="font-semibold text-slate-900 dark:text-slate-100 text-base">{t('myTeam.settings.streamTitle')}</CardTitle>
-                  <p className="text-xs text-slate-500 mt-0.5">{t('myTeam.settings.streamDesc')}</p>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  <div className="flex gap-2">
-                    <Input value={form.stream_url} onChange={e => setForm({ ...form, stream_url: e.target.value })} placeholder="https://twitch.tv/..." className="flex-1" />
-                    <Button variant="outline" onClick={onSave} type="button">{t('myTeam.form.saveUrl')}</Button>
-                  </div>
-                  <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <div className="flex items-center gap-3">
-                      {activeStream
-                        ? <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 1.2, repeat: Infinity }} className="w-2.5 h-2.5 rounded-full bg-red-500" />
-                        : <div className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-600" />
-                      }
-                      <div>
-                        <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{t('myTeam.settings.streamStatus')}</p>
-                        <p className="text-xs text-slate-500">{activeStream ? 'En directo ahora' : t('myTeam.settings.streamStatusDesc')}</p>
-                      </div>
+                <div className="border-b border-stone-100 dark:border-stone-800" />
+
+                {/* Streaming */}
+                <div>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
+                      <Video className="h-4.5 w-4.5 text-red-600 dark:text-red-400" />
                     </div>
-                    <motion.div whileTap={{ scale: 0.95 }}>
+                    <div>
+                      <h2 className="font-display font-bold text-stone-900 dark:text-stone-50">{t('myTeam.settings.streamTitle')}</h2>
+                      <p className="text-xs text-stone-500">{t('myTeam.settings.streamDesc')}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex gap-2">
+                      <Input value={form.stream_url} onChange={e => setForm({ ...form, stream_url: e.target.value })} placeholder="https://twitch.tv/..." className="flex-1" />
+                      <Button variant="outline" onClick={onSave} type="button">{t('myTeam.form.saveUrl')}</Button>
+                    </div>
+                    <div className="flex items-center justify-between p-5 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800">
+                      <div className="flex items-center gap-3">
+                        {activeStream
+                          ? <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.2, repeat: Infinity }} className="w-3 h-3 rounded-full bg-red-500" />
+                          : <div className="w-3 h-3 rounded-full bg-stone-300 dark:bg-stone-600" />
+                        }
+                        <div>
+                          <p className="text-sm font-semibold text-stone-900 dark:text-stone-50">{t('myTeam.settings.streamStatus')}</p>
+                          <p className="text-xs text-stone-500">{activeStream ? 'En directo ahora' : t('myTeam.settings.streamStatusDesc')}</p>
+                        </div>
+                      </div>
                       <Button
                         onClick={onToggleStream}
-                        className={`gap-2 ${activeStream ? 'bg-slate-800 hover:bg-slate-900 text-white' : 'bg-red-600 hover:bg-red-700 text-white'}`}
+                        className={`gap-2 ${activeStream ? '' : 'bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700 dark:text-white'}`}
                       >
                         {activeStream ? <><WifiOff className="h-4 w-4" /> {t('myTeam.actions.stopStream')}</> : <><Wifi className="h-4 w-4" /> {t('myTeam.actions.startStream')}</>}
                       </Button>
-                    </motion.div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Danger zone */}
-              <div className="border border-red-200 dark:border-red-900/50 rounded-xl overflow-hidden">
-                <div className="px-6 py-4 bg-red-50 dark:bg-red-900/10 border-b border-red-200 dark:border-red-900/50">
-                  <h3 className="font-semibold text-red-700 dark:text-red-400">{t('myTeam.settings.dangerZone')}</h3>
                 </div>
-                <div className="p-6 flex items-center justify-between gap-4">
-                  <p className="text-sm text-slate-600 dark:text-slate-400">{t('myTeam.settings.deleteWarning')}</p>
-                  <motion.div whileTap={{ scale: 0.95 }}>
+
+                <div className="border-b border-stone-100 dark:border-stone-800" />
+
+                {/* Danger zone */}
+                <div className="rounded-xl border-2 border-red-200 dark:border-red-900/50 overflow-hidden">
+                  <div className="px-6 py-4 bg-red-50 dark:bg-red-950/20 border-b-2 border-red-200 dark:border-red-900/50">
+                    <h3 className="font-display font-bold text-red-700 dark:text-red-400 text-sm">{t('myTeam.settings.dangerZone')}</h3>
+                  </div>
+                  <div className="p-6 flex items-center justify-between gap-4">
+                    <p className="text-sm text-stone-600 dark:text-stone-400">{t('myTeam.settings.deleteWarning')}</p>
                     <Button variant="destructive" onClick={() => openConfirmDialog('delete-team')} className="gap-2 shrink-0">
                       <Trash2 className="h-4 w-4" /> {t('myTeam.actions.delete')}
                     </Button>
-                  </motion.div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </TabsContent>
-        )}
+              </motion.div>
+            </TabsContent>
+          )}
+        </div>
       </Tabs>
 
       <ConfirmDialog
         open={confirmDialog.open}
-        onOpenChange={(open) => {
-          if (!open) closeConfirmDialog();
-        }}
+        onOpenChange={(open) => { if (!open) closeConfirmDialog(); }}
         title={confirmDialogConfig.title}
         description={confirmDialogConfig.description}
         confirmLabel={confirmDialogConfig.confirmLabel}

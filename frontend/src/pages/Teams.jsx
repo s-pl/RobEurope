@@ -98,9 +98,9 @@ const JoinButton = ({ teamId, onJoin, disabled, label, successLabel, errorLabel 
           : state === 'error'
           ? 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'
           : state === 'loading'
-          ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-wait dark:bg-slate-800 dark:border-slate-700'
+          ? 'bg-stone-100 text-stone-400 border border-stone-200 cursor-wait dark:bg-stone-800 dark:border-stone-700'
           : disabled
-          ? 'bg-slate-50 text-slate-400 border border-slate-200 cursor-not-allowed dark:bg-slate-800/50 dark:border-slate-700'
+          ? 'bg-stone-50 text-stone-400 border border-stone-200 cursor-not-allowed dark:bg-stone-800/50 dark:border-stone-700'
           : 'bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 hover:border-blue-700'
       }`}
     >
@@ -153,7 +153,7 @@ const JoinButton = ({ teamId, onJoin, disabled, label, successLabel, errorLabel 
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
-              className="w-3.5 h-3.5 border-2 border-slate-300 border-t-slate-500 rounded-full"
+              className="w-3.5 h-3.5 border-2 border-stone-300 border-t-stone-500 rounded-full"
             />
           </motion.span>
         ) : (
@@ -327,7 +327,7 @@ const Teams = () => {
                       initial={{ opacity: 0, y: 4 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.35 }}
-                      className="text-base font-medium text-slate-900 dark:text-slate-100"
+                      className="text-base font-medium text-stone-900 dark:text-stone-100"
                     >
                       {t('teams.feedback.created')}
                     </motion.p>
@@ -415,7 +415,7 @@ const Teams = () => {
         className="flex gap-2 flex-wrap"
       >
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -transtone-y-1/2 h-4 w-4 text-stone-400" />
           <Input
             placeholder={t('teams.searchPlaceholder')}
             value={q}
@@ -443,18 +443,18 @@ const Teams = () => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden"
+          className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden"
         >
           {/* Collapsible header */}
           <button
             type="button"
             onClick={() => setRequestsOpen(o => !o)}
-            className="w-full px-5 py-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+            className="w-full px-5 py-4 flex items-center justify-between hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors"
           >
             <div className="flex items-center gap-3">
               <div>
-                <h2 className="font-semibold text-sm text-slate-900 dark:text-slate-100 text-left">{t('myTeam.joinRequests.title')}</h2>
-                <p className="text-xs text-slate-500 mt-0.5 text-left">{t('myTeam.joinRequests.desc')}</p>
+                <h2 className="font-semibold text-sm text-stone-900 dark:text-stone-100 text-left">{t('myTeam.joinRequests.title')}</h2>
+                <p className="text-xs text-stone-500 mt-0.5 text-left">{t('myTeam.joinRequests.desc')}</p>
               </div>
               {myJoinRequests.filter(r => r.status === 'pending').length > 0 && (
                 <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
@@ -467,7 +467,7 @@ const Teams = () => {
               animate={{ rotate: requestsOpen ? 180 : 0 }}
               transition={{ duration: 0.2 }}
             >
-              <ChevronDown className="h-4 w-4 text-slate-400" />
+              <ChevronDown className="h-4 w-4 text-stone-400" />
             </motion.div>
           </button>
 
@@ -482,7 +482,7 @@ const Teams = () => {
                 transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                 style={{ overflow: 'hidden' }}
               >
-                <div className="divide-y divide-slate-100 dark:divide-slate-800 border-t border-slate-100 dark:border-slate-800">
+                <div className="divide-y divide-stone-100 dark:divide-stone-800 border-t border-stone-100 dark:border-stone-800">
                   <AnimatePresence>
                     {myJoinRequests.map((r, i) => {
                       const STATUS_MAP = {
@@ -501,12 +501,12 @@ const Teams = () => {
                           className="flex items-center justify-between px-5 py-3.5"
                         >
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 font-bold text-xs shrink-0">
+                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center text-stone-600 dark:text-stone-400 font-bold text-xs shrink-0">
                               {(r.team?.name || '?').slice(0, 2).toUpperCase()}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{r.team?.name ?? `Team #${r.team_id}`}</p>
-                              <p className="text-xs text-slate-400 mt-0.5">{r.team?.city || new Date(r.created_at).toLocaleDateString()}</p>
+                              <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">{r.team?.name ?? `Team #${r.team_id}`}</p>
+                              <p className="text-xs text-stone-400 mt-0.5">{r.team?.city || new Date(r.created_at).toLocaleDateString()}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
@@ -517,7 +517,7 @@ const Teams = () => {
                                 onClick={() => onCancelRequest(r.id)}
                                 disabled={cancellingId === r.id}
                                 title={t('myTeam.joinRequests.cancel')}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+                                className="p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
                               >
                                 <X className="h-3.5 w-3.5" />
                               </motion.button>
@@ -545,7 +545,7 @@ const Teams = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.28, delay: i * 0.07 }}
               >
-                <div className="h-52 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
+                <div className="h-52 rounded-xl bg-stone-100 dark:bg-stone-800 animate-pulse" />
               </motion.div>
             ))
           : null}
@@ -561,16 +561,16 @@ const Teams = () => {
               transition={{ duration: 0.35, delay: i * 0.06, ease: [0.4, 0, 0.2, 1] }}
             >
               <TiltCard>
-              <div className="group flex flex-col h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden transition-shadow duration-200 hover:shadow-xl hover:border-slate-300 dark:hover:border-slate-700">
+              <div className="group flex flex-col h-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden transition-shadow duration-200 hover:shadow-xl hover:border-stone-300 dark:hover:border-stone-700">
                 {/* Card top accent */}
                 <div className="h-1 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="p-5 flex-1 flex flex-col gap-3">
                   {/* Header */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-slate-900 dark:text-slate-100 truncate text-base">{team.name}</h3>
+                      <h3 className="font-semibold text-stone-900 dark:text-stone-100 truncate text-base">{team.name}</h3>
                       {team.city && (
-                        <p className="flex items-center gap-1 text-xs text-slate-500 mt-0.5">
+                        <p className="flex items-center gap-1 text-xs text-stone-500 mt-0.5">
                           <MapPin className="h-3 w-3 shrink-0" /> {team.city}
                         </p>
                       )}
@@ -583,7 +583,7 @@ const Teams = () => {
 
                   {/* Description */}
                   {team.description && (
-                    <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 flex-1">{team.description}</p>
+                    <p className="text-sm text-stone-500 dark:text-stone-400 line-clamp-2 flex-1">{team.description}</p>
                   )}
 
                   {/* Website */}
@@ -643,7 +643,7 @@ const Teams = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="col-span-full text-center py-16 text-slate-400 dark:text-slate-500"
+            className="col-span-full text-center py-16 text-stone-400 dark:text-stone-500"
           >
             <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
             <p>{t('teams.noTeams')}</p>

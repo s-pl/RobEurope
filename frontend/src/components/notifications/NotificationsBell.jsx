@@ -27,8 +27,8 @@ const TYPE_META = {
   },
   default: {
     Icon: Info,
-    color: 'text-slate-500 dark:text-slate-400',
-    bg: 'bg-slate-100 dark:bg-slate-800',
+    color: 'text-stone-500 dark:text-stone-400',
+    bg: 'bg-stone-100 dark:bg-stone-800',
   },
 };
 
@@ -69,7 +69,7 @@ const NotifItem = ({ item, onMarkRead, onDelete, onInviteAction, busyId }) => {
         }}
         whileHover={{ backgroundColor: item.is_read ? 'rgba(0,0,0,0.018)' : undefined }}
         className={`relative flex items-start gap-3 p-4 cursor-grab active:cursor-grabbing select-none ${
-          !item.is_read ? 'bg-blue-50/60 dark:bg-blue-900/10' : 'bg-white dark:bg-slate-950'
+          !item.is_read ? 'bg-blue-50/60 dark:bg-blue-900/10' : 'bg-white dark:bg-stone-950'
         }`}
         onClick={() => {
           if (!isDragging.current && !item.is_read) onMarkRead(item.id);
@@ -87,11 +87,11 @@ const NotifItem = ({ item, onMarkRead, onDelete, onInviteAction, busyId }) => {
         {/* Text content */}
         <div className="flex-1 min-w-0 space-y-0.5">
           <p className={`text-sm font-medium leading-tight ${
-            !item.is_read ? 'text-slate-900 dark:text-slate-100' : 'text-slate-600 dark:text-slate-400'
+            !item.is_read ? 'text-stone-900 dark:text-stone-100' : 'text-stone-600 dark:text-stone-400'
           }`}>
             {item.title}
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug line-clamp-2">
+          <p className="text-xs text-stone-500 dark:text-stone-400 leading-snug line-clamp-2">
             {item.message}
           </p>
 
@@ -115,7 +115,7 @@ const NotifItem = ({ item, onMarkRead, onDelete, onInviteAction, busyId }) => {
                 whileHover={{ scale: 1.05 }}
                 disabled={busyId === item.id}
                 onClick={() => onInviteAction(item, 'decline')}
-                className="flex items-center gap-1 px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-md text-xs font-medium transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 px-2.5 py-1 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-md text-xs font-medium transition-colors disabled:opacity-50"
               >
                 {t('notifications.decline')}
               </motion.button>
@@ -290,7 +290,7 @@ const NotificationsBell = () => {
             style={{ transformOrigin: 'top center' }}
             transition={{ duration: 0.55, ease: 'easeOut' }}
           >
-            <Bell className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+            <Bell className="h-5 w-5 text-stone-600 dark:text-stone-300" />
           </motion.div>
 
           {/* Unread badge — shows count, pops in/out */}
@@ -302,7 +302,7 @@ const NotificationsBell = () => {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 600, damping: 20 }}
-                className="absolute -top-0.5 -right-0.5 h-4 min-w-4 rounded-full bg-red-500 ring-2 ring-white dark:ring-slate-950 text-white text-[10px] font-bold flex items-center justify-center px-0.5 leading-none pointer-events-none"
+                className="absolute -top-0.5 -right-0.5 h-4 min-w-4 rounded-full bg-red-500 ring-2 ring-white dark:ring-stone-950 text-white text-[10px] font-bold flex items-center justify-center px-0.5 leading-none pointer-events-none"
               >
                 {unread > 9 ? '9+' : unread}
               </motion.span>
@@ -319,9 +319,9 @@ const NotificationsBell = () => {
           transition={{ duration: 0.18 }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4 py-3">
+          <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-800 px-4 py-3">
             <div className="flex items-center gap-2">
-              <h4 className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
+              <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-sm">
                 {t('notifications.title')}
               </h4>
               <AnimatePresence>
@@ -358,7 +358,7 @@ const NotificationsBell = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="flex flex-col items-center justify-center gap-3 py-14 text-slate-400 dark:text-slate-500"
+                className="flex flex-col items-center justify-center gap-3 py-14 text-stone-400 dark:text-stone-500"
               >
                 <motion.div
                   animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
@@ -369,7 +369,7 @@ const NotificationsBell = () => {
                 <p className="text-sm">{t('notifications.empty')}</p>
               </motion.div>
             ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="divide-y divide-stone-100 dark:divide-stone-800">
                 <AnimatePresence initial={false}>
                   {items.map(item => (
                     <NotifItem
@@ -388,8 +388,8 @@ const NotificationsBell = () => {
 
           {/* Footer hint */}
           {items.length > 0 && (
-            <div className="border-t border-slate-100 dark:border-slate-800 px-4 py-2 text-center">
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 select-none">
+            <div className="border-t border-stone-100 dark:border-stone-800 px-4 py-2 text-center">
+              <p className="text-[11px] text-stone-400 dark:text-stone-500 select-none">
                 {t('notifications.hint')}
               </p>
             </div>

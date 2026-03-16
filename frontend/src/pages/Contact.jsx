@@ -1,20 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Mail, Users, MessageSquare, Send } from 'lucide-react';
+import { Mail, Users, MessageSquare, Send, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { useApi } from '../hooks/useApi';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import { PageHeader } from '../components/ui/PageHeader';
-import { AnimatedSuccess } from '../components/ui/AnimatedSuccess';
 
 const Contact = () => {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const api = useApi();
 
   const [form, setForm] = useState({ name: '', email: '', organization: '', message: '' });
@@ -50,78 +44,178 @@ const Contact = () => {
     }
   };
 
-  return (
-    <div className="space-y-12">
-      <PageHeader title={t('contact.hero.title')} description={t('contact.hero.description')} />
+  const channelIcons = [Mail, Users, MessageSquare];
 
-      <div className="grid gap-6 md:grid-cols-3">
-        {Array.isArray(contactChannels) && contactChannels.map((channel, index) => (
-          <Card key={index} className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-md transition-shadow">
-            <CardHeader>
-              <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-2 text-blue-700 dark:text-blue-400">
-                <MessageSquare className="h-5 w-5" />
-              </div>
-              <CardTitle className="text-xl text-slate-900 dark:text-slate-100">{channel.title}</CardTitle>
-              <CardDescription className="text-xs uppercase tracking-wider font-semibold text-blue-700 dark:text-blue-400 mt-1">{channel.note}</CardDescription>
-            </CardHeader>
-            <CardContent><p className="text-slate-600 dark:text-slate-400">{channel.detail}</p></CardContent>
-          </Card>
-        ))}
+  return (
+    <div className="max-w-4xl mx-auto">
+      {/* Page header */}
+      <div className="pt-2 pb-8">
+        <h1 className="font-display text-3xl font-bold text-stone-900 dark:text-stone-50">
+          {t('contact.hero.title')}
+        </h1>
+        <p className="text-stone-500 dark:text-stone-400 text-sm mt-1">
+          {t('contact.hero.description')}
+        </p>
       </div>
 
-      <Card className="max-w-4xl mx-auto border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg overflow-hidden">
-        <div className="grid md:grid-cols-5">
-          <div className="bg-blue-900 dark:bg-blue-950 p-8 text-white md:col-span-2 flex flex-col justify-between">
-            <div>
-              <h3 className="text-2xl font-bold mb-4">{t('contact.contactUs')}</h3>
-              <p className="text-blue-100 dark:text-blue-200 mb-8">{t('contact.contactUsDesc')}</p>
-            </div>
-            <div className="space-y-4 text-blue-200 dark:text-blue-300 text-sm">
-              <div className="flex items-center gap-3"><Mail className="h-4 w-4" /><span>contact@robeurope.eu</span></div>
-              <div className="flex items-center gap-3"><Users className="h-4 w-4" /><span>{t('contact.support')}</span></div>
-            </div>
-          </div>
+      {/* Split layout: form left, channels right */}
+      <div className="grid md:grid-cols-5 gap-12">
+        {/* Form section */}
+        <div className="md:col-span-3">
+          <AnimatePresence mode="wait">
+            {submitted ? (
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                className="py-16 flex flex-col items-center text-center"
+              >
+                <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center mb-4">
+                  <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <h3 className="font-display text-xl font-semibold text-stone-900 dark:text-stone-50 mb-2">
+                  {t('contact.sentTitle')}
+                </h3>
+                <p className="text-stone-500 dark:text-stone-400 text-sm max-w-xs mb-6">
+                  {t('contact.sentDesc')}
+                </p>
+                <button
+                  onClick={() => setSubmitted(false)}
+                  className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                >
+                  {t('contact.sendAnother')}
+                </button>
+              </motion.div>
+            ) : (
+              <motion.form
+                key="form"
+                onSubmit={handleSubmit}
+                className="space-y-5"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name" className="text-sm font-medium text-stone-700 dark:text-stone-300">{t('forms.name')}</Label>
+                    <input
+                      id="name"
+                      name="name"
+                      value={form.name}
+                      onChange={handleChange}
+                      required
+                      placeholder={t('contact.placeholders.name')}
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="text-sm font-medium text-stone-700 dark:text-stone-300">{t('forms.email')}</Label>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      required
+                      placeholder={t('contact.placeholders.email')}
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="organization" className="text-sm font-medium text-stone-700 dark:text-stone-300">{t('forms.organization')}</Label>
+                  <input
+                    id="organization"
+                    name="organization"
+                    value={form.organization}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="message" className="text-sm font-medium text-stone-700 dark:text-stone-300">{t('forms.message')}</Label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    rows={5}
+                    value={form.message}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors resize-none"
+                  />
+                </div>
 
-          <div className="p-8 md:col-span-3">
-            <AnimatePresence mode="wait">
-              {submitted ? (
-                <motion.div key="success" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="h-full flex flex-col items-center justify-center text-center space-y-4 py-12">
-                  <AnimatedSuccess show message={t('contact.sentTitle')} />
-                  <p className="text-slate-500 dark:text-slate-400 max-w-xs mx-auto text-sm">{t('contact.sentDesc')}</p>
-                  <Button variant="outline" size="sm" onClick={() => setSubmitted(false)}>{t('contact.sendAnother')}</Button>
-                </motion.div>
-              ) : (
-                <motion.form key="form" onSubmit={handleSubmit} className="space-y-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">{t('forms.name')}</Label>
-                      <Input id="name" name="name" value={form.name} onChange={handleChange} required placeholder={t('contact.placeholders.name')} />
+                {!isAuthenticated && (
+                  <p className="text-xs text-stone-400 dark:text-stone-500">
+                    {t('contact.emailReplyNote') || 'Your email will be used to send you a reply.'}
+                  </p>
+                )}
+
+                {submitError && <p className="text-sm text-red-500">{submitError}</p>}
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {submitting ? (
+                    <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" />
+                      {t('contact.send') || t('contact.form.submit')}
+                    </>
+                  )}
+                </button>
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Contact channels - right side */}
+        <div className="md:col-span-2">
+          <div className="md:sticky md:top-24">
+            <h3 className="font-display text-sm font-semibold text-stone-900 dark:text-stone-50 uppercase tracking-wider mb-6">
+              {t('contact.contactUs')}
+            </h3>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">
+              {t('contact.contactUsDesc')}
+            </p>
+
+            {/* Channel list */}
+            <div className="space-y-0 divide-y divide-stone-200 dark:divide-stone-800">
+              {Array.isArray(contactChannels) && contactChannels.map((channel, index) => {
+                const Icon = channelIcons[index] || MessageSquare;
+                return (
+                  <div key={index} className="py-4 first:pt-0">
+                    <div className="flex items-start gap-3">
+                      <Icon className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-stone-900 dark:text-stone-50">{channel.title}</p>
+                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-0.5">{channel.note}</p>
+                        <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{channel.detail}</p>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">{t('forms.email')}</Label>
-                      <Input id="email" name="email" type="email" value={form.email} onChange={handleChange} required placeholder={t('contact.placeholders.email')} />
-                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="organization">{t('forms.organization')}</Label>
-                    <Input id="organization" name="organization" value={form.organization} onChange={handleChange} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="message">{t('forms.message')}</Label>
-                    <Textarea id="message" name="message" rows={4} value={form.message} onChange={handleChange} required />
-                  </div>
-                  {submitError && <p className="text-sm text-red-500">{submitError}</p>}
-                  <Button type="submit" className="w-full gap-2" disabled={submitting}>
-                    {submitting
-                      ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full" />
-                      : <><Send className="h-4 w-4" /> {t('contact.send') || t('contact.form.submit')}</>}
-                  </Button>
-                </motion.form>
-              )}
-            </AnimatePresence>
+                );
+              })}
+            </div>
+
+            {/* Direct contact info */}
+            <div className="mt-8 pt-6 border-t border-stone-200 dark:border-stone-800 space-y-3">
+              <div className="flex items-center gap-3 text-sm text-stone-500 dark:text-stone-400">
+                <Mail className="h-4 w-4 text-stone-400" />
+                <span>contact@robeurope.eu</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-stone-500 dark:text-stone-400">
+                <Users className="h-4 w-4 text-stone-400" />
+                <span>{t('contact.support')}</span>
+              </div>
+            </div>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

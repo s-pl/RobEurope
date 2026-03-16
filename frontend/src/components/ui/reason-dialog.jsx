@@ -31,22 +31,22 @@ export function ReasonDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <motion.div
-            initial={{ opacity: 0, y: 6, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 360, damping: 28 }}
-            className="flex items-start gap-3"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            className="flex items-start gap-4"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: [1, 1.06, 1], opacity: 1 }}
-              transition={{ duration: 0.45, ease: 'easeOut' }}
-              className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
+              className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-100 dark:border-amber-900/40"
             >
-              <MessageSquareWarning className="h-4 w-4" />
+              <MessageSquareWarning className="h-5 w-5" />
             </motion.div>
-            <div>
+            <div className="flex-1 min-w-0">
               <DialogTitle>{title}</DialogTitle>
-              {description ? <DialogDescription className="mt-1">{description}</DialogDescription> : null}
+              {description && <DialogDescription className="mt-1.5">{description}</DialogDescription>}
             </div>
           </motion.div>
         </DialogHeader>
@@ -71,8 +71,8 @@ export function ReasonDialog({
               <span className="inline-flex items-center gap-2">
                 <motion.span
                   animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }}
-                  className="h-3.5 w-3.5 rounded-full border-2 border-white/35 border-t-white"
+                  transition={{ repeat: Infinity, duration: 0.7, ease: 'linear' }}
+                  className="h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white"
                 />
                 ...
               </span>
