@@ -2,7 +2,7 @@ import { Link, NavLink } from 'react-router-dom';
 import {
   Bot, User, LogOut, Globe, ChevronRight,
   Home, Newspaper, Trophy, Users, Heart, Tv, Mail, Shield, Image, MessageSquare,
-  Archive, Building2, Settings, FileText, MessageCircle,
+  Archive, Building2, Settings, FileText,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
@@ -144,7 +144,6 @@ const Sidebar = () => {
           <>
             <div className="my-3 border-t border-stone-200 dark:border-stone-800" />
             <SidebarNavLink to="/profile" icon={User} label={t('nav.profile')} collapsed={collapsed} />
-            <SidebarNavLink to="/messages" icon={MessageCircle} label={t('nav.messages', 'Messages')} collapsed={collapsed} />
             {hasTeam && (
               <SidebarNavLink to="/my-team" icon={Shield} label={t('nav.myTeam')} collapsed={collapsed} />
             )}

@@ -11,7 +11,7 @@ const Alert = React.forwardRef(({ className = '', variant = 'default', ...props 
   <div
     ref={ref}
     role="alert"
-    className={`relative w-full rounded-lg border px-4 py-3 text-sm [&>svg~*]:pl-7 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-3.5 [&>svg]:h-4 [&>svg]:w-4 ${alertVariants[variant] ?? alertVariants.default} ${className}`}
+    className={`relative w-full border-2 px-4 py-3 text-sm [&>svg~*]:pl-7 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-3.5 [&>svg]:h-4 [&>svg]:w-4 ${alertVariants[variant] ?? alertVariants.default} ${className}`}
     {...props}
   />
 ));

@@ -4,7 +4,7 @@ import { sanitizeUser } from '../utils/sanitize.js';
 const {
   User,
   Notification,
-  TeamMember,
+  TeamMembers,
   Team,
   TeamMessage,
   Post,
@@ -16,6 +16,9 @@ const {
   TeamJoinRequest,
   TeamLog,
   RobotFile,
+  Gallery,
+  Media,
+  CenterAdminRequest,
 } = db;
 
 /**
@@ -54,7 +57,7 @@ export const getMyData = async (req, res) => {
       robotFiles,
     ] = await Promise.all([
       Notification      ? Notification.findAll({ where: { user_id: userId } })      : [],
-      TeamMember        ? TeamMember.findAll({ where: { user_id: userId } })         : [],
+      TeamMembers       ? TeamMembers.findAll({ where: { user_id: userId } })        : [],
       TeamMessage       ? TeamMessage.findAll({ where: { user_id: userId } })        : [],
       Post              ? Post.findAll({ where: { author_id: userId } })             : [],
       Comment           ? Comment.findAll({ where: { author_id: userId } })          : [],
@@ -123,18 +126,22 @@ export const deleteMyAccount = async (req, res) => {
 
     // 1. Delete user-owned data that has no structural dependency
     const deletions = [];
-    if (Notification)    deletions.push(Notification.destroy({ where: { user_id: userId }, transaction }));
-    if (PostLike)        deletions.push(PostLike.destroy({ where: { user_id: userId }, transaction }));
-    if (TeamInvite)      deletions.push(TeamInvite.destroy({ where: { user_id: userId }, transaction }));
-    if (TeamJoinRequest) deletions.push(TeamJoinRequest.destroy({ where: { user_id: userId }, transaction }));
-    if (TeamMessage)     deletions.push(TeamMessage.destroy({ where: { user_id: userId }, transaction }));
-    if (TeamLog)         deletions.push(TeamLog.destroy({ where: { author_id: userId }, transaction }));
-    if (RobotFile)       deletions.push(RobotFile.destroy({ where: { uploaded_by: userId }, transaction }));
+    if (Notification)       deletions.push(Notification.destroy({ where: { user_id: userId }, transaction }));
+    if (PostLike)           deletions.push(PostLike.destroy({ where: { user_id: userId }, transaction }));
+    if (TeamInvite)         deletions.push(TeamInvite.destroy({ where: { user_id: userId }, transaction }));
+    if (TeamJoinRequest)    deletions.push(TeamJoinRequest.destroy({ where: { user_id: userId }, transaction }));
+    if (TeamMessage)        deletions.push(TeamMessage.destroy({ where: { user_id: userId }, transaction }));
+    if (TeamLog)            deletions.push(TeamLog.destroy({ where: { author_id: userId }, transaction }));
+    if (RobotFile)          deletions.push(RobotFile.destroy({ where: { uploaded_by: userId }, transaction }));
+    if (Comment)            deletions.push(Comment.destroy({ where: { author_id: userId }, transaction }));
+    if (Gallery)            deletions.push(Gallery.destroy({ where: { uploaded_by: userId }, transaction }));
+    if (Media)              deletions.push(Media.destroy({ where: { uploaded_by: userId }, transaction }));
+    if (CenterAdminRequest) deletions.push(CenterAdminRequest.destroy({ where: { user_id: userId }, transaction }));
     await Promise.all(deletions);
 
     // 2. Remove team memberships (keep team structures)
-    if (TeamMember) {
-      await TeamMember.destroy({ where: { user_id: userId }, transaction });
+    if (TeamMembers) {
+      await TeamMembers.destroy({ where: { user_id: userId }, transaction });
     }
 
     // 3. Anonymize the user record instead of hard-deleting to keep referential integrity

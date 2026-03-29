@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 // import { useAuthContext } from '../../context/AuthContext';
 import { RefreshCw, Video, FileText, Upload, Activity, BarChart2, Eye, EyeOff, Download, Trash2 } from 'lucide-react';
 import { apiRequest, resolveMediaUrl } from '../../lib/apiClient';
@@ -10,6 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '../ui/badge';
 
 const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('overview');
   const [streamData, setStreamData] = useState({ title: '', description: '', stream_url: '' });
   const [robotFiles, setRobotFiles] = useState([]);
@@ -143,20 +145,20 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
   };
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: Activity },
-    { id: 'stream', label: 'Stream', icon: Video },
-    { id: 'files', label: 'Files', icon: Upload },
-    { id: 'logs', label: 'Logs', icon: FileText },
-    { id: 'stats', label: 'Stats', icon: BarChart2 },
+    { id: 'overview', label: t('team.dashboard.tabOverview'), icon: Activity },
+    { id: 'stream', label: t('team.dashboard.tabStream'), icon: Video },
+    { id: 'files', label: t('team.dashboard.tabFiles'), icon: Upload },
+    { id: 'logs', label: t('team.dashboard.tabLogs'), icon: FileText },
+    { id: 'stats', label: t('team.dashboard.tabStats'), icon: BarChart2 },
   ];
 
   return (
     <div className="space-y-6 mt-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Team Dashboard</h2>
+        <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('team.dashboard.title')}</h2>
         <Button variant="outline" size="sm" onClick={refreshData} className="gap-2">
           <RefreshCw className="h-4 w-4" />
-          Refresh
+          {t('team.dashboard.refresh')}
         </Button>
       </div>
 
@@ -179,12 +181,12 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
       </div>
 
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg border border-red-200 dark:border-red-800">
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 border-2 border-red-200 dark:border-red-800">
           {error}
         </div>
       )}
       {success && (
-        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-4 rounded-lg border border-green-200 dark:border-green-800">
+        <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-4 border-2 border-green-200 dark:border-green-800">
           {success}
         </div>
       )}
@@ -195,9 +197,9 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
           <div className="space-y-6">
             <Card className="bg-blue-50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-800">
               <CardHeader>
-                <CardTitle className="text-blue-900 dark:text-blue-100">Welcome to the Competition Dashboard</CardTitle>
+                <CardTitle className="text-blue-900 dark:text-blue-100">{t('team.dashboard.welcomeTitle')}</CardTitle>
                 <CardDescription className="text-blue-700 dark:text-blue-300">
-                  Manage your team's participation, upload robot files, log your progress, and stream your matches live.
+                  {t('team.dashboard.welcomeDesc')}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -205,36 +207,36 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
+                  <CardTitle>{t('team.dashboard.quickActions')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <Button variant="outline" className="w-full justify-start gap-2" onClick={() => setActiveTab('stream')}>
-                    <Video className="h-4 w-4" /> Start Live Stream
+                    <Video className="h-4 w-4" /> {t('team.dashboard.startLiveStream')}
                   </Button>
                   <Button variant="outline" className="w-full justify-start gap-2" onClick={() => setActiveTab('files')}>
-                    <Upload className="h-4 w-4" /> Upload Robot Files
+                    <Upload className="h-4 w-4" /> {t('team.dashboard.uploadRobotFiles')}
                   </Button>
                   <Button variant="outline" className="w-full justify-start gap-2" onClick={() => setActiveTab('logs')}>
-                    <FileText className="h-4 w-4" /> Add Log Entry
+                    <FileText className="h-4 w-4" /> {t('team.dashboard.addLogEntry')}
                   </Button>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Status Summary</CardTitle>
+                  <CardTitle>{t('team.dashboard.statusSummary')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-stone-500 dark:text-stone-400">Files Uploaded</span>
+                    <span className="text-stone-500 dark:text-stone-400">{t('team.dashboard.filesUploaded')}</span>
                     <Badge variant="secondary">{robotFiles.length}</Badge>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-stone-500 dark:text-stone-400">Log Entries</span>
+                    <span className="text-stone-500 dark:text-stone-400">{t('team.dashboard.logEntries')}</span>
                     <Badge variant="secondary">{logs.length}</Badge>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-stone-500 dark:text-stone-400">Public Files</span>
+                    <span className="text-stone-500 dark:text-stone-400">{t('team.dashboard.publicFiles')}</span>
                     <Badge variant="secondary">{robotFiles.filter(f => f.is_public).length}</Badge>
                   </div>
                 </CardContent>
@@ -246,8 +248,8 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
         {activeTab === 'stream' && (
           <Card>
             <CardHeader>
-              <CardTitle>Live Stream Configuration</CardTitle>
-              <CardDescription>Set up your stream details to go live.</CardDescription>
+              <CardTitle>{t('team.dashboard.streamConfigTitle')}</CardTitle>
+              <CardDescription>{t('team.dashboard.streamConfigDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleStartStream} className="space-y-4">
@@ -311,7 +313,7 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
                     <Input
                       id="file-desc"
                       type="text"
-                      placeholder="File description"
+                      placeholder={t('team.competition.fileDescriptionPlaceholder')}
                       value={fileDescription}
                       onChange={(e) => setFileDescription(e.target.value)}
                     />
@@ -357,7 +359,7 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
                 </Card>
               ))}
               {robotFiles.length === 0 && (
-                <div className="text-center py-8 text-stone-500">No files uploaded yet.</div>
+                <div className="text-center py-8 text-stone-500">{t('team.competition.noFiles')}</div>
               )}
             </div>
           </div>
@@ -374,7 +376,7 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
                   <Textarea
                     value={newLog}
                     onChange={(e) => setNewLog(e.target.value)}
-                    placeholder="Write your log entry here..."
+                    placeholder={t('team.competition.logPlaceholder')}
                     rows={3}
                     required
                   />
@@ -405,7 +407,7 @@ const TeamCompetitionDashboard = ({ competitionId, teamId }) => {
                 </div>
               ))}
               {logs.length === 0 && (
-                <div className="text-center py-8 text-stone-500">No logs yet.</div>
+                <div className="text-center py-8 text-stone-500">{t('team.competition.noLogs')}</div>
               )}
             </div>
           </div>

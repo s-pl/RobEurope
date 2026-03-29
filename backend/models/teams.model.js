@@ -142,6 +142,24 @@ export default function defineTeamsModel(sequelize, DataTypes) {
                 as: 'competition'
             });
         }
+        if (models.Registration) {
+            Team.hasMany(models.Registration, {
+                foreignKey: 'team_id',
+                as: 'registrations'
+            });
+        }
+        if (models.TeamMembers) {
+            Team.hasMany(models.TeamMembers, {
+                foreignKey: 'team_id',
+                as: 'TeamMembers'
+            });
+        }
+        if (models.Country) {
+            Team.belongsTo(models.Country, {
+                foreignKey: 'country_id',
+                as: 'Country'
+            });
+        }
     };
 
     return Team;

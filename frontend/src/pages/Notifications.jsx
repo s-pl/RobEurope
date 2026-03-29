@@ -9,19 +9,19 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 
 const ICON_MAP = {
-  team_invite: Users,
-  competition: Trophy,
-  info: Info,
-  default: Bell,
+  team_invite: { Icon: Users,  bg: 'bg-violet-100 dark:bg-violet-900/30', color: 'text-violet-600 dark:text-violet-400' },
+  competition: { Icon: Trophy, bg: 'bg-amber-100 dark:bg-amber-900/30',   color: 'text-amber-600 dark:text-amber-400' },
+  info:        { Icon: Info,   bg: 'bg-cyan-100 dark:bg-cyan-900/30',     color: 'text-cyan-600 dark:text-cyan-400' },
+  default:     { Icon: Bell,   bg: 'bg-stone-100 dark:bg-stone-800',      color: 'text-stone-500 dark:text-stone-400' },
 };
 
 const PAGE_SIZE = 15;
 
 const NotificationIcon = ({ type }) => {
-  const Icon = ICON_MAP[type] || ICON_MAP.default;
+  const { Icon, bg, color } = ICON_MAP[type] || ICON_MAP.default;
   return (
-    <div className="w-9 h-9 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center flex-shrink-0">
-      <Icon className="h-4 w-4 text-stone-500 dark:text-stone-400" />
+    <div className={`w-9 h-9 rounded-full ${bg} flex items-center justify-center flex-shrink-0`}>
+      <Icon className={`h-4 w-4 ${color}`} />
     </div>
   );
 };
@@ -263,9 +263,13 @@ const Notifications = () => {
                     if (e.key === 'Enter' && !notification.read)
                       markAsRead(notification.id);
                   }}
-                  className={`group flex items-start gap-3 py-3.5 px-3 -mx-3 rounded-lg cursor-pointer transition-colors border-l-2 ${
+                  className={`group flex items-start gap-3 py-3.5 px-3 -mx-3 cursor-pointer transition-colors border-l-2 ${
                     !notification.read
-                      ? 'border-l-blue-600 bg-blue-50/50 dark:bg-blue-950/20'
+                      ? notification.type === 'team_invite'
+                        ? 'border-l-violet-500 bg-violet-50/50 dark:bg-violet-950/20'
+                        : notification.type === 'competition'
+                        ? 'border-l-amber-500 bg-amber-50/50 dark:bg-amber-950/20'
+                        : 'border-l-cyan-500 bg-cyan-50/50 dark:bg-cyan-950/20'
                       : 'border-l-transparent hover:bg-stone-50 dark:hover:bg-stone-800/50'
                   }`}
                 >
@@ -355,7 +359,10 @@ const Notifications = () => {
 
                     {/* Read indicator */}
                     {!notification.read && (
-                      <span className="inline-block w-2 h-2 rounded-full bg-blue-600 absolute top-4 right-3 sm:hidden" />
+                      <span className={`inline-block w-2 h-2 rounded-full absolute top-4 right-3 sm:hidden ${
+                        notification.type === 'team_invite' ? 'bg-violet-500' :
+                        notification.type === 'competition' ? 'bg-amber-500' : 'bg-cyan-500'
+                      }`} />
                     )}
                   </div>
                 </div>

@@ -18,7 +18,12 @@ import {
 import authenticateToken from '../../middleware/auth.middleware.js';
 import { optionalAuth } from '../../middleware/auth.middleware.js';
 import { requireAnyRole } from '../../middleware/role.middleware.js';
-import { uploadFile } from '../../middleware/upload.middleware.js';
+import { uploadFile, handleUploadErrors } from '../../middleware/upload.middleware.js';
+
+const uploadFileWithErrorHandling = (field) => [
+  uploadFile.single(field),
+  handleUploadErrors,
+];
 
 const router = express.Router();
 
@@ -85,7 +90,7 @@ router.use(authenticateToken);
  *     security:
  *       - sessionAuth: []
  */
-router.post('/', requireAdminRole, uploadFile.single('file'), createArchive);
+router.post('/', requireAdminRole, ...uploadFileWithErrorHandling('file'), createArchive);
 
 /**
  * @swagger
@@ -107,7 +112,7 @@ router.post('/reorder', requireAdminRole, reorderArchives);
  *     security:
  *       - sessionAuth: []
  */
-router.put('/:id', requireAdminRole, uploadFile.single('file'), updateArchive);
+router.put('/:id', requireAdminRole, ...uploadFileWithErrorHandling('file'), updateArchive);
 
 /**
  * @swagger

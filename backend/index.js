@@ -304,6 +304,7 @@ process.on('uncaughtException', (err) => {
 
 // Start background schedulers
 try { startSchedulers(); } catch (_) {}
+
 process.on('unhandledRejection', (reason, promise) => {
   // Log detailed rejection reason. If it's an Error include stack.
   if (reason instanceof Error) {

@@ -8,7 +8,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { CountrySelect } from '../components/ui/CountrySelect';
 import { useAuth } from '../hooks/useAuth';
 import { useApi } from '../hooks/useApi';
 import { resolveMediaUrl } from '../lib/apiClient';
@@ -30,7 +30,7 @@ const CopyButton = memo(({ text }) => {
     try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch {}
   };
   return (
-    <button type="button" onClick={copy} className="rounded-lg p-1 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300" title="Copy">
+    <button type="button" onClick={copy} className="p-1 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300" title="Copy">
       <AnimatePresence mode="wait">
         {copied ? (
           <motion.span key="ok" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} transition={{ duration: 0.15 }}>
@@ -74,7 +74,7 @@ const AvatarUpload = memo(({ photoUrl, initials, uploading, onUpload, size = 'lg
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
     >
-      <div className={`${sizeClasses} overflow-hidden rounded-2xl border-2 transition-all duration-200 ${dragOver ? 'border-blue-400 bg-blue-50 shadow-lg shadow-blue-100 dark:border-blue-500 dark:bg-blue-950/20 dark:shadow-blue-950/30' : 'border-stone-200 bg-stone-100 dark:border-stone-700 dark:bg-stone-800'} flex items-center justify-center`}>
+      <div className={`${sizeClasses} overflow-hidden border-2 transition-all duration-200 ${dragOver ? 'border-blue-400 bg-blue-50 dark:border-blue-500 dark:bg-blue-950/20' : 'border-stone-200 bg-stone-100 dark:border-stone-700 dark:bg-stone-800'} flex items-center justify-center`}>
         {uploading ? (
           <Loader2 className="h-8 w-8 animate-spin text-stone-400" />
         ) : photoUrl ? (
@@ -88,7 +88,7 @@ const AvatarUpload = memo(({ photoUrl, initials, uploading, onUpload, size = 'lg
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
-        className="absolute inset-0 flex items-center justify-center rounded-2xl bg-stone-900/0 transition-all duration-200 group-hover:bg-stone-900/50"
+        className="absolute inset-0 flex items-center justify-center bg-stone-900/0 transition-all duration-200 group-hover:bg-stone-900/50"
       >
         <span className="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
           {dragOver ? <ImagePlus className="h-7 w-7 text-white" /> : <Camera className="h-7 w-7 text-white" />}
@@ -122,11 +122,11 @@ const TeamCard = memo(({ member, index }) => {
     <motion.div variants={stagger.item}>
       <Link
         to={`/teams/${member.team_id}`}
-        className="group flex items-center gap-4 rounded-2xl border border-stone-200 bg-white p-4 transition-all duration-200 hover:border-blue-200 hover:shadow-md hover:shadow-blue-50 dark:border-stone-800 dark:bg-stone-950 dark:hover:border-blue-900 dark:hover:shadow-blue-950/20"
+        className="group flex items-center gap-4 border-2 border-stone-200 bg-white p-4 transition-all duration-200 hover:border-stone-900 dark:border-stone-800 dark:bg-stone-950 dark:hover:border-blue-900"
       >
-        <div className={`flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full ${colorClass}`}>
+        <div className={`flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden ${colorClass}`}>
           {member.team?.logo_url
-            ? <img src={resolveMediaUrl(member.team.logo_url)} alt="" className="h-full w-full object-cover rounded-full" />
+            ? <img src={resolveMediaUrl(member.team.logo_url)} alt="" className="h-full w-full object-cover" />
             : <span className="text-sm font-bold">{teamInitials}</span>
           }
         </div>
@@ -134,7 +134,7 @@ const TeamCard = memo(({ member, index }) => {
           <p className="text-sm font-semibold text-stone-900 dark:text-stone-50 truncate">{teamName}</p>
           <p className="text-xs text-stone-500 dark:text-stone-400 capitalize">{member.role}</p>
         </div>
-        <div className="rounded-lg bg-stone-50 p-2 text-stone-400 transition-colors group-hover:bg-blue-50 group-hover:text-blue-500 dark:bg-stone-900 dark:group-hover:bg-blue-950/30">
+        <div className="bg-stone-50 p-2 text-stone-400 transition-colors group-hover:bg-blue-50 group-hover:text-blue-500 dark:bg-stone-900 dark:group-hover:bg-blue-950/30">
           <Trophy className="h-4 w-4" />
         </div>
       </Link>
@@ -150,9 +150,9 @@ const PillTab = memo(({ active, icon: Icon, label, onClick }) => (
   <button
     type="button"
     onClick={onClick}
-    className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-200 ${
       active
-        ? 'bg-stone-900 text-white shadow-sm dark:bg-stone-50 dark:text-stone-900'
+        ? 'bg-stone-900 text-white dark:bg-stone-50 dark:text-stone-900'
         : 'text-stone-500 hover:bg-stone-100 hover:text-stone-700 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-200'
     }`}
   >
@@ -184,9 +184,11 @@ const Profile = () => {
   const [exportingData, setExportingData] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
 
-  /* -- populate form when user loads -- */
+  /* -- populate form once when user first loads -- */
+  const formInitialized = useRef(false);
   useEffect(() => {
-    if (user) {
+    if (user && !formInitialized.current) {
+      formInitialized.current = true;
       setForm({
         first_name: user.first_name || '',
         last_name: user.last_name || '',
@@ -219,12 +221,13 @@ const Profile = () => {
   }, [api]);
 
   /* -- fetch teams -- */
+  const userId = user?.id;
   useEffect(() => {
-    if (!user) return;
-    api(`/team-members?user_id=${user.id}`)
+    if (!userId) return;
+    api(`/team-members?user_id=${userId}`)
       .then(members => setUserTeams(members.filter(m => !m.left_at)))
       .catch(() => {});
-  }, [api, user]);
+  }, [api, userId]);
 
   /* -- derived -- */
   const initials = useMemo(() => `${user?.first_name?.[0] || ''}${user?.last_name?.[0] || ''}`.toUpperCase() || 'RE', [user]);
@@ -299,7 +302,7 @@ const Profile = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className={`fixed top-4 right-4 z-50 flex items-center gap-2.5 rounded-2xl border px-5 py-3.5 text-sm font-medium shadow-xl backdrop-blur-sm ${
+            className={`fixed top-4 right-4 z-50 flex items-center gap-2.5 border-2 px-5 py-3.5 text-sm font-medium backdrop-blur-sm ${
               feedback.type === 'error'
                 ? 'border-red-200 bg-red-50/95 text-red-700 dark:border-red-900 dark:bg-red-950/95 dark:text-red-400'
                 : 'border-blue-200 bg-blue-50/95 text-blue-700 dark:border-blue-900 dark:bg-blue-950/95 dark:text-blue-400'
@@ -323,7 +326,7 @@ const Profile = () => {
           className="w-full shrink-0 lg:sticky lg:top-6 lg:w-80 lg:self-start"
         >
           {/* Mobile: horizontal card / Desktop: vertical card */}
-          <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm dark:border-stone-800 dark:bg-stone-950">
+          <div className="border-2 border-stone-200 bg-white p-6 dark:border-stone-800 dark:bg-stone-950">
             {/* Avatar + identity */}
             <div className="flex flex-row items-center gap-5 lg:flex-col lg:items-center lg:text-center">
               <AvatarUpload
@@ -406,12 +409,12 @@ const Profile = () => {
 
             {/* Quick stats */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-stone-50 p-3 text-center dark:bg-stone-900">
+              <div className="bg-stone-50 p-3 text-center dark:bg-stone-900">
                 <Users className="mx-auto mb-1 h-4 w-4 text-stone-400 dark:text-stone-500" />
                 <p className="text-lg font-bold text-stone-900 dark:text-stone-50">{userTeams.length}</p>
                 <p className="text-[11px] text-stone-500 dark:text-stone-400">{t('teams.title')}</p>
               </div>
-              <div className="rounded-xl bg-stone-50 p-3 text-center dark:bg-stone-900">
+              <div className="bg-stone-50 p-3 text-center dark:bg-stone-900">
                 <Calendar className="mx-auto mb-1 h-4 w-4 text-stone-400 dark:text-stone-500" />
                 <p className="text-lg font-bold text-stone-900 dark:text-stone-50">
                   {new Date(user.createdAt || user.created_at || Date.now()).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
@@ -444,7 +447,7 @@ const Profile = () => {
           className="min-w-0 flex-1"
         >
           {/* Pill-style tabs */}
-          <div className="mb-6 flex gap-2 rounded-2xl border border-stone-200 bg-stone-50 p-1.5 dark:border-stone-800 dark:bg-stone-900">
+          <div className="mb-6 flex gap-2 border-2 border-stone-200 bg-stone-50 p-1.5 dark:border-stone-800 dark:bg-stone-900">
             {sections.map(s => (
               <PillTab
                 key={s.key}
@@ -468,7 +471,7 @@ const Profile = () => {
 
               {/* ── INFO FORM ── */}
               {activeSection === 'info' && (
-                <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm dark:border-stone-800 dark:bg-stone-950 sm:p-8">
+                <div className="border-2 border-stone-200 bg-white p-6 dark:border-stone-800 dark:bg-stone-950 sm:p-8">
                   <div className="mb-6">
                     <h2 className="font-display text-xl font-semibold tracking-tight text-stone-900 dark:text-stone-50">
                       {t('profile.personalInfo')}
@@ -517,14 +520,15 @@ const Profile = () => {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="country_id">{t('profile.country')}</Label>
-                        <Select value={form.country_id} onValueChange={(v) => handleChange({ target: { name: 'country_id', value: v } })} disabled={countriesStatus.loading}>
-                          <SelectTrigger id="country_id">
-                            <SelectValue placeholder={countriesStatus.loading ? t('general.countriesLoading') : '—'} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {countries.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.flag_emoji ? `${c.flag_emoji} ` : ''}{c.name}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <CountrySelect
+                          value={form.country_id || 'all'}
+                          onValueChange={(v) => handleChange({ target: { name: 'country_id', value: v === 'all' ? '' : v } })}
+                          countries={countries}
+                          loading={countriesStatus.loading}
+                          allLabel="—"
+                          placeholder={t('general.countriesLoading') || 'Search...'}
+                          disabled={countriesStatus.loading}
+                        />
                         {countriesStatus.error && <p className="text-xs text-red-600">{t('profile.countriesError')}</p>}
                       </div>
                     </div>
@@ -538,7 +542,7 @@ const Profile = () => {
                           name="educational_center_id"
                           value={form.educational_center_id}
                           onChange={handleChange}
-                          className="w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-sm text-stone-900 transition-colors focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+                          className="w-full border-2 border-stone-300 bg-white px-3.5 py-2.5 text-sm text-stone-900 transition-colors focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                           disabled={centersStatus.loading}
                         >
                           <option value="">{t('profile.noEducationalCenter')}</option>
@@ -567,7 +571,7 @@ const Profile = () => {
                       <Button
                         type="submit"
                         disabled={saving}
-                        className="min-w-[140px] rounded-xl bg-stone-900 text-white hover:bg-stone-800 dark:bg-stone-50 dark:text-stone-900 dark:hover:bg-stone-200"
+                        className="min-w-[140px] bg-stone-900 text-white hover:bg-stone-800 dark:bg-stone-50 dark:text-stone-900 dark:hover:bg-stone-200"
                       >
                         {saving ? (
                           <span className="flex items-center gap-2">
@@ -600,11 +604,11 @@ const Profile = () => {
                       initial={{ opacity: 0, scale: 0.97 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.3 }}
-                      className="rounded-2xl border-2 border-dashed border-stone-200 py-16 text-center dark:border-stone-800"
+                      className="border-2 border-dashed border-stone-200 py-16 text-center dark:border-stone-800"
                     >
                       <Users className="mx-auto h-12 w-12 text-stone-200 dark:text-stone-700" />
                       <p className="mt-4 text-sm text-stone-500 dark:text-stone-400">{t('myTeam.createDesc')}</p>
-                      <Button variant="outline" size="sm" asChild className="mt-5 rounded-xl">
+                      <Button variant="outline" size="sm" asChild className="mt-5">
                         <Link to="/teams">{t('teams.create')}</Link>
                       </Button>
                     </motion.div>
@@ -621,9 +625,9 @@ const Profile = () => {
                   className="space-y-6"
                 >
                   {/* Export My Data */}
-                  <motion.div variants={stagger.item} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm dark:border-stone-800 dark:bg-stone-950 sm:p-8">
+                  <motion.div variants={stagger.item} className="border-2 border-stone-200 bg-white p-6 dark:border-stone-800 dark:bg-stone-950 sm:p-8">
                     <div className="mb-4 flex items-start gap-3">
-                      <div className="rounded-xl bg-stone-100 p-2.5 dark:bg-stone-800">
+                      <div className="bg-stone-100 p-2.5 dark:bg-stone-800">
                         <Download className="h-5 w-5 text-stone-500 dark:text-stone-400" />
                       </div>
                       <div>
@@ -656,7 +660,6 @@ const Profile = () => {
                           setExportingData(false);
                         }
                       }}
-                      className="rounded-xl"
                     >
                       {exportingData ? (
                         <span className="flex items-center gap-2">
@@ -673,9 +676,9 @@ const Profile = () => {
                   </motion.div>
 
                   {/* Danger Zone - Delete Account */}
-                  <motion.div variants={stagger.item} className="rounded-2xl border-2 border-red-200 bg-red-50/50 p-6 dark:border-red-900/60 dark:bg-red-950/20 sm:p-8">
+                  <motion.div variants={stagger.item} className="border-2 border-red-200 bg-red-50/50 p-6 dark:border-red-900/60 dark:bg-red-950/20 sm:p-8">
                     <div className="mb-4 flex items-start gap-3">
-                      <div className="rounded-xl bg-red-100 p-2.5 dark:bg-red-900/40">
+                      <div className="bg-red-100 p-2.5 dark:bg-red-900/40">
                         <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
                       </div>
                       <div>
@@ -686,7 +689,7 @@ const Profile = () => {
                       </div>
                     </div>
 
-                    <div className="mb-4 rounded-xl border border-red-100 bg-white px-4 py-3 dark:border-red-900/40 dark:bg-stone-950">
+                    <div className="mb-4 border-2 border-red-100 bg-white px-4 py-3 dark:border-red-900/40 dark:bg-stone-950">
                       <p className="text-sm text-stone-600 dark:text-stone-400">
                         Account to be deleted: <span className="font-semibold text-stone-900 dark:text-stone-50">{user.email}</span>
                       </p>
@@ -714,7 +717,6 @@ const Profile = () => {
                           setDeletingAccount(false);
                         }
                       }}
-                      className="rounded-xl"
                     >
                       {deletingAccount ? (
                         <span className="flex items-center gap-2">

@@ -8,7 +8,6 @@
 
 import db from '../models/index.js';
 import { getIO } from '../utils/realtime.js';
-import { getFileInfo } from '../middleware/upload.middleware.js';
 
 const { TeamMessage, TeamMembers, User, Notification } = db;
 
@@ -109,44 +108,17 @@ export const sendMessage = async (req, res) => {
             return res.status(403).json({ error: 'Not a member of this team' });
         }
 
-        let type = 'text';
-        let fileUrl = null;
-        let attachments = [];
-
-        if (req.files && req.files.length > 0) {
-            attachments = req.files.map(file => ({
-                url: `/uploads/${file.filename}`,
-                name: file.originalname,
-                type: file.mimetype.startsWith('image/') ? 'image' : 'file',
-                mimetype: file.mimetype
-            }));
-            type = attachments[0].type; // Main type based on first file
-            fileUrl = attachments[0].url; // Backward compatibility
-        } else {
-            const fileInfo = getFileInfo(req);
-            if (fileInfo && fileInfo.url) {
-                fileUrl = fileInfo.url;
-                type = fileInfo.mimetype.startsWith('image/') ? 'image' : 'file';
-                attachments.push({
-                    url: fileUrl,
-                    name: fileInfo.originalname,
-                    type: type,
-                    mimetype: fileInfo.mimetype
-                });
-            }
-        }
-
-        if (!content && attachments.length === 0) {
-            return res.status(400).json({ error: 'Message content or file required' });
+        if (!content || !content.trim()) {
+            return res.status(400).json({ error: 'El mensaje no puede estar vacío.' });
         }
 
         const message = await TeamMessage.create({
             team_id: teamId,
             user_id: userId,
-            content,
-            type,
-            file_url: fileUrl,
-            attachments
+            content: content.trim(),
+            type: 'text',
+            file_url: null,
+            attachments: [],
         });
 
         // Fetch full message with user info
@@ -163,27 +135,26 @@ export const sendMessage = async (req, res) => {
             io.to(`team_${teamId}`).emit('team_message', fullMessage);
         }
 
-        // Create notifications for other members
+        // Notify other members (fire-and-forget)
         const members = await TeamMembers.findAll({
             where: { team_id: teamId, left_at: null }
         });
 
-        const notifications = members
+        const notificationPayloads = members
             .filter(m => m.user_id !== userId)
             .map(m => ({
                 user_id: m.user_id,
                 type: 'team_message',
                 title: 'Nuevo mensaje de equipo',
-                message: `${req.user.first_name}: ${type === 'text' ? (content.substring(0, 30) + (content.length > 30 ? '...' : '')) : 'Archivo adjunto'}`,
+                message: `${req.user.first_name}: ${content.substring(0, 30)}${content.length > 30 ? '...' : ''}`,
                 data: { team_id: teamId, message_id: message.id }
             }));
 
-        if (notifications.length > 0) {
-            await Notification.bulkCreate(notifications);
-            // Emit notifications
-            notifications.forEach(n => {
-                if (io) io.emit(`notification:${n.user_id}`, n);
-            });
+        if (notificationPayloads.length > 0) {
+            Notification.bulkCreate(notificationPayloads).then((created) => {
+                const io = getIO();
+                if (io) created.forEach((n) => io.emit(`notification:${n.user_id}`, n.toJSON()));
+            }).catch((err) => console.error('Failed to create notifications', err));
         }
 
         res.status(201).json(fullMessage);

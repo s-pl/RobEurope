@@ -47,7 +47,7 @@ const Contact = () => {
   const channelIcons = [Mail, Users, MessageSquare];
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       {/* Page header */}
       <div className="pt-2 pb-8">
         <h1 className="font-display text-3xl font-bold text-stone-900 dark:text-stone-50">
@@ -106,7 +106,7 @@ const Contact = () => {
                       onChange={handleChange}
                       required
                       placeholder={t('contact.placeholders.name')}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
+                      className="w-full px-3 py-2 text-sm border-2 border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -119,7 +119,7 @@ const Contact = () => {
                       onChange={handleChange}
                       required
                       placeholder={t('contact.placeholders.email')}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
+                      className="w-full px-3 py-2 text-sm border-2 border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
                     />
                   </div>
                 </div>
@@ -130,7 +130,7 @@ const Contact = () => {
                     name="organization"
                     value={form.organization}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
+                    className="w-full px-3 py-2 text-sm border-2 border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -142,7 +142,7 @@ const Contact = () => {
                     value={form.message}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors resize-none"
+                    className="w-full px-3 py-2 text-sm border-2 border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors resize-none"
                   />
                 </div>
 
@@ -157,7 +157,7 @@ const Contact = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium bg-stone-900 text-white hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {submitting ? (
                     <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />

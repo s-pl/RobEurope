@@ -38,7 +38,7 @@ export function ConfirmDialog({
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
-              className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 border border-red-100 dark:border-red-900/40"
+              className="mt-0.5 flex h-10 w-10 items-center justify-center bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 border-2 border-red-100 dark:border-red-900/40"
             >
               <Icon className="h-5 w-5" />
             </motion.div>
@@ -58,7 +58,7 @@ export function ConfirmDialog({
                 <motion.span
                   animate={{ rotate: 360 }}
                   transition={{ repeat: Infinity, duration: 0.7, ease: 'linear' }}
-                  className="h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white"
+                  className="h-3.5 w-3.5 border-2 border-white/30 border-t-white"
                 />
                 ...
               </span>

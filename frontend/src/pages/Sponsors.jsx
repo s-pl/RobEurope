@@ -101,7 +101,7 @@ const Sponsors = () => {
     setDialogOpen(true);
   };
 
-  const inputClass = 'w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50';
+  const inputClass = 'w-full border-2 border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50';
 
   return (
     <div className="space-y-10">
@@ -111,7 +111,7 @@ const Sponsors = () => {
         action={isAdmin && (
           <button
             onClick={openCreateDialog}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200"
+            className="inline-flex items-center gap-2 bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-800 transition-colors duration-200"
           >
             <Plus className="h-4 w-4" />
             {t('sponsors.create')}
@@ -124,7 +124,7 @@ const Sponsors = () => {
         <div className="grid gap-8 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="flex flex-col items-center gap-3">
-              <Skeleton className="h-28 w-full rounded-xl" />
+              <Skeleton className="h-28 w-full" />
               <Skeleton className="h-4 w-24" />
             </div>
           ))}
@@ -143,7 +143,7 @@ const Sponsors = () => {
           {sponsors.map((sponsor) => (
             <div key={sponsor.id} className="group flex flex-col items-center text-center">
               {/* Logo box */}
-              <div className="relative w-full aspect-[4/3] rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 flex items-center justify-center p-4 overflow-hidden">
+              <div className="relative w-full aspect-[4/3] border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 flex items-center justify-center p-4 overflow-hidden">
                 {sponsor.logo_url ? (
                   <img
                     src={sponsor.logo_url}
@@ -162,7 +162,7 @@ const Sponsors = () => {
                     <button
                       type="button"
                       onClick={() => handleEdit(sponsor)}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700 transition-colors duration-200"
+                      className="inline-flex h-9 w-9 items-center justify-center bg-stone-100 text-stone-700 hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700 transition-colors duration-200"
                       aria-label={t('sponsors.edit')}
                     >
                       <Edit className="h-4 w-4" />
@@ -170,7 +170,7 @@ const Sponsors = () => {
                     <button
                       type="button"
                       onClick={() => handleDelete(sponsor.id)}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 transition-colors duration-200"
+                      className="inline-flex h-9 w-9 items-center justify-center bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 transition-colors duration-200"
                       aria-label={t('actions.delete')}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -214,7 +214,7 @@ const Sponsors = () => {
           {isAdmin && (
             <button
               onClick={openCreateDialog}
-              className="mt-2 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200"
+              className="mt-2 inline-flex items-center gap-2 bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-800 transition-colors duration-200"
             >
               <Plus className="h-4 w-4" />
               {t('sponsors.create')}
@@ -225,7 +225,7 @@ const Sponsors = () => {
 
       {/* Create / Edit dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] rounded-xl border-stone-200 dark:border-stone-700">
+        <DialogContent className="sm:max-w-[425px] border-stone-200 dark:border-stone-700">
           <DialogHeader>
             <DialogTitle className="font-display text-stone-900 dark:text-stone-50">
               {editingSponsor ? t('sponsors.edit') : t('sponsors.create')}
@@ -283,13 +283,13 @@ const Sponsors = () => {
               <button
                 type="button"
                 onClick={() => setDialogOpen(false)}
-                className="inline-flex items-center justify-center rounded-xl border border-stone-200 px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50 transition-colors duration-200 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800"
+                className="inline-flex items-center justify-center border-2 border-stone-200 px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50 transition-colors duration-200 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800"
               >
                 {t('common.cancel')}
               </button>
               <button
                 type="submit"
-                className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200"
+                className="inline-flex items-center justify-center bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-800 transition-colors duration-200"
               >
                 {editingSponsor ? t('common.save') : t('common.create') || 'Crear'}
               </button>

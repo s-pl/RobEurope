@@ -253,8 +253,8 @@ export const getArchiveById = async (req, res) => {
  */
 export const createArchive = async (req, res) => {
   try {
-    if (!req.user || !isSuperAdmin(req.user)) {
-      return res.status(403).json({ error: 'Solo el administrador general puede crear archivos' });
+    if (!req.user || !isAdmin(req.user)) {
+      return res.status(403).json({ error: 'Se requieren permisos de administrador' });
     }
 
     const {

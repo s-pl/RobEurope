@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useTeams } from '../hooks/useTeams';
 
 function useQuery() {
@@ -8,27 +9,28 @@ function useQuery() {
 }
 
 const AcceptInvite = () => {
+  const { t } = useTranslation();
   const q = useQuery();
   const token = q.get('token');
   const nav = useNavigate();
   const { acceptInvite } = useTeams();
-  const [msg, setMsg] = useState('Procesando invitación…');
+  const [msg, setMsg] = useState(t('invite.processing'));
 
   useEffect(() => {
     const run = async () => {
       try {
-        if (!token) throw new Error('Token no encontrado');
+        if (!token) throw new Error(t('invite.tokenNotFound'));
         await acceptInvite(token);
-        setMsg('Invitación aceptada');
+        setMsg(t('invite.accepted'));
         setTimeout(() => nav('/teams', { replace: true }), 1200);
       } catch (e) {
-        setMsg(e.message || 'No se pudo aceptar la invitación');
+        setMsg(e.message || t('invite.error'));
       }
     };
     run();
-  }, [acceptInvite, nav, token]);
+  }, [acceptInvite, nav, t, token]);
 
-  return <div className="rounded-xl border border-stone-200 bg-white p-4 text-sm text-stone-700">{msg}</div>;
+  return <div className="border-2 border-stone-200 bg-white p-4 text-sm text-stone-700">{msg}</div>;
 };
 
 export default AcceptInvite;

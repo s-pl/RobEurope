@@ -33,16 +33,16 @@ const Streams = () => {
   }, [streams, t]);
 
   const statusConfig = {
-    live: { dot: 'bg-green-500', label: t('streams.status.live'), pulse: true },
-    offline: { dot: 'bg-stone-400', label: t('streams.status.offline'), pulse: false },
-    scheduled: { dot: 'bg-yellow-500', label: t('streams.status.scheduled'), pulse: false },
+    live:      { dot: 'bg-cyan-500',   label: t('streams.status.live'),      pulse: true },
+    offline:   { dot: 'bg-stone-400',  label: t('streams.status.offline'),   pulse: false },
+    scheduled: { dot: 'bg-amber-500',  label: t('streams.status.scheduled'), pulse: false },
   };
 
   const getStatus = (status) => statusConfig[status] || statusConfig.offline;
 
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="pt-2 pb-8">
           <div className="h-8 w-48 bg-stone-100 dark:bg-stone-800 rounded animate-pulse mb-2" />
           <div className="h-4 w-72 bg-stone-100 dark:bg-stone-800 rounded animate-pulse" />
@@ -61,14 +61,14 @@ const Streams = () => {
 
   if (error) {
     return (
-      <div className="max-w-3xl mx-auto pt-2">
+      <div className="max-w-4xl mx-auto pt-2">
         <p className="text-center text-red-600 dark:text-red-400 py-12">{t('streams.error')} {error}</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       {/* Page header */}
       <div className="pt-2 pb-8">
         <h1 className="font-display text-3xl font-bold text-stone-900 dark:text-stone-50">
@@ -156,7 +156,7 @@ const Streams = () => {
                               href={stream.stream_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 transition-colors"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 transition-colors"
                             >
                               <Eye className="w-3.5 h-3.5" />
                               {t('streams.watch')}
@@ -165,7 +165,7 @@ const Streams = () => {
                             <span className="text-xs text-stone-400">{t('streams.status.offline')}</span>
                           )
                         ) : (
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg text-stone-400 bg-stone-100 dark:bg-stone-800 dark:text-stone-500">
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-stone-400 bg-stone-100 dark:bg-stone-800 dark:text-stone-500">
                             <Lock className="w-3 h-3" />
                             {t('streams.registerToWatch') || 'Register to watch'}
                           </div>

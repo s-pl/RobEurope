@@ -4,7 +4,7 @@ import { cn } from '../../lib/utils';
 const Card = ({ className, ...props }) => (
   <div
     className={cn(
-      'rounded-xl border border-stone-200 bg-white p-6 dark:border-stone-800 dark:bg-stone-900',
+      'border-2 border-stone-200 bg-white p-6 dark:border-stone-800 dark:bg-stone-900 transition-colors duration-100 hover:border-stone-900 dark:hover:border-stone-50',
       className
     )}
     {...props}

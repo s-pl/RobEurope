@@ -164,7 +164,7 @@ const EducationalCenters = () => {
         rejected: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
     };
 
-    const inputClass = 'w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50';
+    const inputClass = 'w-full border-2 border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50';
 
     return (
         <div className="space-y-10">
@@ -174,9 +174,9 @@ const EducationalCenters = () => {
                 action={isAuthenticated && (
                     <button
                         onClick={() => setShowCreateForm((v) => !v)}
-                        className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors duration-200 ${showCreateForm
-                            ? 'border border-stone-200 text-stone-700 hover:bg-stone-50 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors duration-200 ${showCreateForm
+                            ? 'border-2 border-stone-200 text-stone-700 hover:bg-stone-50 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800'
+                            : 'bg-stone-900 text-white hover:bg-stone-800'
                         }`}
                     >
                         {showCreateForm ? (
@@ -197,7 +197,7 @@ const EducationalCenters = () => {
             {/* Inline filter bar */}
             <div className="flex flex-wrap items-center gap-3">
                 <Select value={selectedCountry || 'all'} onValueChange={(v) => setSelectedCountry(v === 'all' ? '' : v)}>
-                    <SelectTrigger className="w-[180px] rounded-xl border-stone-200 dark:border-stone-700">
+                    <SelectTrigger className="w-[180px] border-stone-200 dark:border-stone-700">
                         <SelectValue placeholder={t('educationalCenters.filters.countryAll')} />
                     </SelectTrigger>
                     <SelectContent>
@@ -210,7 +210,7 @@ const EducationalCenters = () => {
 
                 {isAdmin && (
                     <Select value={selectedStatus || 'all'} onValueChange={(v) => setSelectedStatus(v === 'all' ? '' : v)}>
-                        <SelectTrigger className="w-[160px] rounded-xl border-stone-200 dark:border-stone-700">
+                        <SelectTrigger className="w-[160px] border-stone-200 dark:border-stone-700">
                             <SelectValue placeholder={t('educationalCenters.filters.statusAll')} />
                         </SelectTrigger>
                         <SelectContent>
@@ -229,7 +229,7 @@ const EducationalCenters = () => {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder={t('common.search') || 'Buscar...'}
-                        className="w-full rounded-xl border border-stone-200 bg-white pl-9 pr-3 py-2 text-sm text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50"
+                        className="w-full border-2 border-stone-200 bg-white pl-9 pr-3 py-2 text-sm text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50"
                     />
                 </div>
             </div>
@@ -243,7 +243,7 @@ const EducationalCenters = () => {
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.25 }}
                         onSubmit={handleCreate}
-                        className="rounded-xl border border-stone-200 bg-white p-5 sm:p-6 dark:border-stone-700 dark:bg-stone-900"
+                        className="border-2 border-stone-200 bg-white p-5 sm:p-6 dark:border-stone-700 dark:bg-stone-900"
                     >
                         <h2 className="font-display text-lg font-semibold text-stone-900 dark:text-stone-50 mb-5">
                             {t('educationalCenters.actions.create')}
@@ -319,7 +319,7 @@ const EducationalCenters = () => {
                                 <input
                                     type="file"
                                     accept="image/*"
-                                    className="block w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 file:mr-3 file:rounded-lg file:border-0 file:bg-stone-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-stone-900 hover:file:bg-stone-200 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50 dark:file:bg-stone-800 dark:file:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                                    className="block w-full border-2 border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 file:mr-3 file:border-0 file:bg-stone-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-stone-900 hover:file:bg-stone-200 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50 dark:file:bg-stone-800 dark:file:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                                     onChange={(ev) => setForm((p) => ({ ...p, logo: ev.target.files?.[0] || null }))}
                                 />
                             </div>
@@ -329,7 +329,7 @@ const EducationalCenters = () => {
                             <button
                                 type="submit"
                                 disabled={createStatus.loading}
-                                className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+                                className="inline-flex items-center justify-center bg-stone-900 px-5 py-2 text-sm font-medium text-white hover:bg-stone-800 transition-colors duration-200 disabled:opacity-50"
                             >
                                 {createStatus.loading ? t('common.loading') : t('actions.save')}
                             </button>
@@ -349,7 +349,7 @@ const EducationalCenters = () => {
                 <div className="divide-y divide-stone-200 dark:divide-stone-800">
                     {[...Array(6)].map((_, i) => (
                         <div key={i} className="flex items-center gap-4 py-4">
-                            <Skeleton className="h-12 w-12 rounded-lg shrink-0" />
+                            <Skeleton className="h-12 w-12 shrink-0" />
                             <div className="flex-1 space-y-2">
                                 <Skeleton className="h-4 w-48" />
                                 <Skeleton className="h-3 w-32" />
@@ -389,10 +389,10 @@ const EducationalCenters = () => {
                                         <img
                                             src={resolveMediaUrl(item.logo_url)}
                                             alt={item.name}
-                                            className="h-12 w-12 rounded-lg object-cover shrink-0 border border-stone-200 dark:border-stone-700"
+                                            className="h-12 w-12 object-cover shrink-0 border-2 border-stone-200 dark:border-stone-700"
                                         />
                                     ) : (
-                                        <div className="h-12 w-12 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0">
+                                        <div className="h-12 w-12 bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0">
                                             <Building2 className="h-6 w-6 text-stone-400" />
                                         </div>
                                     )}
@@ -434,14 +434,14 @@ const EducationalCenters = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => handleApprove(item.id)}
-                                                className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors duration-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
+                                                className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors duration-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
                                             >
                                                 {t('educationalCenters.actions.approve')}
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => handleReject(item.id)}
-                                                className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium bg-red-50 text-red-700 hover:bg-red-100 transition-colors duration-200 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40"
+                                                className="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-red-50 text-red-700 hover:bg-red-100 transition-colors duration-200 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40"
                                             >
                                                 {t('educationalCenters.actions.reject')}
                                             </button>

@@ -71,7 +71,25 @@ const resources = {
         manageArchives: 'Gestionar Archivos',
         managePosts: 'Gestionar Posts',
         adminRequests: 'Solicitudes Admin',
-        notifications: 'Notificaciones'
+        notifications: 'Notificaciones',
+        robeuropeHome: 'RobEurope – Inicio',
+        language: 'Idioma',
+        languageCycleHint: 'Clic para cambiar ES / EN / DE',
+        adminLabel: 'Admin',
+        homeDesc: 'Página principal',
+        competitionsDesc: 'Competiciones activas',
+        teamsDesc: 'Equipos registrados',
+        postsDesc: 'Noticias y actualizaciones',
+        streamsDesc: 'Retransmisiones en vivo',
+        galleryDesc: 'Galería de fotos',
+        archivesDesc: 'Contenido archivado',
+        educationalCentersDesc: 'Centros educativos',
+        sponsorsDesc: 'Nuestros patrocinadores',
+        contactDesc: 'Contacta con nosotros',
+        feedbackDesc: 'Comparte tu opinión',
+        profileDesc: 'Tu perfil de usuario',
+        myTeamDesc: 'Gestión de tu equipo',
+        loginDesc: 'Iniciar sesión'
       },
       notifications: {
         title: 'Notificaciones',
@@ -109,6 +127,11 @@ const resources = {
         apply: 'Aplicar'
       },
       footer: {
+        tagline: 'Plataforma de robótica europea para equipos, competiciones y comunidad.',
+        explore: 'Explorar',
+        info: 'Información',
+        centers: 'Centros',
+        madeWith: 'Hecho con ♥ para la robótica',
         description:
           'RobEurope ofrece la mejor experiencia en robótica. Trabajamos con verdaderos profesionales —los mejores en su campo— para llevar innovación y excelencia a cada proyecto.',
         projects: 'PROYECTOS',
@@ -148,7 +171,8 @@ const resources = {
         delete: 'Eliminar',
         deleting: 'Eliminando...',
         seeMore: 'Ver más',
-        seeLess: 'Ver menos'
+        seeLess: 'Ver menos',
+        loginForFavorites: 'Inicia sesión para guardar favoritos',
       },
       archives: {
         title: 'Archivo de Información',
@@ -295,6 +319,24 @@ const resources = {
         label: 'Estado'
       },
       admin: {
+        layout: {
+          title: 'Admin Panel',
+          logout: 'Cerrar sesión',
+          expand: 'Expandir',
+          collapse: 'Contraer',
+          nav: {
+            dashboard: 'Panel',
+            users: 'Usuarios',
+            teams: 'Equipos',
+            competitions: 'Competiciones',
+            registrations: 'Inscripciones',
+            posts: 'Publicaciones',
+            centers: 'Centros',
+            archives: 'Archivos',
+            requests: 'Solicitudes',
+            logs: 'Registros',
+          },
+        },
         centers: {
           title: 'Gestionar Centros Educativos',
           description: 'Administra los centros educativos registrados',
@@ -340,7 +382,9 @@ const resources = {
           confirmRemoveUser: '¿Eliminar este alumno del centro?',
           confirmRemoveTeam: '¿Eliminar este equipo del centro?',
           centerApprovedReason: 'Aprobado por el centro',
-          centerRejectReason: 'Motivo del rechazo:'
+          centerRejectReason: 'Motivo del rechazo:',
+          statusLabel: 'Estado',
+          actionsLabel: 'Acciones',
         },
         archives: {
           title: 'Gestionar Archivos',
@@ -353,6 +397,7 @@ const resources = {
           updated: 'Archivo actualizado',
           created: 'Archivo creado',
           confirmDelete: '¿Eliminar este archivo?',
+          actionsLabel: 'Acciones',
           types: {
             document: 'Documento',
             image: 'Imagen',
@@ -419,6 +464,104 @@ const resources = {
           noPosts: 'No hay posts para mostrar.',
           confirmDelete: '¿Eliminar este post?',
           pinned: 'Fijado'
+        },
+        users: {
+          title: 'Usuarios',
+          searchPlaceholder: 'Buscar…',
+          empty: 'No se encontraron usuarios',
+          confirmDelete: '¿Eliminar usuario?'
+        },
+        teams: {
+          title: 'Equipos',
+          searchPlaceholder: 'Buscar equipo o institución…',
+          empty: 'No se encontraron equipos',
+          noMembers: 'Sin miembros activos',
+          confirmDelete: '¿Eliminar equipo?'
+        },
+        registrations: {
+          title: 'Inscripciones',
+          searchPlaceholder: 'Equipo o competición…',
+          empty: 'No hay inscripciones',
+          rejectTitle: 'Rechazar inscripción',
+          rejectDescription: 'Indica el motivo para rechazar la inscripción de {{name}}.',
+          counter: '{{count}} inscripciones en total',
+          tabAll: 'Todas',
+          tabPending: 'Pendientes',
+          tabApproved: 'Aprobadas',
+          tabRejected: 'Rechazadas',
+          statusPending: 'Pendiente',
+          statusApproved: 'Aprobada',
+          statusRejected: 'Rechazada',
+          labelCompetition: 'Competición:',
+          labelRegistration: 'Inscrito:',
+          labelCompetitionDate: 'Fecha competición:',
+          btnApprove: 'Aprobar',
+          btnReject: 'Rechazar',
+        },
+        competitions: {
+          title: 'Competiciones',
+          searchPlaceholder: 'Buscar competición…',
+          empty: 'No hay competiciones',
+          count: '{{n}} competiciones en total',
+          maxTeams: 'Máx. {{n}} equipos',
+          activeBadge: 'Activa',
+          rulesLink: 'Reglamento',
+          registrations: '{{n}} inscripciones',
+          approved: '{{n}} aprobadas',
+          pending: '{{n}} pendientes',
+          status: {
+            draft: 'Borrador',
+            published: 'Publicada',
+            archived: 'Archivada',
+          },
+          form: {
+            editPrefix: 'Editar',
+            title: 'Título',
+            description: 'Descripción',
+            status: 'Estado',
+            location: 'Lugar',
+            maxTeams: 'Máx. equipos',
+            rulesUrl: 'URL reglamento',
+            registrationStart: 'Inicio inscripción',
+            registrationEnd: 'Fin inscripción',
+            startDate: 'Fecha inicio',
+            endDate: 'Fecha fin',
+            isActive: 'Competición activa',
+          },
+        },
+        dashboard: {
+          title: 'Panel',
+          subtitle: 'Resumen del sistema',
+          stats: {
+            users: 'Usuarios',
+            competitions: 'Competiciones',
+            posts: 'Publicaciones',
+            registrations: 'Inscripciones',
+          },
+          server: {
+            title: 'Recursos del servidor',
+            cpu: 'CPU',
+            ram: 'RAM',
+            disk: 'Disco',
+          },
+          services: {
+            title: 'Servicios',
+            mysql: 'MySQL',
+            redis: 'Redis',
+          },
+          sessions: 'Sesiones activas',
+        },
+        logs: {
+          title: 'Logs del sistema',
+          empty: 'No hay logs',
+          filterAllActions: 'Todas las acciones',
+          filterAllEntities: 'Todas las entidades',
+          clearFilters: 'Limpiar filtros',
+          columnAction: 'Acción',
+          columnEntity: 'Entidad',
+          columnUser: 'Usuario',
+          columnDetail: 'Detalle',
+          columnDate: 'Fecha'
         }
       },
       actions: {
@@ -506,7 +649,11 @@ const resources = {
         unpinned: 'Desfijado',
         comments: 'Comentarios',
         noComments: 'No hay comentarios todavía.',
-        writeComment: 'Escribe un comentario...'
+        writeComment: 'Escribe un comentario...',
+        tabs: {
+          all: 'Todos',
+          pinned: 'Destacados',
+        },
       },
       teams: {
         title: 'Equipos',
@@ -610,7 +757,9 @@ const resources = {
           title: "¿Listo para competir?",
           description: "Únete a la comunidad de robótica más grande de Europa y demuestra tus habilidades.",
           button: "Registrarse Ahora"
-        }
+        },
+        noCompetitions: 'Sin competiciones aún',
+        noNews: 'Sin noticias aún'
       },
       competitions: {
         hero: {
@@ -730,6 +879,7 @@ const resources = {
         sentDesc: "Gracias por contactarnos. Te responderemos a la brevedad posible.",
         sendAnother: "Enviar otro mensaje",
         send: "Enviar mensaje",
+        emailReplyNote: "Usaremos tu email para enviarte la respuesta.",
         errorGeneric: "Error al enviar. Inténtalo de nuevo.",
         support: "Soporte 24/7 para equipos",
         placeholders: {
@@ -948,12 +1098,26 @@ const resources = {
             approved: "Aceptada",
             rejected: "Rechazada"
           }
+        },
+        files: {
+          dropHere: 'Suelta el archivo aquí',
+          maxSize: 'Máx. 50 MB · Se guarda en Cloudflare',
+          uploadTitle: 'Subir archivo al equipo'
+        },
+        activity: {
+          empty: 'Sin actividad registrada'
         }
       },
       team: {
         chat: {
           tab: 'Chat',
           title: 'Chat de Equipo'
+        },
+        competition: {
+          noFiles: 'Sin archivos subidos aún.',
+          noLogs: 'Sin entradas de registro.',
+          logPlaceholder: 'Escribe tu entrada de registro aquí...',
+          fileDescriptionPlaceholder: 'Descripción del archivo'
         }
       },
       tour: {
@@ -1056,6 +1220,11 @@ const resources = {
         apply: 'Apply'
       },
       footer: {
+        tagline: 'European robotics platform for teams, competitions and community.',
+        explore: 'Explore',
+        info: 'Information',
+        centers: 'Centers',
+        madeWith: 'Made with ♥ for robotics',
         description:
           'RobEurope offers the best experience in robotics. We work with true professionals —the best in their field— to bring innovation and excellence to every project.',
         projects: 'PROJECTS',
@@ -1095,7 +1264,8 @@ const resources = {
         delete: 'Delete',
         deleting: 'Deleting...',
         seeMore: 'See more',
-        seeLess: 'See less'
+        seeLess: 'See less',
+        loginForFavorites: 'Log in to save favourites',
       },
       archives: {
         title: 'Information Archive',
@@ -1242,6 +1412,24 @@ const resources = {
         label: 'Status'
       },
       admin: {
+        layout: {
+          title: 'Admin Panel',
+          logout: 'Log out',
+          expand: 'Expand',
+          collapse: 'Collapse',
+          nav: {
+            dashboard: 'Dashboard',
+            users: 'Users',
+            teams: 'Teams',
+            competitions: 'Competitions',
+            registrations: 'Registrations',
+            posts: 'Posts',
+            centers: 'Centers',
+            archives: 'Archives',
+            requests: 'Requests',
+            logs: 'Logs',
+          },
+        },
         centers: {
           title: 'Manage Educational Centers',
           description: 'Manage registered educational centers',
@@ -1287,7 +1475,9 @@ const resources = {
           confirmRemoveUser: 'Remove this student from the center?',
           confirmRemoveTeam: 'Remove this team from the center?',
           centerApprovedReason: 'Approved by the center',
-          centerRejectReason: 'Rejection reason:'
+          centerRejectReason: 'Rejection reason:',
+          statusLabel: 'Status',
+          actionsLabel: 'Actions',
         },
         archives: {
           title: 'Manage Archives',
@@ -1300,6 +1490,7 @@ const resources = {
           updated: 'File updated',
           created: 'File created',
           confirmDelete: 'Delete this file?',
+          actionsLabel: 'Actions',
           types: {
             document: 'Document',
             image: 'Image',
@@ -1365,6 +1556,104 @@ const resources = {
           noPosts: 'No posts to display.',
           confirmDelete: 'Delete this post?',
           pinned: 'Pinned'
+        },
+        users: {
+          title: 'Users',
+          searchPlaceholder: 'Search…',
+          empty: 'No users found',
+          confirmDelete: 'Delete user?'
+        },
+        teams: {
+          title: 'Teams',
+          searchPlaceholder: 'Search team or institution…',
+          empty: 'No teams found',
+          noMembers: 'No active members',
+          confirmDelete: 'Delete team?'
+        },
+        registrations: {
+          title: 'Registrations',
+          searchPlaceholder: 'Team or competition…',
+          empty: 'No registrations found',
+          rejectTitle: 'Reject registration',
+          rejectDescription: 'Enter the reason for rejecting {{name}}\'s registration.',
+          counter: '{{count}} registrations total',
+          tabAll: 'All',
+          tabPending: 'Pending',
+          tabApproved: 'Approved',
+          tabRejected: 'Rejected',
+          statusPending: 'Pending',
+          statusApproved: 'Approved',
+          statusRejected: 'Rejected',
+          labelCompetition: 'Competition:',
+          labelRegistration: 'Registered:',
+          labelCompetitionDate: 'Competition date:',
+          btnApprove: 'Approve',
+          btnReject: 'Reject',
+        },
+        competitions: {
+          title: 'Competitions',
+          searchPlaceholder: 'Search competition…',
+          empty: 'No competitions found',
+          count: '{{n}} competitions total',
+          maxTeams: 'Max. {{n}} teams',
+          activeBadge: 'Active',
+          rulesLink: 'Rules',
+          registrations: '{{n}} registrations',
+          approved: '{{n}} approved',
+          pending: '{{n}} pending',
+          status: {
+            draft: 'Draft',
+            published: 'Published',
+            archived: 'Archived',
+          },
+          form: {
+            editPrefix: 'Edit',
+            title: 'Title',
+            description: 'Description',
+            status: 'Status',
+            location: 'Location',
+            maxTeams: 'Max. teams',
+            rulesUrl: 'Rules URL',
+            registrationStart: 'Registration start',
+            registrationEnd: 'Registration end',
+            startDate: 'Start date',
+            endDate: 'End date',
+            isActive: 'Active competition',
+          },
+        },
+        dashboard: {
+          title: 'Dashboard',
+          subtitle: 'System overview',
+          stats: {
+            users: 'Users',
+            competitions: 'Competitions',
+            posts: 'Posts',
+            registrations: 'Registrations',
+          },
+          server: {
+            title: 'Server resources',
+            cpu: 'CPU',
+            ram: 'RAM',
+            disk: 'Disk',
+          },
+          services: {
+            title: 'Services',
+            mysql: 'MySQL',
+            redis: 'Redis',
+          },
+          sessions: 'Active sessions',
+        },
+        logs: {
+          title: 'System logs',
+          empty: 'No logs found',
+          filterAllActions: 'All actions',
+          filterAllEntities: 'All entities',
+          clearFilters: 'Clear filters',
+          columnAction: 'Action',
+          columnEntity: 'Entity',
+          columnUser: 'User',
+          columnDetail: 'Detail',
+          columnDate: 'Date'
         }
       },
       actions: {
@@ -1451,7 +1740,11 @@ const resources = {
         unpinned: 'Unpinned',
         comments: 'Comments',
         noComments: 'No comments yet.',
-        writeComment: 'Write a comment...'
+        writeComment: 'Write a comment...',
+        tabs: {
+          all: 'All',
+          pinned: 'Pinned',
+        },
       },
       teams: {
         title: 'Teams',
@@ -1555,7 +1848,9 @@ const resources = {
           title: "Ready to compete?",
           description: "Join the largest robotics community in Europe and show your skills.",
           button: "Register Now"
-        }
+        },
+        noCompetitions: 'No competitions yet',
+        noNews: 'No news yet'
       },
       competitions: {
         hero: {
@@ -1675,6 +1970,7 @@ const resources = {
         sentDesc: "Thank you for contacting us. We will respond shortly.",
         sendAnother: "Send another message",
         send: "Send message",
+        emailReplyNote: "We will use your email to send you a reply.",
         errorGeneric: "Failed to send. Please try again.",
         support: "24/7 Team Support",
         placeholders: {
@@ -1893,12 +2189,26 @@ const resources = {
             approved: "Accepted",
             rejected: "Rejected"
           }
+        },
+        files: {
+          dropHere: 'Drop the file here',
+          maxSize: 'Max. 50 MB · Stored in Cloudflare',
+          uploadTitle: 'Upload file to team'
+        },
+        activity: {
+          empty: 'No activity recorded'
         }
       },
       team: {
         chat: {
           tab: 'Chat',
           title: 'Team Chat'
+        },
+        competition: {
+          noFiles: 'No files uploaded yet.',
+          noLogs: 'No logs yet.',
+          logPlaceholder: 'Write your log entry here...',
+          fileDescriptionPlaceholder: 'File description'
         }
       },
       tour: {
@@ -2001,6 +2311,11 @@ const resources = {
         apply: 'Anwenden'
       },
       footer: {
+        tagline: 'Europäische Robotik-Plattform für Teams, Wettbewerbe und Community.',
+        explore: 'Entdecken',
+        info: 'Information',
+        centers: 'Zentren',
+        madeWith: 'Mit ♥ für die Robotik gemacht',
         description:
           'RobEurope bietet die beste Erfahrung in der Robotik. Wir arbeiten mit echten Fachleuten —den Besten auf ihrem Gebiet— um Innovation und Exzellenz in jedes Projekt zu bringen.',
         projects: 'PROJEKTE',
@@ -2040,7 +2355,8 @@ const resources = {
         delete: 'Löschen',
         deleting: 'Wird gelöscht...',
         seeMore: 'Mehr anzeigen',
-        seeLess: 'Weniger anzeigen'
+        seeLess: 'Weniger anzeigen',
+        loginForFavorites: 'Anmelden um Favoriten zu speichern',
       },
       archives: {
         title: 'Informationsarchiv',
@@ -2187,6 +2503,24 @@ const resources = {
         label: 'Status'
       },
       admin: {
+        layout: {
+          title: 'Admin Panel',
+          logout: 'Abmelden',
+          expand: 'Ausklappen',
+          collapse: 'Einklappen',
+          nav: {
+            dashboard: 'Dashboard',
+            users: 'Benutzer',
+            teams: 'Teams',
+            competitions: 'Wettbewerbe',
+            registrations: 'Anmeldungen',
+            posts: 'Beiträge',
+            centers: 'Zentren',
+            archives: 'Archive',
+            requests: 'Anfragen',
+            logs: 'Protokolle',
+          },
+        },
         centers: {
           title: 'Bildungseinrichtungen verwalten',
           description: 'Registrierte Bildungseinrichtungen verwalten',
@@ -2232,7 +2566,9 @@ const resources = {
           confirmRemoveUser: 'Diesen Schüler aus dem Zentrum entfernen?',
           confirmRemoveTeam: 'Dieses Team aus dem Zentrum entfernen?',
           centerApprovedReason: 'Vom Zentrum genehmigt',
-          centerRejectReason: 'Ablehnungsgrund:'
+          centerRejectReason: 'Ablehnungsgrund:',
+          statusLabel: 'Status',
+          actionsLabel: 'Aktionen',
         },
         archives: {
           title: 'Archiv verwalten',
@@ -2245,6 +2581,7 @@ const resources = {
           updated: 'Datei aktualisiert',
           created: 'Datei erstellt',
           confirmDelete: 'Diese Datei löschen?',
+          actionsLabel: 'Aktionen',
           types: {
             document: 'Dokument',
             image: 'Bild',
@@ -2310,6 +2647,104 @@ const resources = {
           noPosts: 'Keine Beiträge vorhanden.',
           confirmDelete: 'Diesen Beitrag löschen?',
           pinned: 'Angeheftet'
+        },
+        users: {
+          title: 'Benutzer',
+          searchPlaceholder: 'Suchen…',
+          empty: 'Keine Benutzer gefunden',
+          confirmDelete: 'Benutzer löschen?'
+        },
+        teams: {
+          title: 'Teams',
+          searchPlaceholder: 'Team oder Institution suchen…',
+          empty: 'Keine Teams gefunden',
+          noMembers: 'Keine aktiven Mitglieder',
+          confirmDelete: 'Team löschen?'
+        },
+        registrations: {
+          title: 'Einschreibungen',
+          searchPlaceholder: 'Team oder Wettbewerb…',
+          empty: 'Keine Einschreibungen gefunden',
+          rejectTitle: 'Einschreibung ablehnen',
+          rejectDescription: 'Gib den Grund für die Ablehnung von {{name}} an.',
+          counter: '{{count}} Einschreibungen insgesamt',
+          tabAll: 'Alle',
+          tabPending: 'Ausstehend',
+          tabApproved: 'Genehmigt',
+          tabRejected: 'Abgelehnt',
+          statusPending: 'Ausstehend',
+          statusApproved: 'Genehmigt',
+          statusRejected: 'Abgelehnt',
+          labelCompetition: 'Wettbewerb:',
+          labelRegistration: 'Eingeschrieben:',
+          labelCompetitionDate: 'Wettbewerbsdatum:',
+          btnApprove: 'Genehmigen',
+          btnReject: 'Ablehnen',
+        },
+        competitions: {
+          title: 'Wettbewerbe',
+          searchPlaceholder: 'Wettbewerb suchen…',
+          empty: 'Keine Wettbewerbe gefunden',
+          count: '{{n}} Wettbewerbe insgesamt',
+          maxTeams: 'Max. {{n}} Teams',
+          activeBadge: 'Aktiv',
+          rulesLink: 'Reglement',
+          registrations: '{{n}} Anmeldungen',
+          approved: '{{n}} genehmigt',
+          pending: '{{n}} ausstehend',
+          status: {
+            draft: 'Entwurf',
+            published: 'Veröffentlicht',
+            archived: 'Archiviert',
+          },
+          form: {
+            editPrefix: 'Bearbeiten',
+            title: 'Titel',
+            description: 'Beschreibung',
+            status: 'Status',
+            location: 'Ort',
+            maxTeams: 'Max. Teams',
+            rulesUrl: 'Reglement-URL',
+            registrationStart: 'Anmeldebeginn',
+            registrationEnd: 'Anmeldeende',
+            startDate: 'Startdatum',
+            endDate: 'Enddatum',
+            isActive: 'Aktiver Wettbewerb',
+          },
+        },
+        dashboard: {
+          title: 'Dashboard',
+          subtitle: 'Systemübersicht',
+          stats: {
+            users: 'Benutzer',
+            competitions: 'Wettbewerbe',
+            posts: 'Beiträge',
+            registrations: 'Anmeldungen',
+          },
+          server: {
+            title: 'Serverressourcen',
+            cpu: 'CPU',
+            ram: 'RAM',
+            disk: 'Festplatte',
+          },
+          services: {
+            title: 'Dienste',
+            mysql: 'MySQL',
+            redis: 'Redis',
+          },
+          sessions: 'Aktive Sitzungen',
+        },
+        logs: {
+          title: 'Systemprotokolle',
+          empty: 'Keine Protokolle gefunden',
+          filterAllActions: 'Alle Aktionen',
+          filterAllEntities: 'Alle Entitäten',
+          clearFilters: 'Filter zurücksetzen',
+          columnAction: 'Aktion',
+          columnEntity: 'Entität',
+          columnUser: 'Benutzer',
+          columnDetail: 'Detail',
+          columnDate: 'Datum'
         }
       },
       actions: {
@@ -2396,7 +2831,11 @@ const resources = {
         unpinned: 'Nicht mehr angeheftet',
         comments: 'Kommentare',
         noComments: 'Noch keine Kommentare.',
-        writeComment: 'Schreibe einen Kommentar...'
+        writeComment: 'Schreibe einen Kommentar...',
+        tabs: {
+          all: 'Alle',
+          pinned: 'Angeheftet',
+        },
       },
       teams: {
         title: 'Teams',
@@ -2500,7 +2939,9 @@ const resources = {
           title: "Bereit zum Wettbewerb?",
           description: "Treten Sie der größten Robotik-Community in Europa bei und zeigen Sie Ihre Fähigkeiten.",
           button: "Jetzt registrieren"
-        }
+        },
+        noCompetitions: 'Noch keine Wettbewerbe',
+        noNews: 'Noch keine Neuigkeiten'
       },
       competitions: {
         hero: {
@@ -2620,6 +3061,7 @@ const resources = {
         sentDesc: "Danke für Ihre Nachricht. Wir werden uns in Kürze melden.",
         sendAnother: "Eine weitere Nachricht senden",
         send: "Nachricht senden",
+        emailReplyNote: "Wir nutzen deine E-Mail, um dir zu antworten.",
         errorGeneric: "Senden fehlgeschlagen. Bitte erneut versuchen.",
         support: "24/7 Support für Teams",
         placeholders: {
@@ -2830,12 +3272,26 @@ const resources = {
             approved: "Angenommen",
             rejected: "Abgelehnt"
           }
+        },
+        files: {
+          dropHere: 'Datei hier ablegen',
+          maxSize: 'Max. 50 MB · In Cloudflare gespeichert',
+          uploadTitle: 'Datei zum Team hochladen'
+        },
+        activity: {
+          empty: 'Keine Aktivität aufgezeichnet'
         }
       },
       team: {
         chat: {
           tab: 'Chat',
           title: 'Team-Chat'
+        },
+        competition: {
+          noFiles: 'Noch keine Dateien hochgeladen.',
+          noLogs: 'Noch keine Protokolle.',
+          logPlaceholder: 'Protokolleintrag hier schreiben...',
+          fileDescriptionPlaceholder: 'Dateibeschreibung'
         }
       },
       tour: {

@@ -23,12 +23,12 @@ const AdaptiveModalContent = React.forwardRef(({ className, children, title, des
       ref={ref}
       className={cn(
         // ── Mobile: bottom sheet ──
-        'fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-2xl border-t border-stone-200 bg-white shadow-2xl dark:border-stone-800 dark:bg-stone-950',
+        'fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto border-t-2 border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-950',
         'data-[state=open]:animate-in data-[state=closed]:animate-out',
         'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
         'data-[state=closed]:duration-200 data-[state=open]:duration-300',
         // ── Desktop: centered dialog ──
-        'sm:inset-auto sm:bottom-auto sm:left-[50%] sm:top-[50%] sm:max-h-[90vh] sm:w-full sm:max-w-2xl sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl sm:border sm:border-stone-200 sm:shadow-2xl sm:shadow-stone-900/10 sm:dark:border-stone-800 sm:dark:shadow-stone-950/40',
+        'sm:inset-auto sm:bottom-auto sm:left-[50%] sm:top-[50%] sm:max-h-[90vh] sm:w-full sm:max-w-2xl sm:translate-x-[-50%] sm:translate-y-[-50%] sm:border-2 sm:border-stone-200 sm:dark:border-stone-800',
         'sm:data-[state=closed]:slide-out-to-bottom-0 sm:data-[state=open]:slide-in-from-bottom-0',
         'sm:data-[state=closed]:fade-out-0 sm:data-[state=open]:fade-in-0',
         'sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95',
@@ -41,7 +41,7 @@ const AdaptiveModalContent = React.forwardRef(({ className, children, title, des
     >
       {/* Mobile drag handle */}
       <div className="sticky top-0 z-10 flex justify-center bg-white pt-3 pb-1 dark:bg-stone-950 sm:hidden">
-        <div className="h-1 w-10 rounded-full bg-stone-300 dark:bg-stone-700" />
+        <div className="h-1 w-10 bg-stone-300 dark:bg-stone-700" />
       </div>
 
       <div className="px-5 pb-8 pt-2 sm:p-7">
@@ -65,7 +65,7 @@ const AdaptiveModalContent = React.forwardRef(({ className, children, title, des
       </div>
 
       {/* Close button */}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-1.5 text-stone-400 transition-all hover:text-stone-900 hover:bg-stone-100 dark:hover:text-stone-50 dark:hover:bg-stone-800 sm:right-5 sm:top-5">
+      <DialogPrimitive.Close className="absolute right-4 top-4 p-1.5 text-stone-400 transition-all hover:text-stone-900 hover:bg-stone-100 dark:hover:text-stone-50 dark:hover:bg-stone-800 sm:right-5 sm:top-5">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>

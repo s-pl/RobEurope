@@ -45,9 +45,9 @@ const ReviewItem = ({ review, onDelete, currentUserId }) => {
       {/* Author info - left */}
       <div className="flex flex-col items-center shrink-0 w-20">
         {photo ? (
-          <img src={photo} alt={name} className="w-9 h-9 rounded-full object-cover" />
+          <img src={photo} alt={name} className="w-9 h-9 object-cover" />
         ) : (
-          <div className="w-9 h-9 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center text-stone-500 font-bold text-xs border border-stone-200 dark:border-stone-700">
+          <div className="w-9 h-9 bg-stone-100 dark:bg-stone-800 flex items-center justify-center text-stone-500 font-bold text-xs border-2 border-stone-200 dark:border-stone-700">
             {name.slice(0, 2).toUpperCase()}
           </div>
         )}
@@ -62,7 +62,7 @@ const ReviewItem = ({ review, onDelete, currentUserId }) => {
           {isOwn && (
             <button
               onClick={() => onDelete()}
-              className={`p-1.5 rounded-md text-stone-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-150 ${
+              className={`p-1.5 text-stone-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-150 ${
                 hovered ? 'opacity-100' : 'opacity-0'
               }`}
             >
@@ -133,7 +133,7 @@ const Feedback = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-3xl mx-auto">
       {/* Page header */}
       <div className="pt-2 pb-8">
         <h1 className="font-display text-3xl font-bold text-stone-900 dark:text-stone-50">
@@ -186,7 +186,7 @@ const Feedback = () => {
                 onChange={e => setReviewForm(f => ({ ...f, message: e.target.value }))}
                 required
                 placeholder={t('contact.reviews.messagePlaceholder')}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors resize-none"
+                className="w-full px-3 py-2 text-sm border-2 border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors resize-none"
               />
             </div>
             {reviewError && <p className="text-sm text-red-500">{reviewError}</p>}
@@ -200,7 +200,7 @@ const Feedback = () => {
             <button
               type="submit"
               disabled={reviewSubmitting}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-stone-900 text-white hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Star className="h-4 w-4" /> {t('contact.reviews.submit')}
             </button>

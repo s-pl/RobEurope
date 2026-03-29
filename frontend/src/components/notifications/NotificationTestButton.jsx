@@ -20,9 +20,9 @@ export default function NotificationTestButton() {
     <button
       type="button"
       onClick={trigger}
-      className="fixed bottom-5 left-5 z-[1100] rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+      className="fixed bottom-4 left-20 z-[1100] border-2 border-stone-900 dark:border-stone-600 bg-white dark:bg-stone-950 text-stone-900 dark:text-stone-300 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 hover:bg-stone-900 hover:text-white dark:hover:bg-stone-800 dark:hover:text-white transition-colors duration-100 font-mono"
     >
-      Push Test
+      {count > 0 ? `test #${count}` : 'push test'}
     </button>
   );
 }

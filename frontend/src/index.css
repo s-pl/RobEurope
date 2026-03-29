@@ -1,12 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@500;700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.js";
 
 :root {
   --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
   --color-accent: #2563eb;
   --color-accent-hover: #1d4ed8;
   --color-surface: #ffffff;
@@ -14,6 +14,8 @@
   --color-text: #1c1917;
   --color-muted: #78716c;
   --color-border: #e7e5e4;
+  --color-competition: #ef4444;
+  --color-contrast: #0c0a09;
 }
 
 :root.dark {
@@ -49,7 +51,20 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+}
+
+/* Utility classes */
+.label-caps {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.font-mono-data {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 #root {
@@ -127,10 +142,10 @@ a, button, input, select, textarea {
 .stagger-4 { animation-delay: 200ms; }
 .stagger-5 { animation-delay: 250ms; }
 
-/* Dot grid pattern */
+/* Dot grid pattern — subtle */
 .dot-grid {
-  background-image: radial-gradient(circle, var(--color-border) 1px, transparent 1px);
-  background-size: 20px 20px;
+  background-image: radial-gradient(circle, var(--color-border) 0.5px, transparent 0.5px);
+  background-size: 16px 16px;
 }
 
 /* Selection color */
@@ -166,8 +181,21 @@ a, button, input, select, textarea {
 /* Button press */
 button:not([disabled]):active { transform: scale(0.98); }
 
+/* Marquee ticker */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marquee-reverse {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+.animate-marquee         { animation: marquee         22s linear infinite; }
+.animate-marquee-reverse { animation: marquee-reverse 22s linear infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto; }
   .robot-runner { animation: none; display: none; }
   .animate-fade-in, .animate-fade-in-up, .animate-slide-in-left { animation: none; }
+  .animate-marquee, .animate-marquee-reverse { animation: none; }
 }

@@ -10,6 +10,7 @@ export default {
       fontFamily: {
         display: ['Bricolage Grotesque', 'system-ui', 'sans-serif'],
         body: ['DM Sans', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       colors: {
         accent: {
@@ -25,11 +26,13 @@ export default {
           DEFAULT: '#f8f7f4',
           dark: '#0c0a09',
         },
+        competition: {
+          DEFAULT: '#ef4444',
+          muted: '#fef2f2',
+        },
+        contrast: '#0c0a09',
       },
     },
   },
-  plugins: [
-    ("tailwindcss-animate"),
-    ("@tailwindcss/typography"),
-  ],
+  plugins: [],
 };

@@ -79,7 +79,7 @@ const NotifItem = ({ item, onMarkRead, onDelete, onInviteAction, busyId }) => {
         <motion.div
           whileHover={{ scale: 1.12 }}
           transition={{ type: 'spring', stiffness: 500, damping: 22 }}
-          className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${bg}`}
+          className={`flex-shrink-0 w-8 h-8 flex items-center justify-center ${bg}`}
         >
           <Icon className={`h-4 w-4 ${color}`} />
         </motion.div>
@@ -103,10 +103,10 @@ const NotifItem = ({ item, onMarkRead, onDelete, onInviteAction, busyId }) => {
                 whileHover={{ scale: 1.05, backgroundColor: '#1d4ed8' }}
                 disabled={busyId === item.id}
                 onClick={() => onInviteAction(item, 'accept')}
-                className="flex items-center gap-1 px-2.5 py-1 bg-blue-600 text-white rounded-md text-xs font-medium transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 px-2.5 py-1 bg-blue-600 text-white text-xs font-medium transition-colors disabled:opacity-50"
               >
                 {busyId === item.id
-                  ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.7, repeat: Infinity, ease: 'linear' }} className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full" />
+                  ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.7, repeat: Infinity, ease: 'linear' }} className="w-3 h-3 border-2 border-white/30 border-t-white" />
                   : <><CheckCheck className="h-3 w-3" /> {t('notifications.accept')}</>
                 }
               </motion.button>
@@ -115,7 +115,7 @@ const NotifItem = ({ item, onMarkRead, onDelete, onInviteAction, busyId }) => {
                 whileHover={{ scale: 1.05 }}
                 disabled={busyId === item.id}
                 onClick={() => onInviteAction(item, 'decline')}
-                className="flex items-center gap-1 px-2.5 py-1 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-md text-xs font-medium transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 px-2.5 py-1 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-medium transition-colors disabled:opacity-50"
               >
                 {t('notifications.decline')}
               </motion.button>
@@ -302,7 +302,7 @@ const NotificationsBell = () => {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 600, damping: 20 }}
-                className="absolute -top-0.5 -right-0.5 h-4 min-w-4 rounded-full bg-red-500 ring-2 ring-white dark:ring-stone-950 text-white text-[10px] font-bold flex items-center justify-center px-0.5 leading-none pointer-events-none"
+                className="absolute -top-0.5 -right-0.5 h-4 min-w-4 bg-red-500 ring-2 ring-white dark:ring-stone-950 text-white text-[10px] font-bold flex items-center justify-center px-0.5 leading-none pointer-events-none"
               >
                 {unread > 9 ? '9+' : unread}
               </motion.span>
@@ -319,7 +319,7 @@ const NotificationsBell = () => {
           transition={{ duration: 0.18 }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-800 px-4 py-3">
+          <div className="flex items-center justify-between border-b-2 border-stone-100 dark:border-stone-800 px-4 py-3">
             <div className="flex items-center gap-2">
               <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-sm">
                 {t('notifications.title')}
@@ -332,7 +332,7 @@ const NotificationsBell = () => {
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 22 }}
-                    className="inline-flex items-center justify-center h-5 min-w-5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold px-1.5"
+                    className="inline-flex items-center justify-center h-5 min-w-5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold px-1.5"
                   >
                     {unread}
                   </motion.span>
