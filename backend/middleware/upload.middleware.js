@@ -131,7 +131,7 @@ export const handleUploadErrors = (error, req, res, next) => {
     }
   }
 
-  if (error.message.includes('Invalid file type')) {
+  if (error.message.includes('Invalid file type') || error.message.includes('Tipo de archivo no permitido')) {
     return res.status(415).json({
       error: 'Unsupported Media Type',
       message: error.message

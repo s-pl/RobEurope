@@ -7,6 +7,7 @@ import { useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useApi } from '../hooks/useApi';
 import { useTeams } from '../hooks/useTeams';
+import { useTeamContext } from '../context/TeamContext';
 import { useCountries } from '../hooks/useCountries';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -60,7 +61,7 @@ const TiltCard = ({ children }) => {
         {children}
         <div
           ref={glareRef}
-          className="absolute inset-0 rounded-xl pointer-events-none"
+          className="absolute inset-0 pointer-events-none"
           style={{ opacity: 0, transition: 'opacity 0.3s ease' }}
         />
       </div>
@@ -92,16 +93,16 @@ const JoinButton = ({ teamId, onJoin, disabled, label, successLabel, errorLabel 
       whileTap={{ scale: 0.96 }}
       onClick={handleClick}
       disabled={disabled || state !== 'idle'}
-      className={`w-full flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300 ${
+      className={`w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-300 ${
         state === 'success'
-          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
+          ? 'bg-emerald-50 text-emerald-700 border-2 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
           : state === 'error'
-          ? 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'
+          ? 'bg-red-50 text-red-700 border-2 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'
           : state === 'loading'
-          ? 'bg-stone-100 text-stone-400 border border-stone-200 cursor-wait dark:bg-stone-800 dark:border-stone-700'
+          ? 'bg-stone-100 text-stone-400 border-2 border-stone-200 cursor-wait dark:bg-stone-800 dark:border-stone-700'
           : disabled
-          ? 'bg-stone-50 text-stone-400 border border-stone-200 cursor-not-allowed dark:bg-stone-800/50 dark:border-stone-700'
-          : 'bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 hover:border-blue-700'
+          ? 'bg-stone-50 text-stone-400 border-2 border-stone-200 cursor-not-allowed dark:bg-stone-800/50 dark:border-stone-700'
+          : 'bg-stone-900 hover:bg-stone-800 text-white border-2 border-stone-900 hover:border-stone-800'
       }`}
     >
       <AnimatePresence mode="wait" initial={false}>
@@ -169,6 +170,7 @@ const JoinButton = ({ teamId, onJoin, disabled, label, successLabel, errorLabel 
 const Teams = () => {
   const { isAuthenticated } = useAuth();
   const { list, create, requestJoin, getMembers, getMyRequests, cancelRequest } = useTeams();
+  const { refreshTeamStatus } = useTeamContext();
   const { countries, status: countriesStatus } = useCountries();
   const api = useApi();
   const { t } = useTranslation();
@@ -269,6 +271,7 @@ const Teams = () => {
       await create(payload);
       setForm({ name: '', country_id: '', description: '', website_url: '' });
       setCreateSuccess(true);
+      refreshTeamStatus();
       await reload();
       setTimeout(() => {
         setCreateSuccess(false);
@@ -294,7 +297,7 @@ const Teams = () => {
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-                <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
+                <Button className="gap-2 bg-stone-900 hover:bg-stone-800 text-white">
                   <Plus className="h-4 w-4" /> {t('teams.create')}
                 </Button>
               </motion.div>
@@ -317,7 +320,7 @@ const Teams = () => {
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 20, delay: 0.1 }}
-                      className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center"
+                      className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center"
                     >
                       <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8 stroke-emerald-500" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                         <motion.path d="M5 13l4 4L19 7" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.4, delay: 0.2 }} />
@@ -349,7 +352,7 @@ const Teams = () => {
                         onChange={e => setForm({ ...form, name: e.target.value })}
                         required
                         placeholder="Robotics Club EU..."
-                        className="transition-shadow focus:shadow-sm"
+                        className="transition-colors"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -415,7 +418,7 @@ const Teams = () => {
         className="flex gap-2 flex-wrap"
       >
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -transtone-y-1/2 h-4 w-4 text-stone-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
           <Input
             placeholder={t('teams.searchPlaceholder')}
             value={q}
@@ -443,7 +446,7 @@ const Teams = () => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden"
+          className="bg-white dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-800 overflow-hidden"
         >
           {/* Collapsible header */}
           <button
@@ -457,7 +460,7 @@ const Teams = () => {
                 <p className="text-xs text-stone-500 mt-0.5 text-left">{t('myTeam.joinRequests.desc')}</p>
               </div>
               {myJoinRequests.filter(r => r.status === 'pending').length > 0 && (
-                <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 border-2 border-amber-200 dark:border-amber-800">
                   <Clock className="h-3 w-3" />
                   {myJoinRequests.filter(r => r.status === 'pending').length} {t('myTeam.joinRequests.pending')}
                 </span>
@@ -501,7 +504,7 @@ const Teams = () => {
                           className="flex items-center justify-between px-5 py-3.5"
                         >
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center text-stone-600 dark:text-stone-400 font-bold text-xs shrink-0">
+                            <div className="w-9 h-9 bg-gradient-to-br from-stone-100 to-stone-200 dark:from-stone-800 dark:to-stone-700 flex items-center justify-center text-stone-600 dark:text-stone-400 font-bold text-xs shrink-0">
                               {(r.team?.name || '?').slice(0, 2).toUpperCase()}
                             </div>
                             <div className="min-w-0">
@@ -517,7 +520,7 @@ const Teams = () => {
                                 onClick={() => onCancelRequest(r.id)}
                                 disabled={cancellingId === r.id}
                                 title={t('myTeam.joinRequests.cancel')}
-                                className="p-1.5 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+                                className="p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
                               >
                                 <X className="h-3.5 w-3.5" />
                               </motion.button>
@@ -545,7 +548,7 @@ const Teams = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.28, delay: i * 0.07 }}
               >
-                <div className="h-52 rounded-xl bg-stone-100 dark:bg-stone-800 animate-pulse" />
+                <div className="h-52 bg-stone-100 dark:bg-stone-800 animate-pulse" />
               </motion.div>
             ))
           : null}
@@ -561,9 +564,9 @@ const Teams = () => {
               transition={{ duration: 0.35, delay: i * 0.06, ease: [0.4, 0, 0.2, 1] }}
             >
               <TiltCard>
-              <div className="group flex flex-col h-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden transition-shadow duration-200 hover:shadow-xl hover:border-stone-300 dark:hover:border-stone-700">
+              <div className="group flex flex-col h-full bg-white dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-800 overflow-hidden transition-colors duration-100 hover:border-stone-900 dark:hover:border-stone-50">
                 {/* Card top accent */}
-                <div className="h-1 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="h-[3px] bg-stone-900 dark:bg-stone-50 opacity-0 group-hover:opacity-100 transition-opacity duration-100" />
                 <div className="p-5 flex-1 flex flex-col gap-3">
                   {/* Header */}
                   <div className="flex items-start justify-between gap-2">

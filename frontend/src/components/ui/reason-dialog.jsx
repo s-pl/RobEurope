@@ -40,7 +40,7 @@ export function ReasonDialog({
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
-              className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-100 dark:border-amber-900/40"
+              className="mt-0.5 flex h-10 w-10 items-center justify-center bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border-2 border-amber-100 dark:border-amber-900/40"
             >
               <MessageSquareWarning className="h-5 w-5" />
             </motion.div>
@@ -72,7 +72,7 @@ export function ReasonDialog({
                 <motion.span
                   animate={{ rotate: 360 }}
                   transition={{ repeat: Infinity, duration: 0.7, ease: 'linear' }}
-                  className="h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white"
+                  className="h-3.5 w-3.5 border-2 border-white/30 border-t-white"
                 />
                 ...
               </span>

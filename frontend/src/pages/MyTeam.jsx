@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,13 +23,16 @@ import {
   Globe, MapPin, Hash, ChevronRight,
   Wifi, WifiOff, Shield, Crown, Search,
   Mail, ExternalLink, Zap, Clock,
-  ArrowRight, Pencil
+  ArrowRight, Pencil, Copy, ChevronUp, ChevronDown,
+  FolderOpen, Activity, Image, FileText, Download,
+  FileVideo, FileAudio, UserCheck, Flag, UploadCloud, AlertCircle,
 } from 'lucide-react';
 import TeamChat from '../components/teams/TeamChat';
 import TeamCompetitionDashboard from '../components/teams/TeamCompetitionDashboard';
-import { resolveMediaUrl } from '../lib/apiClient';
+import { resolveMediaUrl, getApiBaseUrl } from '../lib/apiClient';
 import { CountrySelect } from '../components/ui/CountrySelect';
 import { useCountries } from '../hooks/useCountries';
+import { useFeatures } from '../context/FeaturesContext';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -45,11 +48,13 @@ const stagger = {
 
 // ── Tab config ──────────────────────────────────────────────────────────────
 
-const tabConfig = (t, isOwner) => [
+const tabConfig = (t, isOwner, r2Enabled) => [
   { id: 'overview',     label: t('myTeam.tabs.overview'),     Icon: Info },
   { id: 'chat',         label: t('team.chat.tab'),            Icon: MessageCircle },
   { id: 'members',      label: t('myTeam.tabs.members'),      Icon: Users },
   { id: 'competitions', label: t('myTeam.tabs.competitions'), Icon: Trophy },
+  ...(r2Enabled ? [{ id: 'files', label: 'Archivos', Icon: FolderOpen }] : []),
+  { id: 'activity',     label: 'Actividad',                   Icon: Activity },
   ...(isOwner ? [{ id: 'settings', label: t('myTeam.tabs.settings'), Icon: Settings }] : []),
 ];
 
@@ -69,7 +74,7 @@ const Avatar = ({ src, name, size = 'md' }) => {
   const sizeClasses = { sm: 'h-8 w-8 text-[10px]', md: 'h-10 w-10 text-xs', lg: 'h-14 w-14 text-sm' };
 
   return (
-    <div className={`${sizeClasses[size]} rounded-xl overflow-hidden shrink-0 flex items-center justify-center font-bold ${!src ? palette : 'bg-stone-100 dark:bg-stone-800'}`}>
+    <div className={`${sizeClasses[size]} overflow-hidden shrink-0 flex items-center justify-center font-bold ${!src ? palette : 'bg-stone-100 dark:bg-stone-800'}`}>
       {src
         ? <img src={src} alt={name} className="h-full w-full object-cover" />
         : <span>{initials}</span>
@@ -89,7 +94,7 @@ const InlineToast = ({ toast }) => (
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -8, scale: 0.95 }}
         transition={{ duration: 0.2, ease: 'easeOut' }}
-        className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-lg text-sm font-medium border backdrop-blur-sm ${
+        className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 text-sm font-medium border-2 backdrop-blur-sm ${
           toast.type === 'success'
             ? 'bg-emerald-50/95 text-emerald-800 border-emerald-200 dark:bg-emerald-950/90 dark:text-emerald-300 dark:border-emerald-800'
             : toast.type === 'error'
@@ -98,14 +103,14 @@ const InlineToast = ({ toast }) => (
         }`}
       >
         {toast.type === 'success' && (
-          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 shrink-0">
+          <div className="flex items-center justify-center w-5 h-5 bg-emerald-500 shrink-0">
             <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
               <motion.path d="M2 6l3 3 5-5" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.3 }} />
             </svg>
           </div>
         )}
         {toast.type === 'error' && (
-          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-red-500 shrink-0">
+          <div className="flex items-center justify-center w-5 h-5 bg-red-500 shrink-0">
             <X className="h-3 w-3 text-white" />
           </div>
         )}
@@ -218,7 +223,7 @@ const CreateTeamForm = ({ onCreated, t, api, countries = [], countriesLoading = 
               id="cf-center"
               value={centerId}
               onChange={e => setCenterId(e.target.value)}
-              className="mt-2 w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-sm text-stone-900 transition-colors focus:border-stone-900 focus:outline-none focus:ring-1 focus:ring-stone-900 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50 dark:focus:border-stone-400 dark:focus:ring-stone-400"
+              className="mt-2 w-full border-2 border-stone-300 bg-white px-3.5 py-2.5 text-sm text-stone-900 transition-colors focus:border-stone-900 focus:outline-none focus:ring-1 focus:ring-stone-900 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50 dark:focus:border-stone-400 dark:focus:ring-stone-400"
             >
               <option value="">{t('myTeam.form.noCenter')}</option>
               {educationalCenters.map(c => (
@@ -236,7 +241,7 @@ const CreateTeamForm = ({ onCreated, t, api, countries = [], countriesLoading = 
   ];
 
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-2xl mx-auto">
       <AnimatePresence mode="wait">
         {step === 2 ? (
           <motion.div
@@ -250,7 +255,7 @@ const CreateTeamForm = ({ onCreated, t, api, countries = [], countriesLoading = 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.1 }}
-              className="w-20 h-20 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center"
+              className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center"
             >
               <svg viewBox="0 0 24 24" fill="none" className="w-10 h-10 stroke-emerald-600 dark:stroke-emerald-400" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                 <motion.path d="M5 13l4 4L19 7" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.5, delay: 0.3 }} />
@@ -263,7 +268,7 @@ const CreateTeamForm = ({ onCreated, t, api, countries = [], countriesLoading = 
           </motion.div>
         ) : (
           <motion.div key={`step-${step}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25 }}>
-            <div className="rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 overflow-hidden">
+            <div className="border-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 overflow-hidden">
               {/* Progress bar */}
               <div className="h-1 bg-stone-100 dark:bg-stone-800">
                 <motion.div
@@ -277,7 +282,7 @@ const CreateTeamForm = ({ onCreated, t, api, countries = [], countriesLoading = 
               <div className="p-8 space-y-6">
                 {/* Step label */}
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-stone-900 text-white text-xs font-bold dark:bg-stone-50 dark:text-stone-900">
+                  <span className="inline-flex items-center justify-center w-7 h-7 bg-stone-900 text-white text-xs font-bold dark:bg-stone-50 dark:text-stone-900">
                     {step + 1}
                   </span>
                   <div>
@@ -326,13 +331,13 @@ const StatCard = ({ label, value, Icon, delay = 0 }) => (
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
-    className="group relative rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 p-5 overflow-hidden transition-all duration-300 hover:border-stone-300 dark:hover:border-stone-700"
+    className="group relative border-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 p-5 overflow-hidden transition-all duration-300 hover:border-stone-300 dark:hover:border-stone-700"
   >
     <div className="absolute top-0 right-0 w-24 h-24 -translate-y-8 translate-x-8 opacity-[0.04] dark:opacity-[0.06]">
       <Icon className="w-full h-full" />
     </div>
     <div className="relative">
-      <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 flex items-center justify-center mb-3 transition-colors group-hover:bg-stone-900 dark:group-hover:bg-stone-50">
+      <div className="w-9 h-9 bg-stone-100 dark:bg-stone-800 flex items-center justify-center mb-3 transition-colors group-hover:bg-stone-900 dark:group-hover:bg-stone-50">
         <Icon className="h-4.5 w-4.5 text-stone-600 dark:text-stone-400 transition-colors group-hover:text-white dark:group-hover:text-stone-900" />
       </div>
       <p className="text-3xl font-display font-bold text-stone-900 dark:text-stone-50 tracking-tight">{value}</p>
@@ -343,7 +348,7 @@ const StatCard = ({ label, value, Icon, delay = 0 }) => (
 
 // ── Member row ───────────────────────────────────────────────────────────────
 
-const MemberRow = ({ member, isOwner, onRemove, t, index }) => {
+const MemberRow = ({ member, isOwner, onRemove, onRoleChange, t, index }) => {
   const roleIcons = { owner: Crown, admin: Shield };
   const roleColors = { owner: 'text-amber-500', admin: 'text-blue-500' };
   const RoleIcon = roleIcons[member.role];
@@ -368,14 +373,27 @@ const MemberRow = ({ member, isOwner, onRemove, t, index }) => {
         </div>
       </div>
       {isOwner && member.role !== 'owner' && (
-        <Button
-          size="sm"
-          variant="ghost"
-          className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 h-8 px-2.5 transition-all"
-          onClick={() => onRemove(member.id)}
-        >
-          <X className="h-3.5 w-3.5" />
-        </Button>
+        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
+          {/* Promote / demote */}
+          <Button
+            size="sm"
+            variant="ghost"
+            title={member.role === 'admin' ? 'Demote to member' : 'Promote to admin'}
+            className={`h-8 px-2.5 text-xs gap-1 ${member.role === 'admin' ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/30' : 'text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/30'}`}
+            onClick={() => onRoleChange(member.id, member.role === 'admin' ? 'member' : 'admin')}
+          >
+            {member.role === 'admin' ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronUp className="h-3.5 w-3.5" />}
+            {member.role === 'admin' ? 'Demote' : 'Admin'}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 px-2.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
+            onClick={() => onRemove(member.id)}
+          >
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       )}
     </motion.div>
   );
@@ -410,14 +428,14 @@ const RegistrationRow = ({ reg, comp, isOwner, onWithdraw, t, index, teamId }) =
           </p>
         </div>
         <div className="flex items-center gap-2.5 shrink-0">
-          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border ${statusStyles[displayStatus] || statusStyles.pending}`}>
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium border-2 ${statusStyles[displayStatus] || statusStyles.pending}`}>
             <StatusIcon className="h-3 w-3" />
             {t(`myTeam.competitions.status.${displayStatus}`) || displayStatus}
           </span>
           {isOwner && displayStatus === 'pending' && (
             <button
               onClick={() => onWithdraw(reg.id)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 dark:text-red-400 transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 dark:text-red-400 transition-colors"
             >
               <X className="h-3 w-3" />
               {t('myTeam.competitions.withdraw')}
@@ -434,12 +452,543 @@ const RegistrationRow = ({ reg, comp, isOwner, onWithdraw, t, index, teamId }) =
   );
 };
 
+// ── Files Tab ────────────────────────────────────────────────────────────────
+
+const FILE_ICONS = {
+  image: Image,
+  video: FileVideo,
+  audio: FileAudio,
+  pdf:   FileText,
+  default: FileText,
+};
+
+const getFileCategory = (name = '') => {
+  const ext = name.split('.').pop()?.toLowerCase() ?? '';
+  if (['jpg','jpeg','png','gif','webp','svg','avif'].includes(ext)) return 'image';
+  if (['mp4','webm','mov','avi','mkv'].includes(ext)) return 'video';
+  if (['mp3','wav','ogg','flac'].includes(ext)) return 'audio';
+  if (ext === 'pdf') return 'pdf';
+  return 'default';
+};
+
+const MAX_UPLOAD_SIZE = 50 * 1024 * 1024; // 50 MB
+
+const fmtSize = (b) => {
+  if (!b) return '';
+  if (b < 1024) return `${b} B`;
+  if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+  return `${(b / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const fmtNum = (n) => Number(n).toLocaleString('es-ES');
+
+/** Single horizontal gauge bar */
+const Gauge = ({ label, used, limit, fmtUsed, fmtLimit, warning = 80, danger = 95 }) => {
+  const pct = Math.min(100, (used / limit) * 100);
+  const color = pct >= danger ? 'bg-red-500' : pct >= warning ? 'bg-amber-500' : 'bg-emerald-500';
+  return (
+    <div>
+      <div className="flex justify-between items-baseline mb-1">
+        <span className="text-xs font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wider">{label}</span>
+        <span className={`text-xs font-mono ${pct >= danger ? 'text-red-500' : pct >= warning ? 'text-amber-500' : 'text-stone-500 dark:text-stone-400'}`}>
+          {fmtUsed} / {fmtLimit}
+        </span>
+      </div>
+      <div className="h-2 w-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
+        <div className={`h-full transition-all duration-500 ${color}`} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+};
+
+/** Usage panel shown in FilesTab */
+const StorageGauges = ({ usage }) => {
+  const { team, global: g, ops } = usage;
+  const teamNearLimit  = team.pct  >= 80;
+  const globalNearLimit = g.pct   >= 80;
+  const opsNearLimit   = (ops.classA / ops.classALimit) * 100 >= 80;
+
+  return (
+    <div className="border-2 border-stone-200 dark:border-stone-800 overflow-hidden">
+      {/* Header */}
+      <div className="px-4 py-3 border-b-2 border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 flex items-center justify-between">
+        <span className="text-xs font-bold uppercase tracking-widest text-stone-500 dark:text-stone-400">Uso de almacenamiento</span>
+        <span className="text-[10px] text-stone-400">Cloudflare R2 · {ops.month}</span>
+      </div>
+
+      <div className="p-4 space-y-4">
+        {/* Team storage */}
+        <Gauge
+          label="Este equipo"
+          used={team.used}
+          limit={team.limit}
+          fmtUsed={fmtSize(team.used)}
+          fmtLimit={fmtSize(team.limit)}
+        />
+
+        {/* Global storage */}
+        <Gauge
+          label="Almacenamiento global"
+          used={g.used}
+          limit={g.limit}
+          fmtUsed={fmtSize(g.used)}
+          fmtLimit={fmtSize(g.limit)}
+        />
+
+        {/* Class A ops */}
+        <Gauge
+          label="Escrituras mensuales (Clase A)"
+          used={ops.classA}
+          limit={ops.classALimit}
+          fmtUsed={fmtNum(ops.classA)}
+          fmtLimit={fmtNum(ops.classALimit)}
+        />
+
+        {/* Class B ops */}
+        <Gauge
+          label="Lecturas mensuales (Clase B)"
+          used={ops.classB}
+          limit={ops.classBLimit}
+          fmtUsed={fmtNum(ops.classB)}
+          fmtLimit={fmtNum(ops.classBLimit)}
+        />
+      </div>
+
+      {/* Warnings */}
+      {(teamNearLimit || globalNearLimit || opsNearLimit) && (
+        <div className="px-4 py-3 border-t-2 border-amber-200 dark:border-amber-800/50 bg-amber-50/60 dark:bg-amber-950/20 space-y-1">
+          {teamNearLimit && (
+            <p className="text-xs text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              El equipo ha usado {team.pct.toFixed(0)}% de su cuota. Elimina archivos para liberar espacio.
+            </p>
+          )}
+          {globalNearLimit && (
+            <p className="text-xs text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              El almacenamiento global está al {g.pct.toFixed(0)}%. Contacta con el administrador.
+            </p>
+          )}
+          {opsNearLimit && (
+            <p className="text-xs text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              Las escrituras mensuales están al {((ops.classA / ops.classALimit) * 100).toFixed(0)}% del límite gratuito.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const FilesTab = ({ teamId, api, isAdmin }) => {
+  const { t } = useTranslation();
+  const [files,     setFiles]     = useState(null);   // null = loading
+  const [usage,     setUsage]     = useState(null);
+  const [filter,    setFilter]    = useState('all');
+  const [lightbox,  setLightbox]  = useState(null);
+  const [isDrag,    setIsDrag]    = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [progress,  setProgress]  = useState(0);
+  const [uploadErr, setUploadErr] = useState(null);
+  const dropRef  = useRef(null);
+  const inputRef = useRef(null);
+
+  const load = useCallback(() => {
+    api(`/teams/${teamId}/files`)
+      .then(data => setFiles(Array.isArray(data) ? data : []))
+      .catch(() => setFiles([]));
+    api(`/teams/${teamId}/files/usage`)
+      .then(data => setUsage(data))
+      .catch(() => {});
+  }, [teamId, api]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleUpload = useCallback(async (fileObj) => {
+    if (!fileObj) return;
+    if (fileObj.size > MAX_UPLOAD_SIZE) {
+      setUploadErr(`El archivo supera el límite de ${MAX_UPLOAD_SIZE / 1024 / 1024} MB.`);
+      return;
+    }
+    setUploading(true);
+    setProgress(0);
+    setUploadErr(null);
+
+    const base = getApiBaseUrl();
+    const fd = new FormData();
+    fd.append('file', fileObj);
+
+    await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${base}/teams/${teamId}/files`);
+      xhr.withCredentials = true;
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100));
+      };
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) resolve();
+        else {
+          try { reject(new Error(JSON.parse(xhr.responseText).error || `HTTP ${xhr.status}`)); }
+          catch { reject(new Error(`HTTP ${xhr.status}`)); }
+        }
+      };
+      xhr.onerror = () => reject(new Error('Error de red'));
+      xhr.send(fd);
+    }).then(() => {
+      load();
+    }).catch(err => {
+      setUploadErr(err.message);
+    }).finally(() => {
+      setUploading(false);
+      setProgress(0);
+    });
+  }, [teamId, api, load]);
+
+  const handleDelete = useCallback(async (fileId) => {
+    try {
+      await api(`/teams/${teamId}/files/${fileId}`, { method: 'DELETE' });
+      setFiles(prev => prev.filter(f => f.id !== fileId));
+      // Refresh usage counters after delete
+      api(`/teams/${teamId}/files/usage`).then(setUsage).catch(() => {});
+    } catch (err) {
+      setUploadErr(err.message);
+    }
+  }, [teamId, api]);
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    setIsDrag(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) handleUpload(f);
+  };
+
+  const allFiles  = files ?? [];
+  const categories = ['all', 'image', 'video', 'audio', 'pdf', 'default'];
+  const catLabels  = { all: 'Todo', image: 'Imágenes', video: 'Vídeos', audio: 'Audio', pdf: 'PDFs', default: 'Otros' };
+
+  const filtered = filter === 'all' ? allFiles : allFiles.filter(f => getFileCategory(f.original_name) === filter);
+  const images   = filtered.filter(f => getFileCategory(f.original_name) === 'image');
+  const others   = filtered.filter(f => getFileCategory(f.original_name) !== 'image');
+
+  if (files === null) {
+    return (
+      <div className="p-6 sm:p-8 space-y-3">
+        {[1,2,3].map(i => <div key={i} className="h-16 bg-stone-100 dark:bg-stone-800 animate-pulse" />)}
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      ref={dropRef}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className={`p-6 sm:p-8 space-y-6 relative ${isDrag && isAdmin ? 'outline-2 outline-dashed outline-blue-500 outline-offset-[-4px]' : ''}`}
+      onDragOver={isAdmin ? (e) => { e.preventDefault(); setIsDrag(true); } : undefined}
+      onDragLeave={isAdmin ? (e) => { if (!dropRef.current?.contains(e.relatedTarget)) setIsDrag(false); } : undefined}
+      onDrop={isAdmin ? onDrop : undefined}
+    >
+      {/* Drag overlay */}
+      {isDrag && isAdmin && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-blue-50/80 dark:bg-blue-950/50 pointer-events-none">
+          <div className="flex flex-col items-center gap-3 p-10 border-2 border-dashed border-blue-500">
+            <UploadCloud className="h-10 w-10 text-blue-500" />
+            <p className="font-semibold text-blue-600 dark:text-blue-400">{t('myTeam.files.dropHere')}</p>
+            <p className="text-xs text-blue-500">{t('myTeam.files.maxSize')}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Storage usage gauges */}
+      {usage && (
+        <StorageGauges usage={usage} />
+      )}
+
+      {/* Admin upload area */}
+      {isAdmin && (
+        <div className="border-2 border-dashed border-stone-200 dark:border-stone-700 p-5">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-10 h-10 bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
+                <UploadCloud className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">{t('myTeam.files.uploadTitle')}</p>
+                <p className="text-xs text-stone-400">Cloudflare R2 · Máx. 50 MB · Arrastra o selecciona</p>
+              </div>
+            </div>
+            <input
+              ref={inputRef}
+              type="file"
+              className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.target.value = ''; }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={uploading}
+              onClick={() => inputRef.current?.click()}
+              className="gap-2 shrink-0"
+            >
+              {uploading
+                ? <><span className="h-3.5 w-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" /> Subiendo {progress}%</>
+                : <><UploadCloud className="h-3.5 w-3.5" /> Seleccionar</>
+              }
+            </Button>
+          </div>
+          {uploading && (
+            <div className="mt-3 h-1.5 w-full bg-stone-100 dark:bg-stone-800">
+              <div
+                className="h-full bg-violet-500 transition-all duration-200"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          )}
+          {uploadErr && (
+            <p className="mt-2 text-xs text-red-500 flex items-center gap-1.5">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />{uploadErr}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Filter pills */}
+      <div className="flex gap-2 flex-wrap">
+        {categories.map(cat => (
+          <button
+            key={cat}
+            type="button"
+            onClick={() => setFilter(cat)}
+            className={`px-3 py-1.5 text-xs font-semibold border-2 transition-colors ${
+              filter === cat
+                ? 'bg-stone-900 dark:bg-stone-50 text-white dark:text-stone-900 border-stone-900 dark:border-stone-50'
+                : 'border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:border-stone-400 dark:hover:border-stone-500'
+            }`}
+          >
+            {catLabels[cat]}
+            {cat !== 'all' && (
+              <span className="ml-1.5 opacity-60">
+                {allFiles.filter(f => getFileCategory(f.original_name) === cat).length}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="py-20 text-center border-2 border-dashed border-stone-200 dark:border-stone-800">
+          <FolderOpen className="h-10 w-10 mx-auto mb-3 text-stone-300 dark:text-stone-700" />
+          <p className="text-sm text-stone-400 font-medium">
+            {isAdmin ? 'Sin archivos. Sube el primero.' : 'Sin archivos compartidos'}
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Image grid */}
+          {images.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-3">Imágenes · {images.length}</p>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                {images.map((f) => (
+                  <div key={f.id} className="relative group aspect-square overflow-hidden border-2 border-stone-200 dark:border-stone-800 hover:border-stone-400 dark:hover:border-stone-600 transition-colors">
+                    <button
+                      type="button"
+                      onClick={() => setLightbox(f.signed_url || f.url)}
+                      className="h-full w-full"
+                    >
+                      <img src={f.signed_url || f.url} alt={f.original_name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    </button>
+                    {isAdmin && (
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(f.id)}
+                        className="absolute top-1 right-1 p-1 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* File list */}
+          {others.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-3">Archivos · {others.length}</p>
+              <div className="border-2 border-stone-200 dark:border-stone-800 divide-y divide-stone-100 dark:divide-stone-800 overflow-hidden">
+                {others.map((f) => {
+                  const cat = getFileCategory(f.original_name);
+                  const FileIcon = FILE_ICONS[cat] ?? FILE_ICONS.default;
+                  return (
+                    <div key={f.id} className="flex items-center gap-3 px-4 py-3 hover:bg-stone-50 dark:hover:bg-stone-900 transition-colors group">
+                      <div className="w-9 h-9 bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0">
+                        <FileIcon className="h-4 w-4 text-stone-500 dark:text-stone-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">{f.original_name}</p>
+                        <p className="text-xs text-stone-400">
+                          {f.uploader?.first_name ?? 'Admin'}
+                          {f.size && ` · ${fmtSize(f.size)}`}
+                          {f.created_at && ` · ${new Date(f.created_at).toLocaleDateString()}`}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <a
+                          href={f.signed_url || f.url}
+                          download={f.original_name}
+                          onClick={e => e.stopPropagation()}
+                          className="p-2 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+                        >
+                          <Download className="h-4 w-4" />
+                        </a>
+                        {isAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(f.id)}
+                            className="p-2 text-stone-400 hover:text-red-500"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Lightbox */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 cursor-zoom-out"
+          onClick={() => setLightbox(null)}
+        >
+          <img src={lightbox} alt="" className="max-h-full max-w-full object-contain" onClick={e => e.stopPropagation()} />
+          <button type="button" onClick={() => setLightbox(null)} className="absolute top-4 right-4 text-white/70 hover:text-white">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
+// ── Activity Tab ──────────────────────────────────────────────────────────────
+
+const ActivityItem = ({ icon: Icon, iconBg, iconColor, title, subtitle, time }) => (
+  <div className="flex gap-4">
+    <div className="flex flex-col items-center">
+      <div className={`w-9 h-9 ${iconBg} flex items-center justify-center shrink-0`}>
+        <Icon className={`h-4 w-4 ${iconColor}`} />
+      </div>
+      <div className="flex-1 w-px bg-stone-200 dark:bg-stone-800 mt-1" />
+    </div>
+    <div className="pb-6">
+      <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">{title}</p>
+      {subtitle && <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{subtitle}</p>}
+      <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">{time}</p>
+    </div>
+  </div>
+);
+
+const fmtDate = (d) => new Date(d).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const ActivityTab = ({ team, members, registrations, competitions }) => {
+  const { t } = useTranslation();
+  const events = useMemo(() => {
+    const list = [];
+
+    // Team created
+    list.push({
+      key: 'team-created',
+      icon: Flag,
+      iconBg: 'bg-violet-100 dark:bg-violet-900/30',
+      iconColor: 'text-violet-600 dark:text-violet-400',
+      title: `Equipo "${team.name}" creado`,
+      subtitle: null,
+      time: fmtDate(team.created_at),
+      ts: new Date(team.created_at).getTime(),
+    });
+
+    // Members joined
+    members.forEach(m => {
+      if (m.joined_at) {
+        list.push({
+          key: `member-${m.id}`,
+          icon: UserCheck,
+          iconBg: 'bg-emerald-100 dark:bg-emerald-900/30',
+          iconColor: 'text-emerald-600 dark:text-emerald-400',
+          title: `${m.username ?? m.name} se unió al equipo`,
+          subtitle: m.role === 'owner' ? 'Propietario' : null,
+          time: fmtDate(m.joined_at),
+          ts: new Date(m.joined_at).getTime(),
+        });
+      }
+    });
+
+    // Competition registrations
+    registrations.forEach(r => {
+      const comp = competitions.find(c => c.id === r.competition_id);
+      list.push({
+        key: `reg-${r.id}`,
+        icon: Trophy,
+        iconBg: 'bg-amber-100 dark:bg-amber-900/30',
+        iconColor: 'text-amber-600 dark:text-amber-400',
+        title: `Inscripción a "${comp?.title ?? `Competición #${r.competition_id}`}"`,
+        subtitle: r.status === 'approved' ? 'Aprobada' : r.status === 'pending' ? 'Pendiente de aprobación' : r.status,
+        time: fmtDate(r.created_at ?? r.registered_at),
+        ts: new Date(r.created_at ?? r.registered_at).getTime(),
+      });
+    });
+
+    return list.sort((a, b) => b.ts - a.ts);
+  }, [team, members, registrations, competitions]);
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="p-6 sm:p-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-9 h-9 bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+          <Activity className="h-4 w-4 text-stone-600 dark:text-stone-400" />
+        </div>
+        <div>
+          <h2 className="font-display font-bold text-stone-900 dark:text-stone-50">Historial de actividad</h2>
+          <p className="text-xs text-stone-500">{events.length} eventos registrados</p>
+        </div>
+      </div>
+
+      {events.length === 0 ? (
+        <div className="py-20 text-center border-2 border-dashed border-stone-200 dark:border-stone-800">
+          <Activity className="h-10 w-10 mx-auto mb-3 text-stone-300 dark:text-stone-700" />
+          <p className="text-sm text-stone-400 font-medium">{t('myTeam.activity.empty')}</p>
+        </div>
+      ) : (
+        <div>
+          {events.map((ev, i) => (
+            <div key={ev.key} className={i === events.length - 1 ? '[&_.w-px]:hidden' : ''}>
+              <ActivityItem {...ev} />
+            </div>
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
 // ── Main component ──────────────────────────────────────────────────────────
 
 const MyTeam = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { refreshTeamStatus } = useTeamContext();
+  const features = useFeatures();
   const api = useApi();
   const { mine, update, invite, remove, listRequests, approveRequest, getMembers, removeMember, leave } = useTeams();
   const { list: listRegistrations, create: createRegistration, remove: removeRegistration } = useRegistrations();
@@ -464,6 +1013,7 @@ const MyTeam = () => {
   const [saving, setSaving] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, type: null, payload: null });
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
@@ -580,6 +1130,16 @@ const MyTeam = () => {
     }
   };
 
+  const onRoleChange = async (memberId, newRole) => {
+    try {
+      await api(`/team-members/${memberId}`, { method: 'PUT', body: { role: newRole } });
+      setMembers(prev => prev.map(m => m.id === memberId ? { ...m, role: newRole } : m));
+      showToast(newRole === 'admin' ? 'Miembro promovido a admin' : 'Admin degradado a miembro');
+    } catch (err) {
+      showToast(err.message || 'Error al cambiar rol', 'error');
+    }
+  };
+
   const onLeave = async () => {
     try {
       await leave();
@@ -603,6 +1163,17 @@ const MyTeam = () => {
   };
 
   const registeredCompIds = useMemo(() => new Set(registrations.map(r => r.competition_id)), [registrations]);
+  const approvedRegs = useMemo(() => registrations.filter(r => r.status === 'approved'), [registrations]);
+  const pendingRegs = useMemo(() => registrations.filter(r => r.status === 'pending'), [registrations]);
+  const adminCount = useMemo(() => members.filter(m => m.role === 'admin').length, [members]);
+
+  const copyTeamLink = async () => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/teams/${team.id}`);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    } catch { /* ignore */ }
+  };
   const filteredCompetitions = useMemo(() =>
     competitions.filter(c => c.title?.toLowerCase().includes(compSearch.toLowerCase())),
     [competitions, compSearch]
@@ -678,12 +1249,12 @@ const MyTeam = () => {
   // ── Loading state ─────────────────────────────────────────────────────
   if (!loaded) {
     return (
-      <div className="space-y-6 py-8 max-w-4xl mx-auto">
-        <Skeleton className="h-32 w-full rounded-2xl" />
+      <div className="space-y-6 py-8 max-w-6xl mx-auto">
+        <Skeleton className="h-32 w-full" />
         <div className="flex gap-3">
-          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-10 w-24 rounded-lg" />)}
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-10 w-24" />)}
         </div>
-        <Skeleton className="h-72 w-full rounded-2xl" />
+        <Skeleton className="h-72 w-full" />
       </div>
     );
   }
@@ -691,7 +1262,7 @@ const MyTeam = () => {
   // ── No team ────────────────────────────────────────────────────────────
   if (!team) return <Navigate to="/" replace />;
 
-  const tabItems = tabConfig(t, isOwner);
+  const tabItems = tabConfig(t, isOwner, features.r2);
 
   // ── Main render ────────────────────────────────────────────────────────
   return (
@@ -699,7 +1270,7 @@ const MyTeam = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="max-w-5xl mx-auto space-y-8"
+      className="max-w-6xl mx-auto space-y-8"
     >
       <InlineToast toast={toast} />
 
@@ -708,13 +1279,13 @@ const MyTeam = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="relative rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 overflow-hidden"
+        className="relative border-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 overflow-hidden"
       >
         <div className="p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
             <div className="flex items-center gap-5">
               {/* Team initials badge */}
-              <div className="w-16 h-16 rounded-2xl bg-stone-900 dark:bg-stone-50 flex items-center justify-center text-white dark:text-stone-900 font-display font-bold text-xl shrink-0 shadow-lg shadow-stone-900/20 dark:shadow-stone-50/10">
+              <div className="w-16 h-16 bg-stone-900 dark:bg-stone-50 flex items-center justify-center text-white dark:text-stone-900 font-display font-bold text-xl shrink-0">
                 {team.name.slice(0, 2).toUpperCase()}
               </div>
               <div>
@@ -727,7 +1298,7 @@ const MyTeam = () => {
                     <motion.div
                       animate={{ opacity: [1, 0.5, 1] }}
                       transition={{ duration: 1.5, repeat: Infinity }}
-                      className="flex items-center gap-1.5 px-2.5 py-1 bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-bold rounded-full border border-red-200 dark:border-red-800"
+                      className="flex items-center gap-1.5 px-2.5 py-1 bg-cyan-100 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400 text-xs font-bold border-2 border-cyan-200 dark:border-cyan-800"
                     >
                       <Wifi className="h-3 w-3" /> LIVE
                     </motion.div>
@@ -774,7 +1345,7 @@ const MyTeam = () => {
               className={`
                 relative flex items-center gap-2 px-5 py-3 text-sm font-medium
                 whitespace-nowrap shrink-0 transition-all duration-200
-                rounded-t-xl border border-b-0
+                border-2 border-b-0
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-inset
                 ${activeTab === id
                   ? 'text-stone-900 dark:text-stone-50 bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800 -mb-px z-10'
@@ -784,11 +1355,16 @@ const MyTeam = () => {
             >
               <Icon className="h-4 w-4 shrink-0" />
               <span>{label}</span>
+              {id === 'members' && requests.length > 0 && (
+                <span className="flex items-center justify-center h-4 w-4 text-[10px] font-bold bg-blue-600 text-white shrink-0">
+                  {requests.length}
+                </span>
+              )}
             </button>
           ))}
         </motion.div>
 
-        <div className="rounded-2xl rounded-tl-none border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 overflow-hidden">
+        <div className="border-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 overflow-hidden">
 
           {/* ────────────────── OVERVIEW ────────────────── */}
           <TabsContent value="overview">
@@ -801,13 +1377,15 @@ const MyTeam = () => {
               {/* Stats grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatCard label={t('myTeam.overview.membersCount')} value={members.length} Icon={Users} delay={0.05} />
+                <StatCard label="Admins" value={adminCount} Icon={Shield} delay={0.08} />
                 <StatCard label={t('myTeam.overview.compsCount')} value={registrations.length} Icon={Trophy} delay={0.1} />
+                <StatCard label="Aprobadas" value={approvedRegs.length} Icon={Check} delay={0.13} />
               </div>
 
               {/* About */}
               <div>
                 <h2 className="font-display font-bold text-stone-900 dark:text-stone-50 mb-3">{t('myTeam.overview.about')}</h2>
-                <div className="rounded-xl bg-stone-50 dark:bg-stone-900 p-5 border border-stone-100 dark:border-stone-800">
+                <div className="bg-stone-50 dark:bg-stone-900 p-5 border-2 border-stone-100 dark:border-stone-800">
                   <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
                     {team.description || <span className="italic text-stone-400">{t('myTeam.overview.noDesc')}</span>}
                   </p>
@@ -817,6 +1395,46 @@ const MyTeam = () => {
                     </a>
                   )}
                 </div>
+              </div>
+
+              {/* Quick info row */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* Team link */}
+                <div className="border-2 border-stone-200 dark:border-stone-800 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-2">Enlace del equipo</p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 text-xs bg-stone-50 dark:bg-stone-900 px-3 py-2 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 truncate font-mono">
+                      /teams/{team.id}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={copyTeamLink}
+                      className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-2 border-stone-200 dark:border-stone-700 hover:border-stone-900 dark:hover:border-stone-400 transition-colors text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-50 shrink-0"
+                    >
+                      {copiedLink ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                      {copiedLink ? 'Copiado' : 'Copiar'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Pending registrations */}
+                {pendingRegs.length > 0 && (
+                  <div className="border-2 border-amber-200 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-950/10 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-2 flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5" /> Inscripciones pendientes
+                    </p>
+                    <div className="space-y-1.5">
+                      {pendingRegs.slice(0, 3).map(r => {
+                        const comp = competitions.find(c => c.id === r.competition_id);
+                        return (
+                          <p key={r.id} className="text-xs text-amber-700 dark:text-amber-300 truncate">
+                            · {comp?.title ?? `Competición #${r.competition_id}`}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           </TabsContent>
@@ -840,7 +1458,7 @@ const MyTeam = () => {
                   </div>
                   <Badge variant="secondary" className="text-xs">{members.length}</Badge>
                 </div>
-                <div className="rounded-xl border border-stone-200 dark:border-stone-800 overflow-hidden">
+                <div className="border-2 border-stone-200 dark:border-stone-800 overflow-hidden">
                   <div className="divide-y divide-stone-100 dark:divide-stone-800">
                     {members.length === 0 ? (
                       <div className="px-5 py-12 text-center">
@@ -848,7 +1466,7 @@ const MyTeam = () => {
                         <p className="text-sm text-stone-400">{t('myTeam.members.noMembers')}</p>
                       </div>
                     ) : members.map((m, i) => (
-                      <MemberRow key={m.id} member={m} isOwner={isOwner} onRemove={(id) => openConfirmDialog('remove-member', id)} t={t} index={i} />
+                      <MemberRow key={m.id} member={m} isOwner={isOwner} onRemove={(id) => openConfirmDialog('remove-member', id)} onRoleChange={onRoleChange} t={t} index={i} />
                     ))}
                   </div>
                 </div>
@@ -858,9 +1476,9 @@ const MyTeam = () => {
               {isOwner && (
                 <div className="grid gap-6 lg:grid-cols-2">
                   {/* Invite */}
-                  <div className="rounded-xl border border-stone-200 dark:border-stone-800 p-6">
+                  <div className="border-2 border-stone-200 dark:border-stone-800 p-6">
                     <div className="flex items-center gap-3 mb-5">
-                      <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
+                      <div className="w-9 h-9 bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
                         <UserPlus className="h-4.5 w-4.5 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div>
@@ -884,7 +1502,7 @@ const MyTeam = () => {
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -4 }}
                               transition={{ duration: 0.15 }}
-                              className="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden divide-y divide-stone-100 dark:divide-stone-800 max-h-36 overflow-y-auto"
+                              className="border-2 border-stone-200 dark:border-stone-700 overflow-hidden divide-y divide-stone-100 dark:divide-stone-800 max-h-36 overflow-y-auto"
                             >
                               {candidates.map(u => (
                                 <div key={u.id} className="flex items-center justify-between px-4 py-2.5 text-sm hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors">
@@ -916,10 +1534,10 @@ const MyTeam = () => {
                   </div>
 
                   {/* Join requests */}
-                  <div className="rounded-xl border border-stone-200 dark:border-stone-800 p-6">
+                  <div className="border-2 border-stone-200 dark:border-stone-800 p-6">
                     <div className="flex items-center justify-between mb-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center">
+                        <div className="w-9 h-9 bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center">
                           <Clock className="h-4.5 w-4.5 text-amber-600 dark:text-amber-400" />
                         </div>
                         <div>
@@ -931,7 +1549,7 @@ const MyTeam = () => {
                         <Badge className="bg-blue-600 text-white text-xs">{requests.length}</Badge>
                       )}
                     </div>
-                    <div className="rounded-xl border border-stone-200 dark:border-stone-800 overflow-hidden">
+                    <div className="border-2 border-stone-200 dark:border-stone-800 overflow-hidden">
                       <div className="divide-y divide-stone-100 dark:divide-stone-800">
                         {requests.length === 0 ? (
                           <div className="px-5 py-8 text-center">
@@ -947,7 +1565,7 @@ const MyTeam = () => {
                             {r.status === 'pending' && (
                               <button
                                 onClick={() => onApprove(r.id)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold transition-colors"
                               >
                                 <Check className="h-3.5 w-3.5" /> {t('myTeam.actions.approve')}
                               </button>
@@ -967,9 +1585,9 @@ const MyTeam = () => {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="p-6 sm:p-8 space-y-8">
               {/* Register */}
               {isOwner && (
-                <div className="rounded-xl border border-stone-200 dark:border-stone-800 p-6">
+                <div className="border-2 border-stone-200 dark:border-stone-800 p-6">
                   <div className="flex items-center gap-3 mb-5">
-                    <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center">
+                    <div className="w-9 h-9 bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center">
                       <Zap className="h-4.5 w-4.5 text-amber-600 dark:text-amber-400" />
                     </div>
                     <div>
@@ -995,7 +1613,7 @@ const MyTeam = () => {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -4 }}
                           transition={{ duration: 0.15 }}
-                          className="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden divide-y divide-stone-100 dark:divide-stone-800 max-h-52 overflow-y-auto"
+                          className="border-2 border-stone-200 dark:border-stone-700 overflow-hidden divide-y divide-stone-100 dark:divide-stone-800 max-h-52 overflow-y-auto"
                         >
                           {filteredCompetitions.length === 0 ? (
                             <p className="px-4 py-4 text-xs text-stone-400 text-center">{t('myTeam.competitions.noResults')}</p>
@@ -1050,12 +1668,12 @@ const MyTeam = () => {
               <div>
                 <h2 className="font-display font-bold text-stone-900 dark:text-stone-50 mb-4">{t('myTeam.competitions.activeTitle')}</h2>
                 {registrations.length === 0 ? (
-                  <div className="py-16 text-center rounded-xl border border-dashed border-stone-200 dark:border-stone-800">
+                  <div className="py-16 text-center border-2 border-dashed border-stone-200 dark:border-stone-800">
                     <Trophy className="h-10 w-10 mx-auto mb-3 text-stone-300 dark:text-stone-700" />
                     <p className="text-sm text-stone-400 font-medium">{t('myTeam.competitions.noRegistrations')}</p>
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-stone-200 dark:border-stone-800 overflow-hidden divide-y divide-stone-100 dark:divide-stone-800">
+                  <div className="border-2 border-stone-200 dark:border-stone-800 overflow-hidden divide-y divide-stone-100 dark:divide-stone-800">
                     {registrations.map((r, i) => (
                       <RegistrationRow
                         key={r.id}
@@ -1074,6 +1692,21 @@ const MyTeam = () => {
             </motion.div>
           </TabsContent>
 
+          {/* ────────────────── FILES ────────────────── */}
+          <TabsContent value="files">
+            <FilesTab teamId={team.id} api={api} isAdmin={isOwner} />
+          </TabsContent>
+
+          {/* ────────────────── ACTIVITY ────────────────── */}
+          <TabsContent value="activity">
+            <ActivityTab
+              team={team}
+              members={members}
+              registrations={registrations}
+              competitions={competitions}
+            />
+          </TabsContent>
+
           {/* ────────────────── SETTINGS ────────────────── */}
           {isOwner && (
             <TabsContent value="settings">
@@ -1081,7 +1714,7 @@ const MyTeam = () => {
                 {/* Edit info */}
                 <div>
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-9 h-9 rounded-xl bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+                    <div className="w-9 h-9 bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
                       <Pencil className="h-4.5 w-4.5 text-stone-600 dark:text-stone-400" />
                     </div>
                     <div>
@@ -1137,7 +1770,7 @@ const MyTeam = () => {
                 {/* Streaming */}
                 <div>
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
+                    <div className="w-9 h-9 bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
                       <Video className="h-4.5 w-4.5 text-red-600 dark:text-red-400" />
                     </div>
                     <div>
@@ -1151,11 +1784,11 @@ const MyTeam = () => {
                       <Input value={form.stream_url} onChange={e => setForm({ ...form, stream_url: e.target.value })} placeholder="https://twitch.tv/..." className="flex-1" />
                       <Button variant="outline" onClick={onSave} type="button">{t('myTeam.form.saveUrl')}</Button>
                     </div>
-                    <div className="flex items-center justify-between p-5 bg-stone-50 dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800">
+                    <div className="flex items-center justify-between p-5 bg-stone-50 dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-800">
                       <div className="flex items-center gap-3">
                         {activeStream
                           ? <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.2, repeat: Infinity }} className="w-3 h-3 rounded-full bg-red-500" />
-                          : <div className="w-3 h-3 rounded-full bg-stone-300 dark:bg-stone-600" />
+                          : <div className="w-3 h-3 bg-stone-300 dark:bg-stone-600" />
                         }
                         <div>
                           <p className="text-sm font-semibold text-stone-900 dark:text-stone-50">{t('myTeam.settings.streamStatus')}</p>
@@ -1175,7 +1808,7 @@ const MyTeam = () => {
                 <div className="border-b border-stone-100 dark:border-stone-800" />
 
                 {/* Danger zone */}
-                <div className="rounded-xl border-2 border-red-200 dark:border-red-900/50 overflow-hidden">
+                <div className="border-2 border-red-200 dark:border-red-900/50 overflow-hidden">
                   <div className="px-6 py-4 bg-red-50 dark:bg-red-950/20 border-b-2 border-red-200 dark:border-red-900/50">
                     <h3 className="font-display font-bold text-red-700 dark:text-red-400 text-sm">{t('myTeam.settings.dangerZone')}</h3>
                   </div>

@@ -107,7 +107,7 @@ const OnboardingTour = ({ isAuthenticated }) => {
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) skipTour(); }}>
-      <DialogContent className="sm:max-w-xl p-0 overflow-hidden bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800">
+      <DialogContent className="sm:max-w-xl p-0 overflow-hidden bg-white dark:bg-stone-950 border-2 border-stone-200 dark:border-stone-800">
         <div className="px-8 pt-8 pb-2">
           {/* Top bar: progress label + skip */}
           <DialogHeader>
@@ -117,7 +117,7 @@ const OnboardingTour = ({ isAuthenticated }) => {
               </span>
               <button
                 onClick={skipTour}
-                className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-stone-400 transition-colors duration-150 hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+                className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-stone-400 transition-colors duration-150 hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300"
               >
                 <X className="h-3 w-3" />
                 {t('tour.skip') || 'Saltar tour'}
@@ -125,9 +125,9 @@ const OnboardingTour = ({ isAuthenticated }) => {
             </div>
 
             {/* Solid progress bar */}
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
+            <div className="h-1.5 w-full overflow-hidden bg-stone-100 dark:bg-stone-800">
               <div
-                className="h-full rounded-full bg-blue-600 dark:bg-blue-500 transition-all duration-300 ease-out"
+                className="h-full bg-stone-900 dark:bg-stone-50 dark:bg-blue-500 transition-all duration-300 ease-out"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -137,7 +137,7 @@ const OnboardingTour = ({ isAuthenticated }) => {
         <div className="px-8 pb-4 pt-4">
           <div className="space-y-5">
             {/* Icon in bordered circle */}
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl border-2 border-stone-200 text-stone-700 dark:border-stone-700 dark:text-stone-300">
+            <div className="flex h-14 w-14 items-center justify-center border-2 border-stone-200 text-stone-700 dark:border-stone-700 dark:text-stone-300">
               <Icon className="h-7 w-7" />
             </div>
 
@@ -159,7 +159,7 @@ const OnboardingTour = ({ isAuthenticated }) => {
             {/* Action buttons */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
               {step > 0 && (
-                <Button variant="ghost" size="lg" className="rounded-lg" onClick={goPrev}>
+                <Button variant="ghost" size="lg" className="" onClick={goPrev}>
                   {t('actions.back') || 'Atras'}
                 </Button>
               )}
@@ -168,7 +168,7 @@ const OnboardingTour = ({ isAuthenticated }) => {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="rounded-lg border-stone-200 dark:border-stone-700"
+                  className="border-stone-200 dark:border-stone-700"
                   onClick={() => {
                     navigate(current.cta.to);
                     setOpen(false);
@@ -184,7 +184,7 @@ const OnboardingTour = ({ isAuthenticated }) => {
                 <Button
                   size="lg"
                   onClick={goNext}
-                  className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-stone-900 hover:bg-stone-800 text-white"
                 >
                   {t('actions.next') || 'Siguiente'}
                 </Button>
@@ -192,7 +192,7 @@ const OnboardingTour = ({ isAuthenticated }) => {
                 <Button
                   size="lg"
                   onClick={finishTour}
-                  className="gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                  className="gap-2 bg-stone-900 hover:bg-stone-800 text-white"
                 >
                   <CheckCircle2 className="h-4 w-4" /> {t('tour.finish') || 'Empezar'}
                 </Button>

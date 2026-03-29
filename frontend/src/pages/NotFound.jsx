@@ -35,7 +35,7 @@ const NotFound = () => {
       {/* Robot icon */}
       <motion.div
         {...(reduceMotion ? {} : { ...fadeProps, transition: { ...fadeProps.transition, delay: 0.05 } })}
-        className="my-6 flex h-24 w-24 items-center justify-center rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900"
+        className="my-6 flex h-24 w-24 items-center justify-center border-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900"
       >
         <Bot className="h-12 w-12 text-blue-600 dark:text-blue-500" />
       </motion.div>
@@ -84,7 +84,7 @@ const NotFound = () => {
       >
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-6 py-3 text-sm font-semibold text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800"
+          className="inline-flex items-center gap-2 border-2 border-stone-200 bg-white px-6 py-3 text-sm font-semibold text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800"
         >
           <ArrowLeft size={18} />
           {t('notFound.goBack')}
@@ -92,7 +92,7 @@ const NotFound = () => {
 
         <Link
           to="/"
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+          className="inline-flex items-center gap-2 bg-stone-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-stone-800"
         >
           <Home size={18} />
           {t('notFound.goHome') || t('notFound.backHome')}

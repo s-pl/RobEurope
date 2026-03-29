@@ -37,7 +37,7 @@ const ImageGallery = ({ urls, onImageClick }) => {
 
   if (urls.length === 1) {
     return (
-      <div className="mt-4 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 cursor-pointer" onClick={() => onImageClick(0)}>
+      <div className="mt-4 overflow-hidden border-2 border-stone-200 dark:border-stone-800 cursor-pointer" onClick={() => onImageClick(0)}>
         <img src={resolveMediaUrl(urls[0])} alt="" className="w-full h-auto max-h-[500px] object-cover transition-transform hover:scale-[1.01]" loading="lazy" />
       </div>
     );
@@ -45,7 +45,7 @@ const ImageGallery = ({ urls, onImageClick }) => {
 
   if (urls.length === 2) {
     return (
-      <div className="mt-4 grid grid-cols-2 gap-1 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800">
+      <div className="mt-4 grid grid-cols-2 gap-1 overflow-hidden border-2 border-stone-200 dark:border-stone-800">
         {urls.map((url, i) => (
           <div key={i} className="cursor-pointer aspect-[4/3] overflow-hidden" onClick={() => onImageClick(i)}>
             <img src={resolveMediaUrl(url)} alt="" className="w-full h-full object-cover transition-transform hover:scale-105" loading="lazy" />
@@ -57,7 +57,7 @@ const ImageGallery = ({ urls, onImageClick }) => {
 
   // 3+ images: first large, rest in grid
   return (
-    <div className="mt-4 grid grid-cols-2 gap-1 rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800">
+    <div className="mt-4 grid grid-cols-2 gap-1 overflow-hidden border-2 border-stone-200 dark:border-stone-800">
       <div className="col-span-2 cursor-pointer aspect-video overflow-hidden" onClick={() => onImageClick(0)}>
         <img src={resolveMediaUrl(urls[0])} alt="" className="w-full h-full object-cover transition-transform hover:scale-105" loading="lazy" />
       </div>
@@ -113,7 +113,7 @@ const Lightbox = ({ urls, currentIndex, onClose, onNext, onPrev }) => {
       <img
         src={resolveMediaUrl(urls[currentIndex])}
         alt=""
-        className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
+        className="max-w-[90vw] max-h-[90vh] object-contain"
         onClick={(e) => e.stopPropagation()}
       />
       {urls.length > 1 && (
@@ -133,7 +133,7 @@ const Lightbox = ({ urls, currentIndex, onClose, onNext, onPrev }) => {
 const HeartButton = ({ liked, count, onClick }) => (
   <button
     onClick={onClick}
-    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all duration-200 ${
+    className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm transition-all duration-200 ${
       liked
         ? 'text-red-500'
         : 'text-stone-400 hover:text-red-500 hover:bg-stone-50 dark:hover:bg-stone-800/50'
@@ -163,7 +163,7 @@ const CommentItem = ({ comment, user, isAuthenticated, onReply, onDelete, t, dep
       animate={{ opacity: 1, y: 0 }}
       className={`flex gap-3 py-3 ${depth > 0 ? 'ml-10 border-l-2 border-stone-100 dark:border-stone-800 pl-4' : ''}`}
     >
-      <div className="h-7 w-7 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden flex-shrink-0 border border-stone-200 dark:border-stone-700">
+      <div className="h-7 w-7 bg-stone-100 dark:bg-stone-800 overflow-hidden flex-shrink-0 border-2 border-stone-200 dark:border-stone-700">
         {comment.User?.profile_photo_url ? (
           <img src={resolveMediaUrl(comment.User.profile_photo_url)} alt="" className="h-full w-full object-cover" />
         ) : (
@@ -230,7 +230,7 @@ const ImageUploadPreview = ({ images, onRemove }) => {
   return (
     <div className="grid grid-cols-3 gap-2 mt-2">
       {images.map((img, i) => (
-        <div key={i} className="relative group rounded-lg overflow-hidden aspect-square bg-stone-100 dark:bg-stone-800">
+        <div key={i} className="relative group overflow-hidden aspect-square bg-stone-100 dark:bg-stone-800">
           <img src={URL.createObjectURL(img)} alt="" className="w-full h-full object-cover" />
           <button
             type="button"
@@ -661,7 +661,7 @@ const Posts = () => {
   const filteredPosts = posts.filter(p => activeTab === 'pinned' ? p.is_pinned : true);
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       {/* Page header */}
       <div className="pt-2 pb-8">
         <div className="flex items-center gap-3 mb-1">
@@ -669,7 +669,7 @@ const Posts = () => {
             {t('posts.title')}
           </h1>
           {editMode && (
-            <span className="text-xs px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 font-medium">
+            <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 font-medium">
               EDIT MODE
             </span>
           )}
@@ -691,7 +691,7 @@ const Posts = () => {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
             <input
               placeholder={t('posts.search')}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
+              className="w-full pl-9 pr-3 py-2 text-sm border-2 border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -703,7 +703,7 @@ const Posts = () => {
               if (!open) { setNewPost({ title: '', content: '' }); setNewImages([]); }
             }}>
               <DialogTrigger asChild>
-                <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors shrink-0">
+                <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-stone-900 text-white hover:bg-stone-800 transition-colors shrink-0">
                   <Plus className="h-4 w-4" /> {t('posts.create')}
                 </button>
               </DialogTrigger>
@@ -719,7 +719,7 @@ const Posts = () => {
                       value={newPost.title}
                       onChange={e => setNewPost({...newPost, title: e.target.value})}
                       required
-                      className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
+                      className="mt-1 w-full px-3 py-2 text-sm border-2 border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
                     />
                   </div>
                   <div>
@@ -730,7 +730,7 @@ const Posts = () => {
                           type="button"
                           onClick={rewriteCreate}
                           disabled={aiRewritingCreate}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/30 disabled:opacity-50 transition-colors border border-violet-200 dark:border-violet-800"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/30 disabled:opacity-50 transition-colors border-2 border-violet-200 dark:border-violet-800"
                         >
                           {aiRewritingCreate
                             ? <Loader2 className="h-3 w-3 animate-spin" />
@@ -763,7 +763,7 @@ const Posts = () => {
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
                       onClick={() => fileInputRef.current?.click()}
-                      className={`mt-1 flex flex-col items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${
+                      className={`mt-1 flex flex-col items-center justify-center gap-2 p-6 border-2 border-dashed cursor-pointer transition-colors ${
                         dragOver
                           ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
                           : 'border-stone-300 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-600'
@@ -798,7 +798,7 @@ const Posts = () => {
                     <button
                       type="submit"
                       disabled={creating || usedBytes > MAX_CONTENT_BYTES}
-                      className="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="px-4 py-2 text-sm font-medium bg-stone-900 text-white hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       {creating ? t('common.saving') : t('common.save')}
                     </button>
@@ -841,7 +841,7 @@ const Posts = () => {
                 {/* Post header */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-9 w-9 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden border border-stone-200 dark:border-stone-700 shrink-0">
+                    <div className="h-9 w-9 bg-stone-100 dark:bg-stone-800 overflow-hidden border-2 border-stone-200 dark:border-stone-700 shrink-0">
                       {post.User?.profile_photo_url ? (
                         <img src={resolveMediaUrl(post.User.profile_photo_url)} alt="" className="h-full w-full object-cover" />
                       ) : (
@@ -880,7 +880,7 @@ const Posts = () => {
                     {user?.role === 'super_admin' && (
                       <button
                         onClick={() => handlePin(post)}
-                        className="p-1.5 rounded-md text-stone-400 hover:text-blue-600 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                        className="p-1.5 text-stone-400 hover:text-blue-600 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                       >
                         <Pin className={`h-4 w-4 ${post.is_pinned ? 'fill-blue-600 text-blue-600' : ''}`} />
                         <span className="sr-only">{post.is_pinned ? t('posts.unpinned') : t('posts.pinned')}</span>
@@ -889,7 +889,7 @@ const Posts = () => {
                     {(user?.id === post.author_id || user?.role === 'super_admin') && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="p-1.5 rounded-md text-stone-400 hover:text-stone-600 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">
+                          <button className="p-1.5 text-stone-400 hover:text-stone-600 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">
                             <MoreVertical className="h-4 w-4" />
                             <span className="sr-only">{t('common.moreOptions') || 'More options'}</span>
                           </button>
@@ -915,7 +915,7 @@ const Posts = () => {
                     <input
                       value={editData.title}
                       onChange={e => setEditData(prev => ({ ...prev, title: e.target.value }))}
-                      className="w-full px-3 py-2 text-sm font-semibold rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
+                      className="w-full px-3 py-2 text-sm font-semibold border-2 border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
                     />
                     <RichTextEditor
                       value={editData.content}
@@ -927,7 +927,7 @@ const Posts = () => {
                           type="button"
                           onClick={rewriteEdit}
                           disabled={aiRewritingEdit}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/30 disabled:opacity-50 transition-colors border border-violet-200 dark:border-violet-800"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/30 disabled:opacity-50 transition-colors border-2 border-violet-200 dark:border-violet-800"
                         >
                           {aiRewritingEdit
                             ? <Loader2 className="h-3 w-3 animate-spin" />
@@ -938,14 +938,14 @@ const Posts = () => {
                       <button
                         onClick={() => saveEdit(post.id)}
                         disabled={editSaving}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-stone-900 text-white hover:bg-stone-800 disabled:opacity-50 transition-colors"
                       >
                         {editSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
                         {t('common.save') || 'Guardar'}
                       </button>
                       <button
                         onClick={cancelEdit}
-                        className="px-3 py-1.5 text-sm font-medium rounded-lg text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                        className="px-3 py-1.5 text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                       >
                         {t('common.cancel') || 'Cancelar'}
                       </button>
@@ -957,7 +957,7 @@ const Posts = () => {
                       {post.title}
                     </h3>
                     <div
-                      className="prose dark:prose-invert prose-stone max-w-none text-stone-600 dark:text-stone-300 text-sm leading-relaxed mt-2 break-words [&_img]:rounded-lg [&_img]:max-h-[500px] [&_img]:w-auto [&_img]:mx-auto"
+                      className="prose dark:prose-invert prose-stone max-w-none text-stone-600 dark:text-stone-300 text-sm leading-relaxed mt-2 break-words [&_img]:rounded-none [&_img]:max-h-[500px] [&_img]:w-auto [&_img]:mx-auto"
                       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
                     />
                   </>
@@ -982,7 +982,7 @@ const Posts = () => {
                       />
                       <button
                         onClick={() => toggleComments(post.id)}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors ${
                           commentsExpanded
                             ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20'
                             : 'text-stone-400 hover:text-blue-600 hover:bg-stone-50 dark:hover:bg-stone-800/50'
@@ -994,7 +994,7 @@ const Posts = () => {
                       <div className="flex-1" />
                       <button
                         onClick={() => handleShare(post)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-stone-400 hover:text-blue-600 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-stone-400 hover:text-blue-600 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors"
                       >
                         <Share2 className="h-4 w-4" />
                       </button>
@@ -1056,7 +1056,7 @@ const Posts = () => {
                         {isAuthenticated && (
                           <form onSubmit={(e) => handleAddComment(e, post.id)} className="mt-3">
                             {replyTo?.postId === post.id && (
-                              <div className="flex items-center gap-2 mb-2 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-400">
+                              <div className="flex items-center gap-2 mb-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-xs text-blue-700 dark:text-blue-400">
                                 <Reply className="h-3 w-3" />
                                 <span>{t('posts.replyingTo') || 'Respondiendo a'} {replyTo.userName}</span>
                                 <button
@@ -1069,7 +1069,7 @@ const Posts = () => {
                               </div>
                             )}
                             <div className="flex gap-2">
-                              <div className="h-7 w-7 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden border border-stone-200 dark:border-stone-700 shrink-0">
+                              <div className="h-7 w-7 bg-stone-100 dark:bg-stone-800 overflow-hidden border-2 border-stone-200 dark:border-stone-700 shrink-0">
                                 {user?.profile_photo_url ? (
                                   <img src={resolveMediaUrl(user.profile_photo_url)} alt="" className="h-full w-full object-cover" />
                                 ) : (
@@ -1082,12 +1082,12 @@ const Posts = () => {
                                 value={newCommentText[post.id] || ''}
                                 onChange={(e) => setNewCommentText(prev => ({ ...prev, [post.id]: e.target.value }))}
                                 placeholder={replyTo?.postId === post.id ? (t('posts.writeReply') || 'Escribe una respuesta...') : (t('posts.writeComment') || 'Escribe un comentario...')}
-                                className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
+                                className="flex-1 px-3 py-1.5 text-sm border-2 border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
                               />
                               <button
                                 type="submit"
                                 disabled={!newCommentText[post.id]?.trim()}
-                                className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+                                className="p-2 bg-stone-900 text-white hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
                               >
                                 <Send className="h-4 w-4" />
                               </button>

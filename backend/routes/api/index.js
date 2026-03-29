@@ -23,7 +23,6 @@ import statsRouter from './stats.route.js';
 import authenticateToken from '../../middleware/auth.middleware.js';
 import adminApiRouter from './admin.route.js';
 import gdprRouter from './gdpr.route.js';
-import conversationsRouter from './conversations.route.js';
 import aiRouter from './ai.route.js';
 const router = express.Router();
 
@@ -48,6 +47,17 @@ router.get('/isAIActive', (req, res) => {
   res.json({ active: !!process.env.OPENROUTER_API_KEY });
 });
 
+// Public: feature flags — tells the frontend which optional features are enabled
+router.get('/features', (req, res) => {
+  const v = (k) => (process.env[k] || '').trim();
+  res.json({
+    r2: !!(v('R2_ACCOUNT_ID') && v('R2_ACCESS_KEY_ID') && v('R2_SECRET_ACCESS_KEY') && v('R2_BUCKET')),
+    ai: !!v('OPENROUTER_API_KEY'),
+    email: !!v('RESEND_API_KEY'),
+    push: !!(v('VAPID_PUBLIC_KEY') && v('VAPID_PRIVATE_KEY')),
+  });
+});
+
 // Protect all routes after this middleware: only authenticated users can access
 router.use(authenticateToken);
 
@@ -64,7 +74,6 @@ router.use('/system-logs', systemLogRouter);
 router.use('/robot-files', robotFilesRouter);
 router.use('/team-logs', teamLogsRouter);
 router.use('/admin', adminApiRouter);
-router.use('/conversations', conversationsRouter);
 router.use('/ai', aiRouter);
 
 

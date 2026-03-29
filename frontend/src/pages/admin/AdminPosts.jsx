@@ -165,7 +165,7 @@ const AdminPosts = () => {
       {/* ── Header ── */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-100 dark:bg-blue-900/30 shrink-0">
+          <div className="flex h-11 w-11 items-center justify-center bg-blue-100 dark:bg-blue-900/30 shrink-0">
             <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
@@ -177,7 +177,7 @@ const AdminPosts = () => {
             </p>
           </div>
         </div>
-        <Button onClick={handleCreate} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2">
+        <Button onClick={handleCreate} className="bg-stone-900 hover:bg-stone-800 text-white gap-2">
           <Plus className="h-4 w-4" />
           {t('admin.posts.create') || 'Nuevo Post'}
         </Button>
@@ -190,7 +190,7 @@ const AdminPosts = () => {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="border border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-2xl mb-6 text-sm"
+            className="border-2 border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 mb-6 text-sm"
           >
             {error}
           </motion.div>
@@ -200,7 +200,7 @@ const AdminPosts = () => {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 px-4 py-3 rounded-2xl mb-6 text-sm"
+            className="border-2 border-emerald-200 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 px-4 py-3 mb-6 text-sm"
           >
             {successMsg}
           </motion.div>
@@ -215,7 +215,7 @@ const AdminPosts = () => {
           placeholder={t('admin.posts.searchPlaceholder') || 'Buscar posts...'}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-10 rounded-xl border-stone-200 dark:border-stone-800 focus:border-blue-300 focus:ring-blue-200"
+          className="pl-10 border-stone-200 dark:border-stone-800 focus:border-blue-300 focus:ring-blue-200"
         />
       </div>
 
@@ -233,7 +233,7 @@ const AdminPosts = () => {
               <Input
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="rounded-xl border-stone-200 dark:border-stone-800 focus:border-blue-300 focus:ring-blue-200"
+                className="border-stone-200 dark:border-stone-800 focus:border-blue-300 focus:ring-blue-200"
                 required
               />
             </div>
@@ -253,7 +253,7 @@ const AdminPosts = () => {
                 id="is_pinned"
                 checked={formData.is_pinned}
                 onChange={(e) => setFormData({ ...formData, is_pinned: e.target.checked })}
-                className="h-4 w-4 rounded border-stone-300 dark:border-stone-700 text-blue-600 focus:ring-blue-200"
+                className="h-4 w-4 border-stone-300 dark:border-stone-700 text-blue-600 focus:ring-blue-200"
               />
               <label htmlFor="is_pinned" className="text-sm text-stone-700 dark:text-stone-300">
                 {t('admin.posts.pinPost') || 'Fijar post'}
@@ -264,14 +264,13 @@ const AdminPosts = () => {
                 type="button"
                 variant="ghost"
                 onClick={() => setShowForm(false)}
-                className="rounded-xl"
               >
                 {t('common.cancel') || 'Cancelar'}
               </Button>
               <Button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2"
+                className="bg-stone-900 hover:bg-stone-800 text-white gap-2"
               >
                 {saving ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -286,7 +285,7 @@ const AdminPosts = () => {
       </AdaptiveModal>
 
       {/* ── Posts Table ── */}
-      <div className="bg-white dark:bg-stone-950 rounded-2xl border border-stone-200 dark:border-stone-800 overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-stone-950 border-2 border-stone-200 dark:border-stone-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -313,7 +312,7 @@ const AdminPosts = () => {
                 <tr>
                   <td colSpan="5" className="px-5 py-16 text-center">
                     <div className="flex flex-col items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-stone-100 dark:bg-stone-800">
+                      <div className="flex h-12 w-12 items-center justify-center bg-stone-100 dark:bg-stone-800">
                         <Inbox className="h-6 w-6 text-stone-400" />
                       </div>
                       <p className="text-sm text-stone-400 dark:text-stone-500">
@@ -357,7 +356,7 @@ const AdminPosts = () => {
                     </td>
                     <td className="px-5 py-3.5 text-center">
                       {post.is_pinned ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-blue-50 text-blue-700 border-2 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800">
                           <Pin className="h-3 w-3" />
                           {t('admin.posts.pinned') || 'Fijado'}
                         </span>
@@ -370,21 +369,21 @@ const AdminPosts = () => {
                         <button
                           onClick={() => togglePin(post)}
                           title={post.is_pinned ? 'Desfijar' : 'Fijar'}
-                          className="p-2 rounded-xl text-stone-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                          className="p-2 text-stone-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                         >
                           {post.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
                         </button>
                         <button
                           onClick={() => handleEdit(post)}
                           title={t('common.edit') || 'Editar'}
-                          className="p-2 rounded-xl text-stone-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                          className="p-2 text-stone-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(post.id)}
                           title={t('common.delete') || 'Eliminar'}
-                          className="p-2 rounded-xl text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                          className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>

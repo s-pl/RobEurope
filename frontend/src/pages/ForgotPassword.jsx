@@ -138,7 +138,7 @@ const ForgotPassword = () => {
             {message && (
               <div
                 role={messageType === 'error' ? 'alert' : 'status'}
-                className={`mb-6 flex items-start gap-3 rounded-lg p-4 text-sm font-medium transition-all duration-300 ${
+                className={`mb-6 flex items-start gap-3 p-4 text-sm font-medium transition-all duration-300 ${
                   messageType === 'error'
                     ? 'bg-red-50 text-red-900 dark:bg-red-900/20 dark:text-red-200'
                     : 'bg-green-50 text-green-900 dark:bg-green-900/20 dark:text-green-200'

@@ -20,7 +20,7 @@ const CompetitionItem = ({ competition, isFavorite, onToggleFavorite, onSetActiv
   const { t } = useTranslation();
 
   return (
-    <Card className={`transition-all duration-300 border-l-4 ${isOpen ? 'border-l-blue-600 shadow-md' : 'border-l-transparent hover:border-l-blue-300'}`}>
+    <Card className={`transition-all duration-300 border-l-4 ${isOpen ? 'border-l-blue-600' : 'border-l-transparent hover:border-l-blue-300'}`}>
       <div 
         className="p-6 cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
@@ -29,11 +29,11 @@ const CompetitionItem = ({ competition, isFavorite, onToggleFavorite, onSetActiv
           <div className="space-y-1">
             <div className="flex items-center gap-3">
               <h3 className="text-xl font-bold text-blue-900 dark:text-blue-100">{competition.title}</h3>
-              <Badge variant={competition.status === 'published' ? 'default' : 'secondary'}>
+              <Badge variant={competition.status === 'published' ? 'emerald' : 'secondary'}>
                 {competition.status}
               </Badge>
               {competition.is_active && (
-                <Badge className="bg-green-500 hover:bg-green-600 border-none text-white">
+                <Badge variant="cyan">
                   {t('competitions.activeBadge')}
                 </Badge>
               )}
@@ -52,7 +52,7 @@ const CompetitionItem = ({ competition, isFavorite, onToggleFavorite, onSetActiv
                 variant="ghost"
                 size="icon"
                 onClick={(e)=>{ e.stopPropagation(); onToggleFavorite(competition.id, isFavorite); }}
-                className={isFavorite ? 'text-yellow-500' : 'text-stone-400 dark:text-stone-500'}
+                className={isFavorite ? 'text-amber-500' : 'text-stone-400 dark:text-stone-500'}
                 title={isFavorite ? (t('competitions.removeFavorite')||'Quitar de favoritos') : (t('competitions.addFavorite')||'Añadir a favoritos')}
               >
                 <Star className="h-5 w-5" fill={isFavorite ? 'currentColor' : 'none'} aria-hidden="true" />
@@ -341,7 +341,7 @@ const Competitions = () => {
       {loading && <div className="text-center py-12">{t('competitions.loading')}</div>}
       
       {error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-lg border border-red-200">
+        <div className="bg-red-50 text-red-600 p-4 border-2 border-red-200">
           {error}
         </div>
       )}
@@ -359,7 +359,7 @@ const Competitions = () => {
         ))}
         
         {!loading && competitions.length === 0 && (
-          <div className="text-center py-12 text-stone-500 dark:text-stone-400 bg-stone-50 dark:bg-stone-900 rounded-xl border border-dashed border-stone-200 dark:border-stone-800">
+          <div className="text-center py-12 text-stone-500 dark:text-stone-400 bg-stone-50 dark:bg-stone-900 border-2 border-dashed border-stone-200 dark:border-stone-800">
             {t('competitions.noActive')}
           </div>
         )}

@@ -128,16 +128,16 @@ const CompetitionDetail = () => {
       <header className="mb-10">
         <div className="flex flex-wrap items-center gap-3 mb-3">
           {competition.is_active && (
-            <Badge variant="success">{t('competitions.activeBadge')}</Badge>
+            <Badge variant="cyan">{t('competitions.activeBadge')}</Badge>
           )}
           {isRestricted && (
-            <Badge variant="outline" className="border-amber-400 text-amber-600 dark:border-amber-500 dark:text-amber-400">
+            <Badge variant="amber">
               <Lock className="h-3 w-3 mr-1" />
               {t('competitions.restrictedBadge')}
             </Badge>
           )}
         </div>
-        <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-stone-900 dark:text-stone-50 tracking-tight mb-4">
+        <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-black text-stone-900 dark:text-stone-50 tracking-tighter mb-4">
           {competition.title}
         </h1>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-stone-500 dark:text-stone-400 text-sm">
@@ -159,7 +159,7 @@ const CompetitionDetail = () => {
         </div>
       </header>
 
-      <div className="border-t border-stone-200 dark:border-stone-700" />
+      <div className="border-t-2 border-stone-200 dark:border-stone-700" />
 
       {/* Main content + sidebar */}
       <div className="flex flex-col lg:flex-row gap-10 mt-10">
@@ -175,7 +175,7 @@ const CompetitionDetail = () => {
             </div>
           </section>
 
-          <div className="border-t border-stone-200 dark:border-stone-700" />
+          <div className="border-t-2 border-stone-200 dark:border-stone-700" />
 
           {/* Streams */}
           <section>
@@ -185,7 +185,7 @@ const CompetitionDetail = () => {
             </h2>
 
             {isRestricted || (!isAuthenticated && streams.length > 0) ? (
-              <div className="relative rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
+              <div className="relative border-2 border-stone-200 dark:border-stone-700 overflow-hidden">
                 <div className="absolute inset-0 bg-stone-100/80 dark:bg-stone-900/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
                   <Lock className="h-8 w-8 text-stone-400 dark:text-stone-500 mb-3" />
                   <p className="text-stone-600 dark:text-stone-400 font-medium text-sm">
@@ -194,7 +194,7 @@ const CompetitionDetail = () => {
                       : 'Register to access live streams'}
                   </p>
                   {!isAuthenticated && (
-                    <Button asChild size="sm" className="mt-3 bg-blue-600 hover:bg-blue-700 text-white">
+                    <Button asChild size="sm" className="mt-3 bg-stone-900 hover:bg-stone-800 text-white dark:bg-stone-50 dark:text-stone-900">
                       <Link to="/login">{t('competitions.detail.loginToAccess') || 'Log in'}</Link>
                     </Button>
                   )}
@@ -212,10 +212,10 @@ const CompetitionDetail = () => {
                 {streams.map((stream) => (
                   <div
                     key={stream.id}
-                    className="flex items-center justify-between py-3 border-b border-stone-100 dark:border-stone-800 last:border-b-0"
+                    className="flex items-center justify-between py-3 border-b-2 border-stone-100 dark:border-stone-800 last:border-b-0"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded bg-stone-100 dark:bg-stone-800 flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 bg-stone-100 dark:bg-stone-800 flex items-center justify-center flex-shrink-0">
                         <Video className="h-4 w-4 text-stone-400" />
                       </div>
                       <div className="min-w-0">
@@ -255,7 +255,7 @@ const CompetitionDetail = () => {
             )}
           </section>
 
-          <div className="border-t border-stone-200 dark:border-stone-700" />
+          <div className="border-t-2 border-stone-200 dark:border-stone-700" />
 
           {/* Teams */}
           <section>
@@ -269,9 +269,9 @@ const CompetitionDetail = () => {
                   <Link
                     key={team.id}
                     to={`/teams/${team.id}`}
-                    className="flex items-center gap-3 py-3 border-b border-stone-100 dark:border-stone-800 last:border-b-0 hover:bg-stone-50 dark:hover:bg-stone-800/50 -mx-2 px-2 rounded transition-colors"
+                    className="flex items-center gap-3 py-3 border-b-2 border-stone-100 dark:border-stone-800 last:border-b-0 hover:bg-stone-50 dark:hover:bg-stone-800/50 -mx-2 px-2 transition-colors"
                   >
-                    <div className="h-10 w-10 bg-stone-100 dark:bg-stone-800 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 border border-stone-200 dark:border-stone-700">
+                    <div className="h-10 w-10 bg-stone-100 dark:bg-stone-800 flex items-center justify-center overflow-hidden flex-shrink-0 border-2 border-stone-200 dark:border-stone-700">
                       {team.logo_url ? (
                         <img
                           src={team.logo_url}
@@ -288,7 +288,7 @@ const CompetitionDetail = () => {
                     {streams.some(
                       (s) => s.team_id === team.id && s.status === 'live'
                     ) && (
-                      <span className="ml-auto inline-flex items-center gap-1 text-xs text-red-600 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-full">
+                      <span className="ml-auto inline-flex items-center gap-1 text-xs text-red-600 bg-red-50 dark:bg-red-900/20 px-2 py-0.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                         LIVE
                       </span>
@@ -306,7 +306,7 @@ const CompetitionDetail = () => {
           {/* Files */}
           {publicFiles.length > 0 && (
             <>
-              <div className="border-t border-stone-200 dark:border-stone-700" />
+              <div className="border-t-2 border-stone-200 dark:border-stone-700" />
               <section>
                 <h2 className="font-display text-xl font-semibold text-stone-800 dark:text-stone-200 mb-4 flex items-center gap-2">
                   <FileText className="h-5 w-5 text-blue-600" />
@@ -314,20 +314,20 @@ const CompetitionDetail = () => {
                 </h2>
 
                 {!isAuthenticated ? (
-                  <div className="relative rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
+                  <div className="relative border-2 border-stone-200 dark:border-stone-700 overflow-hidden">
                     <div className="absolute inset-0 bg-stone-100/80 dark:bg-stone-900/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
                       <Lock className="h-8 w-8 text-stone-400 dark:text-stone-500 mb-3" />
                       <p className="text-stone-600 dark:text-stone-400 font-medium text-sm">
                         Register to access files
                       </p>
-                      <Button asChild size="sm" className="mt-3 bg-blue-600 hover:bg-blue-700 text-white">
+                      <Button asChild size="sm" className="mt-3 bg-stone-900 hover:bg-stone-800 text-white dark:bg-stone-50 dark:text-stone-900">
                         <Link to="/login">{t('competitions.detail.loginToAccess') || 'Log in'}</Link>
                       </Button>
                     </div>
                     <div className="p-8 opacity-30 select-none pointer-events-none">
                       <div className="space-y-3">
                         {[1, 2].map((i) => (
-                          <div key={i} className="h-12 rounded bg-stone-200 dark:bg-stone-800" />
+                          <div key={i} className="h-12 bg-stone-200 dark:bg-stone-800" />
                         ))}
                       </div>
                     </div>
@@ -337,7 +337,7 @@ const CompetitionDetail = () => {
                     {publicFiles.map((file) => (
                       <div
                         key={file.id}
-                        className="flex items-center justify-between py-3 border-b border-stone-100 dark:border-stone-800 last:border-b-0"
+                        className="flex items-center justify-between py-3 border-b-2 border-stone-100 dark:border-stone-800 last:border-b-0"
                       >
                         <div className="min-w-0 flex-1">
                           <p className="font-medium text-stone-800 dark:text-stone-200 text-sm truncate">
@@ -363,7 +363,7 @@ const CompetitionDetail = () => {
                           href={resolveMediaUrl(file.file_url)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="ml-4 p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors flex-shrink-0"
+                          className="ml-4 p-2 text-stone-600 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors flex-shrink-0"
                           title="Download"
                         >
                           <Download className="h-4 w-4" />
@@ -379,7 +379,7 @@ const CompetitionDetail = () => {
 
         {/* Sidebar */}
         <aside className="w-full lg:w-72 flex-shrink-0">
-          <div className="lg:sticky lg:top-24 space-y-5 p-5 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-900/50">
+          <div className="lg:sticky lg:top-24 space-y-5 p-5 border-2 border-stone-200 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-900/50">
             <h3 className="font-display text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
               {t('competitions.detail.information')}
             </h3>
@@ -394,7 +394,7 @@ const CompetitionDetail = () => {
                 </span>
               </div>
 
-              <div className="border-t border-stone-200 dark:border-stone-700" />
+              <div className="border-t-2 border-stone-200 dark:border-stone-700" />
 
               <div>
                 <span className="text-xs text-stone-400 dark:text-stone-500 block mb-0.5">
@@ -411,7 +411,7 @@ const CompetitionDetail = () => {
                 </span>
               </div>
 
-              <div className="border-t border-stone-200 dark:border-stone-700" />
+              <div className="border-t-2 border-stone-200 dark:border-stone-700" />
 
               <div>
                 <span className="text-xs text-stone-400 dark:text-stone-500 block mb-0.5">
@@ -424,7 +424,7 @@ const CompetitionDetail = () => {
 
               {competition.website_url && (
                 <>
-                  <div className="border-t border-stone-200 dark:border-stone-700" />
+                  <div className="border-t-2 border-stone-200 dark:border-stone-700" />
                   <div>
                     <span className="text-xs text-stone-400 dark:text-stone-500 block mb-0.5">
                       {t('competitions.detail.website')}

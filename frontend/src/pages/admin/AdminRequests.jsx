@@ -19,7 +19,7 @@ const StatusBadge = ({ status, t }) => {
   };
   const s = map[status] || map.pending;
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${s.bg}`}>
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium border ${s.bg}`}>
       {s.icon}
       {t(`admin.requests.status.${status}`) || status}
     </span>
@@ -29,7 +29,7 @@ const StatusBadge = ({ status, t }) => {
 const TypeBadge = ({ type, t }) => {
   const isCreate = type === 'create_center';
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium border ${
       isCreate
         ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
         : 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800'
@@ -50,7 +50,7 @@ const UserAvatar = ({ name }) => {
     .join('')
     .toUpperCase();
   return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 shrink-0 text-sm font-semibold text-blue-700 dark:text-blue-400">
+    <div className="flex h-10 w-10 items-center justify-center bg-blue-100 dark:bg-blue-900/30 shrink-0 text-sm font-semibold text-blue-700 dark:text-blue-400">
       {initials}
     </div>
   );
@@ -145,7 +145,7 @@ const AdminRequests = () => {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       {/* ── Header ── */}
       <div className="flex items-start gap-3 mb-8">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-100 dark:bg-blue-900/30 shrink-0">
+        <div className="flex h-11 w-11 items-center justify-center bg-blue-100 dark:bg-blue-900/30 shrink-0">
           <Settings className="h-5 w-5 text-blue-600 dark:text-blue-400" />
         </div>
         <div>
@@ -165,7 +165,7 @@ const AdminRequests = () => {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className={`mb-6 px-4 py-3 rounded-2xl text-sm border ${
+            className={`mb-6 px-4 py-3 text-sm border-2 ${
               feedback.type === 'error'
                 ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400'
                 : 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
@@ -177,14 +177,14 @@ const AdminRequests = () => {
       </AnimatePresence>
 
       {/* ── Filter Tabs (pill segmented) ── */}
-      <div className="flex p-1 rounded-xl bg-stone-100 dark:bg-stone-800/60 gap-0.5 w-fit mb-6">
+      <div className="flex p-1 bg-stone-100 dark:bg-stone-800/60 gap-0.5 w-fit mb-6">
         {filterTabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setFilter(tab.key)}
-            className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${
+            className={`px-4 py-1.5 text-sm font-medium transition-all ${
               filter === tab.key
-                ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-50 shadow-sm'
+                ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-50'
                 : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
             }`}
           >
@@ -200,7 +200,7 @@ const AdminRequests = () => {
         </div>
       ) : requests.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-stone-100 dark:bg-stone-800">
+          <div className="flex h-12 w-12 items-center justify-center bg-stone-100 dark:bg-stone-800">
             <Inbox className="h-6 w-6 text-stone-400" />
           </div>
           <p className="text-sm text-stone-400 dark:text-stone-500">
@@ -214,7 +214,7 @@ const AdminRequests = () => {
               key={request.id}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-stone-950 rounded-2xl border border-stone-200 dark:border-stone-800 p-5 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white dark:bg-stone-950 border-2 border-stone-200 dark:border-stone-800 p-5"
             >
               <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                 {/* Left side */}
@@ -260,7 +260,7 @@ const AdminRequests = () => {
 
                     {/* Decision reason */}
                     {request.decision_reason && (
-                      <div className="bg-stone-50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-800 rounded-xl px-3.5 py-2.5 text-sm text-stone-600 dark:text-stone-400">
+                      <div className="bg-stone-50 dark:bg-stone-900/50 border-2 border-stone-200 dark:border-stone-800 px-3.5 py-2.5 text-sm text-stone-600 dark:text-stone-400">
                         <span className="font-medium text-stone-700 dark:text-stone-300">
                           {t('admin.requests.reason') || 'Motivo'}:
                         </span>{' '}
@@ -276,7 +276,7 @@ const AdminRequests = () => {
                     <Button
                       size="sm"
                       onClick={() => handleApprove(request.id)}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded-xl gap-1.5"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs gap-1.5"
                     >
                       <Check className="h-3.5 w-3.5" />
                       {t('common.approve') || 'Aprobar'}
@@ -285,7 +285,7 @@ const AdminRequests = () => {
                       size="sm"
                       variant="outline"
                       onClick={() => handleReject(request.id)}
-                      className="border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs rounded-xl gap-1.5"
+                      className="border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs gap-1.5"
                     >
                       <X className="h-3.5 w-3.5" />
                       {t('common.reject') || 'Rechazar'}

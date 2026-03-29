@@ -1,301 +1,222 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Send, Paperclip, File, Image as ImageIcon, X, Download, FileText } from 'lucide-react';
+import { Send, Download, FileText, FileImage, FileVideo, FileArchive, File, ZoomIn } from 'lucide-react';
 import { useApi } from '../../hooks/useApi';
 import { useAuth } from '../../hooks/useAuth';
-import { useToast } from '../../hooks/useToast';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
 import { resolveMediaUrl, getApiOrigin, isBackendActive } from '../../lib/apiClient';
 import { io } from 'socket.io-client';
 
-const TeamChat = ({ teamId }) => {
-  const { t } = useTranslation();
-  const api = useApi();
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [files, setFiles] = useState([]);
-  const scrollRef = useRef(null);
-  const socketRef = useRef(null);
+/* ─── Utils ───────────────────────────────────────────────────────────────── */
+const isImgUrl = (url) => /\.(jpe?g|png|gif|webp|bmp|avif)$/i.test(url || '');
 
+/* ─── FileTypeIcon ────────────────────────────────────────────────────────── */
+const FileTypeIcon = ({ name = '', className = 'h-5 w-5' }) => {
+  const ext = name.split('.').pop().toLowerCase();
+  if (['jpg','jpeg','png','gif','webp','bmp','svg','avif'].includes(ext)) return <FileImage className={className} />;
+  if (['mp4','mov','avi','mkv','webm'].includes(ext))                     return <FileVideo   className={className} />;
+  if (['zip','rar','7z','tar','gz'].includes(ext))                        return <FileArchive className={className} />;
+  if (['pdf','doc','docx','txt','xls','xlsx'].includes(ext))              return <FileText    className={className} />;
+  return <File className={className} />;
+};
+
+/* ─── FileAttachment (in message) ────────────────────────────────────────── */
+const FileAttachment = ({ att, onZoom }) => {
+  const { t } = useTranslation();
+  const url  = resolveMediaUrl(att.url);
+  const name = att.name || att.url?.split('/').pop() || t('team.chat.defaultFilename');
+  const ext  = (att.url || '').split('.').pop().toUpperCase();
+
+  if (att.type === 'image' || isImgUrl(att.url)) {
+    return (
+      <div className="relative group inline-block">
+        <img src={url} alt="attachment" className="max-w-full max-h-[200px] block cursor-zoom-in" />
+        <button
+          onClick={() => onZoom(url)}
+          className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center"
+        >
+          <ZoomIn className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-stone-900/50 border-2 border-stone-200 dark:border-stone-700 max-w-xs">
+      <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0">
+        <FileTypeIcon name={name} className="h-5 w-5 text-blue-700 dark:text-blue-400" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate text-stone-700 dark:text-stone-200">{name}</p>
+        <p className="text-xs text-stone-500 uppercase font-semibold">{ext || 'FILE'}</p>
+      </div>
+      <a href={url} target="_blank" rel="noopener noreferrer" download
+        className="p-2 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors text-stone-500" title="Descargar">
+        <Download className="h-4 w-4" />
+      </a>
+    </div>
+  );
+};
+
+/* ─── Main component ──────────────────────────────────────────────────────── */
+const TeamChat = ({ teamId }) => {
+  const { t }    = useTranslation();
+  const api      = useApi();
+  const { user } = useAuth();
+
+  const [messages,   setMessages]   = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [sending,    setSending]    = useState(false);
+  const [lightbox,   setLightbox]   = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [typingUsers, setTypingUsers] = useState([]);
-  const typingTimeoutRef = useRef(null);
 
+  const scrollRef     = useRef(null);
+  const socketRef     = useRef(null);
+  const typingTimeout = useRef(null);
+
+  /* Scroll to bottom */
   const scrollToBottom = useCallback(() => {
-    if (scrollRef.current) {
-      const viewport = scrollRef.current.closest('[data-radix-scroll-area-viewport]');
-      if (viewport) {
-        viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
-      } else {
-        scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }
+    if (!scrollRef.current) return;
+    const vp = scrollRef.current.closest('[data-radix-scroll-area-viewport]');
+    if (vp) vp.scrollTo({ top: vp.scrollHeight, behavior: 'smooth' });
+    else scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, []);
 
+  /* Socket */
   useEffect(() => {
     if (!isBackendActive) return undefined;
+    const url = getApiOrigin();
+    if (!url) return undefined;
 
-    // Initialize socket
-    const socketUrl = getApiOrigin();
-    if (!socketUrl) return undefined;
-
-    socketRef.current = io(socketUrl);
-
-    // Send user info when joining
+    socketRef.current = io(url);
     socketRef.current.emit('join_team', { teamId, user });
 
-    socketRef.current.on('team_message', (message) => {
-      setMessages((prev) => [...prev, message]);
-      scrollToBottom();
+    socketRef.current.on('team_message',      (msg)   => { setMessages(p => [...p, msg]); scrollToBottom(); });
+    socketRef.current.on('team_users_update', (users) => setOnlineUsers(users));
+    socketRef.current.on('user_typing',       (u)     => {
+      if (u.id !== user.id) setTypingUsers(p => p.find(x => x.id === u.id) ? p : [...p, u]);
     });
-
-    socketRef.current.on('team_users_update', (users) => {
-      setOnlineUsers(users);
-    });
-
-    socketRef.current.on('user_typing', (typingUser) => {
-      if (typingUser.id !== user.id) {
-        setTypingUsers((prev) => {
-          if (!prev.find(u => u.id === typingUser.id)) {
-            return [...prev, typingUser];
-          }
-          return prev;
-        });
-      }
-    });
-
-    socketRef.current.on('user_stop_typing', (typingUser) => {
-      setTypingUsers((prev) => prev.filter(u => u.id !== typingUser.id));
-    });
+    socketRef.current.on('user_stop_typing',  (u) => setTypingUsers(p => p.filter(x => x.id !== u.id)));
 
     return () => {
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-      if (socketRef.current) socketRef.current.disconnect();
+      clearTimeout(typingTimeout.current);
+      socketRef.current?.disconnect();
     };
   }, [teamId, user, scrollToBottom]);
 
-  const handleTyping = () => {
-    if (socketRef.current) {
-      socketRef.current.emit('typing', { teamId, user });
-      
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-      
-      typingTimeoutRef.current = setTimeout(() => {
-        socketRef.current.emit('stop_typing', { teamId, user });
-      }, 2000);
-    }
-  };
-
+  /* Load messages */
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const data = await api(`/teams/${teamId}/messages`);
-        if (!cancelled) {
-          const items = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
-          setMessages(items);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    let alive = true;
+    api(`/teams/${teamId}/messages`).then(data => {
+      if (!alive) return;
+      const items = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
+      setMessages(items);
+    }).catch(console.error);
+    return () => { alive = false; };
   }, [api, teamId]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
+  useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
 
-  const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB per file limit
+  /* Typing indicator */
+  const handleTyping = () => {
+    socketRef.current?.emit('typing', { teamId, user });
+    clearTimeout(typingTimeout.current);
+    typingTimeout.current = setTimeout(() => {
+      socketRef.current?.emit('stop_typing', { teamId, user });
+    }, 2000);
+  };
 
-  const handleSendMessage = async (e) => {
+  /* Send message */
+  const handleSend = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() && files.length === 0) return;
-
-    // Frontend guard: block sending if any file exceeds 25MB
-    const tooLarge = files.find(f => f.size > MAX_FILE_SIZE);
-    if (tooLarge) {
-      toast({
-        title: t('team.chat.fileTooLarge') || 'Archivo demasiado grande',
-        description: `${tooLarge.name}: ${t('team.chat.fileLimit') || 'El límite es de 25MB por archivo'}`,
-        variant: 'destructive'
-      });
-      return;
-    }
+    if (!newMessage.trim() || sending) return;
+    setSending(true);
 
     try {
-      const formData = new FormData();
-      if (newMessage.trim()) formData.append('content', newMessage);
-      files.forEach(file => {
-        formData.append('files', file);
-      });
-
       await api(`/teams/${teamId}/messages`, {
         method: 'POST',
-        body: formData,
-        formData: true
+        body: { content: newMessage.trim() },
       });
-
       setNewMessage('');
-      setFiles([]);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSending(false);
     }
   };
 
-  const handleFileSelect = (e) => {
-    const selectedFiles = Array.from(e.target.files || []);
-    if (selectedFiles.length > 0) {
-      const validFiles = selectedFiles.filter(file => {
-        if (file.size > MAX_FILE_SIZE) { // 25MB limit
-          toast({
-            title: t('team.chat.fileTooLarge') || 'Archivo demasiado grande',
-            description: `${file.name}: ${t('team.chat.fileLimit') || 'El límite es de 25MB por archivo'}`,
-            variant: 'destructive'
-          });
-          return false;
-        }
-        return true;
-      });
-      setFiles(prev => [...prev, ...validFiles]);
-      e.target.value = ''; // Reset input
-    }
-  };
-
-  const removeFile = (index) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
+  /* ─── Render ────────────────────────────────────────────────────────────── */
   return (
-    <div className="flex flex-col h-[600px] border rounded-lg bg-white dark:bg-stone-950 dark:border-stone-800">
-      <div className="p-4 border-b dark:border-stone-800 flex justify-between items-center">
+    <div className="relative flex flex-col h-[600px] border-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950">
+      {/* Header */}
+      <div className="px-4 py-3 border-b-2 border-stone-200 dark:border-stone-800 flex items-center justify-between shrink-0">
         <div>
-          <h3 className="font-semibold text-lg">{t('team.chat.title')}</h3>
+          <h3 className="font-semibold text-stone-900 dark:text-stone-50">{t('team.chat.title')}</h3>
           {onlineUsers.length > 0 && (
-            <p className="text-xs text-green-600 flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+            <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-0.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               {onlineUsers.length} online
             </p>
           )}
         </div>
         <div className="flex -space-x-2">
           {onlineUsers.slice(0, 5).map(u => (
-            <div key={u.id} className="h-8 w-8 rounded-full border-2 border-white dark:border-stone-900 bg-stone-100 overflow-hidden" title={u.first_name}>
-              {u.profile_photo_url ? (
-                <img src={resolveMediaUrl(u.profile_photo_url)} alt={u.first_name} className="h-full w-full object-cover" />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center text-xs font-bold text-stone-500">
-                  {u.first_name?.[0]}
-                </div>
-              )}
+            <div key={u.id} title={u.first_name}
+              className="h-8 w-8 border-2 border-white dark:border-stone-900 bg-stone-100 dark:bg-stone-800 overflow-hidden">
+              {u.profile_photo_url
+                ? <img src={resolveMediaUrl(u.profile_photo_url)} alt={u.first_name} className="h-full w-full object-cover" />
+                : <div className="h-full w-full flex items-center justify-center text-xs font-bold text-stone-500">{u.first_name?.[0]}</div>
+              }
             </div>
           ))}
           {onlineUsers.length > 5 && (
-            <div className="h-8 w-8 rounded-full border-2 border-white dark:border-stone-900 bg-stone-100 flex items-center justify-center text-xs font-bold text-stone-500">
+            <div className="h-8 w-8 border-2 border-white dark:border-stone-900 bg-stone-100 flex items-center justify-center text-xs font-bold text-stone-500">
               +{onlineUsers.length - 5}
             </div>
           )}
         </div>
       </div>
 
+      {/* Messages */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
           {messages.map((msg) => {
             const isMe = msg.user_id === user.id;
             return (
               <div key={msg.id} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}>
-                <div className="h-8 w-8 rounded-full bg-stone-100 overflow-hidden flex-shrink-0 border border-stone-200 dark:border-stone-700">
-                  {msg.User?.profile_photo_url ? (
-                    <img src={resolveMediaUrl(msg.User.profile_photo_url)} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center text-stone-400 text-xs font-bold">
-                      {msg.User?.first_name?.[0]}
-                    </div>
-                  )}
+                <div className="h-8 w-8 bg-stone-100 dark:bg-stone-800 overflow-hidden shrink-0 border-2 border-stone-200 dark:border-stone-700">
+                  {msg.User?.profile_photo_url
+                    ? <img src={resolveMediaUrl(msg.User.profile_photo_url)} alt="" className="h-full w-full object-cover" />
+                    : <div className="h-full w-full flex items-center justify-center text-stone-400 text-xs font-bold">{msg.User?.first_name?.[0]}</div>
+                  }
                 </div>
-                <div className={`flex flex-col max-w-[70%] ${isMe ? 'items-end' : 'items-start'}`}>
+                <div className={`flex flex-col max-w-[72%] ${isMe ? 'items-end' : 'items-start'}`}>
                   <div className="flex items-baseline gap-2 mb-1">
-                    <span className="text-xs font-medium text-stone-500">{msg.User?.first_name}</span>
-                    <span className="text-[10px] text-stone-400">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    {!isMe && <span className="text-xs font-medium text-stone-500">{msg.User?.first_name}</span>}
+                    <span className="text-[10px] text-stone-400">
+                      {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                   </div>
-                  <div className={`p-3 rounded-lg ${isMe ? 'bg-blue-600 text-white' : 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100'}`}>
+                  <div className={`p-3 ${isMe ? 'bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900' : 'bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100'}`}>
                     {msg.content && <p className="whitespace-pre-wrap text-sm">{msg.content}</p>}
-                    
-                    {/* Multiple attachments */}
-                    {msg.attachments && msg.attachments.length > 0 && (
-                      <div className="mt-2 space-y-2">
+
+                    {msg.attachments?.length > 0 && (
+                      <div className={`space-y-2 ${msg.content ? 'mt-2' : ''}`}>
                         {msg.attachments.map((att, idx) => (
-                          <div key={idx}>
-                            {att.type === 'image' ? (
-                              <img src={resolveMediaUrl(att.url)} alt="attachment" className="max-w-full rounded-md max-h-[200px]" />
-                            ) : (
-                              <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-stone-900/50 rounded-lg border border-stone-200 dark:border-stone-700 max-w-xs group transition-all hover:shadow-sm">
-                                <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                                  <FileText className="h-5 w-5 text-blue-700 dark:text-blue-400" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium truncate text-stone-700 dark:text-stone-200">
-                                    {att.name || 'Archivo adjunto'}
-                                  </p>
-                                  <p className="text-xs text-stone-500 dark:text-stone-400 uppercase font-semibold">
-                                    {att.url?.split('.').pop() || 'FILE'}
-                                  </p>
-                                </div>
-                                <a 
-                                  href={resolveMediaUrl(att.url)} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer" 
-                                  download
-                                  className="p-2 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full transition-colors text-stone-500 dark:text-stone-400"
-                                  title="Descargar"
-                                >
-                                  <Download className="h-4 w-4" />
-                                </a>
-                              </div>
-                            )}
-                          </div>
+                          <FileAttachment key={idx} att={att} onZoom={setLightbox} />
                         ))}
                       </div>
                     )}
 
-                    {/* Legacy single file support */}
-                    {!msg.attachments && msg.file_url && (
-                      <div className="mt-2">
-                        {msg.type === 'image' ? (
-                          <img src={resolveMediaUrl(msg.file_url)} alt="attachment" className="max-w-full rounded-md max-h-[200px]" />
-                        ) : (
-                          <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-stone-900/50 rounded-lg border border-stone-200 dark:border-stone-700 max-w-xs group transition-all hover:shadow-sm">
-                            <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <FileText className="h-5 w-5 text-blue-700 dark:text-blue-400" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate text-stone-700 dark:text-stone-200">
-                                Archivo adjunto
-                              </p>
-                              <p className="text-xs text-stone-500 dark:text-stone-400 uppercase font-semibold">
-                                {msg.file_url?.split('.').pop() || 'FILE'}
-                              </p>
-                            </div>
-                            <a 
-                              href={resolveMediaUrl(msg.file_url)} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              download
-                              className="p-2 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-full transition-colors text-stone-500 dark:text-stone-400"
-                              title="Descargar"
-                            >
-                              <Download className="h-4 w-4" />
-                            </a>
-                          </div>
-                        )}
+                    {!msg.attachments?.length && msg.file_url && (
+                      <div className={msg.content ? 'mt-2' : ''}>
+                        <FileAttachment
+                          att={{ url: msg.file_url, type: msg.type, name: msg.file_url?.split('/').pop() }}
+                          onZoom={setLightbox}
+                        />
                       </div>
                     )}
                   </div>
@@ -303,58 +224,57 @@ const TeamChat = ({ teamId }) => {
               </div>
             );
           })}
+
           <div ref={scrollRef} />
+
           {typingUsers.length > 0 && (
-            <div className="text-xs text-stone-400 italic animate-pulse ml-10">
-              {typingUsers.map(u => u.first_name).join(', ')} {typingUsers.length === 1 ? 'está escribiendo...' : 'están escribiendo...'}
-            </div>
+            <p className="text-xs text-stone-400 italic animate-pulse ml-11">
+              {typingUsers.map(u => u.first_name).join(', ')}
+              {typingUsers.length === 1 ? ' está escribiendo...' : ' están escribiendo...'}
+            </p>
           )}
         </div>
       </ScrollArea>
 
-      <div className="p-4 border-t dark:border-stone-800">
-        {files.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-2">
-            {files.map((f, i) => (
-              <div key={i} className="flex items-center gap-2 p-2 bg-stone-50 dark:bg-stone-900 rounded-md text-sm border border-stone-200 dark:border-stone-700">
-                <Paperclip className="h-3 w-3 text-blue-500" />
-                <span className="truncate max-w-[150px]">{f.name}</span>
-                <button onClick={() => removeFile(i)} className="ml-auto hover:text-red-500">
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-        <form onSubmit={handleSendMessage} className="flex gap-2">
-          <div className="relative">
-            <input
-              type="file"
-              id="chat-file"
-              className="hidden"
-              multiple
-              onChange={handleFileSelect}
-            />
-            <Button type="button" variant="ghost" size="icon" onClick={() => document.getElementById('chat-file').click()}>
-              <Paperclip className="h-5 w-5 text-stone-500" aria-hidden="true" />
-              <span className="sr-only">{t('common.attachFile') || 'Attach file'}</span>
-            </Button>
-          </div>
+      {/* Input area */}
+      <div className="p-4 border-t-2 border-stone-200 dark:border-stone-800 shrink-0">
+        <form onSubmit={handleSend} className="flex gap-2">
           <Input
             value={newMessage}
-            onChange={(e) => {
-              setNewMessage(e.target.value);
-              handleTyping();
-            }}
+            onChange={e => { setNewMessage(e.target.value); handleTyping(); }}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(e); } }}
             placeholder={t('team.chat.placeholder')}
             className="flex-1"
+            disabled={sending}
           />
-          <Button type="submit" size="icon" disabled={!newMessage.trim() && files.length === 0}>
-            <Send className="h-4 w-4" aria-hidden="true" />
-            <span className="sr-only">{t('common.send') || 'Send'}</span>
+          <Button type="submit" size="icon" disabled={!newMessage.trim() || sending}>
+            {sending
+              ? <span className="h-4 w-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+              : <Send className="h-4 w-4" aria-hidden />
+            }
+            <span className="sr-only">Enviar</span>
           </Button>
         </form>
+        <p className="text-[10px] text-stone-400 mt-1.5">Enter para enviar · Shift+Enter nueva línea</p>
       </div>
+
+      {/* Image lightbox (for legacy messages with attachments) */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85"
+          onClick={() => setLightbox(null)}
+        >
+          <button onClick={() => setLightbox(null)}
+            className="absolute top-4 right-4 p-2 text-white/70 hover:text-white bg-black/30 hover:bg-black/50 transition-colors">
+            ✕
+          </button>
+          <img
+            src={lightbox} alt="preview"
+            className="max-w-[92vw] max-h-[92vh] object-contain"
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };

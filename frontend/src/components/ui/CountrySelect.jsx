@@ -62,7 +62,7 @@ export const CountrySelect = ({
         disabled={disabled || loading}
         onClick={() => setOpen(v => !v)}
         className={`
-          flex items-center justify-between w-full rounded-lg border px-3.5 py-2.5 text-sm
+          flex items-center justify-between w-full border-2 px-3.5 py-2.5 text-sm
           bg-white dark:bg-stone-950 transition-all duration-150
           ${open
             ? 'border-stone-900 ring-1 ring-stone-900 dark:border-stone-400 dark:ring-stone-400'
@@ -92,7 +92,7 @@ export const CountrySelect = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.98 }}
             transition={{ duration: 0.12, ease: 'easeOut' }}
-            className="absolute z-50 mt-1.5 w-full min-w-[200px] bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-xl shadow-xl shadow-stone-900/8 dark:shadow-stone-950/40 overflow-hidden"
+            className="absolute z-50 mt-1.5 w-full min-w-[200px] bg-white dark:bg-stone-950 border-2 border-stone-200 dark:border-stone-800 overflow-hidden"
             style={{ maxHeight: '300px', display: 'flex', flexDirection: 'column' }}
           >
             {/* Search */}
@@ -105,13 +105,13 @@ export const CountrySelect = ({
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder={placeholder}
-                  className="w-full pl-8 pr-8 py-2 text-sm bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-stone-900 focus:border-stone-900 dark:focus:ring-stone-400 dark:focus:border-stone-400 text-stone-900 dark:text-stone-50 placeholder:text-stone-400"
+                  className="w-full pl-8 pr-8 py-2 text-sm bg-stone-50 dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-700 focus:outline-none focus:border-stone-900 dark:focus:border-stone-400 text-stone-900 dark:text-stone-50 placeholder:text-stone-400"
                 />
                 {search && (
                   <button
                     type="button"
                     onClick={() => setSearch('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
                   >
                     <X className="h-3 w-3" />
                   </button>

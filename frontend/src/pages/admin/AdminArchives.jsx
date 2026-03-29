@@ -32,7 +32,7 @@ const FileIcon = ({ type }) => {
   const cfg = fileIconMap[type] || fileIconMap.other;
   const Icon = cfg.icon;
   return (
-    <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${cfg.bg} shrink-0`}>
+    <div className={`flex h-9 w-9 items-center justify-center ${cfg.bg} shrink-0`}>
       <Icon className={`h-4 w-4 ${cfg.color}`} />
     </div>
   );
@@ -47,7 +47,7 @@ const VisibilityBadge = ({ visibility }) => {
   const cfg = map[visibility] || map.hidden;
   const Icon = cfg.icon;
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${cfg.style}`}>
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium border ${cfg.style}`}>
       <Icon className="h-3 w-3" />
       {visibility}
     </span>
@@ -247,7 +247,7 @@ const AdminArchives = () => {
   );
 
   const selectClass =
-    'w-full rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:border-blue-300 focus:ring-blue-200 focus:outline-none focus:ring-2';
+    'w-full border-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:border-blue-300 focus:ring-blue-200 focus:outline-none focus:ring-2';
 
   /* -- render -- */
   return (
@@ -255,7 +255,7 @@ const AdminArchives = () => {
       {/* -- Header -- */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-100 dark:bg-blue-900/30 shrink-0">
+          <div className="flex h-11 w-11 items-center justify-center bg-blue-100 dark:bg-blue-900/30 shrink-0">
             <Archive className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
@@ -269,7 +269,7 @@ const AdminArchives = () => {
         </div>
         <Button
           onClick={() => setShowCreateForm(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2"
+          className="bg-stone-900 hover:bg-stone-800 text-white gap-2"
         >
           <Plus className="h-4 w-4" />
           {t('admin.archives.upload') || 'Subir Archivo'}
@@ -283,7 +283,7 @@ const AdminArchives = () => {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className={`mb-6 px-4 py-3 rounded-2xl text-sm border ${
+            className={`mb-6 px-4 py-3 text-sm border-2 ${
               feedback.type === 'error'
                 ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400'
                 : 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
@@ -301,7 +301,7 @@ const AdminArchives = () => {
           placeholder={t('admin.archives.search') || 'Buscar archivos...'}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 rounded-xl border-stone-200 dark:border-stone-800 focus:border-blue-300 focus:ring-blue-200"
+          className="pl-10 border-stone-200 dark:border-stone-800 focus:border-blue-300 focus:ring-blue-200"
         />
       </div>
 
@@ -319,7 +319,7 @@ const AdminArchives = () => {
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-                  className="rounded-xl border-stone-200 dark:border-stone-800"
+                  className="border-stone-200 dark:border-stone-800"
                   required
                 />
               </div>
@@ -360,7 +360,7 @@ const AdminArchives = () => {
                   max="2100"
                   value={formData.year}
                   onChange={(e) => setFormData((prev) => ({ ...prev, year: parseInt(e.target.value) }))}
-                  className="rounded-xl border-stone-200 dark:border-stone-800"
+                  className="border-stone-200 dark:border-stone-800"
                 />
               </div>
               <div className="space-y-1.5">
@@ -386,7 +386,7 @@ const AdminArchives = () => {
                     value={formData.allowed_emails}
                     onChange={(e) => setFormData((prev) => ({ ...prev, allowed_emails: e.target.value }))}
                     placeholder={t('admin.archives.form.emailsPlaceholder') || 'email1@example.com, email2@example.com'}
-                    className="rounded-xl border-stone-200 dark:border-stone-800 min-h-[60px]"
+                    className="border-stone-200 dark:border-stone-800 min-h-[60px]"
                     rows={2}
                   />
                   <p className="text-xs text-stone-400 dark:text-stone-500">
@@ -395,7 +395,7 @@ const AdminArchives = () => {
                   {formData.allowed_emails && (
                     <div className="flex flex-wrap gap-1.5 mt-1">
                       {formData.allowed_emails.split(',').map((e) => e.trim()).filter((e) => e).map((email, i) => (
-                        <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800">
+                        <span key={i} className="inline-flex items-center px-2 py-0.5 text-xs bg-amber-50 text-amber-700 border-2 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800">
                           {email}
                         </span>
                       ))}
@@ -410,7 +410,7 @@ const AdminArchives = () => {
                     id="file"
                     type="file"
                     onChange={(e) => setFile(e.target.files[0])}
-                    className="cursor-pointer rounded-xl border-stone-200 dark:border-stone-800"
+                    className="cursor-pointer border-stone-200 dark:border-stone-800"
                   />
                 </div>
               )}
@@ -421,18 +421,18 @@ const AdminArchives = () => {
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                className="rounded-xl border-stone-200 dark:border-stone-800 min-h-[80px]"
+                className="border-stone-200 dark:border-stone-800 min-h-[80px]"
                 rows={3}
               />
             </div>
             <AdaptiveModalFooter>
-              <Button type="button" variant="ghost" onClick={resetForm} className="rounded-xl">
+              <Button type="button" variant="ghost" onClick={resetForm}>
                 {t('common.cancel') || 'Cancelar'}
               </Button>
               <Button
                 type="submit"
                 disabled={submitting || (formData.visibility === 'restricted' && !formData.allowed_emails.trim())}
-                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2"
+                className="bg-stone-900 hover:bg-stone-800 text-white gap-2"
               >
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -453,7 +453,7 @@ const AdminArchives = () => {
         </div>
       ) : filteredArchives.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-stone-100 dark:bg-stone-800">
+          <div className="flex h-12 w-12 items-center justify-center bg-stone-100 dark:bg-stone-800">
             <Inbox className="h-6 w-6 text-stone-400" />
           </div>
           <p className="text-sm text-stone-400 dark:text-stone-500">
@@ -461,7 +461,7 @@ const AdminArchives = () => {
           </p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-stone-950 rounded-2xl border border-stone-200 dark:border-stone-800 overflow-hidden shadow-sm">
+        <div className="bg-white dark:bg-stone-950 border-2 border-stone-200 dark:border-stone-800 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -501,7 +501,7 @@ const AdminArchives = () => {
                           )}
                           {archive.visibility === 'restricted' && archive.allowed_emails?.length > 0 && (
                             <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
-                              {archive.allowed_emails.length} email(s) permitidos
+                              {t('admin.archives.allowedEmailsCount', { count: archive.allowed_emails.length })}
                             </p>
                           )}
                         </div>
@@ -525,21 +525,21 @@ const AdminArchives = () => {
                         <button
                           onClick={() => toggleVisibility(archive)}
                           title={archive.visibility === 'public' ? 'Ocultar' : 'Hacer publico'}
-                          className="p-2 rounded-xl text-stone-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                          className="p-2 text-stone-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                         >
                           {archive.visibility === 'public' ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
                         <button
                           onClick={() => startEdit(archive)}
                           title={t('common.edit') || 'Editar'}
-                          className="p-2 rounded-xl text-stone-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                          className="p-2 text-stone-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(archive.id)}
                           title={t('common.delete') || 'Eliminar'}
-                          className="p-2 rounded-xl text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                          className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>

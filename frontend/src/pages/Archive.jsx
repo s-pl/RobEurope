@@ -6,7 +6,11 @@ import { PageHeader } from '../components/ui/PageHeader';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Skeleton } from '../components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Download, FileText, FileArchive, File, Calendar, Lock, Globe, EyeOff } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Textarea } from '../components/ui/textarea';
+import { AdaptiveModal, AdaptiveModalContent, AdaptiveModalFooter } from '../components/ui/adaptive-modal';
+import { Download, FileText, FileArchive, File, Calendar, Lock, Globe, EyeOff, Upload, Loader2 } from 'lucide-react';
 
 const fileTypeIcon = (name) => {
   if (!name) return File;
@@ -40,6 +44,11 @@ const Archive = () => {
   const [competitions, setCompetitions] = useState([]);
   const [selectedCompetition, setSelectedCompetition] = useState('all');
   const [status, setStatus] = useState({ loading: true, error: '' });
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [uploadForm, setUploadForm] = useState({ title: '', description: '', competition_id: '', visibility: 'public' });
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
 
   const loadCompetitions = async () => {
     try {
@@ -74,6 +83,30 @@ const Archive = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCompetition]);
 
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    if (!uploadForm.title.trim()) return;
+    setUploading(true);
+    setUploadError('');
+    try {
+      const formData = new FormData();
+      formData.append('title', uploadForm.title);
+      if (uploadForm.description) formData.append('description', uploadForm.description);
+      if (uploadForm.competition_id) formData.append('competition_id', uploadForm.competition_id);
+      formData.append('visibility', uploadForm.visibility);
+      if (uploadFile) formData.append('file', uploadFile);
+      await apiRequest('/archives', { method: 'POST', body: formData });
+      setUploadOpen(false);
+      setUploadForm({ title: '', description: '', competition_id: '', visibility: 'public' });
+      setUploadFile(null);
+      load();
+    } catch (err) {
+      setUploadError(err.message || 'Error uploading');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleDownload = (item) => {
     if (item.file_url) {
       const link = document.createElement('a');
@@ -89,7 +122,15 @@ const Archive = () => {
 
   return (
     <div className="space-y-10">
-      <PageHeader title={t('archives.title')} description={t('archives.description')} />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageHeader title={t('archives.title')} description={t('archives.description')} />
+        {isAdmin && (
+          <Button onClick={() => setUploadOpen(true)} className="gap-2 shrink-0">
+            <Upload className="h-4 w-4" />
+            {t('archives.actions.create')}
+          </Button>
+        )}
+      </div>
 
       {/* Inline filter bar */}
       <div className="flex flex-wrap items-center gap-3">
@@ -97,7 +138,7 @@ const Archive = () => {
           {t('archives.fields.competition')}:
         </span>
         <Select value={selectedCompetition} onValueChange={setSelectedCompetition}>
-          <SelectTrigger className="w-56 rounded-xl border-stone-200 dark:border-stone-700">
+          <SelectTrigger className="w-56 border-stone-200 dark:border-stone-700">
             <SelectValue placeholder={t('archives.filters.competitionAll')} />
           </SelectTrigger>
           <SelectContent>
@@ -114,12 +155,12 @@ const Archive = () => {
         <div className="space-y-0 divide-y divide-stone-200 dark:divide-stone-800">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="flex items-center gap-4 py-4">
-              <Skeleton className="h-10 w-10 rounded-lg shrink-0" />
+              <Skeleton className="h-10 w-10 shrink-0" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-4 w-48" />
                 <Skeleton className="h-3 w-72" />
               </div>
-              <Skeleton className="h-8 w-8 rounded-lg" />
+              <Skeleton className="h-8 w-8" />
             </div>
           ))}
         </div>
@@ -152,7 +193,7 @@ const Archive = () => {
             return (
               <div key={item.id} className="flex items-center gap-4 py-4 group">
                 {/* File type icon */}
-                <div className="h-10 w-10 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0">
+                <div className="h-10 w-10 bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0">
                   <Icon className="h-5 w-5 text-stone-500 dark:text-stone-400" />
                 </div>
 
@@ -204,7 +245,7 @@ const Archive = () => {
                 {item.file_url && (
                   <button
                     onClick={() => handleDownload(item)}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-stone-500 hover:text-blue-600 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors duration-200 shrink-0"
+                    className="inline-flex h-9 w-9 items-center justify-center text-stone-500 hover:text-blue-600 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors duration-200 shrink-0"
                     aria-label={item.file_name || t('archives.actions.download')}
                   >
                     <Download className="h-4 w-4" />
@@ -214,6 +255,80 @@ const Archive = () => {
             );
           })}
         </div>
+      )}
+      {isAdmin && uploadOpen && (
+        <AdaptiveModal open onOpenChange={(o) => !o && setUploadOpen(false)}>
+          <AdaptiveModalContent title={t('archives.actions.create')}>
+            <form onSubmit={handleUpload} className="space-y-4 py-1">
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-stone-600 dark:text-stone-400">{t('archives.fields.title')} *</label>
+                <Input
+                  value={uploadForm.title}
+                  onChange={(e) => setUploadForm(f => ({ ...f, title: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-stone-600 dark:text-stone-400">{t('archives.fields.description')}</label>
+                <Textarea
+                  value={uploadForm.description}
+                  onChange={(e) => setUploadForm(f => ({ ...f, description: e.target.value }))}
+                  rows={2}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-stone-600 dark:text-stone-400">{t('archives.fields.competition')}</label>
+                  <select
+                    value={uploadForm.competition_id}
+                    onChange={(e) => setUploadForm(f => ({ ...f, competition_id: e.target.value }))}
+                    className="w-full border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 px-3 py-2 text-sm focus:outline-none"
+                  >
+                    <option value="">{t('archives.filters.competitionAll')}</option>
+                    {competitions.map((c) => (
+                      <option key={c.id} value={c.id}>{c.title}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-stone-600 dark:text-stone-400">{t('archives.fields.visibility')}</label>
+                  <select
+                    value={uploadForm.visibility}
+                    onChange={(e) => setUploadForm(f => ({ ...f, visibility: e.target.value }))}
+                    className="w-full border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 px-3 py-2 text-sm focus:outline-none"
+                  >
+                    <option value="public">{t('archives.visibility.public')}</option>
+                    <option value="restricted">{t('archives.visibility.restricted')}</option>
+                    <option value="hidden">{t('archives.visibility.hidden')}</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-stone-600 dark:text-stone-400">{t('archives.fields.file')}</label>
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z,.txt,.csv,image/*,video/*"
+                  onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                />
+                <p className="text-xs text-stone-400 dark:text-stone-500">
+                  PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR, 7Z, TXT, CSV, imágenes, vídeos
+                </p>
+              </div>
+              {uploadError && (
+                <p className="text-sm text-red-600 dark:text-red-400">{uploadError}</p>
+              )}
+              <AdaptiveModalFooter>
+                <Button type="button" variant="outline" onClick={() => setUploadOpen(false)} disabled={uploading}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={uploading}>
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
+                  {t('archives.actions.create')}
+                </Button>
+              </AdaptiveModalFooter>
+            </form>
+          </AdaptiveModalContent>
+        </AdaptiveModal>
       )}
     </div>
   );

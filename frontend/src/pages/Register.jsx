@@ -42,11 +42,6 @@ const GitHubIcon = () => (
   </svg>
 );
 
-const AppleIcon = () => (
-  <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
-    <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-  </svg>
-);
 
 const Register = () => {
   const { register } = useAuth();
@@ -181,7 +176,7 @@ const Register = () => {
         </div>
 
         {/* Card */}
-        <Card className="rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm">
+        <Card className="bg-white dark:bg-stone-900">
           <CardHeader className="text-center pb-0">
             <CardTitle className="font-display text-2xl font-bold text-stone-900 dark:text-stone-50">
               {t('register.title')}
@@ -201,7 +196,7 @@ const Register = () => {
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2 }}
-                className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-900/20 dark:text-red-400 mb-4"
+                className="border-2 border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-900/20 dark:text-red-400 mb-4"
               >
                 {error}
               </motion.p>
@@ -219,7 +214,7 @@ const Register = () => {
                     required
                     value={form.first_name}
                     onChange={handleChange}
-                    className="pl-10 rounded-lg"
+                    className="pl-10"
                     placeholder={t('placeholders.nameExample')}
                     autoComplete="given-name"
                   />
@@ -237,7 +232,7 @@ const Register = () => {
                     required
                     value={form.last_name}
                     onChange={handleChange}
-                    className="pl-10 rounded-lg"
+                    className="pl-10"
                     placeholder={t('placeholders.lastNameExample')}
                     autoComplete="family-name"
                   />
@@ -255,7 +250,7 @@ const Register = () => {
                     required
                     value={form.username}
                     onChange={handleChange}
-                    className="pl-10 rounded-lg"
+                    className="pl-10"
                     placeholder={t('placeholders.usernameExample')}
                     autoComplete="username"
                   />
@@ -272,7 +267,7 @@ const Register = () => {
                     name="phone"
                     value={form.phone}
                     onChange={handleChange}
-                    className="pl-10 rounded-lg"
+                    className="pl-10"
                     placeholder={t('placeholders.phoneExample')}
                     autoComplete="tel"
                   />
@@ -291,7 +286,7 @@ const Register = () => {
                     required
                     value={form.email}
                     onChange={handleChange}
-                    className="pl-10 rounded-lg"
+                    className="pl-10"
                     placeholder={t('placeholders.emailExample')}
                     autoComplete="email"
                   />
@@ -310,7 +305,7 @@ const Register = () => {
                     required
                     value={form.password}
                     onChange={(e) => { handleChange(e); if (!pwTouched) setPwTouched(true); }}
-                    className="pl-10 pr-10 rounded-lg"
+                    className="pl-10 pr-10"
                     placeholder={t('placeholders.passwordExample')}
                     autoComplete="new-password"
                     aria-invalid={hasError}
@@ -333,7 +328,7 @@ const Register = () => {
                       {[1, 2, 3, 4, 5].map((i) => (
                         <div
                           key={i}
-                          className={`h-1.5 flex-1 rounded-full transition-colors duration-200 ${
+                          className={`h-1.5 flex-1 transition-colors duration-200 ${
                             i <= strength.score
                               ? 'bg-blue-600'
                               : 'bg-stone-300 dark:bg-stone-700'
@@ -358,7 +353,7 @@ const Register = () => {
                     required
                     value={form.confirm_password}
                     onChange={handleChange}
-                    className="pl-10 pr-10 rounded-lg"
+                    className="pl-10 pr-10"
                     placeholder={t('placeholders.passwordExample')}
                     autoComplete="new-password"
                     aria-invalid={confirmMismatch}
@@ -377,7 +372,7 @@ const Register = () => {
                 {/* Password match indicator */}
                 {form.confirm_password && (
                   <div className="flex items-center gap-1.5 pt-1">
-                    <div className={`flex h-4 w-4 items-center justify-center rounded-full ${
+                    <div className={`flex h-4 w-4 items-center justify-center ${
                       passwordsMatch ? 'bg-emerald-500' : 'bg-red-500'
                     }`}>
                       {passwordsMatch ? (
@@ -397,13 +392,13 @@ const Register = () => {
               </div>
 
               {/* Student center selection */}
-              <div className="md:col-span-2 space-y-2 rounded-xl border border-stone-200 bg-stone-50 p-4 dark:border-stone-800 dark:bg-stone-900/50">
+              <div className="md:col-span-2 space-y-2 border-2 border-stone-200 bg-stone-50 p-4 dark:border-stone-800 dark:bg-stone-900/50">
                 <Label htmlFor="studentCenterSelect">{t('register.studentCenterLabel') || 'Educational center (optional)'}</Label>
                 <select
                   id="studentCenterSelect"
                   value={studentCenterId}
                   onChange={(e) => setStudentCenterId(e.target.value)}
-                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm transition-colors focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                  className="w-full border-2 border-stone-300 bg-white px-3 py-2 text-sm transition-colors focus:border-stone-900 focus:outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
                 >
                   <option value="">{t('register.studentCenterPlaceholder') || '-- No center --'}</option>
                   {educationalCenters.map((center) => (
@@ -416,7 +411,7 @@ const Register = () => {
               </div>
 
               {/* Educational Center Admin Option */}
-              <div className="md:col-span-2 space-y-2 rounded-xl border border-stone-200 bg-stone-50 p-4 dark:border-stone-800 dark:bg-stone-900/50">
+              <div className="md:col-span-2 space-y-2 border-2 border-stone-200 bg-stone-50 p-4 dark:border-stone-800 dark:bg-stone-900/50">
                 <button
                   type="button"
                   onClick={() => {
@@ -471,7 +466,7 @@ const Register = () => {
                                 id="selectCenter"
                                 value={selectedCenterId}
                                 onChange={(e) => setSelectedCenterId(e.target.value)}
-                                className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm transition-colors focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                                className="w-full border-2 border-stone-300 bg-white px-3 py-2 text-sm transition-colors focus:border-stone-900 focus:outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
                               >
                                 <option value="">{t('register.noCenter') || '-- Select a center --'}</option>
                                 {educationalCenters.map((center) => (
@@ -491,13 +486,13 @@ const Register = () => {
                             </button>
                           </div>
                         ) : (
-                          <div className="space-y-3 rounded-lg border border-dashed border-stone-300 bg-white p-4 dark:border-stone-700 dark:bg-stone-950">
+                          <div className="space-y-3 border-2 border-dashed border-stone-300 bg-white p-4 dark:border-stone-700 dark:bg-stone-950">
                             <div className="flex items-center justify-between">
                               <span className="text-sm font-medium text-stone-900 dark:text-stone-50">{t('register.createNewCenter') || 'Create new educational center'}</span>
                               <button
                                 type="button"
                                 onClick={() => setShowCreateCenter(false)}
-                                className="rounded-md p-1 text-stone-400 transition-colors hover:bg-stone-200 hover:text-stone-600 dark:hover:bg-stone-700"
+                                className="p-1 text-stone-400 transition-colors hover:bg-stone-200 hover:text-stone-600 dark:hover:bg-stone-700"
                               >
                                 <X className="h-4 w-4" />
                               </button>
@@ -510,7 +505,7 @@ const Register = () => {
                                   value={newCenterForm.name}
                                   onChange={(e) => setNewCenterForm((prev) => ({ ...prev, name: e.target.value }))}
                                   placeholder={t('register.centerNamePlaceholder') || 'IES / School / University...'}
-                                  className="rounded-lg"
+                                  className=""
                                 />
                               </div>
                               <div className="space-y-1">
@@ -520,7 +515,7 @@ const Register = () => {
                                   value={newCenterForm.city}
                                   onChange={(e) => setNewCenterForm((prev) => ({ ...prev, city: e.target.value }))}
                                   placeholder={t('register.centerCityPlaceholder') || 'Madrid, Barcelona...'}
-                                  className="rounded-lg"
+                                  className=""
                                 />
                               </div>
                               <div className="space-y-1">
@@ -531,7 +526,7 @@ const Register = () => {
                                   value={newCenterForm.contact_email}
                                   onChange={(e) => setNewCenterForm((prev) => ({ ...prev, contact_email: e.target.value }))}
                                   placeholder="center@example.com"
-                                  className="rounded-lg"
+                                  className=""
                                 />
                               </div>
                               <div className="space-y-1">
@@ -541,7 +536,7 @@ const Register = () => {
                                   value={newCenterForm.website}
                                   onChange={(e) => setNewCenterForm((prev) => ({ ...prev, website: e.target.value }))}
                                   placeholder="https://..."
-                                  className="rounded-lg"
+                                  className=""
                                 />
                               </div>
                             </div>
@@ -595,7 +590,7 @@ const Register = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full rounded-lg bg-stone-900 text-stone-50 hover:bg-stone-800 dark:bg-stone-50 dark:text-stone-900 dark:hover:bg-stone-200"
+                  className="w-full bg-stone-900 text-stone-50 hover:bg-stone-800 dark:bg-stone-50 dark:text-stone-900 dark:hover:bg-stone-200"
                 >
                   {loading ? t('buttons.creating') : t('buttons.createAccount')}
                 </Button>
@@ -615,10 +610,10 @@ const Register = () => {
             </div>
 
             {/* OAuth buttons */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 variant="outline"
-                className="gap-2 rounded-lg border-stone-200 dark:border-stone-700"
+                className="gap-2 border-stone-200 dark:border-stone-700"
                 onClick={() => { window.location.href = `${getApiBaseUrl()}/auth/google`; }}
               >
                 <GoogleIcon />
@@ -626,19 +621,11 @@ const Register = () => {
               </Button>
               <Button
                 variant="outline"
-                className="gap-2 rounded-lg border-stone-200 dark:border-stone-700"
+                className="gap-2 border-stone-200 dark:border-stone-700"
                 onClick={() => { window.location.href = `${getApiBaseUrl()}/auth/github`; }}
               >
                 <GitHubIcon />
                 <span className="hidden sm:inline">GitHub</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="gap-2 rounded-lg border-stone-200 dark:border-stone-700"
-                onClick={() => { window.location.href = `${getApiBaseUrl()}/auth/apple`; }}
-              >
-                <AppleIcon />
-                <span className="hidden sm:inline">Apple</span>
               </Button>
             </div>
 

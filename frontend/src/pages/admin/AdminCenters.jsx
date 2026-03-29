@@ -30,7 +30,7 @@ const StatusBadge = ({ status, t }) => {
   };
   const s = map[status] || map.pending;
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${s.bg}`}>
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium border ${s.bg}`}>
       {s.icon}
       {t(`admin.centers.status.${status}`) || status}
     </span>
@@ -41,13 +41,13 @@ const StatusBadge = ({ status, t }) => {
 /*  Collapsible Section wrapper                                        */
 /* ------------------------------------------------------------------ */
 const CollapsibleSection = ({ icon: Icon, iconColor, title, description, expanded, onToggle, children }) => (
-  <div className="bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-2xl overflow-hidden shadow-sm">
+  <div className="bg-white dark:bg-stone-950 border-2 border-stone-200 dark:border-stone-800 overflow-hidden">
     <button
       onClick={onToggle}
       className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-stone-50/70 dark:hover:bg-stone-900/30 transition-colors"
     >
       <div className="flex items-center gap-3">
-        <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${iconColor}`}>
+        <div className={`flex h-9 w-9 items-center justify-center ${iconColor}`}>
           <Icon className="h-4.5 w-4.5" />
         </div>
         <div>
@@ -386,7 +386,7 @@ const AdminCenters = () => {
       {/* ── Header ── */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-100 dark:bg-blue-900/30 shrink-0">
+          <div className="flex h-11 w-11 items-center justify-center bg-blue-100 dark:bg-blue-900/30 shrink-0">
             <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
@@ -400,7 +400,7 @@ const AdminCenters = () => {
         </div>
         <Button
           onClick={() => setShowCreateForm(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2"
+          className="bg-stone-900 hover:bg-stone-800 text-white gap-2"
         >
           <Plus className="h-4 w-4" />
           {t('admin.centers.create') || 'Crear Centro'}
@@ -414,7 +414,7 @@ const AdminCenters = () => {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className={`mb-6 px-4 py-3 rounded-2xl text-sm border ${
+            className={`mb-6 px-4 py-3 text-sm border-2 ${
               feedback.type === 'error'
                 ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400'
                 : 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
@@ -461,7 +461,7 @@ const AdminCenters = () => {
                     <Button
                       size="sm"
                       onClick={() => handleCenterApproveRegistration(reg.id)}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded-xl gap-1"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs gap-1"
                     >
                       <Check className="h-3.5 w-3.5" />
                       {t('common.approve') || 'Aprobar'}
@@ -470,7 +470,7 @@ const AdminCenters = () => {
                       size="sm"
                       variant="outline"
                       onClick={() => openReasonDialog('reject-registration', reg.id)}
-                      className="border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 text-xs rounded-xl gap-1"
+                      className="border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 text-xs gap-1"
                     >
                       <X className="h-3.5 w-3.5" />
                       {t('common.reject') || 'Rechazar'}
@@ -507,7 +507,7 @@ const AdminCenters = () => {
                 myCenterUsers.map((centerUser) => (
                   <div key={centerUser.id} className="flex items-center justify-between gap-3 px-5 py-3.5">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-100 dark:bg-stone-800 shrink-0 text-xs font-semibold text-stone-600 dark:text-stone-300">
+                      <div className="flex h-8 w-8 items-center justify-center bg-stone-100 dark:bg-stone-800 shrink-0 text-xs font-semibold text-stone-600 dark:text-stone-300">
                         {(centerUser.first_name?.[0] || '').toUpperCase()}
                       </div>
                       <div className="min-w-0">
@@ -519,7 +519,7 @@ const AdminCenters = () => {
                     </div>
                     <button
                       onClick={() => openConfirm('remove-user', centerUser.id)}
-                      className="p-2 rounded-xl text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0"
+                      className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -552,7 +552,7 @@ const AdminCenters = () => {
                 myCenterTeams.map((team) => (
                   <div key={team.id} className="flex items-center justify-between gap-3 px-5 py-3.5">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 shrink-0 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                      <div className="flex h-8 w-8 items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 shrink-0 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
                         {(team.name?.[0] || '').toUpperCase()}
                       </div>
                       <div className="min-w-0">
@@ -562,7 +562,7 @@ const AdminCenters = () => {
                     </div>
                     <button
                       onClick={() => openConfirm('remove-team', team.id)}
-                      className="p-2 rounded-xl text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0"
+                      className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -582,17 +582,17 @@ const AdminCenters = () => {
             placeholder={t('admin.centers.search') || 'Buscar centros...'}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 rounded-xl border-stone-200 dark:border-stone-800 focus:border-blue-300 focus:ring-blue-200"
+            className="pl-10 border-stone-200 dark:border-stone-800 focus:border-blue-300 focus:ring-blue-200"
           />
         </div>
-        <div className="flex p-1 rounded-xl bg-stone-100 dark:bg-stone-800/60 gap-0.5">
+        <div className="flex p-1 bg-stone-100 dark:bg-stone-800/60 gap-0.5">
           {filterTabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setFilter(tab.key)}
-              className={`px-3.5 py-1.5 text-sm font-medium rounded-lg transition-all ${
+              className={`px-3.5 py-1.5 text-sm font-medium transition-all ${
                 filter === tab.key
-                  ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-50 shadow-sm'
+                  ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-50'
                   : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
               }`}
             >
@@ -620,7 +620,7 @@ const AdminCenters = () => {
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                  className="rounded-xl border-stone-200 dark:border-stone-800"
+                  className="border-stone-200 dark:border-stone-800"
                   required
                 />
               </div>
@@ -630,7 +630,7 @@ const AdminCenters = () => {
                   id="city"
                   value={formData.city}
                   onChange={(e) => setFormData((prev) => ({ ...prev, city: e.target.value }))}
-                  className="rounded-xl border-stone-200 dark:border-stone-800"
+                  className="border-stone-200 dark:border-stone-800"
                 />
               </div>
               <div className="space-y-1.5">
@@ -640,7 +640,7 @@ const AdminCenters = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                  className="rounded-xl border-stone-200 dark:border-stone-800"
+                  className="border-stone-200 dark:border-stone-800"
                 />
               </div>
               <div className="space-y-1.5">
@@ -649,7 +649,7 @@ const AdminCenters = () => {
                   id="website_url"
                   value={formData.website_url}
                   onChange={(e) => setFormData((prev) => ({ ...prev, website_url: e.target.value }))}
-                  className="rounded-xl border-stone-200 dark:border-stone-800"
+                  className="border-stone-200 dark:border-stone-800"
                 />
               </div>
             </div>
@@ -659,15 +659,15 @@ const AdminCenters = () => {
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                className="rounded-xl border-stone-200 dark:border-stone-800 min-h-[80px]"
+                className="border-stone-200 dark:border-stone-800 min-h-[80px]"
                 rows={3}
               />
             </div>
             <AdaptiveModalFooter>
-              <Button type="button" variant="ghost" onClick={resetForm} className="rounded-xl">
+              <Button type="button" variant="ghost" onClick={resetForm}>
                 {t('common.cancel') || 'Cancelar'}
               </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2">
+              <Button type="submit" className="bg-stone-900 hover:bg-stone-800 text-white gap-2">
                 <Save className="h-4 w-4" />
                 {editingCenter ? (t('common.save') || 'Guardar') : (t('common.create') || 'Crear')}
               </Button>
@@ -683,7 +683,7 @@ const AdminCenters = () => {
         </div>
       ) : filteredCenters.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-stone-100 dark:bg-stone-800">
+          <div className="flex h-12 w-12 items-center justify-center bg-stone-100 dark:bg-stone-800">
             <Building2 className="h-6 w-6 text-stone-400" />
           </div>
           <p className="text-sm text-stone-400 dark:text-stone-500">
@@ -691,7 +691,7 @@ const AdminCenters = () => {
           </p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-stone-950 rounded-2xl border border-stone-200 dark:border-stone-800 overflow-hidden shadow-sm">
+        <div className="bg-white dark:bg-stone-950 border-2 border-stone-200 dark:border-stone-800 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -741,14 +741,14 @@ const AdminCenters = () => {
                           <>
                             <button
                               onClick={() => handleApprove(center.id)}
-                              className="p-2 rounded-xl text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+                              className="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
                               title={t('common.approve') || 'Aprobar'}
                             >
                               <Check className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => openReasonDialog('reject-center', center.id)}
-                              className="p-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                              className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                               title={t('common.reject') || 'Rechazar'}
                             >
                               <X className="h-4 w-4" />
@@ -758,7 +758,7 @@ const AdminCenters = () => {
                         <button
                           onClick={() => startEdit(center)}
                           title={t('common.edit') || 'Editar'}
-                          className="p-2 rounded-xl text-stone-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                          className="p-2 text-stone-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
@@ -766,7 +766,7 @@ const AdminCenters = () => {
                           <button
                             onClick={() => openConfirm('delete-center', center.id)}
                             title={t('common.delete') || 'Eliminar'}
-                            className="p-2 rounded-xl text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                            className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>

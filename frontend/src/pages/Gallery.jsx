@@ -117,7 +117,7 @@ const Gallery = () => {
         setFavorites((prev) => prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]);
     };
 
-    const inputClass = 'w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50';
+    const inputClass = 'w-full border-2 border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 focus-visible:outline-none focus-visible:border-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50 dark:focus-visible:border-stone-50';
 
     return (
         <div className="space-y-10">
@@ -148,7 +148,7 @@ const Gallery = () => {
                                     onSubmit={handleUpload}
                                     className="overflow-hidden mt-4"
                                 >
-                                    <div className="border-t border-stone-200 dark:border-stone-700 pt-5 space-y-4">
+                                    <div className="border-t-2 border-stone-200 dark:border-stone-700 pt-5 space-y-4">
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
@@ -157,7 +157,7 @@ const Gallery = () => {
                                                 <input
                                                     type="file"
                                                     accept="image/*"
-                                                    className="block w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 file:mr-3 file:rounded-lg file:border-0 file:bg-stone-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-stone-900 hover:file:bg-stone-200 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50 dark:file:bg-stone-800 dark:file:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                                                    className="block w-full border-2 border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 file:mr-3 file:border-0 file:bg-stone-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-stone-900 hover:file:bg-stone-200 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-50 dark:file:bg-stone-800 dark:file:text-stone-50 focus-visible:outline-none focus-visible:border-stone-900"
                                                     onChange={(ev) => setForm((p) => ({ ...p, file: ev.target.files?.[0] || null }))}
                                                 />
                                             </div>
@@ -179,7 +179,7 @@ const Gallery = () => {
                                             <button
                                                 type="submit"
                                                 disabled={uploadStatus.loading}
-                                                className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+                                                className="inline-flex items-center justify-center bg-stone-900 px-5 py-2 text-sm font-medium text-white hover:bg-stone-700 transition-colors duration-200 disabled:opacity-50 dark:bg-stone-50 dark:text-stone-900 dark:hover:bg-stone-200"
                                             >
                                                 {uploadStatus.loading ? (t('gallery.uploading') || 'Subiendo...') : (t('gallery.uploadCta') || 'Subir')}
                                             </button>
@@ -212,7 +212,7 @@ const Gallery = () => {
                 <div className="columns-2 sm:columns-3 lg:columns-4 gap-4 space-y-4">
                     {[180, 240, 160, 220, 200, 260, 180, 210].map((h, i) => (
                         <div key={i} className="break-inside-avoid">
-                            <Skeleton className="w-full rounded-lg" style={{ height: h }} />
+                            <Skeleton className="w-full" style={{ height: h }} />
                         </div>
                     ))}
                 </div>
@@ -231,7 +231,7 @@ const Gallery = () => {
                         const isFav = favorites.includes(item.id);
                         return (
                             <ScrollReveal key={item.id} delay={(index % 8) * 0.04}>
-                                <div className="break-inside-avoid group relative rounded-lg overflow-hidden cursor-pointer">
+                                <div className="break-inside-avoid group relative overflow-hidden cursor-pointer">
                                     <img
                                         src={resolveMediaUrl(item.url)}
                                         alt={item.title || item.original_name || 'Imagen'}
@@ -256,7 +256,7 @@ const Gallery = () => {
                                         <button
                                             type="button"
                                             onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id); }}
-                                            className={`absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-full transition-opacity duration-200 ${isFav ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} bg-white/90 dark:bg-stone-800/90 text-stone-700 dark:text-stone-200 hover:bg-white dark:hover:bg-stone-800`}
+                                            className={`absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center transition-opacity duration-200 ${isFav ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} bg-white/90 dark:bg-stone-800/90 text-stone-700 dark:text-stone-200 hover:bg-white dark:hover:bg-stone-800`}
                                             aria-label={isFav ? (t('gallery.unfavorite') || 'Quitar favorito') : (t('gallery.favorite') || 'Anadir favorito')}
                                         >
                                             <Heart className={`h-4 w-4 ${isFav ? 'fill-current text-rose-500' : ''}`} />
@@ -269,7 +269,7 @@ const Gallery = () => {
                                             type="button"
                                             onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
                                             disabled={deleteStatus.loadingId === item.id}
-                                            className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 inline-flex items-center rounded-lg px-2 py-1 text-xs font-medium text-white bg-red-600/80 hover:bg-red-600 disabled:opacity-50"
+                                            className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 inline-flex items-center px-2 py-1 text-xs font-medium text-white bg-red-600/80 hover:bg-red-600 disabled:opacity-50"
                                         >
                                             {deleteStatus.loadingId === item.id ? (t('gallery.deleting') || 'Eliminando...') : (t('gallery.delete') || 'Eliminar')}
                                         </button>
@@ -300,7 +300,7 @@ const Gallery = () => {
                         <button
                             type="button"
                             onClick={() => setActiveIndex(-1)}
-                            className="absolute top-5 right-5 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full text-white/70 hover:text-white transition-colors duration-200"
+                            className="absolute top-5 right-5 z-10 inline-flex h-10 w-10 items-center justify-center text-white/70 hover:text-white transition-colors duration-200"
                             aria-label={t('common.close') || 'Cerrar'}
                         >
                             <X className="h-5 w-5" />
@@ -316,7 +316,7 @@ const Gallery = () => {
                             type="button"
                             disabled={activeIndex <= 0}
                             onClick={(e) => { e.stopPropagation(); setActiveIndex((prev) => Math.max(0, prev - 1)); }}
-                            className="absolute left-4 inline-flex h-10 w-10 items-center justify-center rounded-full text-white/60 hover:text-white disabled:opacity-30 transition-colors duration-200"
+                            className="absolute left-4 inline-flex h-10 w-10 items-center justify-center text-white/60 hover:text-white disabled:opacity-30 transition-colors duration-200"
                             aria-label={t('common.previous') || 'Anterior'}
                         >
                             <ChevronLeft className="h-6 w-6" />
@@ -336,7 +336,7 @@ const Gallery = () => {
                                 <img
                                     src={resolveMediaUrl(activeItem.url)}
                                     alt={activeItem.title || activeItem.original_name || 'Imagen'}
-                                    className="max-h-[75vh] w-auto max-w-full object-contain rounded-lg"
+                                    className="max-h-[75vh] w-auto max-w-full object-contain"
                                 />
                                 {(activeItem.title || activeItem.description) && (
                                     <div className="mt-4 text-center max-w-lg">
@@ -356,7 +356,7 @@ const Gallery = () => {
                             type="button"
                             disabled={activeIndex >= items.length - 1}
                             onClick={(e) => { e.stopPropagation(); setActiveIndex((prev) => Math.min(items.length - 1, prev + 1)); }}
-                            className="absolute right-4 inline-flex h-10 w-10 items-center justify-center rounded-full text-white/60 hover:text-white disabled:opacity-30 transition-colors duration-200"
+                            className="absolute right-4 inline-flex h-10 w-10 items-center justify-center text-white/60 hover:text-white disabled:opacity-30 transition-colors duration-200"
                             aria-label={t('common.next') || 'Siguiente'}
                         >
                             <ChevronRight className="h-6 w-6" />

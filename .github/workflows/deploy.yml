@@ -87,9 +87,9 @@ jobs:
 
           echo "[deploy] migraciones..."
           if [[ -n "$COMPOSE_RUN" ]]; then
-            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' --profile prod exec -T backend sh -lc 'node scripts/run-migrations.js'" || true
+            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' --profile prod exec -T backend sh -lc 'node scripts/run-migrations.js'"
           else
-            docker compose -f "$COMPOSE_FILE" --profile prod exec -T backend sh -lc "node scripts/run-migrations.js" || true
+            docker compose -f "$COMPOSE_FILE" --profile prod exec -T backend sh -lc "node scripts/run-migrations.js"
           fi
 
           echo "[deploy] ✓ Deploy completado"

@@ -23,7 +23,6 @@ import EducationalCenters from './pages/EducationalCenters';
 import Feedback from './pages/Feedback';
 import Terms from './pages/Terms';
 import Notifications from './pages/Notifications';
-import Messages from './pages/Messages';
 import NotFound from './pages/NotFound';
 import { Toaster } from './components/ui/toast';
 import { EditModeProvider } from './context/EditModeContext';
@@ -33,7 +32,15 @@ import AdminCenters from './pages/admin/AdminCenters';
 import AdminArchives from './pages/admin/AdminArchives';
 import AdminRequests from './pages/admin/AdminRequests';
 import AdminPosts from './pages/admin/AdminPosts';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminTeams from './pages/admin/AdminTeams';
+import AdminCompetitions from './pages/admin/AdminCompetitions';
+import AdminRegistrations from './pages/admin/AdminRegistrations';
+import AdminLogs from './pages/admin/AdminLogs';
+import AdminLayout from './components/layout/AdminLayout';
 import { TeamProvider } from './context/TeamContext';
+import { FeaturesProvider } from './context/FeaturesContext';
 
 // Admin route wrapper - requires center_admin or super_admin role
 const AdminRoute = ({ children, superAdminOnly = false }) => {
@@ -63,6 +70,7 @@ const GuestRoute = ({ children }) => {
 function App() {
   return (
     <BrowserRouter>
+  <FeaturesProvider>
   <SocketProvider>
   <EditModeProvider>
   <TeamProvider>
@@ -84,13 +92,7 @@ function App() {
           <Route path="streams" element={<Streams />} />
           <Route path="terms" element={<Terms />} />
           <Route path="notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-          <Route path="messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
 
-          {/* Admin Routes */}
-          <Route path="admin/centers" element={<AdminRoute><AdminCenters /></AdminRoute>} />
-          <Route path="admin/archives" element={<AdminRoute><AdminArchives /></AdminRoute>} />
-          <Route path="admin/posts" element={<AdminRoute><AdminPosts /></AdminRoute>} />
-          <Route path="admin/requests" element={<AdminRoute superAdminOnly><AdminRequests /></AdminRoute>} />
 
           <Route path="*" element={<NotFound />} />
 
@@ -102,6 +104,23 @@ function App() {
               </ProtectedRoute>
             }
           />
+        </Route>
+
+        {/* Admin routes — dedicated AdminLayout (no app navbar/sidebar) */}
+        <Route
+          path="/admin"
+          element={<AdminRoute superAdminOnly><AdminLayout /></AdminRoute>}
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="teams" element={<AdminTeams />} />
+          <Route path="competitions" element={<AdminCompetitions />} />
+          <Route path="registrations" element={<AdminRegistrations />} />
+          <Route path="logs" element={<AdminLogs />} />
+          <Route path="centers" element={<AdminCenters />} />
+          <Route path="archives" element={<AdminArchives />} />
+          <Route path="posts" element={<AdminPosts />} />
+          <Route path="requests" element={<AdminRequests />} />
         </Route>
 
         <Route
@@ -143,6 +162,7 @@ function App() {
   </TeamProvider>
   </EditModeProvider>
   </SocketProvider>
+  </FeaturesProvider>
     </BrowserRouter>
   );
 }

@@ -77,7 +77,7 @@ const ResetPassword = () => {
             <p
               role={messageType === 'error' ? 'alert' : 'status'}
               aria-live={messageType === 'error' ? 'assertive' : 'polite'}
-              className={`rounded-2xl border p-3 text-sm ${
+              className={`border-2 p-3 text-sm ${
                 messageType === 'error'
                   ? 'border-red-200 bg-red-50 text-red-700 dark:bg-red-900/20 dark:border-red-900 dark:text-red-400'
                   : 'border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:border-blue-900 dark:text-blue-300'
