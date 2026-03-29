@@ -68,11 +68,11 @@ jobs:
             COMPOSE_RUN=''
           fi
 
-          echo "[deploy] docker compose up -d --build (prod)..."
+          echo "[deploy] docker compose up -d --build (backend + deps)..."
           if [[ -n "$COMPOSE_RUN" ]]; then
-            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' --profile prod up -d --build"
+            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' up -d --build mysql redis backend"
           else
-            docker compose -f "$COMPOSE_FILE" --profile prod up -d --build
+            docker compose -f "$COMPOSE_FILE" up -d --build mysql redis backend
           fi
 
           echo "[deploy] esperando backend..."
@@ -80,16 +80,16 @@ jobs:
 
           echo "[deploy] containers activos:"
           if [[ -n "$COMPOSE_RUN" ]]; then
-            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' --profile prod ps"
+            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' ps mysql redis backend"
           else
-            docker compose -f "$COMPOSE_FILE" --profile prod ps
+            docker compose -f "$COMPOSE_FILE" ps mysql redis backend
           fi
 
           echo "[deploy] migraciones..."
           if [[ -n "$COMPOSE_RUN" ]]; then
-            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' --profile prod exec -T backend sh -lc 'node scripts/run-migrations.js'"
+            sg docker -c "cd '$REPO_ROOT' && docker compose -f '$COMPOSE_FILE' exec -T backend sh -lc 'node scripts/run-migrations.js'"
           else
-            docker compose -f "$COMPOSE_FILE" --profile prod exec -T backend sh -lc "node scripts/run-migrations.js"
+            docker compose -f "$COMPOSE_FILE" exec -T backend sh -lc "node scripts/run-migrations.js"
           fi
 
           echo "[deploy] ✓ Deploy completado"
