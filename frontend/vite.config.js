@@ -58,7 +58,6 @@ export default defineConfig({
     allowedHosts: [
       'robeurope.samuelponce.es',
       'www.robeurope.samuelponce.es',
-      '*.robeurope.samuelponce.es',
       'localhost',
       '127.0.0.1',
       '46.101.255.106'

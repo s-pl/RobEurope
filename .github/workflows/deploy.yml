@@ -4,6 +4,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'backend/**'
+      - 'docker-compose.yml'
+      - 'docker/**'
+      - '.github/workflows/deploy.yml'
+
+# Minimum required permissions — no write access needed for SSH deploy
+permissions:
+  contents: read
 
 # Evita deploys simultáneos; cancela el anterior si hay uno en curso
 concurrency:

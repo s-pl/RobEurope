@@ -17,8 +17,9 @@ const validate = (schema) => (req, res, next) => {
     if (value === undefined || value === null || value === '') continue;
 
     if (rules.type === 'email') {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(value)) {
+      // Length guard before regex prevents polynomial backtracking on crafted inputs
+      const str = String(value);
+      if (str.length > 254 || !/^[a-zA-Z0-9._%+\-]{1,64}@[a-zA-Z0-9.\-]{1,253}\.[a-zA-Z]{2,24}$/.test(str)) {
         errors.push({ field, message: `${field} must be a valid email` });
       }
     }

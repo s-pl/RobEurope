@@ -339,7 +339,7 @@ const AdminPosts = () => {
                             {post.title}
                           </p>
                           <p className="text-xs text-stone-400 dark:text-stone-500 truncate max-w-xs">
-                            {post.content?.replace(/<[^>]*>/g, '').substring(0, 60)}...
+                            {(post.content ? new DOMParser().parseFromString(post.content, 'text/html').body.textContent ?? '' : '').substring(0, 60)}...
                           </p>
                         </div>
                       </div>
