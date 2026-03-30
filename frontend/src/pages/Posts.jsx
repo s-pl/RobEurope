@@ -231,7 +231,7 @@ const ImageUploadPreview = ({ images, onRemove }) => {
     <div className="grid grid-cols-3 gap-2 mt-2">
       {images.map((img, i) => (
         <div key={i} className="relative group overflow-hidden aspect-square bg-stone-100 dark:bg-stone-800">
-          <img src={URL.createObjectURL(img)} alt="" className="w-full h-full object-cover" />
+          <img src={img instanceof File && img.type.startsWith('image/') ? URL.createObjectURL(img) : ''} alt="" className="w-full h-full object-cover" />
           <button
             type="button"
             onClick={() => onRemove(i)}

@@ -404,7 +404,7 @@ const Home = () => {
                         {post.title}
                       </p>
                       <p className="text-xs text-stone-400 line-clamp-1">
-                        {post.content?.replace(/<[^>]*>?/gm, '')}
+                        {post.content ? new DOMParser().parseFromString(post.content, 'text/html').body.textContent ?? '' : ''}
                       </p>
                     </motion.div>
                   ))

@@ -194,7 +194,10 @@ app.get('/locale/:locale', (req, res) => {
     req.setLocale(locale);
   }
 
-  const redirectParam = typeof req.query.redirect === 'string' && req.query.redirect.startsWith('/')
+  // Allow only root-relative paths; block protocol-relative (//) and absolute URLs
+  const redirectParam = typeof req.query.redirect === 'string'
+    && req.query.redirect.startsWith('/')
+    && !req.query.redirect.startsWith('//')
     ? req.query.redirect
     : null;
 
@@ -225,12 +228,15 @@ app.use('/api/gdpr/my-account', rateLimit({ windowMs: 60 * 60 * 1000, max: 3 }))
 app.use('/api/notifications', rateLimit({ windowMs: 60 * 1000, max: 100 }));
 // General API — generous limit in production
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 1000 }), apiRoutes);
-app.use('/api/admin', adminApiRoutes);
-app.use('/api/streams', streamRoutes);
-app.use('/api/media', mediaRoutes); 
+app.use('/api/admin', rateLimit({ windowMs: 15 * 60 * 1000, max: 500 }), adminApiRoutes);
+app.use('/api/streams', rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }), streamRoutes);
+app.use('/api/media', rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }), mediaRoutes);
+// Health endpoint — low limit, it's metadata only
+app.use('/health', rateLimit({ windowMs: 15 * 60 * 1000, max: 60 }));
 
 // --- CSRF (only for admin panel forms) ---
 // Apply CSRF after session; limit to /admin paths
+app.use('/admin', rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
 app.use('/admin', csrf({ cookie: false }));
 app.use((req, res, next) => {
   if (req.path.startsWith('/admin')) {
