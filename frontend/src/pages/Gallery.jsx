@@ -82,7 +82,7 @@ const Gallery = () => {
 
         try {
             const fd = new FormData();
-            fd.append('image', form.file);
+            fd.append('file', form.file);
             if (form.title?.trim()) fd.append('title', form.title.trim());
             if (form.description?.trim()) fd.append('description', form.description.trim());
 
