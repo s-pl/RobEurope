@@ -38,14 +38,9 @@ export default defineConfig({
           if (id.includes('lucide')) return 'vendor-icons';
           // File utilities — archive page only
           if (id.includes('jszip') || id.includes('file-saver')) return 'vendor-files';
-          // Core React bundle (react, react-dom, react-router, scheduler)
-          if (
-            id.includes('/react/') ||
-            id.includes('/react-dom/') ||
-            id.includes('react-router') ||
-            id.includes('/scheduler/')
-          ) return 'vendor-react';
-          // Everything else in node_modules
+          // Everything else in node_modules (includes React, react-dom, react-router)
+          // NOTE: React core must NOT be manually split — Vite/Rollup manages it to
+          // guarantee a single instance. Splitting it causes "useLayoutEffect undefined".
           return 'vendor';
         }
       }
