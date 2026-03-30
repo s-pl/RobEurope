@@ -1,5 +1,5 @@
 export async function up(queryInterface, Sequelize) {
-  await queryInterface.addColumn('posts', 'is_edited', {
+  await queryInterface.addColumn('Post', 'is_edited', {
     type: Sequelize.BOOLEAN,
     allowNull: false,
     defaultValue: false,
@@ -7,5 +7,5 @@ export async function up(queryInterface, Sequelize) {
 }
 
 export async function down(queryInterface) {
-  await queryInterface.removeColumn('posts', 'is_edited');
+  await queryInterface.removeColumn('Post', 'is_edited');
 }

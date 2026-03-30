@@ -4,19 +4,51 @@
  *
  * All API requests are routed through `VITE_API_BASE_URL` (configured in `frontend/.env`).
  * The application uses cookie-based sessions, so requests are sent with `credentials: 'include'`.
+ *
+ * GET requests are cached in memory for `DEFAULT_TTL` ms and deduplicated:
+ * parallel calls to the same URL share one in-flight fetch.
+ * Pass `ttl: 0` to skip the cache for a specific call.
+ * Call `invalidateCache(pathPattern)` to bust stale entries (e.g. after a mutation).
  */
 
 import { mockApiRequest } from './mockBackend';
 
+// ─── Cache ────────────────────────────────────────────────────────────────────
+
+const DEFAULT_TTL = 30_000; // 30 s — adjust per endpoint via ttl option
+
+/** key → { data, exp } */
+const _cache = new Map();
+/** key → Promise (in-flight deduplication) */
+const _inflight = new Map();
+
+function getCached(key) {
+  const entry = _cache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.exp) { _cache.delete(key); return null; }
+  return entry.data;
+}
+
+function setCached(key, data, ttl) {
+  _cache.set(key, { data, exp: Date.now() + ttl });
+}
+
+/**
+ * Removes all cache entries whose key contains `pattern`.
+ * Call after mutations to invalidate stale GET responses.
+ *
+ * @param {string} pattern Substring to match against cache keys.
+ */
+export function invalidateCache(pattern) {
+  for (const key of _cache.keys()) {
+    if (key.includes(pattern)) _cache.delete(key);
+  }
+}
+
+// ─── URL helpers ──────────────────────────────────────────────────────────────
+
 /**
  * Normalizes a base URL into an API base ending with `/api`.
- *
- * Examples:
- * - `http://localhost:85` -> `http://localhost:85/api`
- * - `http://localhost:85/api/` -> `http://localhost:85/api`
- *
- * @param {string} url Raw base URL.
- * @returns {string} Normalized API base URL or empty string.
  */
 const normalizeBase = (url) => {
   if (!url || typeof url !== 'string') return '';
@@ -38,7 +70,7 @@ const requireApiBaseUrl = () => {
   const envBase = normalizeBase(import.meta.env.VITE_API_BASE_URL || '');
   if (!envBase) {
     throw new Error(
-      'Falta VITE_API_BASE_URL. Configúralo en frontend/.env (ej: VITE_API_BASE_URL=http://localhost:85 o http://localhost:85/api)'
+      'Falta VITE_API_BASE_URL. Configúralo en frontend/.env (ej: VITE_API_BASE_URL=http://localhost:85)'
     );
   }
   return envBase;
@@ -48,10 +80,7 @@ const getApiBaseUrl = () => requireApiBaseUrl();
 
 /**
  * Returns the backend origin (without the `/api` suffix).
- *
- * This is primarily used for Socket.IO and for serving static assets.
- *
- * @returns {string} Origin URL, e.g. `http://localhost:85`.
+ * Used for Socket.IO and static asset URLs.
  */
 export const getApiOrigin = () => {
   const base = getApiBaseUrl();
@@ -59,83 +88,87 @@ export const getApiOrigin = () => {
   return base.replace(/\/?api\/?$/, '');
 };
 
-/**
- * Parses a fetch Response into JSON (when possible) or plain text.
- * @param {Response} response Fetch response.
- * @returns {Promise<any>} Parsed payload.
- */
+// ─── Response parsing ─────────────────────────────────────────────────────────
+
 const parseResponse = async (response) => {
   const contentType = response.headers.get('content-type');
-  if (contentType && contentType.includes('application/json')) {
-    return response.json();
-  }
+  if (contentType && contentType.includes('application/json')) return response.json();
   return response.text();
 };
+
+// ─── Main request function ────────────────────────────────────────────────────
 
 /**
  * Executes an API request against the configured backend.
  *
- * Notes:
- * - `path` must be an API path starting with `/` (e.g. `/teams`, `/auth/login`).
+ * - `path` must start with `/` (e.g. `/teams`, `/auth/login`).
  * - Session cookies are automatically included.
+ * - GET requests are cached for `ttl` ms and deduplicated across parallel calls.
  * - Throws an Error when the response is not OK.
  *
- * @param {string} path API path (prefixed automatically by `VITE_API_BASE_URL`).
+ * @param {string} path API path.
  * @param {object} [options]
- * @param {string} [options.method='GET'] HTTP method.
- * @param {any} [options.body] JSON body (object) or FormData.
- * @param {Record<string,string>} [options.headers={}] Extra headers.
- * @param {boolean} [options.formData=false] When true, forces FormData behavior.
- * @returns {Promise<any>} Parsed response body.
+ * @param {string}  [options.method='GET']
+ * @param {any}     [options.body]
+ * @param {Record<string,string>} [options.headers={}]
+ * @param {boolean} [options.formData=false]
+ * @param {number}  [options.ttl] Cache TTL in ms. Defaults to 30 s. Pass 0 to bypass cache.
+ * @returns {Promise<any>}
  */
-export async function apiRequest(path, { method = 'GET', body, headers = {}, formData = false } = {}) {
+export async function apiRequest(path, { method = 'GET', body, headers = {}, formData = false, ttl = DEFAULT_TTL } = {}) {
   if (!isBackendActive) {
     return mockApiRequest(path, { method, body, headers, formData });
   }
-  const finalHeaders = { ...headers };
 
-  // Session based auth - no token needed
-  // if (token) {
-  //   finalHeaders.Authorization = `Bearer ${token}`;
-  // }
+  const cacheKey = `${method}:${path}`;
+  const cacheable = method === 'GET' && ttl > 0;
 
-  const options = { 
-    method, 
-    headers: finalHeaders,
-    credentials: 'include'
+  if (cacheable) {
+    const cached = getCached(cacheKey);
+    if (cached !== null) return cached;
+    // Deduplicate: if the same GET is already in flight, share its promise
+    if (_inflight.has(cacheKey)) return _inflight.get(cacheKey);
+  }
+
+  const execute = async () => {
+    const finalHeaders = { ...headers };
+    const options = { method, headers: finalHeaders, credentials: 'include' };
+
+    if (body) {
+      if (formData || (typeof FormData !== 'undefined' && body instanceof FormData)) {
+        options.body = body;
+        delete finalHeaders['Content-Type'];
+      } else {
+        finalHeaders['Content-Type'] = finalHeaders['Content-Type'] || 'application/json';
+        options.body = JSON.stringify(body);
+      }
+    }
+
+    const baseUrl = getApiBaseUrl();
+    const response = await fetch(`${baseUrl}${path}`, options);
+    const payload = await parseResponse(response);
+
+    if (!response.ok) {
+      const error = typeof payload === 'string' ? { message: payload } : payload;
+      throw new Error(error?.error || error?.message || 'Request failed');
+    }
+
+    if (cacheable) setCached(cacheKey, payload, ttl);
+    return payload;
   };
 
-  if (body) {
-    if (formData || (typeof FormData !== 'undefined' && body instanceof FormData)) {
-      options.body = body;
-      // Let browser set Content-Type with boundary
-      delete finalHeaders['Content-Type'];
-    } else {
-      finalHeaders['Content-Type'] = finalHeaders['Content-Type'] || 'application/json';
-      options.body = JSON.stringify(body);
-    }
+  const promise = execute();
+
+  if (cacheable) {
+    _inflight.set(cacheKey, promise);
+    promise.finally(() => _inflight.delete(cacheKey));
   }
 
-  const baseUrl = getApiBaseUrl();
-  const response = await fetch(`${baseUrl}${path}`, options);
-  const payload = await parseResponse(response);
-
-  if (!response.ok) {
-    const error = typeof payload === 'string' ? { message: payload } : payload;
-    throw new Error(error?.error || error?.message || 'Request failed');
-  }
-
-  return payload;
+  return promise;
 }
 
 /**
  * Resolves a backend-served media path to a fully qualified URL.
- *
- * - Absolute URLs are returned unchanged.
- * - Relative paths are resolved against the API origin.
- *
- * @param {string} path Backend media path, e.g. `/uploads/file.jpg`.
- * @returns {string} Fully qualified URL.
  */
 export const resolveMediaUrl = (path) => {
   if (!path) return '';

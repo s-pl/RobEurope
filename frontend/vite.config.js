@@ -4,15 +4,62 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  // Lee los archivos .env desde la raíz del proyecto en vez de frontend/
   envDir: '../',
+
+  build: {
+    target: 'es2020',
+    sourcemap: false,
+    chunkSizeWarningLimit: 700,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          // Heavy editor — only loaded in pages that use it
+          if (id.includes('@monaco-editor') || id.includes('monaco-editor')) return 'vendor-monaco';
+          if (id.includes('react-quill') || id.includes('/quill/')) return 'vendor-quill';
+          // Animation libs — not needed on first paint
+          if (id.includes('framer-motion')) return 'vendor-motion';
+          if (id.includes('/gsap/') || id.includes('gsap/')) return 'vendor-gsap';
+          // Real-time transport
+          if (id.includes('socket.io')) return 'vendor-socket';
+          // i18n — loaded after hydration
+          if (id.includes('i18next')) return 'vendor-i18n';
+          // Markdown / syntax highlighting
+          if (
+            id.includes('react-markdown') ||
+            id.includes('remark') ||
+            id.includes('rehype') ||
+            id.includes('react-syntax-highlighter') ||
+            id.includes('highlight.js')
+          ) return 'vendor-markdown';
+          // Radix UI components
+          if (id.includes('@radix-ui')) return 'vendor-radix';
+          // Icon library
+          if (id.includes('lucide')) return 'vendor-icons';
+          // File utilities — archive page only
+          if (id.includes('jszip') || id.includes('file-saver')) return 'vendor-files';
+          // Core React bundle (react, react-dom, react-router, scheduler)
+          if (
+            id.includes('/react/') ||
+            id.includes('/react-dom/') ||
+            id.includes('react-router') ||
+            id.includes('/scheduler/')
+          ) return 'vendor-react';
+          // Everything else in node_modules
+          return 'vendor';
+        }
+      }
+    }
+  },
+
   test: {
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.js',
   },
+
   server: {
-    host: true, // Escucha en todas las interfaces
+    host: true,
     allowedHosts: [
       'robeurope.samuelponce.es',
       'www.robeurope.samuelponce.es',
@@ -22,5 +69,4 @@ export default defineConfig({
       '46.101.255.106'
     ]
   }
-
 })

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Don't index admin or API paths
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://robeurope.samuelponce.es/sitemap.xml
