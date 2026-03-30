@@ -249,8 +249,12 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
+// AppError / asyncHandler — handle operational errors thrown by controllers
+import errorHandler from './middleware/errorHandler.middleware.js';
+app.use(errorHandler);
+
 // error handler
-// centralized error handler
+// centralized error handler (fallback for legacy/unexpected errors)
 app.use((err, req, res, next) => {
   const isSequelize = err && err.name && err.name.startsWith('Sequelize');
   if (isSequelize) {

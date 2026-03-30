@@ -194,8 +194,15 @@ button:not([disabled]):active { transform: scale(0.98); }
 .animate-marquee-reverse { animation: marquee-reverse 22s linear infinite; }
 
 @media (prefers-reduced-motion: reduce) {
-  * { scroll-behavior: auto; }
-  .robot-runner { animation: none; display: none; }
-  .animate-fade-in, .animate-fade-in-up, .animate-slide-in-left { animation: none; }
-  .animate-marquee, .animate-marquee-reverse { animation: none; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Keep robot hidden since its animation is purely decorative */
+  .robot-runner { display: none; }
 }
