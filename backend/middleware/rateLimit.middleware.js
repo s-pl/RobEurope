@@ -1,6 +1,4 @@
 
-const stores = new Map();
-
 /**
  * @fileoverview
  * Lightweight in-memory rate limiter.
@@ -27,15 +25,17 @@ export default function rateLimit(options = {}) {
 
   const windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes
   const max = options.max || 1000; // generous default for production
+  // Each limiter instance has its own store so routes don't share counts
+  const store = new Map();
 
   return (req, res, next) => {
     try {
       const ip = req.ip || req.connection.remoteAddress || 'unknown';
       const now = Date.now();
-      let entry = stores.get(ip);
+      let entry = store.get(ip);
       if (!entry || entry.resetAt <= now) {
         entry = { count: 1, resetAt: now + windowMs };
-        stores.set(ip, entry);
+        store.set(ip, entry);
       } else {
         entry.count += 1;
       }
