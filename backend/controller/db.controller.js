@@ -1,4 +1,5 @@
 import { Sequelize } from "sequelize";
+import pg from 'pg'; // explicit import so @vercel/node includes pg in the bundle
 import logger from '../utils/logger.js';
 import dbConfig from "../config/db.config.js";
 
@@ -18,6 +19,7 @@ if (process.env.DATABASE_URL) {
   // Supabase / any PostgreSQL provider via connection string
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
+    dialectModule: pg, // pass pg directly so Sequelize doesn't need require('pg')
     dialectOptions: {
       ssl: isProduction ? { require: true, rejectUnauthorized: false } : false,
     },
