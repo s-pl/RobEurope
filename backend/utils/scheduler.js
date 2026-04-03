@@ -27,7 +27,7 @@ const REMINDER_WINDOW_HOURS = 24;
  * @private
  * @returns {Promise<void>}
  */
-async function sendCompetitionReminders() {
+export async function sendCompetitionReminders() {
   const now = new Date();
   const inWindow = new Date(now.getTime() + REMINDER_WINDOW_HOURS * 3600 * 1000);
 

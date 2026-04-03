@@ -1,9 +1,9 @@
 import db from '../models/index.js';
 import bcrypt from 'bcryptjs';
 import SystemLogger from '../utils/systemLogger.js';
-import crypto from 'crypto';
 import redisClient from '../utils/redis.js';
-import { sendPasswordResetEmail, sendPasswordResetCodeEmail } from '../utils/email.js';
+import { sendPasswordResetCodeEmail } from '../utils/email.js';
+import { setAuthCookie, clearAuthCookie } from '../utils/signToken.js';
 
 const { User } = db;
 
@@ -177,9 +177,7 @@ export const register = async (req, res) => {
       }
     }
 
-    // Set session user
-    const userSession = { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, username: user.username, role: user.role, educational_center_id: user.educational_center_id };
-    req.session.user = userSession;
+    const userPayload = { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, username: user.username, role: user.role, educational_center_id: user.educational_center_id };
 
     // Log user registration
     await SystemLogger.logCreate('User', user.id, {
@@ -190,16 +188,8 @@ export const register = async (req, res) => {
       role: user.role
     }, req, 'User registration');
 
-    // Explicitly save session
-    req.session.save((err) => {
-      if (err) {
-        console.error('Session save error:', err);
-        return res.status(500).json({ error: 'Session save failed' });
-      }
-      return res.status(201).json({
-        user: userSession
-      });
-    });
+    setAuthCookie(res, userPayload);
+    return res.status(201).json({ user: userPayload });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -259,23 +249,13 @@ export const login = async (req, res) => {
     // success: reset attempts
     await redisClient.del(attemptsKey);
 
-    // Set session user
-    const userSession = { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, role: user.role, educational_center_id: user.educational_center_id };
-    req.session.user = userSession;
+    const userPayload = { id: user.id, email: user.email, first_name: user.first_name, last_name: user.last_name, role: user.role, educational_center_id: user.educational_center_id };
 
     // Log successful login
     await SystemLogger.logAuth('LOGIN', user.id, req, 'User login successful');
 
-    // Explicitly save session before responding
-    req.session.save((err) => {
-      if (err) {
-        console.error('Session save error:', err);
-        return res.status(500).json({ error: 'Session save failed' });
-      }
-      return res.json({
-        user: userSession
-      });
-    });
+    setAuthCookie(res, userPayload);
+    return res.json({ user: userPayload });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -289,11 +269,8 @@ export const login = async (req, res) => {
  * @returns {void}
  */
 export const logout = (req, res) => {
-  req.session.destroy((err) => {
-    if (err) return res.status(500).json({ error: 'Could not log out' });
-    res.clearCookie('connect.sid');
-    return res.json({ message: 'Logged out successfully' });
-  });
+  clearAuthCookie(res);
+  return res.json({ message: 'Logged out successfully' });
 };
 
 /**
@@ -304,9 +281,7 @@ export const logout = (req, res) => {
  * @returns {any}
  */
 export const me = (req, res) => {
-  if (req.session && req.session.user) {
-    return res.json(req.session.user);
-  }
+  if (req.user) return res.json(req.user);
   return res.status(401).json({ error: 'Not authenticated' });
 };
 
@@ -320,7 +295,7 @@ export const me = (req, res) => {
  */
 export const changePassword = async (req, res) => {
   try {
-    if (!req.session?.user?.id) return res.status(401).json({ error: 'Not authenticated' });
+    if (!req.user?.id) return res.status(401).json({ error: 'Not authenticated' });
     let { current_password, new_password } = req.body || {};
     if (!current_password || !new_password) return res.status(400).json({ error: 'Campos requeridos: current_password y new_password' });
 
@@ -334,7 +309,7 @@ export const changePassword = async (req, res) => {
     const pwError = validatePasswordStrength(new_password);
     if (pwError) return res.status(400).json({ error: pwError });
 
-    const user = await User.findByPk(req.session.user.id);
+    const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
     const match = await bcrypt.compare(current_password, user.password_hash);

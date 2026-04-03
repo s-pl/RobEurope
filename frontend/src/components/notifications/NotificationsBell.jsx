@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Bell, UserPlus, Trophy, Trash2, CheckCheck, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import io from 'socket.io-client';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useApi } from '../../hooks/useApi';
-import { getApiOrigin, isBackendActive } from '../../lib/apiClient';
+import { isBackendActive } from '../../lib/apiClient';
+import { supabase } from '../../lib/supabase';
 import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { ScrollArea } from '../ui/scroll-area';
@@ -159,8 +159,6 @@ const NotificationsBell = () => {
   const prevUnread = useRef(-1);
   const [bellRinging, setBellRinging] = useState(false);
 
-  const socketUrl = useMemo(() => getApiOrigin(), []);
-
   // ── Ring the bell whenever unread count increases ────────────────────────
   useEffect(() => {
     const prev = prevUnread.current;
@@ -172,13 +170,10 @@ const NotificationsBell = () => {
     }
   }, [unread]);
 
-  // ── Bootstrap: fetch + socket ─────────────────────────────────────────────
+  // ── Bootstrap: fetch notifications ───────────────────────────────────────
   useEffect(() => {
-    let socket;
-
+    if (!user?.id) return;
     const bootstrap = async () => {
-      if (!user?.id) return;
-
       try {
         const list = await api(`/notifications?user_id=${encodeURIComponent(user.id)}&limit=20`);
         const arr = Array.isArray(list) ? list : [];
@@ -187,36 +182,40 @@ const NotificationsBell = () => {
       } catch {
         // ignore
       }
-
       if (!isBackendActive) return;
-
       await requestNotificationPermission();
-
       try {
         const reg = await registerServiceWorker();
         if (reg) await subscribeToPush(reg);
       } catch {
         // ignore
       }
-
-      try {
-        socket = io(socketUrl, { transports: ['websocket', 'polling'] });
-        socket.on(`notification:${user.id}`, (notif) => {
-          setItems(prev => [notif, ...prev].slice(0, 20));
-          setUnread(x => x + 1);
-          showNotification(notif.title || 'Nueva notificación', {
-            body: notif.message || '',
-            tag: `notif-${notif.id}`,
-          });
-        });
-      } catch {
-        // ignore
-      }
     };
+    bootstrap();
+  }, [user?.id, api]);
 
-    if (user?.id) bootstrap();
-    return () => { if (socket) socket.disconnect(); };
-  }, [user?.id, socketUrl, api]);
+  // ── Realtime: Supabase Postgres Changes on Notification table ────────────
+  useEffect(() => {
+    if (!supabase || !user?.id) return;
+    const channel = supabase
+      .channel(`notifications-bell:${user.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'Notification',
+        filter: `user_id=eq.${user.id}`,
+      }, (payload) => {
+        const notif = payload.new;
+        setItems(prev => [notif, ...prev].slice(0, 20));
+        setUnread(x => x + 1);
+        showNotification(notif.title || 'Nueva notificación', {
+          body: notif.message || '',
+          tag: `notif-${notif.id}`,
+        });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id]);
 
   // ── Actions ───────────────────────────────────────────────────────────────
 

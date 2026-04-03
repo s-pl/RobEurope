@@ -41,7 +41,7 @@ const formatTimeAgo = (dateStr) => {
 const Notifications = () => {
   const { t } = useTranslation();
   const api = useApi();
-  const { socket } = useSocket();
+  const { supabase } = useSocket();
   const { user } = useAuth();
 
   const [notifications, setNotifications] = useState([]);
@@ -89,16 +89,22 @@ const Notifications = () => {
     fetchNotifications(1, false);
   }, [fetchNotifications]);
 
-  // Real-time updates
+  // Real-time updates via Supabase Postgres Changes
   useEffect(() => {
-    if (!socket || !user) return;
-    const channel = `notification:${user.id}`;
-    const handler = (notification) => {
-      setNotifications((prev) => [notification, ...prev]);
-    };
-    socket.on(channel, handler);
-    return () => socket.off(channel, handler);
-  }, [socket, user]);
+    if (!supabase || !user?.id) return;
+    const channel = supabase
+      .channel(`notifications-page:${user.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'Notification',
+        filter: `user_id=eq.${user.id}`,
+      }, (payload) => {
+        setNotifications((prev) => [payload.new, ...prev]);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [supabase, user?.id]);
 
   const handleLoadMore = () => {
     const nextPage = page + 1;

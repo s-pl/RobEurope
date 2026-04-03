@@ -6,8 +6,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
-import { resolveMediaUrl, getApiOrigin, isBackendActive } from '../../lib/apiClient';
-import { io } from 'socket.io-client';
+import { resolveMediaUrl } from '../../lib/apiClient';
+import { supabase } from '../../lib/supabase';
 
 /* ─── Utils ───────────────────────────────────────────────────────────────── */
 const isImgUrl = (url) => /\.(jpe?g|png|gif|webp|bmp|avif)$/i.test(url || '');
@@ -85,25 +85,48 @@ const TeamChat = ({ teamId }) => {
     else scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, []);
 
-  /* Socket */
+  /* Supabase Realtime — messages (Postgres Changes) + typing/presence (Broadcast) */
   useEffect(() => {
-    if (!isBackendActive) return undefined;
-    const url = getApiOrigin();
-    if (!url) return undefined;
+    if (!supabase) return undefined;
 
-    socketRef.current = io(url);
-    socketRef.current.emit('join_team', { teamId, user });
+    const channel = supabase.channel(`team:${teamId}`, { config: { presence: { key: user.id } } });
 
-    socketRef.current.on('team_message',      (msg)   => { setMessages(p => [...p, msg]); scrollToBottom(); });
-    socketRef.current.on('team_users_update', (users) => setOnlineUsers(users));
-    socketRef.current.on('user_typing',       (u)     => {
-      if (u.id !== user.id) setTypingUsers(p => p.find(x => x.id === u.id) ? p : [...p, u]);
+    // New messages via Postgres Changes
+    channel.on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'TeamMessage',
+      filter: `team_id=eq.${teamId}`,
+    }, (payload) => {
+      setMessages(p => [...p, payload.new]);
+      scrollToBottom();
     });
-    socketRef.current.on('user_stop_typing',  (u) => setTypingUsers(p => p.filter(x => x.id !== u.id)));
 
+    // Typing indicators via Broadcast
+    channel.on('broadcast', { event: 'typing' }, ({ payload: u }) => {
+      if (u?.id !== user.id) setTypingUsers(p => p.find(x => x.id === u.id) ? p : [...p, u]);
+    });
+    channel.on('broadcast', { event: 'stop_typing' }, ({ payload: u }) => {
+      setTypingUsers(p => p.filter(x => x.id !== u?.id));
+    });
+
+    // Presence — online users
+    channel.on('presence', { event: 'sync' }, () => {
+      const state = channel.presenceState();
+      const users = Object.values(state).flat().map(p => p.user).filter(Boolean);
+      setOnlineUsers(users);
+    });
+
+    channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await channel.track({ user });
+      }
+    });
+
+    socketRef.current = channel;
     return () => {
       clearTimeout(typingTimeout.current);
-      socketRef.current?.disconnect();
+      supabase.removeChannel(channel);
     };
   }, [teamId, user, scrollToBottom]);
 
@@ -122,10 +145,10 @@ const TeamChat = ({ teamId }) => {
 
   /* Typing indicator */
   const handleTyping = () => {
-    socketRef.current?.emit('typing', { teamId, user });
+    socketRef.current?.send({ type: 'broadcast', event: 'typing', payload: user });
     clearTimeout(typingTimeout.current);
     typingTimeout.current = setTimeout(() => {
-      socketRef.current?.emit('stop_typing', { teamId, user });
+      socketRef.current?.send({ type: 'broadcast', event: 'stop_typing', payload: user });
     }, 2000);
   };
 

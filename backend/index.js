@@ -2,8 +2,10 @@ import './env.js';
 import express from 'express';
 import http from 'http';
 import path from 'path';
+import cookieParser from 'cookie-parser';
 import { fileURLToPath } from 'url';
 import apiRoutes from './routes/api/index.js';
+import cronRoutes from './routes/api/cron.route.js';
 import rateLimit from './middleware/rateLimit.middleware.js';
 import timeoutMiddleware from './middleware/timeout.middleware.js';
 import morgan from 'morgan';
@@ -13,40 +15,31 @@ import mediaRoutes from './routes/api/media.route.js';
 import swaggerRouter from './swagger.js';
 import cors from 'cors';
 import helmet from 'helmet';
-import csrf from 'csurf';
-import session from 'express-session';
-import SequelizeStoreInit from 'connect-session-sequelize';
-import fs from 'fs';
-import https from 'https';
-import { Server as SocketIOServer } from 'socket.io';
-import { setIO } from './utils/realtime.js';
-import { startSchedulers } from './utils/scheduler.js';
 import db from './models/index.js';
 import adminRoutes from './routes/admin.route.js';
 import adminApiRoutes from './routes/admin.routes.js';
 import requestId from './middleware/requestId.middleware.js';
 import responseTime from './middleware/responseTime.middleware.js';
-import redisClient from './utils/redis.js';
 import passport from 'passport';
 import './config/passport.js';
 import i18n, { supportedLocales } from './config/i18n.js';
+import healthDeployRouter from './routes/api/health.route.js';
+import errorHandler from './middleware/errorHandler.middleware.js';
 
 const allowedOrigins = [
   /^https?:\/\/localhost(:\d+)?$/,
   /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
   /^http:\/\/46\.101\.255\.106(?::85)?$/,
   /^http:\/\/46\.101\.255\.106:5173$/,
-  /^https?:\/\/(?:[a-z0-9-]+\.)?robeurope\.samuelponce\.es(?::\d+)?$/
+  /^https?:\/\/(?:[a-z0-9-]+\.)?robeurope\.samuelponce\.es(?::\d+)?$/,
 ];
 
 const isProduction = process.env.NODE_ENV === 'production';
+const PORT = process.env.PORT || 85;
 
 const app = express();
 
-// --- Request ID ---
 app.use(requestId());
-
-// --- Response Time ---
 app.use(responseTime());
 
 app.use(
@@ -55,7 +48,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // needed for Swagger UI / admin EJS
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
         connectSrc: ["'self'"],
@@ -63,77 +56,32 @@ app.use(
         objectSrc: ["'none'"],
         frameAncestors: ["'none'"],
         ...(isProduction && { upgradeInsecureRequests: [] }),
-      }
-    }
+      },
+    },
   })
 );
 
-
-// --- View Engine (EJS) ---
-app.set('view engine', 'ejs');
-// Resolve views relative to this file's directory to avoid double 'backend/backend' when cwd is already backend
+// --- View Engine (EJS for admin panel) ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// --- Sessions (Sequelize Store) ---
-const SequelizeStore = SequelizeStoreInit(session.Store);
-const sessionStore = new SequelizeStore({
-  db: db.sequelize,
-  tableName: 'Session'
-});
-
-
-sessionStore.sync();
-// When behind a reverse proxy (NGINX, Caddy, etc.) trust the first proxy so secure cookies work
+// --- Trust proxy (Vercel / NGINX / Caddy) ---
 app.set('trust proxy', 1);
-// En producción el frontend (Vercel) y la API (DO) están en subdominios
-// diferentes de robeurope.samuelponce.es. Para que la cookie de sesión viaje
-// en peticiones cross-origin con credentials: 'include' necesitamos:
-//   domain: '.robeurope.samuelponce.es'  → válida en todos los subdominios
-//   sameSite: 'none' + secure: true      → permite cross-origin con HTTPS
-const cookieDomain = isProduction
-  ? (process.env.COOKIE_DOMAIN || `.${(process.env.TEAM_DOMAIN || 'robeurope.samuelponce.es')}`)
-  : undefined; // en dev no forzamos dominio (localhost)
 
-if (isProduction && !process.env.SESSION_SECRET) {
-  logger.error('CRITICAL: SESSION_SECRET env var is not set in production. Using an insecure default — set SESSION_SECRET immediately.');
-}
+// --- Cookie parser (needed for JWT cookie auth) ---
+app.use(cookieParser());
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'Session123456789100000',
-  store: sessionStore,
-  resave: false,
-  saveUninitialized: false,
-  proxy: true,
-  cookie: {
-    secure: isProduction,      // HTTPS requerido en prod (trust proxy ya activo)
-    httpOnly: true,
-    // 'none' permite cross-origin con credentials (necesario Vercel ↔ api.DO)
-    // 'lax' en dev (localhost no requiere cross-origin)
-    sameSite: isProduction ? 'none' : 'lax',
-    // Dominio compartido para que funcione desde equipo.robeurope.samuelponce.es
-    ...(cookieDomain && { domain: cookieDomain }),
-    maxAge: 1000 * 60 * 60 * 24 * 7 // 7 días
-  }
-}));
-
+// --- i18n ---
 app.use(i18n.init);
 app.use((req, res, next) => {
   const queryLocale = typeof req.query.lang === 'string' ? req.query.lang : null;
-  if (queryLocale && supportedLocales.includes(queryLocale)) {
-    req.session.locale = queryLocale;
-  }
-
-  let locale = req.session?.locale;
-  if (!locale || !supportedLocales.includes(locale)) {
-    locale = i18n.getLocale();
-  }
+  let locale = queryLocale && supportedLocales.includes(queryLocale) ? queryLocale : i18n.getLocale();
   req.setLocale(locale);
-
   res.locals.locale = locale;
   res.locals.availableLocales = supportedLocales;
-  res.locals.currentUser = req.session?.user || null;
+  res.locals.currentUser = req.user || null;
   res.locals.currentPath = req.originalUrl || '/';
   res.locals.pageKey = null;
   res.locals.t = (...args) => (res.__ ? res.__.apply(res, args) : i18n.__.apply(i18n, args));
@@ -141,142 +89,89 @@ app.use((req, res, next) => {
   next();
 });
 
+// --- Passport (OAuth strategies only — no sessions) ---
 app.use(passport.initialize());
-app.use(passport.session());
-const PORT = process.env.PORT || 85;
 
-// registrar peticiones (access logs) vía winston
-app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }));
+// --- Request logging ---
+app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 
-
-
-
-
-// CORS only for API & real-time connections; admin panel (server-rendered) should not require CORS
+// --- CORS ---
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // non-browser or same-origin requests
-    const allowed = allowedOrigins.some((pattern) => (pattern instanceof RegExp ? pattern.test(origin) : pattern === origin));
+    if (!origin) return callback(null, true);
+    const allowed = allowedOrigins.some((p) => (p instanceof RegExp ? p.test(origin) : p === origin));
     if (allowed) return callback(null, true);
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
-  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization','X-Requested-With'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
-
 app.use('/api', cors(corsOptions));
 app.use('/api/streams', cors(corsOptions));
 app.use('/api/media', cors(corsOptions));
 app.use('/api-docs', cors(corsOptions));
-// Ensure preflight requests succeed for all routes
 app.options('*', cors(corsOptions));
 
-// ── Health / Deploy info (public, no auth) ──────────────────
-import healthDeployRouter from './routes/api/health.route.js';
+// --- Health (public, no auth) ---
 app.use('/health/deploy/actions', healthDeployRouter);
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(timeoutMiddleware);
-// Serve static files from backend/public so we can host a simple test UI
 app.use(express.static('public'));
-// Serve uploaded files
-app.use('/uploads', express.static('uploads'));
-// Serve API documentation (Swagger UI)
 app.use('/api-docs', swaggerRouter);
 
+// --- Locale switch ---
 app.get('/locale/:locale', (req, res) => {
   const { locale } = req.params;
-  if (supportedLocales.includes(locale)) {
-    req.session.locale = locale;
-    req.setLocale(locale);
-  }
-
-  // Allow only root-relative paths; block protocol-relative (//) and absolute URLs
-  const redirectParam = typeof req.query.redirect === 'string'
-    && req.query.redirect.startsWith('/')
-    && !req.query.redirect.startsWith('//')
-    ? req.query.redirect
-    : null;
-
+  if (supportedLocales.includes(locale)) req.setLocale(locale);
+  const redirectParam =
+    typeof req.query.redirect === 'string' &&
+    req.query.redirect.startsWith('/') &&
+    !req.query.redirect.startsWith('//')
+      ? req.query.redirect
+      : null;
   let fallback = '/admin';
   if (!redirectParam) {
     const referer = req.get('Referer');
     if (referer) {
       try {
-        const refererUrl = new URL(referer);
-        const host = req.get('host');
-        if (refererUrl.host === host) {
-          fallback = `${refererUrl.pathname}${refererUrl.search}${refererUrl.hash}`;
-        }
-      } catch (_) {
-        // ignore parsing issues
-      }
+        const u = new URL(referer);
+        if (u.host === req.get('host')) fallback = `${u.pathname}${u.search}${u.hash}`;
+      } catch (_) {}
     }
   }
-
   res.redirect(redirectParam || fallback);
 });
-// Sensitive routes get a strict limit (login, register, password reset)
-// No-op in development (rateLimit.middleware.js skips when NODE_ENV !== 'production')
+
+// --- Rate limits ---
 app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, max: 40 }));
-// GDPR account deletion: max 3 requests per hour
 app.use('/api/gdpr/my-account', rateLimit({ windowMs: 60 * 60 * 1000, max: 3 }));
-// Notifications: max 100 requests per minute to prevent abuse
 app.use('/api/notifications', rateLimit({ windowMs: 60 * 1000, max: 100 }));
-// General API — generous limit in production
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 1000 }), apiRoutes);
 app.use('/api/admin', rateLimit({ windowMs: 15 * 60 * 1000, max: 500 }), adminApiRoutes);
 app.use('/api/streams', rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }), streamRoutes);
 app.use('/api/media', rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }), mediaRoutes);
-// Health endpoint — low limit, it's metadata only
+app.use('/api/cron', cronRoutes);
 app.use('/health', rateLimit({ windowMs: 15 * 60 * 1000, max: 60 }));
 
-// --- CSRF (only for admin panel forms) ---
-// Apply CSRF after session; limit to /admin paths
+// --- Admin panel (EJS, JWT-protected via cookie) ---
 app.use('/admin', rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }));
-app.use('/admin', csrf({ cookie: false }));
-app.use((req, res, next) => {
-  if (req.path.startsWith('/admin')) {
-    res.locals.csrfToken = req.csrfToken ? req.csrfToken() : null;
-  }
-  next();
-});
-// Admin panel (session-based) routes
 app.use('/admin', adminRoutes);
 
-// CSRF error handler
-app.use((err, req, res, next) => {
-  if (err.code === 'EBADCSRFTOKEN') {
-    return res.status(403).send('Invalid CSRF token');
-  }
-  next(err);
+// --- Manual ---
+app.get('/manual', (req, res) => {
+  res.sendFile(path.join(__dirname, '../docs/manual/user-manual.html'));
 });
 
-// AppError / asyncHandler — handle operational errors thrown by controllers
-import errorHandler from './middleware/errorHandler.middleware.js';
+// --- Error handlers ---
 app.use(errorHandler);
-
-// error handler
-// centralized error handler (fallback for legacy/unexpected errors)
 app.use((err, req, res, next) => {
-  const isSequelize = err && err.name && err.name.startsWith('Sequelize');
+  const isSequelize = err?.name?.startsWith('Sequelize');
   if (isSequelize) {
-    // Log structured Sequelize error (may include err.errors array for validation)
-    logger.error({
-      sequelize: true,
-      name: err.name,
-      message: err.message,
-      errors: err.errors || undefined,
-      stack: err.stack,
-      path: req.originalUrl,
-      method: req.method
-    });
-
+    logger.error({ sequelize: true, name: err.name, message: err.message, errors: err.errors, stack: err.stack, path: req.originalUrl, method: req.method });
     if (!res.headersSent) {
-      // Validation / constraint errors -> 400 with details, else 500
       if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
         return res.status(400).json({ error: 'Validation Error', details: err.errors });
       }
@@ -284,181 +179,32 @@ app.use((err, req, res, next) => {
     }
     return;
   }
-
-  // Generic errors
-  logger.error({
-    message: err && err.message ? err.message : String(err),
-    stack: err && err.stack ? err.stack : undefined,
-    path: req.originalUrl,
-    method: req.method
-  });
-
+  logger.error({ message: err?.message || String(err), stack: err?.stack, path: req.originalUrl, method: req.method });
   if (!res.headersSent) {
-    // If the error object contains a status code use it, else 500
-    const status = err && err.status && Number.isInteger(err.status) ? err.status : 500;
+    const status = Number.isInteger(err?.status) ? err.status : 500;
     return res.status(status).json({ error: status === 500 ? 'Internal Server Error' : err.message });
   }
 });
 
-app.get('/manual', (req, res) => {
-  res.sendFile(path.join(__dirname, '../docs/manual/user-manual.html'));
-})
-
-// register global unhandled error handlers
+// --- Global unhandled error handlers ---
 process.on('uncaughtException', (err) => {
-  // Log and exit - process may be in inconsistent state
-  logger.error({ unhandled: 'uncaughtException', message: err && err.message ? err.message : String(err), stack: err && err.stack ? err.stack : undefined, error: err });
-  // Allow logger to flush then exit
+  logger.error({ unhandled: 'uncaughtException', message: err?.message, stack: err?.stack });
   setTimeout(() => process.exit(1), 500);
 });
-
-// Start background schedulers
-try { startSchedulers(); } catch (_) {}
-
-process.on('unhandledRejection', (reason, promise) => {
-  // Log detailed rejection reason. If it's an Error include stack.
+process.on('unhandledRejection', (reason) => {
   if (reason instanceof Error) {
     logger.error({ unhandled: 'unhandledRejection', message: reason.message, stack: reason.stack });
   } else {
     logger.error({ unhandled: 'unhandledRejection', reason });
   }
-  // It's safest to exit the process so the application can restart in a clean state
   setTimeout(() => process.exit(1), 500);
 });
 
-
-// Create HTTP/HTTPS server and attach Socket.IO so ws://.../socket.io is available
-let server;
-server = http.createServer(app); // simple HTTP server - https is already handled by a reverse proxy in production
-
-// Socket.IO with CORS matching the same allowed origins as Express CORS
-const io = new SocketIOServer(server, {
-  cors: {
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      const allowed = allowedOrigins.some((pattern) => (pattern instanceof RegExp ? pattern.test(origin) : pattern === origin));
-      if (allowed) return callback(null, true);
-      callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true
-  }
-});
-setIO(io);
-
-io.on('connection', (socket) => {
-  logger.info({ socket: 'connected', id: socket.id, ip: socket.handshake.address });
-  
-  socket.on('join_team', (data) => {
-    // Support both legacy (teamId only) and new ({ teamId, user }) formats
-    const teamId = typeof data === 'object' ? data.teamId : data;
-    const user = typeof data === 'object' ? data.user : null;
-
-    if (teamId) {
-      const room = `team_${teamId}`;
-      socket.join(room);
-      
-      if (user) {
-        socket.data.user = user;
-        socket.data.teamId = teamId;
-        broadcastTeamUsers(room);
-      }
-      
-      logger.info({ socket: 'joined_team', id: socket.id, teamId, userId: user?.id });
-    }
-  });
-
-  socket.on('typing', (data) => {
-    if (data.teamId && data.user) {
-      socket.to(`team_${data.teamId}`).emit('user_typing', data.user);
-    }
-  });
-
-  socket.on('stop_typing', (data) => {
-    if (data.teamId && data.user) {
-      socket.to(`team_${data.teamId}`).emit('user_stop_typing', data.user);
-    }
-  });
-
-  // DM: identify user so they receive events in their personal room
-  socket.on('identify', ({ userId }) => {
-    if (userId) {
-      socket.join(`user:${userId}`);
-      socket.data.userId = userId;
-      logger.info({ socket: 'identified', id: socket.id, userId });
-    }
-  });
-
-  // DM: join/leave conversation rooms for typing indicators
-  socket.on('join_conversation', (conversationId) => {
-    if (conversationId) socket.join(`conv:${conversationId}`);
-  });
-
-  socket.on('leave_conversation', (conversationId) => {
-    if (conversationId) socket.leave(`conv:${conversationId}`);
-  });
-
-  // DM: typing indicators
-  socket.on('dm_typing', ({ conversationId, user }) => {
-    if (conversationId) {
-      socket.to(`conv:${conversationId}`).emit('dm_typing', { conversationId, user });
-    }
-  });
-
-  socket.on('dm_stop_typing', ({ conversationId, user }) => {
-    if (conversationId) {
-      socket.to(`conv:${conversationId}`).emit('dm_stop_typing', { conversationId, user });
-    }
-  });
-
-  socket.on('disconnect', (reason) => {
-    logger.info({ socket: 'disconnected', id: socket.id, reason });
-    if (socket.data.teamId) {
-      broadcastTeamUsers(`team_${socket.data.teamId}`);
-    }
-    if (socket.data.codeTeamId) {
-      broadcastCodeUsers(`code_${socket.data.codeTeamId}`);
-    }
-  });
-});
-
-function broadcastCodeUsers(room) {
-  const clients = io.sockets.adapter.rooms.get(room);
-  if (clients) {
-    const users = [];
-    for (const clientId of clients) {
-      const clientSocket = io.sockets.sockets.get(clientId);
-      if (clientSocket && clientSocket.data.codeUser) {
-        users.push({
-          ...clientSocket.data.codeUser,
-          focusedFileId: clientSocket.data.focusedFileId,
-          socketId: clientId
-        });
-      }
-    }
-    io.to(room).emit('session_users', users);
-  }
-}
-
-function broadcastTeamUsers(room) {
-  const clients = io.sockets.adapter.rooms.get(room);
-  if (clients) {
-    const users = [];
-    for (const clientId of clients) {
-      const clientSocket = io.sockets.sockets.get(clientId);
-      if (clientSocket && clientSocket.data.user) {
-        // Avoid duplicates if same user has multiple tabs open
-        if (!users.find(u => u.id === clientSocket.data.user.id)) {
-          users.push(clientSocket.data.user);
-        }
-      }
-    }
-    io.to(room).emit('team_users_update', users);
-  }
-}
-
-if (process.env.NODE_ENV !== 'test') {
+// --- Start server (local dev only — Vercel handles listen() itself) ---
+if (process.env.NODE_ENV !== 'test' && process.env.VERCEL !== '1') {
+  const server = http.createServer(app);
   server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running at https://0.0.0.0:${PORT}`);
+    console.log(`Server running at http://0.0.0.0:${PORT}`);
   });
 }
 

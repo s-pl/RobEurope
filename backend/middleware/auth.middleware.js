@@ -1,44 +1,49 @@
-/**
- * @fileoverview Session authentication middleware.
- */
+import { verifyToken, COOKIE_NAME } from '../utils/signToken.js';
 
 /**
- * Ensures the request is authenticated via server-side session.
+ * @fileoverview JWT-based authentication middleware.
  *
- * On success, populates `req.user` from `req.session.user`.
- *
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @param {Express.NextFunction} next Express next.
- * @returns {void}
+ * Reads the auth token from the `auth_token` httpOnly cookie or, as fallback,
+ * from the `Authorization: Bearer <token>` header.
  */
-export default function authenticateToken(req, res, next) {
-  if (req.session && req.session.user) {
-    req.user = req.session.user;
-    return next();
-  }
-  return res.status(401).json({ error: 'Unauthorized: Session required' });
+
+function extractToken(req) {
+  if (req.cookies?.[COOKIE_NAME]) return req.cookies[COOKIE_NAME];
+  const authHeader = req.headers['authorization'];
+  if (authHeader?.startsWith('Bearer ')) return authHeader.slice(7);
+  return null;
 }
 
 /**
- * Optional authentication middleware.
- * Populates `req.user` if a session exists, but does NOT reject unauthenticated requests.
- *
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @param {Express.NextFunction} next Express next.
- * @returns {void}
+ * Ensures the request is authenticated via JWT.
+ * Populates `req.user` with the decoded token payload.
+ */
+export default function authenticateToken(req, res, next) {
+  const token = extractToken(req);
+  if (!token) return res.status(401).json({ error: 'Unauthorized: token required' });
+
+  try {
+    req.user = verifyToken(token);
+    return next();
+  } catch {
+    return res.status(401).json({ error: 'Unauthorized: invalid or expired token' });
+  }
+}
+
+/**
+ * Optional authentication — populates `req.user` if a valid token is present
+ * but does NOT reject unauthenticated requests.
  */
 export function optionalAuth(req, res, next) {
-  if (req.session && req.session.user) {
-    req.user = req.session.user;
+  const token = extractToken(req);
+  if (token) {
+    try {
+      req.user = verifyToken(token);
+    } catch {
+      req.user = null;
+    }
   } else {
     req.user = null;
   }
   return next();
 }
-
-
-
-
-

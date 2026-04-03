@@ -1,63 +1,38 @@
-/**
- * @fileoverview
- * Realtime utilities for emitting Socket.IO events and mirroring select events as Web Push.
- */
-
-/**
- * @typedef {Object} PushPayload
- * @property {string} [title]
- * @property {string} [message]
- * @property {Object} [meta]
- * @property {string} [meta.url] Optional URL to open on click (if supported by the client).
- * @property {Object} [data] Legacy payload container.
- * @property {string} [data.url] Legacy URL field.
- */
-
-// Simple realtime helper to access Socket.IO instance across modules
-let ioInstance = null;
 import { sendPushToUser } from './push.js';
 
 /**
- * Sets the global Socket.IO server instance.
- * @param {object} io Socket.IO server.
+ * @fileoverview
+ * Realtime event emission.
+ *
+ * Socket.IO has been removed in favour of Supabase Realtime:
+ * - The frontend subscribes to Postgres Changes on the `Notification` table.
+ * - Ephemeral events (typing indicators, presence) use Supabase Broadcast channels directly
+ *   from client to client — no backend involvement required.
+ *
+ * This module keeps the `emitToUser` interface so callers (scheduler, controllers) need
+ * no changes. The only side-effect retained is the Web Push mirror for mobile/PWA users.
  */
-export function setIO(io) {
-  ioInstance = io;
-}
 
 /**
- * Returns the current Socket.IO server instance.
- * @returns {object|null}
- */
-export function getIO() {
-  return ioInstance;
-}
-
-// Convenience: emit an event to a specific user's channel
-// Frontend listens to `notification:${userId}`
-/**
- * Emits a realtime event to a specific user channel.
+ * Emits a logical event to a user.
  *
- * Client convention: listeners subscribe to events in the form `${eventName}:${userId}`.
+ * In the Supabase Realtime architecture the frontend picks up DB-backed events
+ * (notifications, messages) via Postgres Changes subscriptions, so the Socket.IO
+ * emit is no longer needed. Web Push is still fired as a best-effort fallback.
  *
- * Additionally, when `eventName === 'notification'`, this mirrors the event as a push
- * notification (best-effort).
- *
- * @param {string} userId Recipient user id.
- * @param {string} eventName Base event name.
- * @param {PushPayload} payload Event payload.
+ * @param {string|number} userId Recipient user id.
+ * @param {string} eventName Logical event name (e.g. 'notification').
+ * @param {object} payload Event payload.
  */
 export function emitToUser(userId, eventName, payload) {
-  if (!ioInstance) return;
-  // Emit to the user's personal room (user joins `user:${userId}` on identify)
-  ioInstance.to(`user:${userId}`).emit(eventName, payload);
-
-  // Also mirror as a push notification when applicable
   if (eventName === 'notification' && userId) {
     const title = payload?.title || 'Nueva notificación';
     const body = payload?.message || '';
     const url = payload?.meta?.url || payload?.data?.url;
-    // Fire-and-forget
     sendPushToUser(userId, { title, body, data: { url } }).catch(() => {});
   }
 }
+
+// Legacy exports kept for any caller that still imports these
+export function setIO() {}
+export function getIO() { return null; }
