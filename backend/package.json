@@ -11,7 +11,6 @@
     "drop-tables": "node scripts/drop-tables.js"
   },
   "dependencies": {
-    "@openrouter/sdk": "^0.9.11",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-toast": "^1.2.15",
