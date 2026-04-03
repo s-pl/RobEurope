@@ -1,4 +1,4 @@
-import { auth, claimCheck } from 'express-oauth2-jwt-bearer';
+import { auth } from 'express-oauth2-jwt-bearer';
 
 /**
  * @fileoverview Auth0 JWT validation middleware.
@@ -11,17 +11,25 @@ import { auth, claimCheck } from 'express-oauth2-jwt-bearer';
  *   AUTH0_AUDIENCE — API identifier set in Auth0 dashboard
  */
 
-const checkJwt = auth({
-  audience: process.env.AUTH0_AUDIENCE,
-  issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}/`,
-  tokenSigningAlg: 'RS256',
-});
+// Lazy init — auth() throws at construction if audience is undefined,
+// so we defer creation to first request to survive missing env vars at import time.
+let _checkJwt;
+function getCheckJwt() {
+  if (!_checkJwt) {
+    _checkJwt = auth({
+      audience: process.env.AUTH0_AUDIENCE,
+      issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}/`,
+      tokenSigningAlg: 'RS256',
+    });
+  }
+  return _checkJwt;
+}
 
 /**
  * Enforces a valid Auth0 JWT. Returns 401 if missing/invalid, 403 if expired.
  */
 export default function authenticateToken(req, res, next) {
-  checkJwt(req, res, next);
+  getCheckJwt()(req, res, next);
 }
 
 /**
@@ -29,7 +37,7 @@ export default function authenticateToken(req, res, next) {
  * but does NOT reject unauthenticated requests.
  */
 export function optionalAuth(req, res, next) {
-  checkJwt(req, res, (err) => {
+  getCheckJwt()(req, res, (err) => {
     if (err) {
       req.auth = null;
       req.user = null;
