@@ -1,35 +1,29 @@
-import { createClient } from 'redis';
+import { Redis } from '@upstash/redis';
 import logger from './logger.js';
 
 /**
  * @fileoverview
- * Shared Redis client — compatible with Upstash (rediss://) and local Redis (redis://).
+ * Upstash Redis client (HTTP-based, no persistent TCP connection).
+ * Compatible with Vercel serverless — no connect() needed.
  *
- * Set REDIS_URL to your Upstash connection string (rediss://...) for free-tier hosting.
- * Falls back to redis://localhost:6379 for local dev.
+ * Requires:
+ *   UPSTASH_REDIS_REST_URL   — e.g. https://awake-swift-77830.upstash.io
+ *   UPSTASH_REDIS_REST_TOKEN — Upstash REST token
  */
 
-const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+let redisClient;
 
-const redisClient = createClient({
-  url: redisUrl,
-  socket: {
-    // Upstash requires TLS; the rediss:// scheme enables it automatically.
-    // Reconnect strategy: exponential backoff capped at 10s.
-    reconnectStrategy: (retries) => Math.min(retries * 100, 10000),
-  },
-});
-
-redisClient.on('error', (err) => logger.error('Redis Client Error', err));
-redisClient.on('connect', () => logger.info('Redis Client Connected'));
-
-try {
-  await redisClient.connect();
-} catch (err) {
-  logger.error(
-    'Redis connection failed — rate-limit dedup, scheduler dedup, etc. will be unavailable.',
-    err
-  );
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  redisClient = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+  logger.info('Upstash Redis client initialised');
+} else {
+  // Fallback no-op client for local dev without Redis
+  logger.warn('UPSTASH_REDIS_REST_URL/TOKEN not set — Redis features disabled');
+  const noop = async () => null;
+  redisClient = new Proxy({}, { get: () => noop });
 }
 
 export default redisClient;

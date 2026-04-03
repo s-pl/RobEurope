@@ -13,6 +13,10 @@
 
 import { mockApiRequest } from './mockBackend';
 
+// Auth0 token getter — set by AuthContext after Auth0 initialises
+let _getToken = null;
+export function setTokenGetter(fn) { _getToken = fn; }
+
 // ─── Cache ────────────────────────────────────────────────────────────────────
 
 const DEFAULT_TTL = 30_000; // 30 s — adjust per endpoint via ttl option
@@ -132,7 +136,16 @@ export async function apiRequest(path, { method = 'GET', body, headers = {}, for
 
   const execute = async () => {
     const finalHeaders = { ...headers };
-    const options = { method, headers: finalHeaders, credentials: 'include' };
+
+    // Attach Auth0 access token if available
+    if (_getToken) {
+      try {
+        const token = await _getToken();
+        if (token) finalHeaders['Authorization'] = `Bearer ${token}`;
+      } catch { /* unauthenticated — continue without token */ }
+    }
+
+    const options = { method, headers: finalHeaders };
 
     if (body) {
       if (formData || (typeof FormData !== 'undefined' && body instanceof FormData)) {

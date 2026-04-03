@@ -111,11 +111,14 @@ function App() {
                     <Route path="requests" element={<AdminRequests />} />
                   </Route>
 
-                  {/* Auth — redirect if already logged in */}
+                  {/* Auth0 callback — Auth0Provider handles the code exchange automatically */}
+                  <Route path="/callback" element={<PageLoader />} />
+
+                  {/* Legacy auth routes — redirect to home (Auth0 Universal Login replaces these) */}
                   <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
                   <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
-                  <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
-                  <Route path="/reset-password" element={<GuestRoute><ResetPassword /></GuestRoute>} />
+                  <Route path="/forgot-password" element={<Navigate to="/" replace />} />
+                  <Route path="/reset-password" element={<Navigate to="/" replace />} />
                 </Routes>
               </Suspense>
               <AdminEditButton />

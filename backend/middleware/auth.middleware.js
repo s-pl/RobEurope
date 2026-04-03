@@ -1,49 +1,39 @@
-import { verifyToken, COOKIE_NAME } from '../utils/signToken.js';
+import { auth, claimCheck } from 'express-oauth2-jwt-bearer';
 
 /**
- * @fileoverview JWT-based authentication middleware.
+ * @fileoverview Auth0 JWT validation middleware.
  *
- * Reads the auth token from the `auth_token` httpOnly cookie or, as fallback,
- * from the `Authorization: Bearer <token>` header.
+ * Validates Bearer tokens issued by Auth0.
+ * Sets `req.auth` with the decoded payload (sub, email, etc.).
+ *
+ * Requires env vars:
+ *   AUTH0_DOMAIN   — e.g. robeurope.eu.auth0.com
+ *   AUTH0_AUDIENCE — API identifier set in Auth0 dashboard
  */
 
-function extractToken(req) {
-  if (req.cookies?.[COOKIE_NAME]) return req.cookies[COOKIE_NAME];
-  const authHeader = req.headers['authorization'];
-  if (authHeader?.startsWith('Bearer ')) return authHeader.slice(7);
-  return null;
-}
+const checkJwt = auth({
+  audience: process.env.AUTH0_AUDIENCE,
+  issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}/`,
+  tokenSigningAlg: 'RS256',
+});
 
 /**
- * Ensures the request is authenticated via JWT.
- * Populates `req.user` with the decoded token payload.
+ * Enforces a valid Auth0 JWT. Returns 401 if missing/invalid, 403 if expired.
  */
 export default function authenticateToken(req, res, next) {
-  const token = extractToken(req);
-  if (!token) return res.status(401).json({ error: 'Unauthorized: token required' });
-
-  try {
-    req.user = verifyToken(token);
-    return next();
-  } catch {
-    return res.status(401).json({ error: 'Unauthorized: invalid or expired token' });
-  }
+  checkJwt(req, res, next);
 }
 
 /**
- * Optional authentication — populates `req.user` if a valid token is present
+ * Optional auth — populates req.auth if a valid token is present,
  * but does NOT reject unauthenticated requests.
  */
 export function optionalAuth(req, res, next) {
-  const token = extractToken(req);
-  if (token) {
-    try {
-      req.user = verifyToken(token);
-    } catch {
+  checkJwt(req, res, (err) => {
+    if (err) {
+      req.auth = null;
       req.user = null;
     }
-  } else {
-    req.user = null;
-  }
-  return next();
+    next();
+  });
 }

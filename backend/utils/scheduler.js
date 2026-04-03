@@ -50,7 +50,7 @@ export async function sendCompetitionReminders() {
       const dedupKey = `reminder:comp:${comp.id}:team:${team.id}`;
       const already = await redisClient.get(dedupKey);
       if (already) continue;
-      await redisClient.set(dedupKey, '1', { EX: 48 * 3600 }); // avoid duplicates for 48h
+      await redisClient.set(dedupKey, '1', { ex: 48 * 3600 }); // avoid duplicates for 48h
 
       try {
         const notif = await Notification.create({

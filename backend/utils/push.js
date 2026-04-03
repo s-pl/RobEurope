@@ -85,8 +85,8 @@ export async function saveSubscription(userId, subscription) {
   const key = subsKeyForUser(userId);
   const subStr = JSON.stringify(subscription);
   // Use a Redis Set to avoid duplicates
-  await redisClient.sAdd(key, subStr);
-  await redisClient.hSet(subsIndexKey, subscription.endpoint, String(userId));
+  await redisClient.sadd(key, subStr);
+  await redisClient.hset(subsIndexKey, subscription.endpoint, String(userId));
 }
 
 /**
@@ -100,14 +100,14 @@ export async function saveSubscription(userId, subscription) {
 export async function removeSubscription(userId, endpoint) {
   if (!userId || !endpoint) throw new Error('Invalid unsubscribe payload');
   const key = subsKeyForUser(userId);
-  const members = await redisClient.sMembers(key);
+  const members = await redisClient.smembers(key);
   const toRemove = members.find(m => {
     try { const j = JSON.parse(m); return j.endpoint === endpoint; } catch { return false; }
   });
   if (toRemove) {
-    await redisClient.sRem(key, toRemove);
+    await redisClient.srem(key, toRemove);
   }
-  await redisClient.hDel(subsIndexKey, endpoint);
+  await redisClient.hdel(subsIndexKey, endpoint);
 }
 
 /**
@@ -118,7 +118,7 @@ export async function removeSubscription(userId, endpoint) {
  */
 export async function listSubscriptions(userId) {
   const key = subsKeyForUser(userId);
-  const members = await redisClient.sMembers(key);
+  const members = await redisClient.smembers(key);
   return members.map(m => { try { return JSON.parse(m); } catch { return null; } }).filter(Boolean);
 }
 

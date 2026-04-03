@@ -20,8 +20,6 @@ import adminRoutes from './routes/admin.route.js';
 import adminApiRoutes from './routes/admin.routes.js';
 import requestId from './middleware/requestId.middleware.js';
 import responseTime from './middleware/responseTime.middleware.js';
-import passport from 'passport';
-import './config/passport.js';
 import i18n, { supportedLocales } from './config/i18n.js';
 import healthDeployRouter from './routes/api/health.route.js';
 import errorHandler from './middleware/errorHandler.middleware.js';
@@ -90,8 +88,6 @@ app.use((req, res, next) => {
 });
 
 // --- Passport (OAuth strategies only — no sessions) ---
-app.use(passport.initialize());
-
 // --- Request logging ---
 app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 

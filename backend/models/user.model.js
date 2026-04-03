@@ -70,6 +70,11 @@ export default async function defineUserModel(sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: true
     },
+    auth0_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
     google_id: {
       type: DataTypes.STRING,
       allowNull: true,
