@@ -1,47 +1,36 @@
-/**
- * @fileoverview
- * Session helpers for server-rendered admin pages.
- *
- * Note: These middlewares are intended for the EJS admin panel (HTML redirects),
- * not JSON APIs.
- */
+import { verifyToken, COOKIE_NAME } from '../utils/signToken.js';
 
 /**
- * Protects admin routes using session-based authentication.
- *
- * - Redirects unauthenticated users to `/admin/login`.
- * - Enforces `super_admin` role.
- *
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @param {Express.NextFunction} next Express next.
- * @returns {any}
+ * @fileoverview
+ * Admin session helpers — now uses JWT cookie instead of express-session.
  */
+
+function getUserFromCookie(req) {
+  try {
+    const token = req.cookies?.[COOKIE_NAME];
+    if (!token) return null;
+    return verifyToken(token);
+  } catch {
+    return null;
+  }
+}
+
 export function requireAdminSession(req, res, next) {
-  const user = req.session && req.session.user;
+  const user = getUserFromCookie(req);
   if (!user) return res.redirect('/admin/login');
   if (user.role !== 'super_admin') {
     return res.status(403).send(`
       <h1>Forbidden access</h1>
       <p>Your current user (${user.email}) is not super_admin.</p>
-      <p><a href="/admin/logout">Log out</a> to sign in with a different account.</p>
-      <p><a href="/">Return to home</a></p>
+      <p><a href="/admin/logout">Log out</a></p>
     `);
   }
+  req.user = user;
   next();
 }
 
-/**
- * Redirects authenticated super admins away from the login page.
- *
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @param {Express.NextFunction} next Express next.
- * @returns {any}
- */
 export function redirectIfAuthenticated(req, res, next) {
-  if (req.session?.user?.role === 'super_admin') {
-    return res.redirect('/admin');
-  }
+  const user = getUserFromCookie(req);
+  if (user?.role === 'super_admin') return res.redirect('/admin');
   next();
 }

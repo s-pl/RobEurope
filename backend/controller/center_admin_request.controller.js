@@ -45,7 +45,7 @@ export const getRequests = async (req, res) => {
 export const approveRequest = async (req, res) => {
   try {
     const { id } = req.params;
-    const adminUserId = req.session?.user?.id;
+    const adminUserId = req.user?.id;
 
     const request = await CenterAdminRequest.findByPk(id, {
       include: [
@@ -110,7 +110,7 @@ export const rejectRequest = async (req, res) => {
   try {
     const { id } = req.params;
     const { reason } = req.body;
-    const adminUserId = req.session?.user?.id;
+    const adminUserId = req.user?.id;
 
     const request = await CenterAdminRequest.findByPk(id, {
       include: [
@@ -208,7 +208,7 @@ export const renderCenterRequests = async (req, res) => {
 export const approveRequestDashboard = async (req, res) => {
   try {
     const { id } = req.params;
-    const adminUserId = req.session?.user?.id;
+    const adminUserId = req.user?.id;
 
     const request = await CenterAdminRequest.findByPk(id, {
       include: [
@@ -267,7 +267,7 @@ export const rejectRequestDashboard = async (req, res) => {
   try {
     const { id } = req.params;
     const { reason } = req.body;
-    const adminUserId = req.session?.user?.id;
+    const adminUserId = req.user?.id;
 
     const request = await CenterAdminRequest.findByPk(id, {
       include: [

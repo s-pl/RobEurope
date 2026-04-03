@@ -164,8 +164,6 @@ export const deleteMyAccount = async (req, res) => {
     await transaction.commit();
 
     // 4. Destroy session
-    if (req.session) {
-      req.session.destroy(() => {});
     }
 
     res.json({ message: 'Your account has been anonymized and your personal data deleted.' });

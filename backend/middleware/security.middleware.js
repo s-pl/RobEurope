@@ -53,12 +53,12 @@ export async function verifyRoleFromDatabase(req, res, next) {
     
     if (!dbUser) {
       // User was deleted, invalidate session
-      req.session.destroy();
+      // session removed — no-op
       return res.status(401).json({ error: 'Usuario no encontrado' });
     }
     
     if (!dbUser.is_active) {
-      req.session.destroy();
+      // session removed — no-op
       return res.status(403).json({ error: 'Cuenta desactivada' });
     }
     

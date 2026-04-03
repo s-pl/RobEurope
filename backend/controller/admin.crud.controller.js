@@ -204,7 +204,7 @@ export const list = async (req, res) => {
       items,
       modelName: model,
       pageKey: model,
-      currentUser: req.session.user
+      currentUser: req.user
     });
   } catch (error) {
     console.error(error);
@@ -247,7 +247,7 @@ export const form = async (req, res) => {
       item,
       modelName: model,
       pageKey: model,
-      currentUser: req.session.user
+      currentUser: req.user
     });
   } catch (error) {
     console.error(error);

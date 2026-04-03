@@ -541,9 +541,9 @@ export const getEducationalCenterStreams = async (req, res) => {
 export const approveCenter = async (req, res) => {
   try {
     const { id } = req.params;
-    const adminUserId = req.session?.user?.id;
+    const adminUserId = req.user?.id;
 
-    if (!isSuperAdmin(req.session?.user)) {
+    if (!isSuperAdmin(req.user)) {
       return res.status(403).json({ error: 'Solo super_admin puede aprobar centros' });
     }
 
@@ -578,7 +578,7 @@ export const rejectCenter = async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body;
 
-    if (!isSuperAdmin(req.session?.user)) {
+    if (!isSuperAdmin(req.user)) {
       return res.status(403).json({ error: 'Solo super_admin puede rechazar centros' });
     }
 

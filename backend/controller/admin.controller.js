@@ -11,6 +11,7 @@ import bcrypt from 'bcryptjs';
 import { Sequelize } from 'sequelize';
 import si from 'systeminformation';
 import redisClient from '../utils/redis.js';
+import { setAuthCookie, clearAuthCookie } from '../utils/signToken.js';
 const { User, Competition, Post, Registration, SystemLog, Team } = db;
 
 /**
@@ -71,7 +72,7 @@ export async function handleLogin(req, res) {
     if (user.role !== 'super_admin') {
       return res.status(403).render('login', { title: req.__('auth.metaTitle'), pageKey: 'login', error: req.__('auth.errors.role') });
     }
-    req.session.user = { id: user.id, email: user.email, role: user.role, username: user.username };
+    setAuthCookie(res, { id: user.id, email: user.email, role: user.role, username: user.username });
     return res.redirect('/admin');
   } catch (e) {
     return res.status(500).render('login', { title: req.__('auth.metaTitle'), pageKey: 'login', error: req.__('auth.errors.unexpected') });
@@ -79,10 +80,8 @@ export async function handleLogin(req, res) {
 }
 
 export async function handleLogout(req, res) {
-  req.session.destroy(() => {
-    res.clearCookie('connect.sid');
-    res.redirect('/admin/login');
-  });
+  clearAuthCookie(res);
+  res.redirect('/admin/login');
 }
 
 export async function renderDashboard(req, res) {
@@ -429,7 +428,7 @@ export async function updateUser(req, res) {
       action: 'UPDATE',
       entity_type: 'User',
       entity_id: user.id,
-      user_id: req.session.user.id,
+      user_id: req.user.id,
       ip_address: req.ip,
       details: `Updated user ${user.username} (ID: ${user.id})`
     });
@@ -440,7 +439,7 @@ export async function updateUser(req, res) {
         action: 'ROLE_CHANGED',
         entity_type: 'User',
         entity_id: user.id,
-        user_id: req.session.user.id,
+        user_id: req.user.id,
         ip_address: req.ip,
         details: `Role changed from ${oldData.role} to ${user.role}`
       });
@@ -484,7 +483,7 @@ export async function updateRegistrationStatus(req, res) {
       action: 'UPDATE',
       entity_type: 'Registration',
       entity_id: registration.id,
-      user_id: req.session.user.id,
+      user_id: req.user.id,
       ip_address: req.ip,
       details: `Updated registration ${id} status to ${status}`
     });
