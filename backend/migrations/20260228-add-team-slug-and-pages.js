@@ -1,6 +1,15 @@
 /**
  * Migration: Add slug to Team table and create team_pages table
  */
+
+function quoteTable(queryInterface, tableName) {
+  return queryInterface.queryGenerator.quoteTable(tableName);
+}
+
+function quoteIdentifier(queryInterface, identifier) {
+  return queryInterface.queryGenerator.quoteIdentifier(identifier);
+}
+
 export async function up(queryInterface, Sequelize) {
   // 1. Add slug column to Team table
   await queryInterface.addColumn('Team', 'slug', {
@@ -16,8 +25,14 @@ export async function up(queryInterface, Sequelize) {
   });
 
   // 3. Backfill existing teams with slugs derived from their names
-  const [teams] = await queryInterface.sequelize.query(
-    'SELECT id, name FROM `Team`'
+  const teamTable = quoteTable(queryInterface, 'Team');
+  const idColumn = quoteIdentifier(queryInterface, 'id');
+  const nameColumn = quoteIdentifier(queryInterface, 'name');
+  const slugColumn = quoteIdentifier(queryInterface, 'slug');
+
+  const teams = await queryInterface.sequelize.query(
+    `SELECT ${idColumn} AS id, ${nameColumn} AS name FROM ${teamTable}`,
+    { type: Sequelize.QueryTypes.SELECT }
   );
 
   for (const team of teams) {
@@ -36,9 +51,9 @@ export async function up(queryInterface, Sequelize) {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       const candidate = suffix === 0 ? slug : `${slug}-${suffix}`;
-      const [rows] = await queryInterface.sequelize.query(
-        'SELECT id FROM `Team` WHERE slug = ? AND id != ?',
-        { replacements: [candidate, team.id] }
+      const rows = await queryInterface.sequelize.query(
+        `SELECT ${idColumn} AS id FROM ${teamTable} WHERE ${slugColumn} = :slug AND ${idColumn} != :id`,
+        { replacements: { slug: candidate, id: team.id }, type: Sequelize.QueryTypes.SELECT }
       );
       if (rows.length === 0) {
         slug = candidate;
@@ -48,8 +63,8 @@ export async function up(queryInterface, Sequelize) {
     }
 
     await queryInterface.sequelize.query(
-      'UPDATE `Team` SET slug = ? WHERE id = ?',
-      { replacements: [slug, team.id] }
+      `UPDATE ${teamTable} SET ${slugColumn} = :slug WHERE ${idColumn} = :id`,
+      { replacements: { slug, id: team.id }, type: Sequelize.QueryTypes.UPDATE }
     );
   }
 

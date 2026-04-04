@@ -10,102 +10,61 @@
  * Per-team soft cap: 250 MB
  */
 
-import { Op, fn, col, literal } from 'sequelize';
-import db from '../models/index.js';
-
-const { TeamFile, R2Stats } = db;
-
-// ── Hard limits ─────────────────────────────────────────────────────────────
+import prisma from '../lib/prisma.js';
 
 export const LIMITS = {
-  TEAM_BYTES:    250  * 1024 * 1024,         //  250 MB per team
-  GLOBAL_BYTES:  10   * 1024 * 1024 * 1024,  //   10 GB global
-  CLASS_A_MONTH: 1_000_000,                   //    1 M Class A ops / month
-  CLASS_B_MONTH: 10_000_000,                  //   10 M Class B ops / month
+  TEAM_BYTES:    250  * 1024 * 1024,
+  GLOBAL_BYTES:  10   * 1024 * 1024 * 1024,
+  CLASS_A_MONTH: 1_000_000,
+  CLASS_B_MONTH: 10_000_000,
 };
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Current month string: "YYYY-MM" */
 function currentMonth() {
   return new Date().toISOString().slice(0, 7);
 }
 
-/**
- * Sum of file sizes (bytes) stored by a specific team.
- * @param {number|string} teamId
- * @returns {Promise<number>}
- */
 export async function getTeamStorageBytes(teamId) {
-  const result = await TeamFile.findOne({
-    attributes: [[fn('COALESCE', fn('SUM', col('size')), literal('0')), 'total']],
+  const result = await prisma.teamFile.aggregate({
+    _sum: { size: true },
     where: { team_id: Number(teamId) },
-    raw: true,
   });
-  return Number(result?.total ?? 0);
+  return Number(result._sum.size ?? 0);
 }
 
-/**
- * Sum of file sizes (bytes) across ALL teams (global storage).
- * @returns {Promise<number>}
- */
 export async function getGlobalStorageBytes() {
-  const result = await TeamFile.findOne({
-    attributes: [[fn('COALESCE', fn('SUM', col('size')), literal('0')), 'total']],
-    raw: true,
+  const result = await prisma.teamFile.aggregate({
+    _sum: { size: true },
   });
-  return Number(result?.total ?? 0);
+  return Number(result._sum.size ?? 0);
 }
 
-/**
- * Fetch (or upsert) the R2Stats row for the current month.
- * @returns {Promise<import('../models/r2_stats.model.js').default>}
- */
 async function getOrCreateMonthStats() {
   const month = currentMonth();
-  const [row] = await R2Stats.findOrCreate({
+  return prisma.r2Stats.upsert({
     where: { month },
-    defaults: { class_a_ops: 0, class_b_ops: 0 },
+    create: { month, class_a_ops: 0, class_b_ops: 0 },
+    update: {},
   });
-  return row;
 }
 
-/**
- * Increment Class A operations by `delta` for the current month.
- * Class A = writes (upload, delete).
- * @param {number} [delta=1]
- */
 export async function incrementClassA(delta = 1) {
   const month = currentMonth();
-  await R2Stats.findOrCreate({
+  await prisma.r2Stats.upsert({
     where: { month },
-    defaults: { class_a_ops: 0, class_b_ops: 0 },
+    create: { month, class_a_ops: BigInt(delta), class_b_ops: 0 },
+    update: { class_a_ops: { increment: BigInt(delta) } },
   });
-  await R2Stats.increment('class_a_ops', { by: delta, where: { month } });
 }
 
-/**
- * Increment Class B operations by `delta` for the current month.
- * Class B = reads (list, head).
- * @param {number} [delta=1]
- */
 export async function incrementClassB(delta = 1) {
   const month = currentMonth();
-  await R2Stats.findOrCreate({
+  await prisma.r2Stats.upsert({
     where: { month },
-    defaults: { class_a_ops: 0, class_b_ops: 0 },
+    create: { month, class_a_ops: 0, class_b_ops: BigInt(delta) },
+    update: { class_b_ops: { increment: BigInt(delta) } },
   });
-  await R2Stats.increment('class_b_ops', { by: delta, where: { month } });
 }
 
-// ── Quota checks (throw on violation) ───────────────────────────────────────
-
-/**
- * Check all quotas before an upload. Throws an error with HTTP status if any limit is exceeded.
- *
- * @param {number|string} teamId
- * @param {number} incomingBytes  Size of the file about to be uploaded
- */
 export async function assertUploadAllowed(teamId, incomingBytes) {
   const [teamBytes, globalBytes, stats] = await Promise.all([
     getTeamStorageBytes(teamId),
@@ -143,18 +102,6 @@ export async function assertUploadAllowed(teamId, incomingBytes) {
   }
 }
 
-// ── Usage summary (for API response) ────────────────────────────────────────
-
-/**
- * Full usage snapshot for a team.
- *
- * @param {number|string} teamId
- * @returns {Promise<{
- *   team:   { used: number, limit: number, pct: number },
- *   global: { used: number, limit: number, pct: number },
- *   ops:    { classA: number, classALimit: number, classB: number, classBLimit: number, month: string }
- * }>}
- */
 export async function getUsageSnapshot(teamId) {
   const [teamBytes, globalBytes, stats] = await Promise.all([
     getTeamStorageBytes(teamId),

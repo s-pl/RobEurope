@@ -5,31 +5,10 @@
  * a single media record, uploading a file to `/uploads`, and deleting media.
  */
 
-import db from '../models/index.js';
-const { Media, User } = db;
+import prisma from '../lib/prisma.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-
-/**
- * Express request.
- * @typedef {object} Request
- * @property {object} params
- * @property {object} query
- * @property {object} body
- * @property {object} user
- * @property {number} user.id
- * @property {string} [user.role]
- * @property {any} [file]
- */
-
-/**
- * Express response.
- * @typedef {object} Response
- * @property {Function} status
- * @property {Function} json
- * @property {Function} send
- */
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -48,14 +27,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
-  },
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp|pdf|doc|docx/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
-
     if (mimetype && extname) {
       return cb(null, true);
     } else {
@@ -64,32 +40,38 @@ const upload = multer({
   }
 });
 
+/**
+ * Get a page of media.
+ *
+ * @route GET /api/media
+ */
 export const getAllMedia = async (req, res) => {
   try {
     const { page = 1, limit = 10, uploaded_by } = req.query;
-    const offset = (page - 1) * limit;
+    const skip = (Number(page) - 1) * Number(limit);
 
     const where = {};
     if (uploaded_by) where.uploaded_by = uploaded_by;
 
-    const media = await Media.findAndCountAll({
-      where,
-      include: [{
-        model: User,
-        as: 'uploader',
-        attributes: ['id', 'username', 'first_name', 'last_name']
-      }],
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-      order: [['created_at', 'DESC']]
-    });
+    const [rows, total] = await prisma.$transaction([
+      prisma.media.findMany({
+        where,
+        include: {
+          uploader: { select: { id: true, username: true, first_name: true, last_name: true } }
+        },
+        take: parseInt(limit),
+        skip: parseInt(skip),
+        orderBy: { created_at: 'desc' }
+      }),
+      prisma.media.count({ where })
+    ]);
 
     res.json({
-      media: media.rows,
+      media: rows,
       pagination: {
-        total: media.count,
+        total,
         page: parseInt(page),
-        pages: Math.ceil(media.count / limit)
+        pages: Math.ceil(total / parseInt(limit))
       }
     });
   } catch (error) {
@@ -99,30 +81,18 @@ export const getAllMedia = async (req, res) => {
 };
 
 /**
- * Get a page of media.
- *
- * @route GET /api/media
- * @param {Request} req
- * @param {Response} res
- */
-// (implementation above)
-
-/**
  * Get a single media record by id.
  *
  * @route GET /api/media/:id
- * @param {Request} req
- * @param {Response} res
  */
 export const getMediaById = async (req, res) => {
   try {
     const { id } = req.params;
-    const media = await Media.findByPk(id, {
-      include: [{
-        model: User,
-        as: 'uploader',
-        attributes: ['id', 'username', 'first_name', 'last_name']
-      }]
+    const media = await prisma.media.findUnique({
+      where: { id: Number(id) },
+      include: {
+        uploader: { select: { id: true, username: true, first_name: true, last_name: true } }
+      }
     });
 
     if (!media) {
@@ -139,12 +109,7 @@ export const getMediaById = async (req, res) => {
 /**
  * Upload a media file.
  *
- * Uses `multer` to store the file under the server `uploads/` directory and
- * persists the record in the Media table.
- *
  * @route POST /api/media
- * @param {Request} req
- * @param {Response} res
  */
 export const uploadMedia = [
   upload.single('file'),
@@ -157,13 +122,15 @@ export const uploadMedia = [
       const { originalname, filename, mimetype, size } = req.file;
       const url = `/uploads/${filename}`;
 
-      const media = await Media.create({
-        filename,
-        original_name: originalname,
-        mime_type: mimetype,
-        size,
-        url,
-        uploaded_by: req.user.id
+      const media = await prisma.media.create({
+        data: {
+          filename,
+          original_name: originalname,
+          mime_type: mimetype,
+          size,
+          url,
+          uploaded_by: req.user.id
+        }
       });
 
       res.status(201).json(media);
@@ -176,22 +143,18 @@ export const uploadMedia = [
 
 /**
  * Delete a media record and its file on disk.
- * Allowed for the uploader or a `super_admin`.
  *
  * @route DELETE /api/media/:id
- * @param {Request} req
- * @param {Response} res
  */
 export const deleteMedia = async (req, res) => {
   try {
     const { id } = req.params;
-    const media = await Media.findByPk(id);
+    const media = await prisma.media.findUnique({ where: { id: Number(id) } });
 
     if (!media) {
       return res.status(404).json({ error: 'Media not found' });
     }
 
-    // Check if user owns the media or is admin
     if (media.uploaded_by !== req.user.id && req.user.role !== 'super_admin') {
       return res.status(403).json({ error: 'Not authorized to delete this media' });
     }
@@ -202,7 +165,7 @@ export const deleteMedia = async (req, res) => {
       fs.unlinkSync(filePath);
     }
 
-    await media.destroy();
+    await prisma.media.delete({ where: { id: Number(id) } });
     res.status(204).send();
   } catch (error) {
     console.error('Error deleting media:', error);

@@ -7,13 +7,10 @@
  * @module controller/ArchiveController
  */
 
-import db from '../models/index.js';
+import prisma from '../lib/prisma.js';
 import { getFileInfo } from '../middleware/upload.middleware.js';
 import fs from 'fs';
 import path from 'path';
-import { Op } from 'sequelize';
-
-const { Archive, Competition, User } = db;
 
 /**
  * Checks if user is super_admin.
@@ -31,9 +28,6 @@ const isAdmin = (user) => user?.role === 'super_admin' || user?.role === 'center
 
 /**
  * Checks if user has access to restricted content.
- * - super_admin: always
- * - center_admin: always (sees all restricted)
- * - Regular user: only if email is in allowed_emails or they uploaded it
  * @param {Object} archive - Archive item.
  * @param {Object} user - Session user.
  * @returns {boolean}
@@ -51,45 +45,26 @@ const hasAccessToRestricted = (archive, user) => {
 
 /**
  * Filters archives based on visibility and user access.
- * - super_admin: sees ALL (including hidden)
- * - center_admin: sees public + ALL restricted (not hidden)
- * - Regular authenticated user: sees public + restricted if email is in allowed_emails
- * - Unauthenticated: sees only public
- * - Hidden is NEVER shown to non-super_admin users
  * @param {Array} archives - Array of archive items.
  * @param {Object} user - Session user.
  * @returns {Array} Filtered archives.
  */
 const filterByVisibility = (archives, user) => {
   return archives.filter(archive => {
-    // Super admin sees everything
     if (isSuperAdmin(user)) return true;
-
-    // Hidden content is only visible to super_admin
     if (archive.visibility === 'hidden') return false;
-
-    // Public content is visible to all
     if (archive.visibility === 'public') return true;
-
-    // Restricted content requires access check
     if (archive.visibility === 'restricted') {
       return hasAccessToRestricted(archive, user);
     }
-
     return false;
   });
 };
 
 /**
  * Lists archive items.
- * Filters based on user visibility permissions.
- * Note: Fetches all matching records then filters by visibility in JS to ensure
- * correct access control. Pagination is applied after filtering.
  *
  * @route GET /api/archives
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const listArchives = async (req, res) => {
   try {
@@ -97,7 +72,7 @@ export const listArchives = async (req, res) => {
     const where = {};
 
     if (competition_id) {
-      where.competition_id = competition_id;
+      where.competition_id = Number(competition_id);
     }
 
     if (content_type) {
@@ -111,16 +86,16 @@ export const listArchives = async (req, res) => {
 
     // For non-super-admin, pre-filter at DB level to exclude hidden
     if (!isSuperAdmin(req.user)) {
-      where.visibility = { [Op.ne]: 'hidden' };
+      where.visibility = { not: 'hidden' };
     }
 
-    const archives = await Archive.findAll({
+    const archives = await prisma.archive.findMany({
       where,
-      include: [
-        { model: Competition, as: 'competition', attributes: ['id', 'title', 'slug'] },
-        { model: User, as: 'uploader', attributes: ['id', 'username', 'first_name', 'last_name'] }
-      ],
-      order: [['sort_order', 'ASC'], ['created_at', 'DESC']]
+      include: {
+        competition: { select: { id: true, title: true, slug: true } },
+        uploader: { select: { id: true, username: true, first_name: true, last_name: true } }
+      },
+      orderBy: [{ sort_order: 'asc' }, { created_at: 'desc' }]
     });
 
     // Filter by visibility (handles restricted email checks)
@@ -145,54 +120,41 @@ export const listArchives = async (req, res) => {
  * Gets archives grouped by competition.
  *
  * @route GET /api/archives/by-competition
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getArchivesByCompetition = async (req, res) => {
   try {
-    const competitions = await Competition.findAll({
-      order: [['start_date', 'DESC']],
-      attributes: ['id', 'title', 'slug', 'start_date', 'end_date']
+    const competitions = await prisma.competition.findMany({
+      orderBy: { start_date: 'desc' },
+      select: { id: true, title: true, slug: true, start_date: true, end_date: true }
     });
 
     const result = [];
 
     for (const competition of competitions) {
-      const archives = await Archive.findAll({
+      const archives = await prisma.archive.findMany({
         where: { competition_id: competition.id },
-        include: [
-          { model: User, as: 'uploader', attributes: ['id', 'username', 'first_name', 'last_name'] }
-        ],
-        order: [['sort_order', 'ASC'], ['created_at', 'DESC']]
+        include: { uploader: { select: { id: true, username: true, first_name: true, last_name: true } } },
+        orderBy: [{ sort_order: 'asc' }, { created_at: 'desc' }]
       });
 
       const filteredArchives = filterByVisibility(archives, req.user);
 
       if (filteredArchives.length > 0 || isSuperAdmin(req.user)) {
-        result.push({
-          competition,
-          archives: filteredArchives
-        });
+        result.push({ competition, archives: filteredArchives });
       }
     }
 
     // Also get archives without competition
-    const noCompetitionArchives = await Archive.findAll({
+    const noCompetitionArchives = await prisma.archive.findMany({
       where: { competition_id: null },
-      include: [
-        { model: User, as: 'uploader', attributes: ['id', 'username', 'first_name', 'last_name'] }
-      ],
-      order: [['sort_order', 'ASC'], ['created_at', 'DESC']]
+      include: { uploader: { select: { id: true, username: true, first_name: true, last_name: true } } },
+      orderBy: [{ sort_order: 'asc' }, { created_at: 'desc' }]
     });
 
     const filteredNoCompetition = filterByVisibility(noCompetitionArchives, req.user);
 
     if (filteredNoCompetition.length > 0 || isSuperAdmin(req.user)) {
-      result.push({
-        competition: null,
-        archives: filteredNoCompetition
-      });
+      result.push({ competition: null, archives: filteredNoCompetition });
     }
 
     res.json({ items: result });
@@ -204,22 +166,19 @@ export const getArchivesByCompetition = async (req, res) => {
 
 /**
  * Gets a single archive by ID.
- * Enforces the same visibility rules as listArchives.
  *
  * @route GET /api/archives/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getArchiveById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const archive = await Archive.findByPk(id, {
-      include: [
-        { model: Competition, as: 'competition', attributes: ['id', 'title', 'slug'] },
-        { model: User, as: 'uploader', attributes: ['id', 'username', 'first_name', 'last_name'] }
-      ]
+    const archive = await prisma.archive.findUnique({
+      where: { id: Number(id) },
+      include: {
+        competition: { select: { id: true, title: true, slug: true } },
+        uploader: { select: { id: true, username: true, first_name: true, last_name: true } }
+      }
     });
 
     if (!archive) {
@@ -247,9 +206,6 @@ export const getArchiveById = async (req, res) => {
  * Creates a new archive item (super_admin only).
  *
  * @route POST /api/archives
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const createArchive = async (req, res) => {
   try {
@@ -293,20 +249,15 @@ export const createArchive = async (req, res) => {
       finalContentType = 'text';
     }
 
-    // Normalize allowed_emails - handle JSON string, array, or comma-separated
+    // Normalize allowed_emails
     let normalizedEmails = [];
     if (allowed_emails) {
       let emailsInput = allowed_emails;
-      // Handle JSON-stringified array from FormData
       if (typeof emailsInput === 'string') {
         try {
           const parsed = JSON.parse(emailsInput);
-          if (Array.isArray(parsed)) {
-            emailsInput = parsed;
-          }
-        } catch {
-          // Not JSON, treat as comma-separated
-        }
+          if (Array.isArray(parsed)) emailsInput = parsed;
+        } catch { /* Not JSON, treat as comma-separated */ }
       }
       if (Array.isArray(emailsInput)) {
         normalizedEmails = emailsInput.map(e => String(e).toLowerCase().trim()).filter(e => e);
@@ -315,16 +266,18 @@ export const createArchive = async (req, res) => {
       }
     }
 
-    const archive = await Archive.create({
-      title: title.trim(),
-      description: description?.trim() || null,
-      content_type: finalContentType,
-      competition_id: competition_id || null,
-      visibility,
-      allowed_emails: normalizedEmails,
-      sort_order: Number(sort_order) || 0,
-      uploaded_by: req.user.id,
-      ...fileData
+    const archive = await prisma.archive.create({
+      data: {
+        title: title.trim(),
+        description: description?.trim() || null,
+        content_type: finalContentType,
+        competition_id: competition_id ? Number(competition_id) : null,
+        visibility,
+        allowed_emails: normalizedEmails,
+        sort_order: Number(sort_order) || 0,
+        uploaded_by: req.user.id,
+        ...fileData
+      }
     });
 
     res.status(201).json(archive);
@@ -338,9 +291,6 @@ export const createArchive = async (req, res) => {
  * Updates an archive item (super_admin only).
  *
  * @route PUT /api/archives/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const updateArchive = async (req, res) => {
   try {
@@ -349,20 +299,13 @@ export const updateArchive = async (req, res) => {
     }
 
     const { id } = req.params;
-    const archive = await Archive.findByPk(id);
+    const archive = await prisma.archive.findUnique({ where: { id: Number(id) } });
 
     if (!archive) {
       return res.status(404).json({ error: 'Archivo no encontrado' });
     }
 
-    const {
-      title,
-      description,
-      competition_id,
-      visibility,
-      allowed_emails,
-      sort_order
-    } = req.body;
+    const { title, description, competition_id, visibility, allowed_emails, sort_order } = req.body;
 
     // Handle file upload if present
     let fileData = {};
@@ -385,20 +328,15 @@ export const updateArchive = async (req, res) => {
       };
     }
 
-    // Normalize allowed_emails - handle JSON string, array, or comma-separated
+    // Normalize allowed_emails
     let normalizedEmails = archive.allowed_emails;
     if (allowed_emails !== undefined) {
       let emailsInput = allowed_emails;
-      // Handle JSON-stringified array from FormData
       if (typeof emailsInput === 'string') {
         try {
           const parsed = JSON.parse(emailsInput);
-          if (Array.isArray(parsed)) {
-            emailsInput = parsed;
-          }
-        } catch {
-          // Not JSON, treat as comma-separated
-        }
+          if (Array.isArray(parsed)) emailsInput = parsed;
+        } catch { /* Not JSON */ }
       }
       if (Array.isArray(emailsInput)) {
         normalizedEmails = emailsInput.map(e => String(e).toLowerCase().trim()).filter(e => e);
@@ -410,11 +348,10 @@ export const updateArchive = async (req, res) => {
     const updateData = {
       title: title?.trim() || archive.title,
       description: description !== undefined ? description?.trim() : archive.description,
-      competition_id: competition_id !== undefined ? competition_id : archive.competition_id,
+      competition_id: competition_id !== undefined ? (competition_id ? Number(competition_id) : null) : archive.competition_id,
       visibility: visibility || archive.visibility,
       allowed_emails: normalizedEmails,
       sort_order: sort_order !== undefined ? Number(sort_order) : archive.sort_order,
-      updated_at: new Date(),
       ...fileData
     };
 
@@ -429,9 +366,9 @@ export const updateArchive = async (req, res) => {
       updateData.content_type = 'text';
     }
 
-    await archive.update(updateData);
+    const updated = await prisma.archive.update({ where: { id: Number(id) }, data: updateData });
 
-    res.json(archive);
+    res.json(updated);
   } catch (err) {
     console.error('Error updating archive:', err);
     res.status(500).json({ error: err.message });
@@ -442,9 +379,6 @@ export const updateArchive = async (req, res) => {
  * Updates visibility of an archive item (super_admin only).
  *
  * @route PATCH /api/archives/:id/visibility
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const updateArchiveVisibility = async (req, res) => {
   try {
@@ -459,12 +393,12 @@ export const updateArchiveVisibility = async (req, res) => {
       return res.status(400).json({ error: 'Visibilidad inválida. Opciones: hidden, public, restricted' });
     }
 
-    const archive = await Archive.findByPk(id);
+    const archive = await prisma.archive.findUnique({ where: { id: Number(id) } });
     if (!archive) {
       return res.status(404).json({ error: 'Archivo no encontrado' });
     }
 
-    const updateData = { visibility, updated_at: new Date() };
+    const updateData = { visibility };
 
     if (visibility === 'restricted') {
       if (!allowed_emails || allowed_emails.length === 0) {
@@ -483,9 +417,9 @@ export const updateArchiveVisibility = async (req, res) => {
       updateData.allowed_emails = [];
     }
 
-    await archive.update(updateData);
+    const updated = await prisma.archive.update({ where: { id: Number(id) }, data: updateData });
 
-    res.json({ message: 'Visibilidad actualizada', archive });
+    res.json({ message: 'Visibilidad actualizada', archive: updated });
   } catch (err) {
     console.error('Error updating archive visibility:', err);
     res.status(500).json({ error: err.message });
@@ -496,9 +430,6 @@ export const updateArchiveVisibility = async (req, res) => {
  * Deletes an archive item (super_admin only).
  *
  * @route DELETE /api/archives/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const deleteArchive = async (req, res) => {
   try {
@@ -507,7 +438,7 @@ export const deleteArchive = async (req, res) => {
     }
 
     const { id } = req.params;
-    const archive = await Archive.findByPk(id);
+    const archive = await prisma.archive.findUnique({ where: { id: Number(id) } });
 
     if (!archive) {
       return res.status(404).json({ error: 'Archivo no encontrado' });
@@ -521,7 +452,7 @@ export const deleteArchive = async (req, res) => {
       }
     }
 
-    await archive.destroy();
+    await prisma.archive.delete({ where: { id: Number(id) } });
 
     res.status(204).send();
   } catch (err) {
@@ -534,9 +465,6 @@ export const deleteArchive = async (req, res) => {
  * Reorders archive items (super_admin only).
  *
  * @route POST /api/archives/reorder
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const reorderArchives = async (req, res) => {
   try {
@@ -552,10 +480,10 @@ export const reorderArchives = async (req, res) => {
 
     for (const item of items) {
       if (item.id && typeof item.sort_order === 'number') {
-        await Archive.update(
-          { sort_order: item.sort_order },
-          { where: { id: item.id } }
-        );
+        await prisma.archive.update({
+          where: { id: Number(item.id) },
+          data: { sort_order: item.sort_order }
+        });
       }
     }
 

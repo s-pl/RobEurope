@@ -2,20 +2,19 @@
  * Migration: create conversations and direct message tables
  */
 
-async function tableExists(queryInterface, Sequelize, tableName) {
-  const rows = await queryInterface.sequelize.query(
-    `SELECT 1
-     FROM information_schema.TABLES
-     WHERE TABLE_SCHEMA = DATABASE()
-       AND TABLE_NAME = :tableName
-     LIMIT 1;`,
-    {
-      replacements: { tableName },
-      type: Sequelize.QueryTypes.SELECT,
-    }
-  );
+function normalizeTableName(tableEntry) {
+  if (typeof tableEntry === 'string') return tableEntry;
+  if (!tableEntry || typeof tableEntry !== 'object') return '';
+  if (tableEntry.tableName) return tableEntry.tableName;
+  if (tableEntry.name) return tableEntry.name;
+  const firstValue = Object.values(tableEntry)[0];
+  return typeof firstValue === 'string' ? firstValue : '';
+}
 
-  return rows.length > 0;
+async function tableExists(queryInterface, Sequelize, tableName) {
+  const tables = await queryInterface.showAllTables();
+  const tableNames = (tables || []).map(normalizeTableName);
+  return tableNames.includes(tableName);
 }
 
 export async function up(queryInterface, Sequelize) {

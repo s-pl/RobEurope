@@ -1,5 +1,4 @@
-import db from '../models/index.js';
-const { ContactMessage, Review, User } = db;
+import prisma from '../lib/prisma.js';
 
 // ─── Contact ──────────────────────────────────────────────────────────────────
 
@@ -11,7 +10,15 @@ export const sendContactMessage = async (req, res) => {
   }
   try {
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || null;
-    await ContactMessage.create({ name: name.trim(), email: email.trim(), organization: organization?.trim() || null, message: message.trim(), ip_address: ip });
+    await prisma.contactMessage.create({
+      data: {
+        name: name.trim(),
+        email: email.trim(),
+        organization: organization?.trim() || null,
+        message: message.trim(),
+        ip_address: ip
+      }
+    });
     return res.status(201).json({ ok: true });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -23,10 +30,12 @@ export const sendContactMessage = async (req, res) => {
 /** GET /api/reviews  (public) */
 export const getReviews = async (req, res) => {
   try {
-    const rows = await Review.findAll({
-      order: [['created_at', 'DESC']],
-      limit: 50,
-      include: [{ model: User, as: 'author', attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url'] }]
+    const rows = await prisma.review.findMany({
+      orderBy: { created_at: 'desc' },
+      take: 50,
+      include: {
+        user: { select: { id: true, username: true, first_name: true, last_name: true, profile_photo_url: true } }
+      }
     });
     return res.json(rows);
   } catch (err) {
@@ -46,17 +55,22 @@ export const createReview = async (req, res) => {
   }
   try {
     // One review per user — upsert
-    const [review, created] = await Review.findOrCreate({
+    const review = await prisma.review.upsert({
       where: { user_id: userId },
-      defaults: { user_id: userId, rating: r, message: message.trim() }
+      update: { rating: r, message: message.trim() },
+      create: { user_id: userId, rating: r, message: message.trim() }
     });
-    if (!created) {
-      await review.update({ rating: r, message: message.trim() });
-    }
-    const full = await Review.findByPk(review.id, {
-      include: [{ model: User, as: 'author', attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url'] }]
+
+    const full = await prisma.review.findUnique({
+      where: { id: review.id },
+      include: {
+        user: { select: { id: true, username: true, first_name: true, last_name: true, profile_photo_url: true } }
+      }
     });
-    return res.status(created ? 201 : 200).json(full);
+
+    // Determine if it was created (no reliable way with upsert, so check created_at proximity)
+    const wasJustCreated = Math.abs(Date.now() - new Date(review.created_at).getTime()) < 2000;
+    return res.status(wasJustCreated ? 201 : 200).json(full);
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -67,8 +81,8 @@ export const deleteMyReview = async (req, res) => {
   const userId = req.user?.id;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const deleted = await Review.destroy({ where: { user_id: userId } });
-    if (!deleted) return res.status(404).json({ error: 'No review found' });
+    const result = await prisma.review.deleteMany({ where: { user_id: userId } });
+    if (result.count === 0) return res.status(404).json({ error: 'No review found' });
     return res.json({ ok: true });
   } catch (err) {
     return res.status(500).json({ error: err.message });

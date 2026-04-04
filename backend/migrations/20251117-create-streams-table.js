@@ -1,12 +1,24 @@
+function normalizeTableName(tableEntry) {
+  if (typeof tableEntry === 'string') return tableEntry;
+  if (!tableEntry || typeof tableEntry !== 'object') return '';
+  if (tableEntry.tableName) return tableEntry.tableName;
+  if (tableEntry.name) return tableEntry.name;
+  const firstValue = Object.values(tableEntry)[0];
+  return typeof firstValue === 'string' ? firstValue : '';
+}
+
+async function hasTable(queryInterface, tableName) {
+  const tables = await queryInterface.showAllTables();
+  const tableNames = (tables || []).map(normalizeTableName);
+  return tableNames.includes(tableName);
+}
+
 export default {
   async up(queryInterface, Sequelize) {
     // Check if Stream table exists and update it if necessary
-    const tableExists = await queryInterface.sequelize.query(
-      "SHOW TABLES LIKE 'Stream'",
-      { type: Sequelize.QueryTypes.SELECT }
-    );
+    const tableExists = await hasTable(queryInterface, 'Stream');
 
-    if (tableExists.length > 0) {
+    if (tableExists) {
       // Table exists, check if it has the status column
       const columns = await queryInterface.describeTable('Stream');
       console.log('Stream table columns:', Object.keys(columns));

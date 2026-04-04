@@ -1,6 +1,4 @@
-import db from '../models/index.js';
-const { Post, User, PostLike, Comment } = db;
-import { Op } from 'sequelize';
+import prisma from '../lib/prisma.js';
 import { getFileInfo } from '../middleware/upload.middleware.js';
 import SystemLogger from '../utils/systemLogger.js';
 import { getIO } from '../utils/realtime.js';
@@ -34,11 +32,11 @@ setInterval(() => {
 }, 30 * 60 * 1000);
 
 // Shared includes used across multiple endpoints
-const POST_INCLUDES = [
-  { model: User, attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url'] },
-  { model: PostLike, attributes: ['user_id'] },
-  { model: Comment, attributes: ['id'] }
-];
+const POST_INCLUDE = {
+  author: { select: { id: true, username: true, first_name: true, last_name: true, profile_photo_url: true } },
+  postLikes: { select: { user_id: true } },
+  comments: { select: { id: true } }
+};
 
 /**
  * Parses media_urls from multipart or JSON body.
@@ -75,10 +73,10 @@ export const createPost = asyncHandler(async (req, res) => {
   const mediaUrls = resolveMediaUrls(req, postData);
   if (mediaUrls) postData.media_urls = mediaUrls;
 
-  const item = await Post.create(postData);
+  const item = await prisma.post.create({ data: postData });
 
   const [fullItem] = await Promise.all([
-    Post.findByPk(item.id, { include: POST_INCLUDES }),
+    prisma.post.findUnique({ where: { id: item.id }, include: POST_INCLUDE }),
     SystemLogger.logCreate('Post', item.id, {
       title: item.title,
       content: item.content,
@@ -104,21 +102,21 @@ export const createPost = asyncHandler(async (req, res) => {
 export const getPosts = asyncHandler(async (req, res) => {
   const { q, author_id, limit = 50, offset = 0 } = req.query;
   const where = {};
-  if (q) where[Op.or] = [
-    { title: { [Op.like]: `%${q}%` } },
-    { content: { [Op.like]: `%${q}%` } }
+  if (q) where.OR = [
+    { title: { contains: q, mode: 'insensitive' } },
+    { content: { contains: q, mode: 'insensitive' } }
   ];
   if (author_id) where.author_id = author_id;
 
-  const items = await Post.findAll({
+  const items = await prisma.post.findMany({
     where,
-    limit: Number(limit),
-    offset: Number(offset),
-    order: [
-      ['is_pinned', 'DESC'],
-      ['created_at', 'DESC']
+    take: Number(limit),
+    skip: Number(offset),
+    orderBy: [
+      { is_pinned: 'desc' },
+      { created_at: 'desc' }
     ],
-    include: POST_INCLUDES
+    include: POST_INCLUDE
   });
   res.json(items);
 });
@@ -129,22 +127,23 @@ export const getPosts = asyncHandler(async (req, res) => {
  * @route GET /api/posts/:id
  */
 export const getPostById = asyncHandler(async (req, res) => {
-  const item = await Post.findByPk(req.params.id, {
-    include: [
-      { model: User, attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url'] },
-      { model: PostLike, attributes: ['user_id'] },
-      {
-        model: Comment,
-        include: [
-          { model: User, attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url'] },
-          {
-            model: Comment,
-            as: 'replies',
-            include: [{ model: User, attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url'] }]
+  const id = Number(req.params.id);
+  const item = await prisma.post.findUnique({
+    where: { id },
+    include: {
+      author: { select: { id: true, username: true, first_name: true, last_name: true, profile_photo_url: true } },
+      postLikes: { select: { user_id: true } },
+      comments: {
+        include: {
+          author: { select: { id: true, username: true, first_name: true, last_name: true, profile_photo_url: true } },
+          replies: {
+            include: {
+              author: { select: { id: true, username: true, first_name: true, last_name: true, profile_photo_url: true } }
+            }
           }
-        ]
+        }
       }
-    ]
+    }
   });
   if (!item) throw new NotFoundError('Post not found');
 
@@ -152,7 +151,7 @@ export const getPostById = asyncHandler(async (req, res) => {
   const viewerKey = `${req.user?.id || req.ip}_${item.id}`;
   if (!viewedPosts.has(viewerKey)) {
     viewedPosts.set(viewerKey, Date.now());
-    await Post.increment('views_count', { where: { id: item.id } });
+    await prisma.post.update({ where: { id: item.id }, data: { views_count: { increment: 1 } } });
     item.views_count = (item.views_count || 0) + 1;
   }
 
@@ -168,7 +167,8 @@ export const getPostById = asyncHandler(async (req, res) => {
  * @route PUT /api/posts/:id
  */
 export const updatePost = asyncHandler(async (req, res) => {
-  const currentPost = await Post.findByPk(req.params.id);
+  const id = Number(req.params.id);
+  const currentPost = await prisma.post.findUnique({ where: { id } });
   if (!currentPost) throw new NotFoundError('Post not found');
 
   const updates = { ...req.body };
@@ -188,12 +188,11 @@ export const updatePost = asyncHandler(async (req, res) => {
     updates.is_edited = true;
   }
 
-  updates.updated_at = new Date();
-
-  const [updated] = await Post.update(updates, { where: { id: req.params.id } });
-  if (!updated) throw new NotFoundError('Post not found');
-
-  const updatedItem = await Post.findByPk(req.params.id, { include: POST_INCLUDES });
+  const updatedItem = await prisma.post.update({
+    where: { id },
+    data: updates,
+    include: POST_INCLUDE
+  });
 
   await SystemLogger.logUpdate('Post', updatedItem.id, {
     title: currentPost.title,
@@ -214,10 +213,11 @@ export const updatePost = asyncHandler(async (req, res) => {
  * @route DELETE /api/posts/:id
  */
 export const deletePost = asyncHandler(async (req, res) => {
-  const post = await Post.findByPk(req.params.id);
+  const id = Number(req.params.id);
+  const post = await prisma.post.findUnique({ where: { id } });
   if (!post) throw new NotFoundError('Post not found');
 
-  await post.destroy();
+  await prisma.post.delete({ where: { id } });
 
   await SystemLogger.logDelete('Post', req.params.id, {
     title: post.title,
@@ -235,18 +235,18 @@ export const deletePost = asyncHandler(async (req, res) => {
  * @route POST /api/posts/:id/like
  */
 export const toggleLike = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const post_id = Number(req.params.id);
   const user_id = req.user.id;
 
-  const existingLike = await PostLike.findOne({ where: { post_id: id, user_id } });
+  const existingLike = await prisma.postLike.findFirst({ where: { post_id, user_id } });
 
   if (existingLike) {
-    await existingLike.destroy();
-    getIO()?.emit('post_liked', { post_id: id, user_id, liked: false });
+    await prisma.postLike.delete({ where: { id: existingLike.id } });
+    getIO()?.emit('post_liked', { post_id, user_id, liked: false });
     res.json({ liked: false });
   } else {
-    await PostLike.create({ post_id: id, user_id });
-    getIO()?.emit('post_liked', { post_id: id, user_id, liked: true });
+    await prisma.postLike.create({ data: { post_id, user_id } });
+    getIO()?.emit('post_liked', { post_id, user_id, liked: true });
     res.json({ liked: true });
   }
 });
@@ -257,7 +257,7 @@ export const toggleLike = asyncHandler(async (req, res) => {
  * @route POST /api/posts/:id/comments
  */
 export const addComment = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const post_id = Number(req.params.id);
   const { content, parent_id } = req.body;
   const author_id = req.user.id;
 
@@ -266,9 +266,9 @@ export const addComment = asyncHandler(async (req, res) => {
   }
 
   if (parent_id) {
-    const parentComment = await Comment.findByPk(parent_id);
+    const parentComment = await prisma.comment.findUnique({ where: { id: Number(parent_id) } });
     if (!parentComment) throw new NotFoundError('Parent comment not found');
-    if (String(parentComment.post_id) !== String(id)) {
+    if (parentComment.post_id !== post_id) {
       throw new AppError('Parent comment does not belong to this post', 400);
     }
     // Only allow 1 level of nesting
@@ -277,15 +277,16 @@ export const addComment = asyncHandler(async (req, res) => {
     }
   }
 
-  const comment = await Comment.create({
-    post_id: id,
-    author_id,
-    content: content.trim(),
-    parent_id: parent_id || null
-  });
-
-  await comment.reload({
-    include: [{ model: User, attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url'] }]
+  const comment = await prisma.comment.create({
+    data: {
+      post_id,
+      author_id,
+      content: content.trim(),
+      parent_id: parent_id ? Number(parent_id) : null
+    },
+    include: {
+      author: { select: { id: true, username: true, first_name: true, last_name: true, profile_photo_url: true } }
+    }
   });
 
   getIO()?.emit('comment_added', comment);
@@ -298,20 +299,20 @@ export const addComment = asyncHandler(async (req, res) => {
  * @route GET /api/posts/:id/comments
  */
 export const getComments = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const post_id = Number(req.params.id);
 
-  const comments = await Comment.findAll({
-    where: { post_id: id, parent_id: null },
-    include: [
-      { model: User, attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url'] },
-      {
-        model: Comment,
-        as: 'replies',
-        include: [{ model: User, attributes: ['id', 'username', 'first_name', 'last_name', 'profile_photo_url'] }],
-        order: [['created_at', 'ASC']]
+  const comments = await prisma.comment.findMany({
+    where: { post_id, parent_id: null },
+    include: {
+      author: { select: { id: true, username: true, first_name: true, last_name: true, profile_photo_url: true } },
+      replies: {
+        include: {
+          author: { select: { id: true, username: true, first_name: true, last_name: true, profile_photo_url: true } }
+        },
+        orderBy: { created_at: 'asc' }
       }
-    ],
-    order: [['created_at', 'ASC']]
+    },
+    orderBy: { created_at: 'asc' }
   });
   res.json(comments);
 });
@@ -322,12 +323,13 @@ export const getComments = asyncHandler(async (req, res) => {
  * @route DELETE /api/posts/:id/comments/:commentId
  */
 export const deleteComment = asyncHandler(async (req, res) => {
-  const { id, commentId } = req.params;
-  const comment = await Comment.findByPk(commentId);
+  const post_id = Number(req.params.id);
+  const commentId = Number(req.params.commentId);
+  const comment = await prisma.comment.findUnique({ where: { id: commentId } });
 
   if (!comment) throw new NotFoundError('Comment not found');
 
-  if (String(comment.post_id) !== String(id)) {
+  if (comment.post_id !== post_id) {
     throw new AppError('Comment does not belong to this post', 400);
   }
 
@@ -335,10 +337,9 @@ export const deleteComment = asyncHandler(async (req, res) => {
     throw new AppError('Not authorized to delete this comment', 403);
   }
 
-  // Cascade will handle replies due to model config
-  await comment.destroy();
+  await prisma.comment.delete({ where: { id: commentId } });
 
-  getIO()?.emit('comment_deleted', { post_id: id, comment_id: commentId });
+  getIO()?.emit('comment_deleted', { post_id: req.params.id, comment_id: req.params.commentId });
   res.json({ message: 'Comment deleted' });
 });
 
@@ -347,13 +348,15 @@ export const deleteComment = asyncHandler(async (req, res) => {
  * @route POST /api/posts/:id/pin
  */
 export const togglePin = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const post = await Post.findByPk(id);
+  const id = Number(req.params.id);
+  const post = await prisma.post.findUnique({ where: { id } });
   if (!post) throw new NotFoundError('Post not found');
 
-  post.is_pinned = !post.is_pinned;
-  await post.save();
+  const updated = await prisma.post.update({
+    where: { id },
+    data: { is_pinned: !post.is_pinned }
+  });
 
-  getIO()?.emit('post_pinned', { id: post.id, is_pinned: post.is_pinned });
-  res.json({ is_pinned: post.is_pinned });
+  getIO()?.emit('post_pinned', { id: updated.id, is_pinned: updated.is_pinned });
+  res.json({ is_pinned: updated.is_pinned });
 });

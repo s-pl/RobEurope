@@ -1,13 +1,15 @@
-export async function up(queryInterface) {
-  await queryInterface.sequelize.query(`
-    ALTER TABLE DirectMessages
-    MODIFY COLUMN type ENUM('text', 'file', 'image', 'system', 'ai') NOT NULL DEFAULT 'text';
-  `);
+export async function up(queryInterface, Sequelize) {
+  await queryInterface.changeColumn('DirectMessages', 'type', {
+    type: Sequelize.ENUM('text', 'file', 'image', 'system', 'ai'),
+    allowNull: false,
+    defaultValue: 'text',
+  });
 }
 
-export async function down(queryInterface) {
-  await queryInterface.sequelize.query(`
-    ALTER TABLE DirectMessages
-    MODIFY COLUMN type ENUM('text', 'file', 'image', 'system') NOT NULL DEFAULT 'text';
-  `);
+export async function down(queryInterface, Sequelize) {
+  await queryInterface.changeColumn('DirectMessages', 'type', {
+    type: Sequelize.ENUM('text', 'file', 'image', 'system'),
+    allowNull: false,
+    defaultValue: 'text',
+  });
 }

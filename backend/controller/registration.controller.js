@@ -1,6 +1,4 @@
-import db from '../models/index.js';
-const { Registration, Team, Notification, EducationalCenter, User, Competition } = db;
-import { Op } from 'sequelize';
+import prisma from '../lib/prisma.js';
 import { Parser as Json2CsvParser } from 'json2csv';
 
 /**
@@ -12,61 +10,40 @@ import { Parser as Json2CsvParser } from 'json2csv';
  * Center admins can approve/reject registrations for teams in their center.
  */
 
-/**
- * Checks if user is super_admin.
- * @param {Object} user - Session user.
- * @returns {boolean}
- */
 const isSuperAdmin = (user) => user?.role === 'super_admin';
-
-/**
- * Checks if user is center_admin.
- * @param {Object} user - Session user.
- * @returns {boolean}
- */
 const isCenterAdmin = (user) => user?.role === 'center_admin';
-
-/**
- * Checks if user is center_admin for a specific team's educational center.
- * @param {Object} user - Session user.
- * @param {Object} team - Team object.
- * @returns {boolean}
- */
 const isCenterAdminForTeam = (user, team) => {
   if (!isCenterAdmin(user)) return false;
   return user.educational_center_id && user.educational_center_id === team?.educational_center_id;
 };
- 
 
 /**
  * Creates a registration.
  *
- * Sets `registration_date` and forces `status = 'pending'`.
- *
  * @route POST /api/registrations
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const createRegistration = async (req, res) => {
   try {
     const payload = {
       ...req.body,
       registration_date: new Date(),
-      status: 'pending' // Ensure status is pending for new registrations
+      status: 'pending'
     };
 
-    // Prevent duplicate registrations: same team + same competition
+    // Prevent duplicate registrations
     if (payload.team_id && payload.competition_id) {
-      const existing = await Registration.findOne({
-        where: { team_id: payload.team_id, competition_id: payload.competition_id }
+      const existing = await prisma.registration.findFirst({
+        where: { team_id: Number(payload.team_id), competition_id: Number(payload.competition_id) }
       });
       if (existing) {
         return res.status(409).json({ error: 'Este equipo ya está inscrito en esta competición' });
       }
     }
 
-    const item = await Registration.create(payload);
+    if (payload.team_id) payload.team_id = Number(payload.team_id);
+    if (payload.competition_id) payload.competition_id = Number(payload.competition_id);
+
+    const item = await prisma.registration.create({ data: payload });
     res.status(201).json(item);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -76,29 +53,22 @@ export const createRegistration = async (req, res) => {
 /**
  * Lists registrations.
  *
- * Query params:
- * - `competition_id`, `team_id`, `status`
- * - `limit`, `offset`
- *
  * @route GET /api/registrations
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getRegistrations = async (req, res) => {
   try {
     const { competition_id, team_id, status, limit = 50, offset = 0 } = req.query;
     const where = {};
-    if (competition_id) where.competition_id = competition_id;
-    if (team_id) where.team_id = team_id;
+    if (competition_id) where.competition_id = Number(competition_id);
+    if (team_id) where.team_id = Number(team_id);
     if (status) where.status = status;
 
-    const items = await Registration.findAll({ 
-      where, 
-      limit: Number(limit), 
-      offset: Number(offset), 
-      order: [['registration_date', 'DESC']],
-      include: [{ model: Team }]
+    const items = await prisma.registration.findMany({
+      where,
+      take: Number(limit),
+      skip: Number(offset),
+      orderBy: { registration_date: 'desc' },
+      include: { team: true }
     });
     res.json(items);
   } catch (err) {
@@ -109,28 +79,25 @@ export const getRegistrations = async (req, res) => {
 /**
  * Exports registrations as a CSV.
  * @route GET /api/registrations/export
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<any>}
  */
 export const exportRegistrationsCSV = async (req, res) => {
   try {
     const { competition_id, status } = req.query;
     const where = {};
-    if (competition_id) where.competition_id = competition_id;
+    if (competition_id) where.competition_id = Number(competition_id);
     if (status) where.status = status;
 
-    const items = await Registration.findAll({ 
+    const items = await prisma.registration.findMany({
       where,
-      include: [{ model: Team, attributes: ['id', 'name'] }],
-      order: [['registration_date', 'DESC']]
+      include: { team: { select: { id: true, name: true } } },
+      orderBy: { registration_date: 'desc' }
     });
 
     const rows = items.map(r => ({
       id: r.id,
       competition_id: r.competition_id,
       team_id: r.team_id,
-      team_name: r.Team ? r.Team.name : '',
+      team_name: r.team ? r.team.name : '',
       status: r.status,
       decision_reason: r.decision_reason || '',
       registration_date: r.registration_date ? new Date(r.registration_date).toISOString() : ''
@@ -149,13 +116,10 @@ export const exportRegistrationsCSV = async (req, res) => {
 /**
  * Retrieves a registration by id.
  * @route GET /api/registrations/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getRegistrationById = async (req, res) => {
   try {
-    const item = await Registration.findByPk(req.params.id);
+    const item = await prisma.registration.findUnique({ where: { id: Number(req.params.id) } });
     if (!item) return res.status(404).json({ error: 'Registration not found' });
     res.json(item);
   } catch (err) {
@@ -166,15 +130,13 @@ export const getRegistrationById = async (req, res) => {
 /**
  * Updates a registration by id.
  * @route PUT /api/registrations/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const updateRegistration = async (req, res) => {
   try {
-    const [updated] = await Registration.update(req.body, { where: { id: req.params.id } });
-    if (!updated) return res.status(404).json({ error: 'Registration not found' });
-    const updatedItem = await Registration.findByPk(req.params.id);
+    const id = Number(req.params.id);
+    const existing = await prisma.registration.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ error: 'Registration not found' });
+    const updatedItem = await prisma.registration.update({ where: { id }, data: req.body });
     res.json(updatedItem);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -184,14 +146,13 @@ export const updateRegistration = async (req, res) => {
 /**
  * Deletes a registration by id.
  * @route DELETE /api/registrations/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const deleteRegistration = async (req, res) => {
   try {
-    const deleted = await Registration.destroy({ where: { id: req.params.id } });
-    if (!deleted) return res.status(404).json({ error: 'Registration not found' });
+    const id = Number(req.params.id);
+    const existing = await prisma.registration.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ error: 'Registration not found' });
+    await prisma.registration.delete({ where: { id } });
     res.json({ message: 'Registration deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -201,31 +162,36 @@ export const deleteRegistration = async (req, res) => {
 /**
  * Approves a pending registration.
  * @route POST /api/registrations/:id/approve
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const approveRegistration = async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = Number(req.params.id);
     const { decision_reason } = req.body || {};
-    const reg = await Registration.findByPk(id);
+    const reg = await prisma.registration.findUnique({ where: { id } });
     if (!reg) return res.status(404).json({ error: 'Registration not found' });
     if (reg.status !== 'pending') return res.status(400).json({ error: 'Registration is not pending' });
-    await reg.update({ status: 'approved', decision_reason: decision_reason || null });
+
+    const updated = await prisma.registration.update({
+      where: { id },
+      data: { status: 'approved', decision_reason: decision_reason || null }
+    });
+
     // Notify team owner
     try {
-      const team = await Team.findByPk(reg.team_id);
-      if (team) {
-        const notif = await Notification.create({
-          user_id: team.created_by_user_id,
-          title: 'Registro aprobado',
-          message: `Tu equipo ha sido aprobado para la competición ${reg.competition_id}`,
-          type: 'competition_registration'
+      const team = await prisma.team.findUnique({ where: { id: reg.team_id } });
+      if (team && team.created_by_user_id) {
+        await prisma.notification.create({
+          data: {
+            user_id: team.created_by_user_id,
+            title: 'Registro aprobado',
+            message: `Tu equipo ha sido aprobado para la competición ${reg.competition_id}`,
+            type: 'registration_team_status'
+          }
         });
       }
     } catch (_) {}
-    res.json(reg);
+
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -234,31 +200,36 @@ export const approveRegistration = async (req, res) => {
 /**
  * Rejects a pending registration.
  * @route POST /api/registrations/:id/reject
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const rejectRegistration = async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = Number(req.params.id);
     const { decision_reason } = req.body || {};
-    const reg = await Registration.findByPk(id);
+    const reg = await prisma.registration.findUnique({ where: { id } });
     if (!reg) return res.status(404).json({ error: 'Registration not found' });
     if (reg.status !== 'pending') return res.status(400).json({ error: 'Registration is not pending' });
-    await reg.update({ status: 'rejected', decision_reason: decision_reason || null });
+
+    const updated = await prisma.registration.update({
+      where: { id },
+      data: { status: 'rejected', decision_reason: decision_reason || null }
+    });
+
     // Notify team owner
     try {
-      const team = await Team.findByPk(reg.team_id);
-      if (team) {
-        const notif = await Notification.create({
-          user_id: team.created_by_user_id,
-          title: 'Registro rechazado',
-          message: `Tu equipo fue rechazado en la competición ${reg.competition_id}`,
-          type: 'competition_registration'
+      const team = await prisma.team.findUnique({ where: { id: reg.team_id } });
+      if (team && team.created_by_user_id) {
+        await prisma.notification.create({
+          data: {
+            user_id: team.created_by_user_id,
+            title: 'Registro rechazado',
+            message: `Tu equipo fue rechazado en la competición ${reg.competition_id}`,
+            type: 'registration_team_status'
+          }
         });
       }
     } catch (_) {}
-    res.json(reg);
+
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -267,51 +238,53 @@ export const rejectRegistration = async (req, res) => {
 /**
  * Center admin approves a registration for a team in their center.
  * @route POST /api/registrations/:id/center-approve
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const centerApproveRegistration = async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = Number(req.params.id);
     const { center_approval_reason } = req.body || {};
-    
-    const reg = await Registration.findByPk(id, {
-      include: [{ model: Team }]
+
+    const reg = await prisma.registration.findUnique({
+      where: { id },
+      include: { team: true }
     });
-    
+
     if (!reg) return res.status(404).json({ error: 'Registration not found' });
-    
-    // Check if user is center admin for this team's center
-    if (!isSuperAdmin(req.user) && !isCenterAdminForTeam(req.user, reg.Team)) {
+
+    if (!isSuperAdmin(req.user) && !isCenterAdminForTeam(req.user, reg.team)) {
       return res.status(403).json({ error: 'No tienes permisos para aprobar esta inscripción' });
     }
-    
+
     if (reg.center_approval_status !== 'pending') {
       return res.status(400).json({ error: 'La aprobación del centro ya no está pendiente' });
     }
-    
-    await reg.update({ 
-      center_approval_status: 'approved', 
-      center_approval_reason: center_approval_reason || 'Aprobado por el centro',
-      center_approved_by: req.user.id,
-      center_approved_at: new Date()
+
+    const updated = await prisma.registration.update({
+      where: { id },
+      data: {
+        center_approval_status: 'approved',
+        center_approval_reason: center_approval_reason || 'Aprobado por el centro',
+        center_approved_by: req.user.id,
+        center_approved_at: new Date()
+      },
+      include: { team: true }
     });
-    
+
     // Notify team owner
     try {
-      const team = reg.Team;
-      if (team) {
-        await Notification.create({
-          user_id: team.created_by_user_id,
-          title: 'Inscripción aprobada por el centro',
-          message: `Tu equipo ha sido aprobado por el centro educativo para la competición ${reg.competition_id}`,
-          type: 'competition_registration'
+      if (reg.team && reg.team.created_by_user_id) {
+        await prisma.notification.create({
+          data: {
+            user_id: reg.team.created_by_user_id,
+            title: 'Inscripción aprobada por el centro',
+            message: `Tu equipo ha sido aprobado por el centro educativo para la competición ${reg.competition_id}`,
+            type: 'registration_team_status'
+          }
         });
       }
     } catch (_) {}
-    
-    res.json(reg);
+
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -320,55 +293,57 @@ export const centerApproveRegistration = async (req, res) => {
 /**
  * Center admin rejects a registration for a team in their center.
  * @route POST /api/registrations/:id/center-reject
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const centerRejectRegistration = async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = Number(req.params.id);
     const { center_approval_reason } = req.body || {};
-    
+
     if (!center_approval_reason || !center_approval_reason.trim()) {
       return res.status(400).json({ error: 'Se requiere una razón para el rechazo' });
     }
-    
-    const reg = await Registration.findByPk(id, {
-      include: [{ model: Team }]
+
+    const reg = await prisma.registration.findUnique({
+      where: { id },
+      include: { team: true }
     });
-    
+
     if (!reg) return res.status(404).json({ error: 'Registration not found' });
-    
-    // Check if user is center admin for this team's center
-    if (!isSuperAdmin(req.user) && !isCenterAdminForTeam(req.user, reg.Team)) {
+
+    if (!isSuperAdmin(req.user) && !isCenterAdminForTeam(req.user, reg.team)) {
       return res.status(403).json({ error: 'No tienes permisos para rechazar esta inscripción' });
     }
-    
+
     if (reg.center_approval_status !== 'pending') {
       return res.status(400).json({ error: 'La aprobación del centro ya no está pendiente' });
     }
-    
-    await reg.update({ 
-      center_approval_status: 'rejected', 
-      center_approval_reason: center_approval_reason.trim(),
-      center_approved_by: req.user.id,
-      center_approved_at: new Date()
+
+    const updated = await prisma.registration.update({
+      where: { id },
+      data: {
+        center_approval_status: 'rejected',
+        center_approval_reason: center_approval_reason.trim(),
+        center_approved_by: req.user.id,
+        center_approved_at: new Date()
+      },
+      include: { team: true }
     });
-    
+
     // Notify team owner
     try {
-      const team = reg.Team;
-      if (team) {
-        await Notification.create({
-          user_id: team.created_by_user_id,
-          title: 'Inscripción rechazada por el centro',
-          message: `Tu equipo fue rechazado por el centro educativo: ${center_approval_reason}`,
-          type: 'competition_registration'
+      if (reg.team && reg.team.created_by_user_id) {
+        await prisma.notification.create({
+          data: {
+            user_id: reg.team.created_by_user_id,
+            title: 'Inscripción rechazada por el centro',
+            message: `Tu equipo fue rechazado por el centro educativo: ${center_approval_reason}`,
+            type: 'registration_team_status'
+          }
         });
       }
     } catch (_) {}
-    
-    res.json(reg);
+
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -377,45 +352,39 @@ export const centerRejectRegistration = async (req, res) => {
 /**
  * Gets registrations for the current center admin's educational center.
  * @route GET /api/registrations/my-center
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getMyCenterRegistrations = async (req, res) => {
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
-    
+
     if (!isCenterAdmin(req.user) && !isSuperAdmin(req.user)) {
       return res.status(403).json({ error: 'Se requiere rol de administrador de centro' });
     }
-    
+
     const { competition_id, center_approval_status, limit = 50, offset = 0 } = req.query;
-    
-    // Get teams from user's educational center
+
+    // Build team filter
     const teamWhere = {};
     if (!isSuperAdmin(req.user)) {
       teamWhere.educational_center_id = req.user.educational_center_id;
     }
-    
-    const where = {};
-    if (competition_id) where.competition_id = competition_id;
+
+    // Get matching teams first
+    const teams = await prisma.team.findMany({ where: teamWhere, select: { id: true } });
+    const teamIds = teams.map(t => t.id);
+
+    const where = { team_id: { in: teamIds } };
+    if (competition_id) where.competition_id = Number(competition_id);
     if (center_approval_status) where.center_approval_status = center_approval_status;
-    
-    const items = await Registration.findAll({
+
+    const items = await prisma.registration.findMany({
       where,
-      include: [{
-        model: Team,
-        where: teamWhere,
-        required: true
-      }, {
-        model: Competition,
-        required: false
-      }],
-      limit: Number(limit),
-      offset: Number(offset),
-      order: [['registration_date', 'DESC']]
+      include: { team: true, competition: true },
+      take: Number(limit),
+      skip: Number(offset),
+      orderBy: { registration_date: 'desc' }
     });
-    
+
     res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -425,33 +394,26 @@ export const getMyCenterRegistrations = async (req, res) => {
 /**
  * Creates a registration with optional password-based registration.
  * @route POST /api/registrations/with-password
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const createPasswordRegistration = async (req, res) => {
   try {
     const { team_id, competition_id, registration_password } = req.body;
-    
+
     if (!registration_password || !registration_password.trim()) {
       return res.status(400).json({ error: 'Se requiere la contraseña de inscripción' });
     }
-    
-    // Verify the password is correct for the competition
-    // This would typically be stored in the Competition model
-    // For now, we'll just mark it as a password-based registration
-    
+
     const payload = {
-      team_id,
-      competition_id,
+      team_id: Number(team_id),
+      competition_id: Number(competition_id),
       registration_date: new Date(),
       status: 'pending',
-      center_approval_status: 'approved', // Password bypass center approval
+      center_approval_status: 'approved',
       is_password_registration: true,
       registration_password: registration_password.trim()
     };
-    
-    const item = await Registration.create(payload);
+
+    const item = await prisma.registration.create({ data: payload });
     res.status(201).json(item);
   } catch (err) {
     res.status(500).json({ error: err.message });

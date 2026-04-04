@@ -1,4 +1,5 @@
 import { auth } from 'express-oauth2-jwt-bearer';
+import { hydrateRequestUser } from './attachUser.middleware.js';
 
 /**
  * @fileoverview Auth0 JWT validation middleware.
@@ -29,7 +30,19 @@ function getCheckJwt() {
  * Enforces a valid Auth0 JWT. Returns 401 if missing/invalid, 403 if expired.
  */
 export default function authenticateToken(req, res, next) {
-  getCheckJwt()(req, res, next);
+  getCheckJwt()(req, res, async (err) => {
+    if (err) return next(err);
+
+    try {
+      await hydrateRequestUser(req);
+      return next();
+    } catch (attachErr) {
+      if (attachErr?.status === 403) {
+        return res.status(403).json({ error: 'Cuenta desactivada' });
+      }
+      return next(attachErr);
+    }
+  });
 }
 
 /**
@@ -37,11 +50,24 @@ export default function authenticateToken(req, res, next) {
  * but does NOT reject unauthenticated requests.
  */
 export function optionalAuth(req, res, next) {
-  getCheckJwt()(req, res, (err) => {
+  getCheckJwt()(req, res, async (err) => {
     if (err) {
       req.auth = null;
       req.user = null;
+      return next();
     }
-    next();
+
+    try {
+      await hydrateRequestUser(req, { allowInactive: true });
+      if (req.user?.is_active === false) {
+        req.auth = null;
+        req.user = null;
+      }
+      return next();
+    } catch {
+      req.auth = null;
+      req.user = null;
+      return next();
+    }
   });
 }

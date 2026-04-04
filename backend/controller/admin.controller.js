@@ -6,34 +6,13 @@
  * authentication and `super_admin` role at the router level.
  */
 
-import db from '../models/index.js';
+import prisma from '../lib/prisma.js';
 import bcrypt from 'bcryptjs';
-import { Sequelize } from 'sequelize';
 import si from 'systeminformation';
 import redisClient from '../utils/redis.js';
 import { setAuthCookie, clearAuthCookie } from '../utils/signToken.js';
-const { User, Competition, Post, Registration, SystemLog, Team } = db;
 
-/**
- * Express request.
- * @typedef {object} Request
- * @property {object} params
- * @property {object} query
- * @property {object} body
- * @property {object} [session]
- */
-
-/**
- * Express response.
- * @typedef {object} Response
- * @property {Function} status
- * @property {Function} json
- * @property {Function} render
- * @property {Function} redirect
- * @property {Function} send
- */
-
-// Helper reused (similar logic as auth.controller) to support base64 obfuscated inputs
+// Helper reused to support base64 obfuscated inputs
 function isBase64(str) {
   return typeof str === 'string' && /^[A-Za-z0-9+/=]+$/.test(str) && (str.length % 4 === 0);
 }
@@ -57,11 +36,10 @@ export async function handleLogin(req, res) {
     if (!email || !password) {
       return res.status(400).render('login', { title: req.__('auth.metaTitle'), pageKey: 'login', error: req.__('auth.errors.missing') });
     }
-    // Normalize & decode
     email = decodeIfBase64(email.trim()).toLowerCase();
     password = decodeIfBase64(password.trim());
 
-    const user = await User.findOne({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return res.status(401).render('login', { title: req.__('auth.metaTitle'), pageKey: 'login', error: req.__('auth.errors.invalid') });
     }
@@ -85,12 +63,11 @@ export async function handleLogout(req, res) {
 }
 
 export async function renderDashboard(req, res) {
-  // Basic stats for dashboard quick view
   const [users, competitions, posts, registrations] = await Promise.all([
-    User.count(),
-    Competition.count(),
-    Post.count(),
-    Registration.count()
+    prisma.user.count(),
+    prisma.competition.count(),
+    prisma.post.count(),
+    prisma.registration.count()
   ]);
   res.render('dashboard', {
     title: req.__('dashboard.metaTitle'),
@@ -100,56 +77,50 @@ export async function renderDashboard(req, res) {
 }
 
 export async function listUsers(req, res) {
-  const all = await User.findAll({ attributes: ['id', 'email', 'username', 'first_name', 'last_name', 'role', 'is_active', 'created_at'] });
+  const all = await prisma.user.findMany({
+    select: { id: true, email: true, username: true, first_name: true, last_name: true, role: true, is_active: true, created_at: true }
+  });
   res.render('users', { title: req.__('users.metaTitle'), pageKey: 'users', users: all });
 }
 
 export async function promoteUser(req, res) {
   const { id } = req.params;
-  const user = await User.findByPk(id);
+  const user = await prisma.user.findUnique({ where: { id } });
   if (!user) return res.status(404).send('User not found');
-  user.role = 'super_admin';
-  await user.save();
+  await prisma.user.update({ where: { id }, data: { role: 'super_admin' } });
   res.redirect('/admin/users');
 }
 
-// API endpoints for dashboard charts
 export async function getStatsData(req, res) {
   try {
     const [users, competitions, posts, registrations] = await Promise.all([
-      User.count(),
-      Competition.count(),
-      Post.count(),
-      Registration.count()
+      prisma.user.count(),
+      prisma.competition.count(),
+      prisma.post.count(),
+      prisma.registration.count()
     ]);
 
-    // System Stats
     const mem = await si.mem();
     const load = await si.currentLoad();
     const disk = await si.fsSize();
-    
+
     // DB Status
-    let mysqlStatus = 'down';
+    let dbStatus = 'down';
     try {
-      await db.sequelize.authenticate();
-      mysqlStatus = 'up';
-    } catch (e) { mysqlStatus = 'down'; }
+      await prisma.$queryRaw`SELECT 1`;
+      dbStatus = 'up';
+    } catch (e) { dbStatus = 'down'; }
 
     let redisStatus = 'down';
     try {
       if (redisClient.isOpen) redisStatus = 'up';
     } catch (e) { redisStatus = 'down'; }
-    
-    // Active sessions (users activos): contar sesiones no expiradas en tabla Session
+
+    // Active sessions via raw query (table may or may not exist)
     let activeSessions = 0;
     try {
-      // connect-session-sequelize por defecto usa la tabla "Sessions" o la configurada; en index.js se usa tableName 'Session'
-      // Intentamos ambas por compatibilidad
-      const [rows1] = await db.sequelize.query('SELECT COUNT(*) AS c FROM "Session" WHERE expires > NOW()');
-      const [rows2] = await db.sequelize.query('SELECT COUNT(*) AS c FROM "Sessions" WHERE expires > NOW()', { raw: true }).catch(() => [null]);
-      const c1 = rows1 && rows1[0] ? Number(rows1[0].c) : 0;
-      const c2 = rows2 && rows2[0] ? Number(rows2[0].c) : 0;
-      activeSessions = Math.max(c1, c2);
+      const rows = await prisma.$queryRaw`SELECT COUNT(*) AS c FROM "Session" WHERE expires > NOW()`;
+      activeSessions = rows && rows[0] ? Number(rows[0].c) : 0;
     } catch (_) { activeSessions = 0; }
 
     res.json({
@@ -159,20 +130,10 @@ export async function getStatsData(req, res) {
       registrations,
       activeSessions,
       system: {
-        memory: {
-          total: mem.total,
-          used: mem.used,
-          free: mem.free,
-          active: mem.active
-        },
-        cpu: {
-          load: load.currentLoad
-        },
-        disk: disk[0] ? {
-          size: disk[0].size,
-          used: disk[0].used
-        } : null,
-        mysql: mysqlStatus,
+        memory: { total: mem.total, used: mem.used, free: mem.free, active: mem.active },
+        cpu: { load: load.currentLoad },
+        disk: disk[0] ? { size: disk[0].size, used: disk[0].used } : null,
+        mysql: dbStatus,
         redis: redisStatus
       },
       timestamp: new Date().toISOString()
@@ -182,86 +143,39 @@ export async function getStatsData(req, res) {
   }
 }
 
-/**
- * Overview counts and server/DB health for the admin dashboard.
- *
- * @route GET /api/admin/stats/overview
- * @param {Request} req
- * @param {Response} res
- */
-// (implementation above)
-
-/**
- * Return user counts grouped by role.
- *
- * @route GET /api/admin/stats/users/by-role
- * @param {Request} req
- * @param {Response} res
- */
 export async function getUsersByRole(req, res) {
   try {
-    const data = await User.findAll({
-      attributes: [
-        'role',
-        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
-      ],
-      group: ['role'],
-      raw: true
+    const data = await prisma.user.groupBy({
+      by: ['role'],
+      _count: { id: true }
     });
-    
-    res.json(data.map(d => ({ role: d.role, count: parseInt(d.count, 10) })));
+    res.json(data.map(d => ({ role: d.role, count: d._count.id })));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
 
-/**
- * Return user creation counts grouped by day.
- *
- * @route GET /api/admin/stats/users/timeline
- * @param {Request} req
- * @param {Response} res
- */
 export async function getUsersTimeline(req, res) {
   try {
-    const data = await User.findAll({
-      attributes: [
-        [Sequelize.fn('DATE', Sequelize.col('created_at')), 'date'],
-        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
-      ],
-      group: [Sequelize.fn('DATE', Sequelize.col('created_at'))],
-      order: [[Sequelize.fn('DATE', Sequelize.col('created_at')), 'ASC']],
-      raw: true
-    });
-    
-    res.json(data.map(d => ({
-      date: d.date,
-      count: parseInt(d.count, 10)
-    })));
+    const data = await prisma.$queryRaw`
+      SELECT DATE("created_at") AS date, COUNT(id)::int AS count
+      FROM "User"
+      GROUP BY DATE("created_at")
+      ORDER BY DATE("created_at") ASC
+    `;
+    res.json(data.map(d => ({ date: d.date, count: Number(d.count) })));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
 
-/**
- * Return registration counts grouped by status.
- *
- * @route GET /api/admin/stats/registrations/by-status
- * @param {Request} req
- * @param {Response} res
- */
 export async function getRegistrationStats(req, res) {
   try {
-    const data = await Registration.findAll({
-      attributes: [
-        'status',
-        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
-      ],
-      group: ['status'],
-      raw: true
+    const data = await prisma.registration.groupBy({
+      by: ['status'],
+      _count: { id: true }
     });
-    
-    res.json(data.map(d => ({ status: d.status, count: parseInt(d.count, 10) })));
+    res.json(data.map(d => ({ status: d.status, count: d._count.id })));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -269,21 +183,19 @@ export async function getRegistrationStats(req, res) {
 
 export async function getDetailedUsers(req, res) {
   try {
-    const all = await User.findAll({
-      attributes: ['id', 'email', 'username', 'first_name', 'last_name', 'role', 'is_active', 'created_at']
+    const all = await prisma.user.findMany({
+      select: { id: true, email: true, username: true, first_name: true, last_name: true, role: true, is_active: true, created_at: true }
     });
-    
     res.json(all);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
 
-// Competiciones
 export async function listCompetitions(req, res) {
   try {
-    const competitions = await Competition.findAll({
-      attributes: ['id', 'title', 'slug', 'description', 'start_date', 'end_date']
+    const competitions = await prisma.competition.findMany({
+      select: { id: true, title: true, slug: true, description: true, start_date: true, end_date: true }
     });
     res.render('competitions', { title: req.__('competitions.metaTitle'), pageKey: 'competitions', competitions });
   } catch (error) {
@@ -293,50 +205,37 @@ export async function listCompetitions(req, res) {
 
 export async function getCompetitionStats(req, res) {
   try {
-    const data = await Competition.findAll({
-      attributes: [
-        'id',
-        'title',
-        [Sequelize.fn('COUNT', Sequelize.col('registrations.id')), 'registrationCount']
-      ],
-      include: [{
-        model: Registration,
-        as: 'registrations',
-        attributes: [],
-        required: false
-      }],
-      group: ['Competition.id'],
-      raw: true,
-      subQuery: false
-    });
-    
+    const data = await prisma.$queryRaw`
+      SELECT c.id, c.title, COUNT(r.id)::int AS "registrationCount"
+      FROM "Competition" c
+      LEFT JOIN "Registration" r ON r.competition_id = c.id
+      GROUP BY c.id, c.title
+    `;
     res.json(data.map(d => ({
       id: d.id,
       title: d.title,
-      registrations: parseInt(d.registrationCount, 10) || 0
+      registrations: Number(d.registrationCount) || 0
     })));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
 
-// Logs del sistema
 export async function listSystemLogs(req, res) {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 50;
-    const offset = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
-    const { count, rows } = await SystemLog.findAndCountAll({
-      include: [{
-        model: User,
-        attributes: ['username', 'email'],
-        as: 'user'
-      }],
-      order: [['created_at', 'DESC']],
-      limit,
-      offset
-    });
+    const [rows, count] = await prisma.$transaction([
+      prisma.systemLog.findMany({
+        include: { user: { select: { username: true, email: true } } },
+        orderBy: { created_at: 'desc' },
+        take: limit,
+        skip
+      }),
+      prisma.systemLog.count()
+    ]);
 
     const totalPages = Math.ceil(count / limit);
     res.render('system-logs', {
@@ -354,34 +253,19 @@ export async function listSystemLogs(req, res) {
 
 export async function getLogsStats(req, res) {
   try {
-    const [byAction, byEntity, recent] = await Promise.all([
-      SystemLog.findAll({
-        attributes: [
-          'action',
-          [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
-        ],
-        group: ['action'],
-        raw: true
-      }),
-      SystemLog.findAll({
-        attributes: [
-          'entity_type',
-          [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
-        ],
-        group: ['entity_type'],
-        raw: true
-      }),
-      SystemLog.findAll({
-        attributes: ['action', 'created_at'],
-        order: [['created_at', 'DESC']],
-        limit: 30,
-        raw: true
+    const [byActionRaw, byEntityRaw, recent] = await Promise.all([
+      prisma.systemLog.groupBy({ by: ['action'], _count: { id: true } }),
+      prisma.systemLog.groupBy({ by: ['entity_type'], _count: { id: true } }),
+      prisma.systemLog.findMany({
+        select: { action: true, created_at: true },
+        orderBy: { created_at: 'desc' },
+        take: 30
       })
     ]);
 
     res.json({
-      byAction: byAction.map(d => ({ action: d.action, count: parseInt(d.count, 10) })),
-      byEntity: byEntity.map(d => ({ entity: d.entity_type, count: parseInt(d.count, 10) })),
+      byAction: byActionRaw.map(d => ({ action: d.action, count: d._count.id })),
+      byEntity: byEntityRaw.map(d => ({ entity: d.entity_type, count: d._count.id })),
       recentTimeline: recent
     });
   } catch (error) {
@@ -392,7 +276,7 @@ export async function getLogsStats(req, res) {
 export async function renderEditUser(req, res) {
   try {
     const { id } = req.params;
-    const user = await User.findByPk(id);
+    const user = await prisma.user.findUnique({ where: { id } });
     if (!user) {
       return res.status(404).render('error', { status: 404, message: req.__('errors.userNotFound') });
     }
@@ -406,42 +290,42 @@ export async function updateUser(req, res) {
   try {
     const { id } = req.params;
     const { username, email, first_name, last_name, role, is_active } = req.body;
-    
-    const user = await User.findByPk(id);
+
+    const user = await prisma.user.findUnique({ where: { id } });
     if (!user) {
       return res.status(404).render('error', { status: 404, message: req.__('errors.userNotFound') });
     }
 
-    const oldData = { ...user.toJSON() };
-    
-    await user.update({
-      username,
-      email,
-      first_name,
-      last_name,
-      role,
-      is_active: is_active === 'true'
+    const oldRole = user.role;
+
+    const updated = await prisma.user.update({
+      where: { id },
+      data: { username, email, first_name, last_name, role, is_active: is_active === 'true' }
     });
 
     // Log action
-    await SystemLog.create({
-      action: 'UPDATE',
-      entity_type: 'User',
-      entity_id: user.id,
-      user_id: req.user.id,
-      ip_address: req.ip,
-      details: `Updated user ${user.username} (ID: ${user.id})`
-    });
-
-    // Log role change specifically (auditoría)
-    if (oldData.role !== user.role) {
-      await SystemLog.create({
-        action: 'ROLE_CHANGED',
+    await prisma.systemLog.create({
+      data: {
+        action: 'UPDATE',
         entity_type: 'User',
-        entity_id: user.id,
+        entity_id: updated.id,
         user_id: req.user.id,
         ip_address: req.ip,
-        details: `Role changed from ${oldData.role} to ${user.role}`
+        details: `Updated user ${updated.username} (ID: ${updated.id})`
+      }
+    });
+
+    // Log role change specifically
+    if (oldRole !== updated.role) {
+      await prisma.systemLog.create({
+        data: {
+          action: 'UPDATE',
+          entity_type: 'User',
+          entity_id: updated.id,
+          user_id: req.user.id,
+          ip_address: req.ip,
+          details: `Role changed from ${oldRole} to ${updated.role}`
+        }
       });
     }
 
@@ -453,12 +337,12 @@ export async function updateUser(req, res) {
 
 export async function listRegistrations(req, res) {
   try {
-    const registrations = await Registration.findAll({
-      include: [
-        { model: Team, attributes: ['name'] },
-        { model: Competition, attributes: ['title'] }
-      ],
-      order: [['registration_date', 'DESC']]
+    const registrations = await prisma.registration.findMany({
+      include: {
+        team: { select: { name: true } },
+        competition: { select: { title: true } }
+      },
+      orderBy: { registration_date: 'desc' }
     });
     res.render('registrations', { title: req.__('registrations.metaTitle'), pageKey: 'registrations', registrations });
   } catch (error) {
@@ -471,21 +355,25 @@ export async function updateRegistrationStatus(req, res) {
     const { id } = req.params;
     const { status, reason } = req.body;
 
-    const registration = await Registration.findByPk(id);
+    const registration = await prisma.registration.findUnique({ where: { id: Number(id) } });
     if (!registration) {
       return res.status(404).send('Registration not found');
     }
 
-    await registration.update({ status, decision_reason: reason });
+    await prisma.registration.update({
+      where: { id: Number(id) },
+      data: { status, decision_reason: reason }
+    });
 
-    // Log action
-    await SystemLog.create({
-      action: 'UPDATE',
-      entity_type: 'Registration',
-      entity_id: registration.id,
-      user_id: req.user.id,
-      ip_address: req.ip,
-      details: `Updated registration ${id} status to ${status}`
+    await prisma.systemLog.create({
+      data: {
+        action: 'UPDATE',
+        entity_type: 'Registration',
+        entity_id: String(registration.id),
+        user_id: req.user.id,
+        ip_address: req.ip,
+        details: `Updated registration ${id} status to ${status}`
+      }
     });
 
     res.redirect('/admin/registrations');
@@ -493,21 +381,3 @@ export async function updateRegistrationStatus(req, res) {
     res.status(500).render('error', { status: 500, message: error.message });
   }
 }
-
-/**
- * Return per-competition registration counts.
- *
- * @route GET /api/admin/stats/competitions/registrations
- * @param {Request} req
- * @param {Response} res
- */
-// (implementation above)
-
-/**
- * Return aggregated system log stats used by the admin dashboard.
- *
- * @route GET /api/admin/stats/logs
- * @param {Request} req
- * @param {Response} res
- */
-// (implementation above)

@@ -1,6 +1,4 @@
-import db from '../models/index.js';
-const { Notification } = db;
-import { Op } from 'sequelize';
+import prisma from '../lib/prisma.js';
 import { parsePagination, paginatedResponse } from '../utils/pagination.js';
 
 /**
@@ -8,29 +6,16 @@ import { parsePagination, paginatedResponse } from '../utils/pagination.js';
  * CRUD handlers for in-app notifications.
  *
  * Every endpoint enforces ownership: users can only access their own notifications.
- *
- * INDEX RECOMMENDATION:
- * For optimal query performance on the getNotifications endpoint (which filters by
- * user_id + is_read and orders by created_at DESC), add a composite index:
- *
- *   CREATE INDEX idx_notifications_user_read_created
- *     ON Notifications (user_id, is_read, created_at DESC);
- *
- * This covers the most frequent query pattern and avoids full table scans as the
- * notifications table grows.
  */
 
 /**
  * Creates a notification.
  *
  * @route POST /api/notifications
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const createNotification = async (req, res) => {
   try {
-    const item = await Notification.create(req.body);
+    const item = await prisma.notification.create({ data: req.body });
     res.status(201).json(item);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -45,9 +30,6 @@ export const createNotification = async (req, res) => {
  * - `page`, `limit`/`pageSize`: pagination
  *
  * @route GET /api/notifications
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getNotifications = async (req, res) => {
   try {
@@ -60,14 +42,17 @@ export const getNotifications = async (req, res) => {
 
     const { limit, offset, page, pageSize } = parsePagination(req.query);
 
-    const result = await Notification.findAndCountAll({
-      where,
-      limit,
-      offset,
-      order: [['created_at', 'DESC']]
-    });
+    const [rows, count] = await prisma.$transaction([
+      prisma.notification.findMany({
+        where,
+        take: limit,
+        skip: offset,
+        orderBy: { created_at: 'desc' }
+      }),
+      prisma.notification.count({ where })
+    ]);
 
-    res.json(paginatedResponse(result, { page, pageSize }));
+    res.json(paginatedResponse({ rows, count }, { page, pageSize }));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -76,16 +61,13 @@ export const getNotifications = async (req, res) => {
 /**
  * Retrieves a single notification by id (ownership enforced).
  * @route GET /api/notifications/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getNotificationById = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'Authentication required' });
 
-    const item = await Notification.findByPk(req.params.id);
+    const item = await prisma.notification.findUnique({ where: { id: req.params.id } });
     if (!item) return res.status(404).json({ error: 'Notification not found' });
     if (item.user_id !== userId) return res.status(403).json({ error: 'Access denied' });
 
@@ -101,21 +83,18 @@ export const getNotificationById = async (req, res) => {
  * Common usage is to set `{ is_read: true }`.
  *
  * @route PUT /api/notifications/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const updateNotification = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'Authentication required' });
 
-    const item = await Notification.findByPk(req.params.id);
+    const item = await prisma.notification.findUnique({ where: { id: req.params.id } });
     if (!item) return res.status(404).json({ error: 'Notification not found' });
     if (item.user_id !== userId) return res.status(403).json({ error: 'Access denied' });
 
-    await item.update(req.body);
-    res.json(item);
+    const updated = await prisma.notification.update({ where: { id: req.params.id }, data: req.body });
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -124,21 +103,18 @@ export const updateNotification = async (req, res) => {
 /**
  * Marks all notifications as read for the authenticated user.
  * @route PUT /api/notifications/read-all
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const markAllAsRead = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'Authentication required' });
 
-    const [updatedCount] = await Notification.update(
-      { is_read: true },
-      { where: { user_id: userId, is_read: false } }
-    );
+    const result = await prisma.notification.updateMany({
+      where: { user_id: userId, is_read: false },
+      data: { is_read: true }
+    });
 
-    res.json({ message: 'All notifications marked as read', updated: updatedCount });
+    res.json({ message: 'All notifications marked as read', updated: result.count });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -147,24 +123,19 @@ export const markAllAsRead = async (req, res) => {
 /**
  * Marks a single notification as read (ownership enforced).
  *
- * This is a lightweight endpoint for one-click "mark as read" in the UI.
- *
  * @route PATCH /api/notifications/:id/read
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const markAsRead = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'Authentication required' });
 
-    const item = await Notification.findByPk(req.params.id);
+    const item = await prisma.notification.findUnique({ where: { id: req.params.id } });
     if (!item) return res.status(404).json({ error: 'Notification not found' });
     if (item.user_id !== userId) return res.status(403).json({ error: 'Access denied' });
 
-    await item.update({ is_read: true });
-    res.json(item);
+    const updated = await prisma.notification.update({ where: { id: req.params.id }, data: { is_read: true } });
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -173,20 +144,17 @@ export const markAsRead = async (req, res) => {
 /**
  * Deletes a notification (ownership enforced).
  * @route DELETE /api/notifications/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const deleteNotification = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'Authentication required' });
 
-    const item = await Notification.findByPk(req.params.id);
+    const item = await prisma.notification.findUnique({ where: { id: req.params.id } });
     if (!item) return res.status(404).json({ error: 'Notification not found' });
     if (item.user_id !== userId) return res.status(403).json({ error: 'Access denied' });
 
-    await item.destroy();
+    await prisma.notification.delete({ where: { id: req.params.id } });
     res.json({ message: 'Notification deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });

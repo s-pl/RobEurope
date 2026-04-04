@@ -1,98 +1,72 @@
-import db from '../models/index.js';
+import prisma from '../lib/prisma.js';
 import redisClient from './redis.js';
-import { Op } from 'sequelize';
 import { emitToUser } from './realtime.js';
 
 /**
  * @fileoverview
  * Background scheduler for periodic tasks.
- * Currently handles competition reminder notifications.
  * @module utils/scheduler
  */
 
-const { Competition, Registration, Team, Notification } = db;
-
-/**
- * Time window in hours before competition start to send reminders.
- * @constant {number}
- */
 const REMINDER_WINDOW_HOURS = 24;
 
-/**
- * Sends reminder notifications for upcoming competitions.
- * Finds competitions starting within the reminder window and notifies
- * team owners with approved registrations.
- * Uses Redis for deduplication to prevent duplicate notifications.
- * @async
- * @private
- * @returns {Promise<void>}
- */
 export async function sendCompetitionReminders() {
   const now = new Date();
   const inWindow = new Date(now.getTime() + REMINDER_WINDOW_HOURS * 3600 * 1000);
 
-  // competitions starting within next 24h
-  const comps = await Competition.findAll({
+  const comps = await prisma.competition.findMany({
     where: {
-      start_date: { [Op.lte]: inWindow, [Op.gte]: now }
+      start_date: { lte: inWindow, gte: now },
     },
-    attributes: ['id', 'title', 'start_date']
+    select: { id: true, title: true, start_date: true },
   });
 
   if (!comps.length) return;
 
   for (const comp of comps) {
-    // find approved registrations for this competition
-    const regs = await Registration.findAll({ where: { competition_id: comp.id, status: 'approved' }, attributes: ['id','team_id'] });
+    const regs = await prisma.registration.findMany({
+      where: { competition_id: comp.id, status: 'approved' },
+      select: { id: true, team_id: true },
+    });
+
     for (const reg of regs) {
-      const team = await Team.findByPk(reg.team_id, { attributes: ['id','name','created_by_user_id'] });
-      if (!team) continue;
+      if (!reg.team_id) continue;
+      const team = await prisma.team.findUnique({
+        where: { id: reg.team_id },
+        select: { id: true, name: true, created_by_user_id: true },
+      });
+      if (!team?.created_by_user_id) continue;
+
       const dedupKey = `reminder:comp:${comp.id}:team:${team.id}`;
       const already = await redisClient.get(dedupKey);
       if (already) continue;
-      await redisClient.set(dedupKey, '1', { ex: 48 * 3600 }); // avoid duplicates for 48h
+      await redisClient.set(dedupKey, '1', { ex: 48 * 3600 });
 
       try {
-        const notif = await Notification.create({
-          user_id: team.created_by_user_id,
-          title: 'Competition Reminder',
-          message: `Your team ${team.name} is competing soon: ${comp.title}`,
-          type: 'competition_reminder'
+        const notif = await prisma.notification.create({
+          data: {
+            user_id: team.created_by_user_id,
+            title: 'Competition Reminder',
+            message: `Your team ${team.name} is competing soon: ${comp.title}`,
+            type: 'team_message', // closest available enum value
+          },
         });
-        emitToUser(team.created_by_user_id, 'notification', notif.toJSON());
+        emitToUser(team.created_by_user_id, 'notification', notif);
       } catch (_) {}
     }
   }
 }
 
-/**
- * Handle for the scheduler interval.
- * @type {NodeJS.Timeout|null}
- * @private
- */
 let intervalHandle = null;
 
-/**
- * Starts the background schedulers.
- * Runs reminder check hourly and once at startup (after 15s delay).
- * Safe to call multiple times - subsequent calls are no-ops.
- * @returns {void}
- */
 export function startSchedulers() {
   if (intervalHandle) return;
-  // run hourly
   intervalHandle = setInterval(() => {
     sendCompetitionReminders().catch(() => {});
   }, 60 * 60 * 1000);
-  // run once at startup after small delay
   setTimeout(() => sendCompetitionReminders().catch(() => {}), 15 * 1000);
 }
 
-/**
- * Stops all background schedulers.
- * Safe to call even if schedulers are not running.
- * @returns {void}
- */
 export function stopSchedulers() {
   if (intervalHandle) clearInterval(intervalHandle);
   intervalHandle = null;

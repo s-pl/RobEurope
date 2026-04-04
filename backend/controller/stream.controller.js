@@ -1,70 +1,49 @@
-import db from '../models/index.js';
-const { Stream, Registration, TeamMembers, Competition } = db;
-import { Op } from 'sequelize';
+import prisma from '../lib/prisma.js';
 
 /**
  * @fileoverview
  * Stream API handlers.
- *
- * Streams can be associated with a competition and team.
- * Access rules:
- * - Creating/deleting streams requires authentication.
- * - For competition streams, the team must be approved for that competition.
- * - For non-admin viewers, `stream_url` is removed unless the viewer is approved.
  */
 
 /**
  * Creates a stream.
  * @route POST /api/streams
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const createStream = async (req, res) => {
   try {
     const { competition_id, team_id } = req.body;
 
-    // Check if user is a member of the team (or admin)
     if (req.user.role !== 'admin') {
-      const membership = await TeamMembers.findOne({
-        where: {
-          team_id,
-          user_id: req.user.id,
-          left_at: null
-        }
+      const membership = await prisma.teamMember.findFirst({
+        where: { team_id: Number(team_id), user_id: req.user.id, left_at: null }
       });
-
       if (!membership) {
         return res.status(403).json({ error: 'You are not a member of this team' });
       }
     }
 
-    // If competition is specified, enforce active status and registration
     if (competition_id) {
-      const competition = await Competition.findByPk(competition_id);
+      const competition = await prisma.competition.findUnique({ where: { id: Number(competition_id) } });
       if (!competition) {
         return res.status(404).json({ error: 'Competition not found' });
       }
-
       if (!competition.is_active) {
         return res.status(400).json({ error: 'Competition is not active. You cannot start a stream.' });
       }
-
-      const registration = await Registration.findOne({
-        where: {
-          competition_id,
-          team_id,
-          status: 'approved'
-        }
+      const registration = await prisma.registration.findFirst({
+        where: { competition_id: Number(competition_id), team_id: Number(team_id), status: 'approved' }
       });
-
       if (!registration) {
         return res.status(403).json({ error: 'Team is not approved for this competition' });
       }
     }
 
     const streamData = { ...req.body };
-    const item = await Stream.create(streamData);
+    if (streamData.competition_id) streamData.competition_id = Number(streamData.competition_id);
+    if (streamData.team_id) streamData.team_id = Number(streamData.team_id);
+    if (streamData.educational_center_id) streamData.educational_center_id = Number(streamData.educational_center_id);
+
+    const item = await prisma.stream.create({ data: streamData });
     res.status(201).json(item);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -74,67 +53,49 @@ export const createStream = async (req, res) => {
 /**
  * Lists streams.
  * @route GET /api/streams
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getStreams = async (req, res) => {
   try {
     const { q, limit = 50, offset = 0, status, competition_id } = req.query;
     const where = {};
-    if (q) where.title = { [Op.like]: `%${q}%` };
+    if (q) where.title = { contains: q, mode: 'insensitive' };
     if (status) where.status = status;
-    if (competition_id) where.competition_id = competition_id;
+    if (competition_id) where.competition_id = Number(competition_id);
 
-    // Check access permissions
     let isApproved = false;
     const currentUser = req.user || req.session?.user;
 
     if (currentUser?.role === 'admin') {
       isApproved = true;
     } else if (competition_id && currentUser) {
-      const userTeams = await TeamMembers.findAll({ where: { user_id: currentUser.id, left_at: null } });
+      const userTeams = await prisma.teamMember.findMany({ where: { user_id: currentUser.id, left_at: null } });
       const teamIds = userTeams.map(tm => tm.team_id);
-      
+
       if (teamIds.length > 0) {
-        const registration = await Registration.findOne({
-          where: {
-            competition_id,
-            team_id: { [Op.in]: teamIds },
-            status: 'approved'
-          }
+        const registration = await prisma.registration.findFirst({
+          where: { competition_id: Number(competition_id), team_id: { in: teamIds }, status: 'approved' }
         });
         if (registration) isApproved = true;
       }
     }
 
-    const items = await Stream.findAll({
+    const items = await prisma.stream.findMany({
       where,
-      limit: Number(limit),
-      offset: Number(offset),
-      order: [['created_at', 'DESC']],
-      include: [{
-        model: db.Competition,
-        as: 'competition',
-        required: false
-      }, {
-        model: db.Team,
-        as: 'team',
-        required: true,
-        include: [{
-          model: db.EducationalCenter,
-          as: 'educationalCenter',
-          required: false
-        }]
-      }]
+      take: Number(limit),
+      skip: Number(offset),
+      orderBy: { created_at: 'desc' },
+      include: {
+        competition: true,
+        team: {
+          include: { educationalCenter: true }
+        }
+      }
     });
 
-    // If not approved (guest or unapproved user), sanitize stream_url
     if (!isApproved) {
       const sanitized = items.map(s => {
-        const json = s.toJSON();
-        delete json.stream_url;
-        return json;
+        const { stream_url, ...rest } = s;
+        return rest;
       });
       return res.json(sanitized);
     }
@@ -148,22 +109,12 @@ export const getStreams = async (req, res) => {
 /**
  * Retrieves a stream by id.
  * @route GET /api/streams/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getStreamById = async (req, res) => {
   try {
-    const item = await Stream.findByPk(req.params.id, {
-      include: [{
-        model: db.Competition,
-        as: 'competition',
-        required: false
-      }, {
-        model: db.Team,
-        as: 'team',
-        required: true
-      }]
+    const item = await prisma.stream.findUnique({
+      where: { id: Number(req.params.id) },
+      include: { competition: true, team: true }
     });
     if (!item) return res.status(404).json({ error: 'Stream not found' });
     res.json(item);
@@ -175,21 +126,16 @@ export const getStreamById = async (req, res) => {
 /**
  * Updates a stream by id.
  * @route PUT /api/streams/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const updateStream = async (req, res) => {
   try {
-    const updates = { ...req.body };
-    const [updated] = await Stream.update(updates, { where: { id: req.params.id } });
-    if (!updated) return res.status(404).json({ error: 'Stream not found' });
-    const updatedItem = await Stream.findByPk(req.params.id, {
-      include: [{
-        model: db.Competition,
-        as: 'competition',
-        required: false
-      }]
+    const id = Number(req.params.id);
+    const existing = await prisma.stream.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ error: 'Stream not found' });
+    const updatedItem = await prisma.stream.update({
+      where: { id },
+      data: req.body,
+      include: { competition: true }
     });
     res.json(updatedItem);
   } catch (err) {
@@ -200,37 +146,26 @@ export const updateStream = async (req, res) => {
 /**
  * Deletes a stream by id.
  * @route DELETE /api/streams/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const deleteStream = async (req, res) => {
   try {
-    const stream = await Stream.findByPk(req.params.id);
+    const id = Number(req.params.id);
+    const stream = await prisma.stream.findUnique({ where: { id } });
     if (!stream) return res.status(404).json({ error: 'Stream not found' });
 
-    // Check permissions
     if (req.user.role !== 'admin') {
-      // If not admin, check if user is owner of the team associated with the stream
       if (!stream.team_id) {
         return res.status(403).json({ error: 'Permission denied' });
       }
-
-      const membership = await TeamMembers.findOne({
-        where: {
-          team_id: stream.team_id,
-          user_id: req.user.id,
-          role: 'owner',
-          left_at: null
-        }
+      const membership = await prisma.teamMember.findFirst({
+        where: { team_id: stream.team_id, user_id: req.user.id, role: 'owner', left_at: null }
       });
-
       if (!membership) {
         return res.status(403).json({ error: 'Permission denied: You must be the team owner' });
       }
     }
 
-    await stream.destroy();
+    await prisma.stream.delete({ where: { id } });
     res.json({ message: 'Stream deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });

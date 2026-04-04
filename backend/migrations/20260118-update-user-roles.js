@@ -12,11 +12,13 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   async up(queryInterface, Sequelize) {
-    // MySQL: Modify ENUM column to add new value 'center_admin'
+    // Update enum values in a dialect-agnostic way.
     try {
-      await queryInterface.sequelize.query(`
-        ALTER TABLE User MODIFY COLUMN role ENUM('user', 'center_admin', 'super_admin') DEFAULT 'user';
-      `);
+      await queryInterface.changeColumn('User', 'role', {
+        type: Sequelize.ENUM('user', 'center_admin', 'super_admin'),
+        allowNull: false,
+        defaultValue: 'user',
+      });
       console.log('Updated User.role ENUM with center_admin');
     } catch (err) {
       console.log('Could not modify role ENUM:', err.message);
@@ -41,11 +43,13 @@ export default {
   async down(queryInterface, Sequelize) {
     await queryInterface.removeColumn('User', 'educational_center_id');
     
-    // Revert enum changes for MySQL
+    // Revert enum values in a dialect-agnostic way.
     try {
-      await queryInterface.sequelize.query(`
-        ALTER TABLE User MODIFY COLUMN role ENUM('user', 'super_admin') DEFAULT 'user';
-      `);
+      await queryInterface.changeColumn('User', 'role', {
+        type: Sequelize.ENUM('user', 'super_admin'),
+        allowNull: false,
+        defaultValue: 'user',
+      });
     } catch (err) {
       console.log('Could not revert role ENUM:', err.message);
     }

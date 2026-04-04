@@ -5,11 +5,11 @@
  * whitelisted models. Model configuration (fields, labels) is defined in this file.
  */
 
-import db from '../models/index.js';
+import prisma from '../lib/prisma.js';
 
 const modelConfigs = {
   teams: {
-    model: 'Team',
+    model: 'team',
     label: 'Equipos',
     labelKey: 'crud.teams.label',
     pk: 'id',
@@ -27,7 +27,7 @@ const modelConfigs = {
     ]
   },
   posts: {
-    model: 'Post',
+    model: 'post',
     label: 'Posts',
     labelKey: 'crud.posts.label',
     pk: 'id',
@@ -42,7 +42,7 @@ const modelConfigs = {
     ]
   },
   sponsors: {
-    model: 'Sponsor',
+    model: 'sponsor',
     label: 'Patrocinadores',
     labelKey: 'crud.sponsors.label',
     pk: 'id',
@@ -55,7 +55,7 @@ const modelConfigs = {
     ]
   },
   countries: {
-    model: 'Country',
+    model: 'country',
     label: 'Países',
     labelKey: 'crud.countries.label',
     pk: 'id',
@@ -67,7 +67,7 @@ const modelConfigs = {
     ]
   },
   competitions: {
-    model: 'Competition',
+    model: 'competition',
     label: 'Competiciones',
     labelKey: 'crud.competitions.label',
     pk: 'id',
@@ -87,7 +87,7 @@ const modelConfigs = {
     ]
   },
   EducationalCenter: {
-    model: 'EducationalCenter',
+    model: 'educationalCenter',
     label: 'Centros Educativos',
     labelKey: 'crud.educationalCenters.label',
     pk: 'id',
@@ -107,7 +107,7 @@ const modelConfigs = {
     ]
   },
   Archive: {
-    model: 'Archive',
+    model: 'archive',
     label: 'Archivo',
     labelKey: 'crud.archives.label',
     pk: 'id',
@@ -124,7 +124,7 @@ const modelConfigs = {
     ]
   },
   Gallery: {
-    model: 'Gallery',
+    model: 'gallery',
     label: 'Galería',
     labelKey: 'crud.gallery.label',
     pk: 'id',
@@ -143,12 +143,10 @@ const modelConfigs = {
 };
 
 const localizeConfig = (config, req) => {
-  // Translate the collection label - use fallback to default
   let collectionLabel = config.label;
   try {
     if (config.labelKey) {
       const translated = req.__(config.labelKey);
-      // Only use translation if it's different from the key (meaning it was found)
       if (translated && !translated.includes('.')) {
         collectionLabel = translated;
       }
@@ -156,14 +154,12 @@ const localizeConfig = (config, req) => {
   } catch (e) {
     console.error('Error translating collection label:', e);
   }
-  
-  // Translate field labels with fallback
+
   const translatedFields = config.fields.map(field => {
-    let fieldLabel = field.label; // default fallback
+    let fieldLabel = field.label;
     try {
       if (field.labelKey) {
         const translated = req.__(field.labelKey);
-        // Only use translation if it was found (doesn't look like a key path)
         if (translated && !translated.includes('.')) {
           fieldLabel = translated;
         }
@@ -173,7 +169,7 @@ const localizeConfig = (config, req) => {
     }
     return { ...field, label: fieldLabel };
   });
-  
+
   return { ...config, label: collectionLabel, fields: translatedFields };
 };
 
@@ -181,9 +177,6 @@ const localizeConfig = (config, req) => {
  * Render a list view for a configured model.
  *
  * @route GET /admin/:model
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const list = async (req, res) => {
   const { model } = req.params;
@@ -194,9 +187,11 @@ export const list = async (req, res) => {
   }
 
   try {
-    const Model = db[config.model];
-    const items = await Model.findAll();
-    
+    const delegate = prisma[config.model];
+    if (!delegate) return res.status(404).send('Model not found in Prisma');
+
+    const items = await delegate.findMany();
+
     const localizedConfig = localizeConfig(config, req);
     res.render('admin/generic-list', {
       title: localizedConfig.label,
@@ -217,9 +212,6 @@ export const list = async (req, res) => {
  *
  * @route GET /admin/:model/create
  * @route GET /admin/:model/edit/:id
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const form = async (req, res) => {
   const { model, id } = req.params;
@@ -232,13 +224,13 @@ export const form = async (req, res) => {
   try {
     let item = null;
     if (id) {
-      const Model = db[config.model];
-      item = await Model.findByPk(id);
+      const delegate = prisma[config.model];
+      if (!delegate) return res.status(404).send('Model not found in Prisma');
+      item = await delegate.findUnique({ where: { id: isNaN(Number(id)) ? id : Number(id) } });
       if (!item) return res.status(404).send('Item not found');
     }
 
     const localizedConfig = localizeConfig(config, req);
-    // Build title using i18n with mustache syntax: {{name}}
     const formTitleKey = id ? 'generic.form.editTitle' : 'generic.form.createTitle';
     const title = req.__(formTitleKey, { name: localizedConfig.label });
     res.render('admin/generic-form', {
@@ -260,9 +252,6 @@ export const form = async (req, res) => {
  *
  * @route POST /admin/:model/save
  * @route POST /admin/:model/save/:id
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const save = async (req, res) => {
   const { model, id } = req.params;
@@ -273,8 +262,10 @@ export const save = async (req, res) => {
   }
 
   try {
-    const Model = db[config.model];
-    const data = req.body;
+    const delegate = prisma[config.model];
+    if (!delegate) return res.status(404).send('Model not found in Prisma');
+
+    const data = { ...req.body };
 
     // Handle JSON fields
     config.fields.forEach(field => {
@@ -283,7 +274,6 @@ export const save = async (req, res) => {
           try {
             data[field.name] = JSON.parse(data[field.name]);
           } catch (e) {
-            // Keep as string if parse fails, or handle error
             console.error(`Failed to parse JSON for ${field.name}`, e);
           }
         }
@@ -291,9 +281,10 @@ export const save = async (req, res) => {
     });
 
     if (id) {
-      await Model.update(data, { where: { [config.pk]: id } });
+      const numericId = isNaN(Number(id)) ? id : Number(id);
+      await delegate.update({ where: { [config.pk]: numericId }, data });
     } else {
-      await Model.create(data);
+      await delegate.create({ data });
     }
 
     res.redirect(`/admin/${model}`);
@@ -307,9 +298,6 @@ export const save = async (req, res) => {
  * Delete a record for a configured model.
  *
  * @route POST /admin/:model/delete/:id
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const remove = async (req, res) => {
   const { model, id } = req.params;
@@ -320,8 +308,11 @@ export const remove = async (req, res) => {
   }
 
   try {
-    const Model = db[config.model];
-    await Model.destroy({ where: { [config.pk]: id } });
+    const delegate = prisma[config.model];
+    if (!delegate) return res.status(404).send('Model not found in Prisma');
+
+    const numericId = isNaN(Number(id)) ? id : Number(id);
+    await delegate.delete({ where: { [config.pk]: numericId } });
     res.redirect(`/admin/${model}`);
   } catch (error) {
     console.error(error);

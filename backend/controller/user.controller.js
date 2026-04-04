@@ -1,8 +1,6 @@
-import db from '../models/index.js';
-const { User, Country, EducationalCenter } = db;
+import prisma from '../lib/prisma.js';
 
 import bcrypt from 'bcryptjs';
-import { Op } from 'sequelize';
 import { getFileInfo } from '../middleware/upload.middleware.js';
 import { sanitizeUser } from '../utils/sanitize.js';
 
@@ -20,16 +18,11 @@ import { sanitizeUser } from '../utils/sanitize.js';
  * Creates a user.
  *
  * Note: This handler is not currently exposed in the API router.
- *
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const createUser = async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
-   
-    const user = await User.create({ ...req.body, password: hashedPassword });
+    const user = await prisma.user.create({ data: { ...req.body, password_hash: hashedPassword } });
     res.json(sanitizeUser(user));
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -41,15 +34,12 @@ export const createUser = async (req, res) => {
  * Lists users.
  *
  * Note: This handler is not currently exposed in the API router.
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getUsers = async (req, res) => {
   try {
-    const users = await User.findAll();
+    const users = await prisma.user.findMany();
     const mapped_users = users.map(user => {
-      const { password_hash, phone, role, email, ...userData } = user.toJSON(); // exclude sensitive fields
+      const { password_hash, phone, role, email, ...userData } = user;
       return userData;
     });
     res.json(mapped_users);
@@ -62,13 +52,10 @@ export const getUsers = async (req, res) => {
 /**
  * Retrieves a user by id.
  * @route GET /api/users/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getUserById = async (req, res) => {
   try {
-    const user = await User.findByPk(req.params.id);
+    const user = await prisma.user.findUnique({ where: { id: req.params.id } });
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(sanitizeUser(user));
   } catch (error) {
@@ -83,9 +70,6 @@ export const getUserById = async (req, res) => {
  * Supports optional profile photo upload via multipart/form-data.
  *
  * @route PUT /api/users/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const updateUser = async (req, res) => {
   try {
@@ -97,11 +81,11 @@ export const updateUser = async (req, res) => {
       updates.profile_photo_url = fileInfo.url;
     }
 
-    const [updated] = await User.update(updates, {
-      where: { id: req.params.id }
-    });
-    if (!updated) return res.status(404).json({ error: 'User not found' });
-    const updatedUser = await User.findByPk(req.params.id);
+    const updatedUser = await prisma.user.update({
+      where: { id: req.params.id },
+      data: updates
+    }).catch(() => null);
+    if (!updatedUser) return res.status(404).json({ error: 'User not found' });
     res.json(sanitizeUser(updatedUser));
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -112,25 +96,22 @@ export const updateUser = async (req, res) => {
 /**
  * Searches users by query string.
  * @route GET /api/users?q=...
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const searchUsers = async (req, res) => {
   try {
     const q = (req.query.q || '').trim();
     const where = q ? {
-      [Op.or]: [
-        { email: { [Op.like]: `%${q}%` } },
-        { username: { [Op.like]: `%${q}%` } },
-        { first_name: { [Op.like]: `%${q}%` } },
-        { last_name: { [Op.like]: `%${q}%` } }
+      OR: [
+        { email: { contains: q, mode: 'insensitive' } },
+        { username: { contains: q, mode: 'insensitive' } },
+        { first_name: { contains: q, mode: 'insensitive' } },
+        { last_name: { contains: q, mode: 'insensitive' } }
       ]
     } : {};
 
-    const users = await User.findAll({
+    const users = await prisma.user.findMany({
       where,
-      attributes: ['id', 'username', 'email', 'first_name', 'last_name', 'profile_photo_url']
+      select: { id: true, username: true, email: true, first_name: true, last_name: true, profile_photo_url: true }
     });
     res.json(users);
   } catch (error) {
@@ -144,9 +125,6 @@ export const searchUsers = async (req, res) => {
  * Requires authentication. Returns sanitized user data, limited to 10 results.
  *
  * @route GET /api/users/search?q=term
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const searchUsersForInvite = async (req, res) => {
   try {
@@ -156,15 +134,15 @@ export const searchUsersForInvite = async (req, res) => {
     const q = (req.query.q || '').trim();
     if (!q) return res.json([]);
 
-    const users = await User.findAll({
+    const users = await prisma.user.findMany({
       where: {
-        [Op.or]: [
-          { username: { [Op.like]: `%${q}%` } },
-          { first_name: { [Op.like]: `%${q}%` } },
-          { last_name: { [Op.like]: `%${q}%` } }
+        OR: [
+          { username: { contains: q, mode: 'insensitive' } },
+          { first_name: { contains: q, mode: 'insensitive' } },
+          { last_name: { contains: q, mode: 'insensitive' } }
         ]
       },
-      limit: 10
+      take: 10
     });
     res.json(users.map(sanitizeUser));
   } catch (error) {
@@ -176,15 +154,12 @@ export const searchUsersForInvite = async (req, res) => {
 /**
  * Returns the current authenticated user.
  * @route GET /api/users/me
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getSelf = async (req, res) => {
   try {
     const id = req.user && req.user.id;
     if (!id) return res.status(401).json({ error: 'No autorizado' });
-    const user = await User.findByPk(id);
+    const user = await prisma.user.findUnique({ where: { id } });
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(sanitizeUser(user));
   } catch (error) {
@@ -199,9 +174,6 @@ export const getSelf = async (req, res) => {
  * Supports optional profile photo upload via multipart/form-data.
  *
  * @route PATCH /api/users/me
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const updateSelf = async (req, res) => {
   try {
@@ -220,8 +192,9 @@ export const updateSelf = async (req, res) => {
       if (updates.country_id == null || updates.country_id === '') {
         updates.country_id = null;
       } else {
-        const exists = await Country.findByPk(updates.country_id);
+        const exists = await prisma.country.findUnique({ where: { id: Number(updates.country_id) } });
         if (!exists) return res.status(400).json({ error: 'Invalid country_id' });
+        updates.country_id = Number(updates.country_id);
       }
     }
 
@@ -232,7 +205,7 @@ export const updateSelf = async (req, res) => {
       } else {
         const centerId = Number(updates.educational_center_id);
         if (!Number.isInteger(centerId)) return res.status(400).json({ error: 'Invalid educational_center_id' });
-        const center = await EducationalCenter.findByPk(centerId);
+        const center = await prisma.educationalCenter.findUnique({ where: { id: centerId } });
         if (!center || center.approval_status !== 'approved') {
           return res.status(400).json({ error: 'Educational center not found or not approved' });
         }
@@ -248,10 +221,7 @@ export const updateSelf = async (req, res) => {
 
     if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'No hay campos válidos para actualizar' });
 
-    const [updated] = await User.update(updates, { where: { id } });
-    if (!updated) return res.status(404).json({ error: 'User not found' });
-
-    const updatedUser = await User.findByPk(id);
+    const updatedUser = await prisma.user.update({ where: { id }, data: updates });
     res.json(sanitizeUser(updatedUser));
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -262,17 +232,14 @@ export const updateSelf = async (req, res) => {
 /**
  * Deletes the current authenticated user.
  * @route DELETE /api/users/me
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<any>}
  */
 export const deleteSelf = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-    const user = await User.findByPk(userId);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return res.status(404).json({ error: 'User not found' });
-    await user.destroy();
+    await prisma.user.delete({ where: { id: userId } });
     return res.json({ success: true });
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -285,9 +252,6 @@ export const deleteSelf = async (req, res) => {
  * Note: Ownership enforcement is performed in the router.
  *
  * @route DELETE /api/users/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<any>}
  */
 export const deleteUser = async (req, res) => {
   try {
@@ -295,13 +259,10 @@ export const deleteUser = async (req, res) => {
     // protect against receiving 'me' or invalid strings
     if (idParam === 'me') return res.status(400).json({ error: "Use /me endpoint to delete your own account" });
 
-    const id = Number(idParam);
-    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid user id' });
-
-    const user = await User.findByPk(id);
+    const user = await prisma.user.findUnique({ where: { id: idParam } });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    await user.destroy();
+    await prisma.user.delete({ where: { id: idParam } });
     return res.json({ success: true });
   } catch (err) {
     return res.status(500).json({ error: err.message });

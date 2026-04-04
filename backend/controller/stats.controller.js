@@ -1,13 +1,13 @@
-import db from '../models/index.js';
+import prisma from '../lib/prisma.js';
 
 export const getStats = async (req, res) => {
   try {
     const [teamsCount, competitionsCount, usersCount, countriesCount, centersCount] = await Promise.all([
-      db.Team.count(),
-      db.Competition.count(),
-      db.User.count(),
-      db.Country.count(),
-      db.EducationalCenter ? db.EducationalCenter.count() : Promise.resolve(0)
+      prisma.team.count(),
+      prisma.competition.count(),
+      prisma.user.count(),
+      prisma.country.count(),
+      prisma.educationalCenter.count()
     ]);
 
     res.json({

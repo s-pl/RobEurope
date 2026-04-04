@@ -10,12 +10,9 @@ import rateLimit from './middleware/rateLimit.middleware.js';
 import timeoutMiddleware from './middleware/timeout.middleware.js';
 import morgan from 'morgan';
 import logger from './utils/logger.js';
-import streamRoutes from './routes/api/stream.route.js';
 import mediaRoutes from './routes/api/media.route.js';
-import swaggerRouter from './swagger.js';
 import cors from 'cors';
 import helmet from 'helmet';
-import db from './models/index.js';
 import adminRoutes from './routes/admin.route.js';
 import adminApiRoutes from './routes/admin.routes.js';
 import requestId from './middleware/requestId.middleware.js';
@@ -87,7 +84,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// --- Passport (OAuth strategies only — no sessions) ---
 // --- Request logging ---
 app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 
@@ -104,9 +100,7 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 app.use('/api', cors(corsOptions));
-app.use('/api/streams', cors(corsOptions));
 app.use('/api/media', cors(corsOptions));
-app.use('/api-docs', cors(corsOptions));
 app.options('*', cors(corsOptions));
 
 // --- Health (public, no auth) ---
@@ -116,7 +110,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(timeoutMiddleware);
 app.use(express.static('public'));
-app.use('/api-docs', swaggerRouter);
 
 // --- Locale switch ---
 app.get('/locale/:locale', (req, res) => {
@@ -147,7 +140,6 @@ app.use('/api/gdpr/my-account', rateLimit({ windowMs: 60 * 60 * 1000, max: 3 }))
 app.use('/api/notifications', rateLimit({ windowMs: 60 * 1000, max: 100 }));
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 1000 }), apiRoutes);
 app.use('/api/admin', rateLimit({ windowMs: 15 * 60 * 1000, max: 500 }), adminApiRoutes);
-app.use('/api/streams', rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }), streamRoutes);
 app.use('/api/media', rateLimit({ windowMs: 15 * 60 * 1000, max: 300 }), mediaRoutes);
 app.use('/api/cron', cronRoutes);
 app.use('/health', rateLimit({ windowMs: 15 * 60 * 1000, max: 60 }));
@@ -164,13 +156,13 @@ app.get('/manual', (req, res) => {
 // --- Error handlers ---
 app.use(errorHandler);
 app.use((err, req, res, next) => {
-  const isSequelize = err?.name?.startsWith('Sequelize');
-  if (isSequelize) {
-    logger.error({ sequelize: true, name: err.name, message: err.message, errors: err.errors, stack: err.stack, path: req.originalUrl, method: req.method });
+  // Prisma known errors
+  if (err?.constructor?.name === 'PrismaClientKnownRequestError') {
+    logger.error({ prisma: true, code: err.code, message: err.message, path: req.originalUrl, method: req.method });
     if (!res.headersSent) {
-      if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
-        return res.status(400).json({ error: 'Validation Error', details: err.errors });
-      }
+      if (err.code === 'P2002') return res.status(409).json({ error: 'Conflict', details: `Unique constraint failed on: ${err.meta?.target}` });
+      if (err.code === 'P2025') return res.status(404).json({ error: 'Not Found' });
+      if (err.code === 'P2003') return res.status(400).json({ error: 'Foreign key constraint failed' });
       return res.status(500).json({ error: 'Database Error' });
     }
     return;

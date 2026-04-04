@@ -1,33 +1,22 @@
-import db from '../models/index.js';
-const { Sponsor } = db;
-import { Op } from 'sequelize';
+import prisma from '../lib/prisma.js';
 import { getFileInfo } from '../middleware/upload.middleware.js';
 
 /**
- * @fileoverview
- * Sponsor API handlers.
- *
- * Sponsors support optional logo upload (multipart/form-data).
+ * @fileoverview Sponsor API handlers.
  */
 
 /**
  * Creates a sponsor.
  * @route POST /api/sponsors
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const createSponsor = async (req, res) => {
   try {
     const sponsorData = { ...req.body };
-
-    // Handle file upload
     const fileInfo = getFileInfo(req);
     if (fileInfo) {
       sponsorData.logo_url = fileInfo.url;
     }
-
-    const item = await Sponsor.create(sponsorData);
+    const item = await prisma.sponsor.create({ data: sponsorData });
     res.status(201).json(item);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -37,16 +26,13 @@ export const createSponsor = async (req, res) => {
 /**
  * Lists sponsors.
  * @route GET /api/sponsors
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getSponsors = async (req, res) => {
   try {
     const { q, limit = 50, offset = 0 } = req.query;
     const where = {};
-    if (q) where.name = { [Op.like]: `%${q}%` };
-    const items = await Sponsor.findAll({ where, limit: Number(limit), offset: Number(offset), order: [['name', 'ASC']] });
+    if (q) where.name = { contains: q, mode: 'insensitive' };
+    const items = await prisma.sponsor.findMany({ where, take: Number(limit), skip: Number(offset), orderBy: { name: 'asc' } });
     res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -56,13 +42,10 @@ export const getSponsors = async (req, res) => {
 /**
  * Retrieves a sponsor by id.
  * @route GET /api/sponsors/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const getSponsorById = async (req, res) => {
   try {
-    const item = await Sponsor.findByPk(req.params.id);
+    const item = await prisma.sponsor.findUnique({ where: { id: Number(req.params.id) } });
     if (!item) return res.status(404).json({ error: 'Sponsor not found' });
     res.json(item);
   } catch (err) {
@@ -73,23 +56,18 @@ export const getSponsorById = async (req, res) => {
 /**
  * Updates a sponsor.
  * @route PUT /api/sponsors/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const updateSponsor = async (req, res) => {
   try {
+    const id = Number(req.params.id);
     const updates = { ...req.body };
-
-    // Handle file upload
     const fileInfo = getFileInfo(req);
     if (fileInfo) {
       updates.logo_url = fileInfo.url;
     }
-
-    const [updated] = await Sponsor.update(updates, { where: { id: req.params.id } });
-    if (!updated) return res.status(404).json({ error: 'Sponsor not found' });
-    const updatedItem = await Sponsor.findByPk(req.params.id);
+    const existing = await prisma.sponsor.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ error: 'Sponsor not found' });
+    const updatedItem = await prisma.sponsor.update({ where: { id }, data: updates });
     res.json(updatedItem);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -99,14 +77,13 @@ export const updateSponsor = async (req, res) => {
 /**
  * Deletes a sponsor.
  * @route DELETE /api/sponsors/:id
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const deleteSponsor = async (req, res) => {
   try {
-    const deleted = await Sponsor.destroy({ where: { id: req.params.id } });
-    if (!deleted) return res.status(404).json({ error: 'Sponsor not found' });
+    const id = Number(req.params.id);
+    const existing = await prisma.sponsor.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ error: 'Sponsor not found' });
+    await prisma.sponsor.delete({ where: { id } });
     res.json({ message: 'Sponsor deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });

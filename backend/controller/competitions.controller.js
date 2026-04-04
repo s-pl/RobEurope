@@ -5,64 +5,44 @@
  * hiding of sensitive fields), admin-only CRUD, and per-user favorites stored in Redis.
  */
 
-import db from '../models/index.js';
-const { Competition, Registration, TeamMembers } = db;
-import { Op } from 'sequelize';
+import prisma from '../lib/prisma.js';
 import redisClient from '../utils/redis.js';
 import { getIO } from '../utils/realtime.js';
-
-/**
- * Express request.
- * @typedef {object} Request
- * @property {object} [user]
- * @property {number} [user.id]
- * @property {string} [user.role]
- * @property {object} [session]
- * @property {object} [session.user]
- */
-
-/**
- * Express response.
- * @typedef {object} Response
- * @property {Function} status
- * @property {Function} json
- */
 
 const generateSlug = (text) => {
   return text
     .toString()
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-')     // Replace spaces with -
-    .replace(/[^\w\-]+/g, '') // Remove all non-word chars
-    .replace(/\-\-+/g, '-');  // Replace multiple - with single -
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-');
 };
 
 export const createCompetition = async (req, res) => {
   try {
     if (req.body.is_active) {
-      await Competition.update({ is_active: false }, { where: {} });
+      await prisma.competition.updateMany({ data: { is_active: false } });
     }
 
     let slug = req.body.slug;
     if (!slug && req.body.title) {
       slug = generateSlug(req.body.title);
     }
-    
+
     if (slug) {
-      // Ensure uniqueness
       let uniqueSlug = slug;
       let counter = 1;
-      while (await Competition.findOne({ where: { slug: uniqueSlug } })) {
+      while (await prisma.competition.findFirst({ where: { slug: uniqueSlug } })) {
         uniqueSlug = `${slug}-${counter}`;
         counter++;
       }
       req.body.slug = uniqueSlug;
     }
 
-  const comp = await Competition.create(req.body);
-  getIO()?.emit('competition_created', comp);
-  res.status(201).json(comp);
+    const comp = await prisma.competition.create({ data: req.body });
+    getIO()?.emit('competition_created', comp);
+    res.status(201).json(comp);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -72,47 +52,44 @@ export const createCompetition = async (req, res) => {
  * List competitions with optional filtering.
  *
  * @route GET /api/competitions
- * @param {Request} req
- * @param {Response} res
  */
 export const getCompetitions = async (req, res) => {
   try {
-    const { q, country_id, limit = 50, offset = 0, sort = 'id', order = 'ASC', is_active, start_date_from, start_date_to, withCount } = req.query;
+    const { q, limit = 50, offset = 0, sort = 'id', order = 'ASC', is_active, start_date_from, start_date_to, withCount } = req.query;
     const where = {};
-    if (q) where.title = { [Op.like]: `%${q}%` };
-    if (country_id) where.country_id = country_id;
+    if (q) where.title = { contains: q, mode: 'insensitive' };
     if (typeof is_active !== 'undefined') where.is_active = String(is_active) === 'true';
     if (start_date_from || start_date_to) {
       where.start_date = {};
-      if (start_date_from) where.start_date[Op.gte] = new Date(start_date_from);
-      if (start_date_to) where.start_date[Op.lte] = new Date(start_date_to);
+      if (start_date_from) where.start_date.gte = new Date(start_date_from);
+      if (start_date_to) where.start_date.lte = new Date(start_date_to);
     }
 
-    const opts = {
-      where,
-      limit: Number(limit),
-      offset: Number(offset),
-      order: [[sort, String(order).toUpperCase() === 'DESC' ? 'DESC' : 'ASC']],
-      // Include count of approved registrations as teams_registered
-      attributes: {
-        include: [
-          [
-            db.sequelize.literal(
-              '(SELECT COUNT(*) FROM `Registration` WHERE `Registration`.`competition_id` = `Competition`.`id` AND `Registration`.`status` = \'approved\')'
-            ),
-            'teams_registered'
-          ]
-        ]
-      }
-    };
+    const orderBy = { [sort]: String(order).toLowerCase() === 'desc' ? 'desc' : 'asc' };
 
     if (String(withCount) === 'true') {
-      const { count, rows } = await Competition.findAndCountAll(opts);
-      return res.json({ items: rows, total: count });
+      const [items, total] = await prisma.$transaction([
+        prisma.competition.findMany({ where, take: Number(limit), skip: Number(offset), orderBy }),
+        prisma.competition.count({ where })
+      ]);
+      // Attach teams_registered count
+      const withRegistered = await Promise.all(items.map(async (comp) => {
+        const teams_registered = await prisma.registration.count({
+          where: { competition_id: comp.id, status: 'approved' }
+        });
+        return { ...comp, teams_registered };
+      }));
+      return res.json({ items: withRegistered, total });
     }
 
-    const items = await Competition.findAll(opts);
-    return res.json(items);
+    const items = await prisma.competition.findMany({ where, take: Number(limit), skip: Number(offset), orderBy });
+    const withRegistered = await Promise.all(items.map(async (comp) => {
+      const teams_registered = await prisma.registration.count({
+        where: { competition_id: comp.id, status: 'approved' }
+      });
+      return { ...comp, teams_registered };
+    }));
+    return res.json(withRegistered);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -125,8 +102,6 @@ const favKey = (userId) => `user:${userId}:favorites:competitions`;
  * Add a competition to the current user's favorites (Redis set).
  *
  * @route POST /api/competitions/:id/favorite
- * @param {Request} req
- * @param {Response} res
  */
 export const addFavoriteCompetition = async (req, res) => {
   try {
@@ -144,8 +119,6 @@ export const addFavoriteCompetition = async (req, res) => {
  * Remove a competition from the current user's favorites (Redis set).
  *
  * @route DELETE /api/competitions/:id/favorite
- * @param {Request} req
- * @param {Response} res
  */
 export const removeFavoriteCompetition = async (req, res) => {
   try {
@@ -163,8 +136,6 @@ export const removeFavoriteCompetition = async (req, res) => {
  * List the current user's favorite competitions.
  *
  * @route GET /api/competitions/favorites/mine
- * @param {Request} req
- * @param {Response} res
  */
 export const listFavoriteCompetitions = async (req, res) => {
   try {
@@ -172,7 +143,7 @@ export const listFavoriteCompetitions = async (req, res) => {
     if (!userId) return res.status(401).json({ error: 'No autorizado' });
     const ids = await redisClient.sMembers(favKey(userId));
     if (!ids || !ids.length) return res.json([]);
-    const items = await Competition.findAll({ where: { id: { [Op.in]: ids.map((s) => Number(s)) } } });
+    const items = await prisma.competition.findMany({ where: { id: { in: ids.map(s => Number(s)) } } });
     return res.json(items);
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -186,27 +157,25 @@ export const listFavoriteCompetitions = async (req, res) => {
  * sensitive fields like `stream_url` are omitted.
  *
  * @route GET /api/competitions/:id
- * @param {Request} req
- * @param {Response} res
  */
 export const getCompetitionById = async (req, res) => {
   try {
-    const item = await Competition.findByPk(req.params.id);
+    const item = await prisma.competition.findUnique({ where: { id: Number(req.params.id) } });
     if (!item) return res.status(404).json({ error: 'Competition not found' });
 
     // Check if user is approved for this competition
     let isApproved = false;
     const currentUser = req.user || req.session?.user;
-    
+
     if (currentUser) {
-      const userTeams = await TeamMembers.findAll({ where: { user_id: currentUser.id, left_at: null } });
+      const userTeams = await prisma.teamMember.findMany({ where: { user_id: currentUser.id, left_at: null } });
       const teamIds = userTeams.map(tm => tm.team_id);
-      
+
       if (teamIds.length > 0) {
-        const registration = await Registration.findOne({
+        const registration = await prisma.registration.findFirst({
           where: {
             competition_id: item.id,
-            team_id: { [Op.in]: teamIds },
+            team_id: { in: teamIds },
             status: 'approved'
           }
         });
@@ -214,8 +183,7 @@ export const getCompetitionById = async (req, res) => {
       }
     }
 
-    const result = item.toJSON();
-    result.is_approved = isApproved;
+    const result = { ...item, is_approved: isApproved };
 
     // Hide sensitive info if not approved
     if (!isApproved) {
@@ -235,22 +203,20 @@ export const getCompetitionById = async (req, res) => {
  * Emits `competition_updated` via Socket.IO.
  *
  * @route PUT /api/competitions/:id
- * @param {Request} req
- * @param {Response} res
  */
 export const updateCompetition = async (req, res) => {
   try {
-    // First check if competition exists
-    const existing = await Competition.findByPk(req.params.id);
+    const id = Number(req.params.id);
+    const existing = await prisma.competition.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ error: 'Competition not found' });
 
     if (req.body.is_active) {
-      await Competition.update({ is_active: false }, { where: { id: { [Op.ne]: req.params.id } } });
+      await prisma.competition.updateMany({ where: { id: { not: id } }, data: { is_active: false } });
     }
-    await Competition.update(req.body, { where: { id: req.params.id } });
-  const updatedItem = await Competition.findByPk(req.params.id);
-  getIO()?.emit('competition_updated', updatedItem);
-  res.json(updatedItem);
+
+    const updatedItem = await prisma.competition.update({ where: { id }, data: req.body });
+    getIO()?.emit('competition_updated', updatedItem);
+    res.json(updatedItem);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -261,15 +227,15 @@ export const updateCompetition = async (req, res) => {
  * Emits `competition_deleted` via Socket.IO.
  *
  * @route DELETE /api/competitions/:id
- * @param {Request} req
- * @param {Response} res
  */
 export const deleteCompetition = async (req, res) => {
   try {
-  const deleted = await Competition.destroy({ where: { id: req.params.id } });
-    if (!deleted) return res.status(404).json({ error: 'Competition not found' });
-  if (deleted) getIO()?.emit('competition_deleted', { id: req.params.id });
-  res.json({ message: 'Competition deleted' });
+    const id = Number(req.params.id);
+    const existing = await prisma.competition.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ error: 'Competition not found' });
+    await prisma.competition.delete({ where: { id } });
+    getIO()?.emit('competition_deleted', { id: req.params.id });
+    res.json({ message: 'Competition deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

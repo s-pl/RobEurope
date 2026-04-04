@@ -5,9 +5,7 @@
  * status helpers, and competition registration.
  */
 
-import db from '../models/index.js';
-const { Team, User, Country, TeamMembers, TeamInvite, TeamJoinRequest, Registration, Competition, Notification, TeamLog } = db;
-import { Op } from 'sequelize';
+import prisma from '../lib/prisma.js';
 import { getFileInfo } from '../middleware/upload.middleware.js';
 import { v4 as uuidv4 } from 'uuid';
 import { emitToUser } from '../utils/realtime.js';
@@ -15,18 +13,10 @@ import { emitToUser } from '../utils/realtime.js';
 /**
  * Helper: create a TeamLog entry for activity tracking.
  * Silently catches errors so it never breaks the main flow.
- *
- * @param {object} opts
- * @param {number} opts.team_id
- * @param {string} opts.content - Human-readable log message
- * @param {string|number|null} [opts.author_id] - User who triggered the action
- * @param {number|null} [opts.competition_id] - Related competition (0 if none)
  */
 const logTeamActivity = async ({ team_id, content, author_id = null, competition_id = 0 }) => {
   try {
-    if (TeamLog) {
-      await TeamLog.create({ team_id, competition_id, content, author_id });
-    }
+    await prisma.teamLog.create({ data: { team_id, competition_id, content, author_id } });
   } catch (_) { /* never break the main flow */ }
 };
 
@@ -34,74 +24,56 @@ const logTeamActivity = async ({ team_id, content, author_id = null, competition
 /**
  * Create a new team (authenticated).
  *
- * Enforces the single-team membership rule for the creator. Also creates the
- * creator's `TeamMembers` record with role `owner`.
- *
  * @route POST /api/teams
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const createTeam = async (req, res) => {
   try {
-    // The creator is the authenticated user
     const created_by_user_id = req.user?.id;
     if (!created_by_user_id) return res.status(401).json({ error: 'No autorizado' });
 
-    // A user can only belong to ONE team (enforced by index and app logic)
-    const existingMembership = await TeamMembers.findOne({ where: { user_id: created_by_user_id, left_at: null } }).catch(() => null);
+    const existingMembership = await prisma.teamMember.findFirst({ where: { user_id: created_by_user_id, left_at: null } }).catch(() => null);
     if (existingMembership) return res.status(400).json({ error: 'Ya perteneces a un equipo' });
 
-    // Validate foreign keys before attempting insert to return a friendly 400
     const { country_id, educational_center_id } = req.body;
     if (country_id) {
-      // Country may be optional in some deployments
-      if (Country) {
-        const c = await Country.findByPk(country_id);
-        if (!c) return res.status(400).json({ error: `country_id '${country_id}' does not exist` });
-      }
+      const c = await prisma.country.findUnique({ where: { id: Number(country_id) } });
+      if (!c) return res.status(400).json({ error: `country_id '${country_id}' does not exist` });
     }
 
-    // Validate educational center if provided
     if (educational_center_id) {
-      const EducationalCenter = db.EducationalCenter;
-      if (EducationalCenter) {
-        const center = await EducationalCenter.findByPk(educational_center_id);
-        if (!center) return res.status(400).json({ error: `educational_center_id '${educational_center_id}' does not exist` });
-        if (center.approval_status !== 'approved') {
-          return res.status(400).json({ error: 'El centro educativo aún no ha sido aprobado' });
-        }
+      const center = await prisma.educationalCenter.findUnique({ where: { id: Number(educational_center_id) } });
+      if (!center) return res.status(400).json({ error: `educational_center_id '${educational_center_id}' does not exist` });
+      if (center.approval_status !== 'approved') {
+        return res.status(400).json({ error: 'El centro educativo aún no ha sido aprobado' });
       }
     }
 
     const teamData = { ...req.body, created_by_user_id };
 
-    // Auto-generate slug from team name
-    // Handle file upload
     const fileInfo = getFileInfo(req);
     if (fileInfo) {
       teamData.logo_url = fileInfo.url;
     }
 
-    const team = await Team.create(teamData);
+    const team = await prisma.team.create({ data: teamData });
 
-    // Make creator the owner in TeamMembers
-    await TeamMembers.create({ team_id: team.id, user_id: created_by_user_id, role: 'owner', joined_at: new Date(), left_at: null });
-    // optional: notify creator (could be useful for consistency)
+    await prisma.teamMember.create({ data: { team_id: team.id, user_id: created_by_user_id, role: 'owner', joined_at: new Date(), left_at: null } });
+
     try {
-      const notif = await Notification.create({
-        user_id: created_by_user_id,
-        title: 'Equipo creado',
-        message: `Has creado el equipo ${team.name}`,
-        type: 'team_invite'
+      const notif = await prisma.notification.create({
+        data: {
+          user_id: created_by_user_id,
+          title: 'Equipo creado',
+          message: `Has creado el equipo ${team.name}`,
+          type: 'team_invite'
+        }
       });
-      emitToUser(created_by_user_id, 'notification', notif.toJSON());
+      emitToUser(created_by_user_id, 'notification', notif);
     } catch (_) {}
     await logTeamActivity({ team_id: team.id, content: `Team "${team.name}" created`, author_id: created_by_user_id });
     res.status(201).json(team);
   } catch (err) {
-    // Map common DB constraint errors to 400 for better client experience
-    if (err && (err.name === 'SequelizeForeignKeyConstraintError' || err.name === 'SequelizeUniqueConstraintError')) {
+    if (err && (err.code === 'P2003' || err.code === 'P2002')) {
       return res.status(400).json({ error: err.message });
     }
     res.status(500).json({ error: err.message });
@@ -112,30 +84,25 @@ export const createTeam = async (req, res) => {
  * List teams with optional filtering.
  *
  * @route GET /api/teams
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const getTeams = async (req, res) => {
   try {
     const { q, country_id, limit = 50, offset = 0, sort = 'name', order = 'ASC', withCount } = req.query;
     const where = {};
-    if (q) where.name = { [Op.like]: `%${q}%` };
-    if (country_id) where.country_id = country_id;
+    if (q) where.name = { contains: q, mode: 'insensitive' };
+    if (country_id) where.country_id = Number(country_id);
 
-    const opts = {
-      where,
-      limit: Number(limit),
-      offset: Number(offset),
-      order: [[sort, String(order).toUpperCase() === 'DESC' ? 'DESC' : 'ASC']]
-    };
+    const orderBy = { [sort]: String(order).toLowerCase() === 'desc' ? 'desc' : 'asc' };
 
     if (String(withCount) === 'true') {
-      const { count, rows } = await Team.findAndCountAll(opts);
-      return res.json({ items: rows, total: count });
+      const [items, total] = await prisma.$transaction([
+        prisma.team.findMany({ where, take: Number(limit), skip: Number(offset), orderBy }),
+        prisma.team.count({ where })
+      ]);
+      return res.json({ items, total });
     }
 
-    const items = await Team.findAll(opts);
+    const items = await prisma.team.findMany({ where, take: Number(limit), skip: Number(offset), orderBy });
     return res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -146,13 +113,10 @@ export const getTeams = async (req, res) => {
  * Get a team by id.
  *
  * @route GET /api/teams/:id
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const getTeamById = async (req, res) => {
   try {
-    const item = await Team.findByPk(req.params.id);
+    const item = await prisma.team.findUnique({ where: { id: Number(req.params.id) } });
     if (!item) return res.status(404).json({ error: 'Team not found' });
     res.json(item);
   } catch (err) {
@@ -163,27 +127,19 @@ export const getTeamById = async (req, res) => {
 /**
  * Update a team by id (owner only via middleware).
  *
- * Supports optional logo upload.
- *
  * @route PUT /api/teams/:id
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const updateTeam = async (req, res) => {
   try {
+    const id = Number(req.params.id);
     const updates = { ...req.body };
 
-    // Handle file upload
     const fileInfo = getFileInfo(req);
     if (fileInfo) {
       updates.logo_url = fileInfo.url;
     }
 
-    const [updated] = await Team.update(updates, { where: { id: req.params.id } });
-    // Note: updated might be 0 if no changes were made, so we don't return 404 here.
-    
-    const updatedItem = await Team.findByPk(req.params.id);
+    const updatedItem = await prisma.team.update({ where: { id }, data: updates }).catch(() => null);
     if (!updatedItem) return res.status(404).json({ error: 'Team not found' });
     res.json(updatedItem);
   } catch (err) {
@@ -195,14 +151,13 @@ export const updateTeam = async (req, res) => {
  * Delete a team by id (owner only via middleware).
  *
  * @route DELETE /api/teams/:id
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const deleteTeam = async (req, res) => {
   try {
-    const deleted = await Team.destroy({ where: { id: req.params.id } });
-    if (!deleted) return res.status(404).json({ error: 'Team not found' });
+    const id = Number(req.params.id);
+    const existing = await prisma.team.findUnique({ where: { id } });
+    if (!existing) return res.status(404).json({ error: 'Team not found' });
+    await prisma.team.delete({ where: { id } });
     res.json({ message: 'Team deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -212,29 +167,21 @@ export const deleteTeam = async (req, res) => {
 /**
  * Creates a team invitation.
  *
- * The requester must be the team owner (enforced by `requireOwnership('Team')`).
- * If the target user exists, a `team_invite` notification is created with a `meta.invite_token`
- * so the invite can be accepted/declined from the UI.
- *
  * @route POST /api/teams/:id/invite
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const inviteToTeam = async (req, res) => {
   try {
     const teamId = Number(req.params.id);
-    const team = await Team.findByPk(teamId);
+    const team = await prisma.team.findUnique({ where: { id: teamId } });
     if (!team) return res.status(404).json({ error: 'Team not found' });
 
-    // requireOwnership middleware already checked ownership by created_by_user_id
     const { email, username, user_id, expires_in_hours = 168 } = req.body || {};
     if (!email && !username && !user_id) return res.status(400).json({ error: 'email o username requerido' });
 
     let targetUserId = user_id || null;
     if (!targetUserId && (username || email)) {
       const where = username ? { username } : { email };
-      const found = await User.findOne({ where });
+      const found = await prisma.user.findFirst({ where });
       if (!found && username) return res.status(400).json({ error: `username '${username}' no existe` });
       if (!found && email) {
         // Invite by email only (no user yet) is allowed
@@ -244,33 +191,33 @@ export const inviteToTeam = async (req, res) => {
     }
 
     if (targetUserId) {
-      const u = await User.findByPk(targetUserId);
+      const u = await prisma.user.findUnique({ where: { id: targetUserId } });
       if (!u) return res.status(400).json({ error: 'Usuario no existe' });
-      // user must not already belong to a team
-      const exists = await TeamMembers.findOne({ where: { user_id: targetUserId, left_at: null } });
+      const exists = await prisma.teamMember.findFirst({ where: { user_id: targetUserId, left_at: null } });
       if (exists) return res.status(400).json({ error: 'El usuario ya pertenece a un equipo' });
     }
 
     const token = uuidv4();
     const expires_at = new Date(Date.now() + Number(expires_in_hours) * 3600 * 1000);
-    const invite = await TeamInvite.create({ team_id: teamId, email: email || null, user_id: targetUserId || null, token, status: 'pending', expires_at });
+    const invite = await prisma.teamInvite.create({ data: { team_id: teamId, email: email || null, user_id: targetUserId || null, token, status: 'pending', expires_at } });
 
-    // Realtime + Notification to invited user (if user_id provided)
     if (targetUserId) {
       try {
-        const notif = await Notification.create({
-          user_id: targetUserId,
-          title: 'Invitación de equipo',
-          message: `Has sido invitado a unirte a ${team.name}`,
-          type: 'team_invite',
-          meta: {
-            kind: 'team_invite',
-            invite_token: token,
-            team_id: teamId,
-            team_name: team.name
+        const notif = await prisma.notification.create({
+          data: {
+            user_id: targetUserId,
+            title: 'Invitación de equipo',
+            message: `Has sido invitado a unirte a ${team.name}`,
+            type: 'team_invite',
+            meta: {
+              kind: 'team_invite',
+              invite_token: token,
+              team_id: teamId,
+              team_name: team.name
+            }
           }
         });
-        emitToUser(targetUserId, 'notification', notif.toJSON());
+        emitToUser(targetUserId, 'notification', notif);
       } catch (_) {}
     }
 
@@ -284,12 +231,7 @@ export const inviteToTeam = async (req, res) => {
 /**
  * Declines a team invitation by token.
  *
- * If the invitation is bound to a specific `user_id`, the authenticated user must match.
- *
  * @route POST /api/teams/invitations/decline
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const declineInvite = async (req, res) => {
   try {
@@ -298,29 +240,29 @@ export const declineInvite = async (req, res) => {
     const { token } = req.body || {};
     if (!token) return res.status(400).json({ error: 'token requerido' });
 
-    const invite = await TeamInvite.findOne({ where: { token } });
+    const invite = await prisma.teamInvite.findUnique({ where: { token } });
     if (!invite) return res.status(404).json({ error: 'Invitación no encontrada' });
     if (invite.status !== 'pending') return res.status(400).json({ error: 'Invitación no disponible' });
     if (invite.expires_at && new Date(invite.expires_at).getTime() < Date.now()) return res.status(400).json({ error: 'Invitación expirada' });
 
-    // If the invite is tied to a specific user, enforce it.
     if (invite.user_id && invite.user_id !== userId) {
       return res.status(403).json({ error: 'No autorizado' });
     }
 
-    await invite.update({ status: 'declined' });
+    await prisma.teamInvite.update({ where: { id: invite.id }, data: { status: 'revoked' } });
 
-    // Notify team owner
     try {
-      const team = await Team.findByPk(invite.team_id);
-      if (team) {
-        const notif = await Notification.create({
-          user_id: team.created_by_user_id,
-          title: 'Invitación rechazada',
-          message: `Un usuario ha rechazado la invitación a ${team.name}`,
-          type: 'team_invite'
+      const team = await prisma.team.findUnique({ where: { id: invite.team_id } });
+      if (team && team.created_by_user_id) {
+        const notif = await prisma.notification.create({
+          data: {
+            user_id: team.created_by_user_id,
+            title: 'Invitación rechazada',
+            message: `Un usuario ha rechazado la invitación a ${team.name}`,
+            type: 'team_invite'
+          }
         });
-        emitToUser(team.created_by_user_id, 'notification', notif.toJSON());
+        emitToUser(team.created_by_user_id, 'notification', notif);
       }
     } catch (_) {}
     await logTeamActivity({ team_id: invite.team_id, content: `Invitation declined by user #${userId}`, author_id: userId });
@@ -333,12 +275,7 @@ export const declineInvite = async (req, res) => {
 /**
  * Accepts a team invitation by token.
  *
- * Enforces the single-team membership rule.
- *
  * @route POST /api/teams/invitations/accept
- * @param {Express.Request} req Express request.
- * @param {Express.Response} res Express response.
- * @returns {Promise<void>}
  */
 export const acceptInvite = async (req, res) => {
   try {
@@ -347,29 +284,29 @@ export const acceptInvite = async (req, res) => {
     const { token } = req.body || {};
     if (!token) return res.status(400).json({ error: 'token requerido' });
 
-    const invite = await TeamInvite.findOne({ where: { token } });
+    const invite = await prisma.teamInvite.findUnique({ where: { token } });
     if (!invite) return res.status(404).json({ error: 'Invitación no encontrada' });
     if (invite.status !== 'pending') return res.status(400).json({ error: 'Invitación no disponible' });
     if (invite.expires_at && new Date(invite.expires_at).getTime() < Date.now()) return res.status(400).json({ error: 'Invitación expirada' });
 
-    // Check single-team rule
-    const existing = await TeamMembers.findOne({ where: { user_id: userId, left_at: null } });
+    const existing = await prisma.teamMember.findFirst({ where: { user_id: userId, left_at: null } });
     if (existing) return res.status(400).json({ error: 'Ya perteneces a un equipo' });
 
-    await TeamMembers.create({ team_id: invite.team_id, user_id: userId, role: 'member', joined_at: new Date(), left_at: null });
-    await invite.update({ status: 'accepted' });
+    await prisma.teamMember.create({ data: { team_id: invite.team_id, user_id: userId, role: 'member', joined_at: new Date(), left_at: null } });
+    await prisma.teamInvite.update({ where: { id: invite.id }, data: { status: 'accepted' } });
 
-    // Notify team owner
     try {
-      const team = await Team.findByPk(invite.team_id);
-      if (team) {
-        const notif = await Notification.create({
-          user_id: team.created_by_user_id,
-          title: 'Invitación aceptada',
-          message: `Un usuario se ha unido a ${team.name}`,
-          type: 'team_invite'
+      const team = await prisma.team.findUnique({ where: { id: invite.team_id } });
+      if (team && team.created_by_user_id) {
+        const notif = await prisma.notification.create({
+          data: {
+            user_id: team.created_by_user_id,
+            title: 'Invitación aceptada',
+            message: `Un usuario se ha unido a ${team.name}`,
+            type: 'team_invite'
+          }
         });
-        emitToUser(team.created_by_user_id, 'notification', notif.toJSON());
+        emitToUser(team.created_by_user_id, 'notification', notif);
       }
     } catch (_) {}
     await logTeamActivity({ team_id: invite.team_id, content: `Member added (user #${userId}) via invitation`, author_id: userId });
@@ -383,36 +320,36 @@ export const acceptInvite = async (req, res) => {
  * Create a request to join a team.
  *
  * @route POST /api/teams/:id/requests
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const requestJoinTeam = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'No autorizado' });
     const teamId = Number(req.params.id);
-    const team = await Team.findByPk(teamId);
+    const team = await prisma.team.findUnique({ where: { id: teamId } });
     if (!team) return res.status(404).json({ error: 'Team not found' });
 
-    const existingMembership = await TeamMembers.findOne({ where: { user_id: userId, left_at: null } });
+    const existingMembership = await prisma.teamMember.findFirst({ where: { user_id: userId, left_at: null } });
     if (existingMembership) return res.status(400).json({ error: 'Ya perteneces a un equipo' });
 
-    const reqRow = await TeamJoinRequest.create({ team_id: teamId, user_id: userId, status: 'pending' });
+    const reqRow = await prisma.teamJoinRequest.create({ data: { team_id: teamId, user_id: userId, status: 'pending' } });
 
-    // Notify team owner about the join request
     try {
-      const notif = await Notification.create({
-        user_id: team.created_by_user_id,
-        title: 'Solicitud de unión',
-        message: `Un usuario ha solicitado unirse a ${team.name}`,
-        type: 'team_invite'
-      });
-      emitToUser(team.created_by_user_id, 'notification', notif.toJSON());
+      if (team.created_by_user_id) {
+        const notif = await prisma.notification.create({
+          data: {
+            user_id: team.created_by_user_id,
+            title: 'Solicitud de unión',
+            message: `Un usuario ha solicitado unirse a ${team.name}`,
+            type: 'team_invite'
+          }
+        });
+        emitToUser(team.created_by_user_id, 'notification', notif);
+      }
     } catch (_) {}
     return res.status(201).json(reqRow);
   } catch (err) {
-    if (err && err.name === 'SequelizeUniqueConstraintError') {
+    if (err && err.code === 'P2002') {
       return res.status(400).json({ error: 'Ya solicitaste unirte a este equipo' });
     }
     return res.status(500).json({ error: err.message });
@@ -423,39 +360,36 @@ export const requestJoinTeam = async (req, res) => {
  * Approve a join request (team owner only).
  *
  * @route POST /api/teams/requests/:requestId/approve
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const approveJoinRequest = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'No autorizado' });
     const requestId = Number(req.params.requestId);
-    const jr = await TeamJoinRequest.findByPk(requestId);
+    const jr = await prisma.teamJoinRequest.findUnique({ where: { id: requestId } });
     if (!jr) return res.status(404).json({ error: 'Solicitud no encontrada' });
 
-    const team = await Team.findByPk(jr.team_id);
+    const team = await prisma.team.findUnique({ where: { id: jr.team_id } });
     if (!team) return res.status(404).json({ error: 'Team not found' });
     if (team.created_by_user_id !== userId) return res.status(403).json({ error: 'Solo el propietario del equipo puede aprobar' });
     if (jr.status !== 'pending') return res.status(400).json({ error: 'La solicitud no está pendiente' });
 
-    // Ensure the user still isn't member of any team
-    const existing = await TeamMembers.findOne({ where: { user_id: jr.user_id, left_at: null } });
+    const existing = await prisma.teamMember.findFirst({ where: { user_id: jr.user_id, left_at: null } });
     if (existing) return res.status(400).json({ error: 'El usuario ya pertenece a un equipo' });
 
-    await TeamMembers.create({ team_id: jr.team_id, user_id: jr.user_id, role: 'member', joined_at: new Date(), left_at: null });
-    await jr.update({ status: 'approved' });
+    await prisma.teamMember.create({ data: { team_id: jr.team_id, user_id: jr.user_id, role: 'member', joined_at: new Date(), left_at: null } });
+    await prisma.teamJoinRequest.update({ where: { id: requestId }, data: { status: 'approved' } });
 
-    // Notify the user about approval
     try {
-      const notif = await Notification.create({
-        user_id: jr.user_id,
-        title: 'Solicitud aprobada',
-        message: 'Tu solicitud para unirte al equipo ha sido aprobada',
-        type: 'team_invite'
+      const notif = await prisma.notification.create({
+        data: {
+          user_id: jr.user_id,
+          title: 'Solicitud aprobada',
+          message: 'Tu solicitud para unirte al equipo ha sido aprobada',
+          type: 'team_invite'
+        }
       });
-      emitToUser(jr.user_id, 'notification', notif.toJSON());
+      emitToUser(jr.user_id, 'notification', notif);
     } catch (_) {}
     await logTeamActivity({ team_id: jr.team_id, content: `Join request approved for user #${jr.user_id}`, author_id: userId });
     return res.json({ success: true });
@@ -467,12 +401,7 @@ export const approveJoinRequest = async (req, res) => {
 /**
  * Register a team into a competition.
  *
- * Creates a `Registration` row with status `pending`.
- *
  * @route POST /api/teams/:id/register-competition
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const registerTeamInCompetition = async (req, res) => {
   try {
@@ -480,16 +409,16 @@ export const registerTeamInCompetition = async (req, res) => {
     const { competition_id } = req.body || {};
     if (!competition_id) return res.status(400).json({ error: 'competition_id requerido' });
 
-    const team = await Team.findByPk(teamId);
+    const team = await prisma.team.findUnique({ where: { id: teamId } });
     if (!team) return res.status(404).json({ error: 'Team not found' });
-    const comp = await Competition.findByPk(competition_id);
+    const comp = await prisma.competition.findUnique({ where: { id: Number(competition_id) } });
     if (!comp) return res.status(404).json({ error: 'Competition not found' });
 
-    const existing = await Registration.findOne({ where: { team_id: teamId, competition_id } });
+    const existing = await prisma.registration.findFirst({ where: { team_id: teamId, competition_id: Number(competition_id) } });
     if (existing) return res.status(400).json({ error: 'El equipo ya está registrado en esta competición' });
 
-    const reg = await Registration.create({ team_id: teamId, competition_id, status: 'pending', registration_date: new Date() });
-    await logTeamActivity({ team_id: teamId, content: `Registration sent for competition #${competition_id}`, author_id: req.user?.id, competition_id });
+    const reg = await prisma.registration.create({ data: { team_id: teamId, competition_id: Number(competition_id), status: 'pending', registration_date: new Date() } });
+    await logTeamActivity({ team_id: teamId, content: `Registration sent for competition #${competition_id}`, author_id: req.user?.id, competition_id: Number(competition_id) });
     return res.status(201).json(reg);
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -500,28 +429,21 @@ export const registerTeamInCompetition = async (req, res) => {
  * Return the team the current user belongs to (or null).
  *
  * @route GET /api/teams/mine
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const getMyTeam = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'No autorizado' });
 
-    // Find active membership
-    const membership = await TeamMembers.findOne({ 
-      where: { user_id: userId, left_at: null } 
-    });
+    const membership = await prisma.teamMember.findFirst({ where: { user_id: userId, left_at: null } });
 
     if (!membership) {
-      // Fallback: check if they own a team (legacy/safety check)
-      const owned = await Team.findOne({ where: { created_by_user_id: userId } });
+      const owned = await prisma.team.findFirst({ where: { created_by_user_id: userId } });
       if (owned) return res.json(owned);
       return res.json(null);
     }
 
-    const team = await Team.findByPk(membership.team_id);
+    const team = await prisma.team.findUnique({ where: { id: membership.team_id } });
     return res.json(team || null);
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -532,24 +454,20 @@ export const getMyTeam = async (req, res) => {
  * List join requests for a team (owner only via middleware).
  *
  * @route GET /api/teams/:id/requests
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const listJoinRequests = async (req, res) => {
   try {
     const teamId = Number(req.params.id);
-    const items = await TeamJoinRequest.findAll({ where: { team_id: teamId }, order: [['created_at', 'DESC']] });
+    const items = await prisma.teamJoinRequest.findMany({ where: { team_id: teamId }, orderBy: { created_at: 'desc' } });
     const userIds = [...new Set(items.map(i => i.user_id))];
     let usersById = {};
     if (userIds.length) {
-      const users = await User.findAll({ where: { id: { [Op.in]: userIds } }, attributes: ['id', 'username', 'email', 'first_name', 'last_name'] });
+      const users = await prisma.user.findMany({ where: { id: { in: userIds } }, select: { id: true, username: true, email: true, first_name: true, last_name: true } });
       usersById = Object.fromEntries(users.map(u => [u.id, u]));
     }
     const enriched = items.map(i => {
       const u = usersById[i.user_id];
-      const plain = i.toJSON();
-      return { ...plain, user_username: u?.username || null, user_email: u?.email || null, user_name: u ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : null };
+      return { ...i, user_username: u?.username || null, user_email: u?.email || null, user_name: u ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : null };
     });
     return res.json(enriched);
   } catch (err) {
@@ -561,20 +479,17 @@ export const listJoinRequests = async (req, res) => {
  * Leave the current team (non-owner only).
  *
  * @route POST /api/teams/leave
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const leaveTeam = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'No autorizado' });
-    const membership = await TeamMembers.findOne({ where: { user_id: userId, left_at: null } });
+    const membership = await prisma.teamMember.findFirst({ where: { user_id: userId, left_at: null } });
     if (!membership) return res.status(400).json({ error: 'No perteneces a ningún equipo' });
-    const team = await Team.findByPk(membership.team_id);
+    const team = await prisma.team.findUnique({ where: { id: membership.team_id } });
     if (!team) return res.status(404).json({ error: 'Team not found' });
     if (team.created_by_user_id === userId) return res.status(400).json({ error: 'El propietario no puede salir del equipo' });
-    await membership.update({ left_at: new Date() });
+    await prisma.teamMember.update({ where: { id: membership.id }, data: { left_at: new Date() } });
     await logTeamActivity({ team_id: membership.team_id, content: `Member removed (user #${userId} left the team)`, author_id: userId });
     return res.json({ success: true });
   } catch (err) {
@@ -586,16 +501,13 @@ export const leaveTeam = async (req, res) => {
  * Get the current user's membership/ownership status.
  *
  * @route GET /api/teams/status
- * @param {Express.Request} req
- * @param {Express.Response} res
- * @returns {Promise<void>}
  */
 export const getMembershipStatus = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'No autorizado' });
-    const owned = await Team.findOne({ where: { created_by_user_id: userId } });
-    const membership = await TeamMembers.findOne({ where: { user_id: userId, left_at: null } });
+    const owned = await prisma.team.findFirst({ where: { created_by_user_id: userId } });
+    const membership = await prisma.teamMember.findFirst({ where: { user_id: userId, left_at: null } });
     return res.json({
       ownsTeam: Boolean(owned),
       ownedTeamId: owned ? owned.id : null,
@@ -615,14 +527,14 @@ export const getMyJoinRequests = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'No autorizado' });
-    const items = await TeamJoinRequest.findAll({ where: { user_id: userId }, order: [['created_at', 'DESC']] });
+    const items = await prisma.teamJoinRequest.findMany({ where: { user_id: userId }, orderBy: { created_at: 'desc' } });
     const teamIds = [...new Set(items.map(i => i.team_id))];
     let teamsById = {};
     if (teamIds.length) {
-      const teams = await Team.findAll({ where: { id: { [Op.in]: teamIds } }, attributes: ['id', 'name', 'city', 'description'] });
+      const teams = await prisma.team.findMany({ where: { id: { in: teamIds } }, select: { id: true, name: true, city: true, description: true } });
       teamsById = Object.fromEntries(teams.map(t => [t.id, t]));
     }
-    return res.json(items.map(i => ({ ...i.toJSON(), team: teamsById[i.team_id] || null })));
+    return res.json(items.map(i => ({ ...i, team: teamsById[i.team_id] || null })));
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -638,11 +550,11 @@ export const cancelJoinRequest = async (req, res) => {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: 'No autorizado' });
     const requestId = Number(req.params.requestId);
-    const jr = await TeamJoinRequest.findByPk(requestId);
+    const jr = await prisma.teamJoinRequest.findUnique({ where: { id: requestId } });
     if (!jr) return res.status(404).json({ error: 'Solicitud no encontrada' });
     if (String(jr.user_id) !== String(userId)) return res.status(403).json({ error: 'No autorizado' });
     if (jr.status !== 'pending') return res.status(400).json({ error: 'Solo se pueden cancelar solicitudes pendientes' });
-    await jr.destroy();
+    await prisma.teamJoinRequest.delete({ where: { id: requestId } });
     return res.json({ success: true });
   } catch (err) {
     return res.status(500).json({ error: err.message });

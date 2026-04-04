@@ -1,0 +1,640 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  user
+  center_admin
+  super_admin
+}
+
+enum ApprovalStatus {
+  pending
+  approved
+  rejected
+}
+
+enum CompetitionStatus {
+  draft
+  published
+  archived
+}
+
+enum StreamStatus {
+  offline
+  scheduled
+  live
+}
+
+enum NotificationType {
+  registration_team_status
+  team_invite
+  mention
+  team_message
+}
+
+enum ContentType {
+  file
+  text
+  mixed
+}
+
+enum Visibility {
+  hidden
+  public
+  restricted
+}
+
+enum MediaType {
+  image
+  video
+}
+
+enum MessageType {
+  text
+  file
+  image
+  ai
+}
+
+enum SystemAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  REGISTER
+  UPLOAD
+  DOWNLOAD
+}
+
+enum SystemEntityType {
+  User
+  Team
+  Post
+  Competition
+  Sponsor
+  Stream
+  Registration
+  Notification
+  Country
+  TeamMember
+  System
+}
+
+enum InviteStatus {
+  pending
+  accepted
+  revoked
+  expired
+}
+
+enum RequestType {
+  create_center
+  join_center
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model User {
+  id                    String    @id @default(uuid()) @db.Uuid
+  country_id            Int?
+  first_name            String
+  last_name             String
+  username              String    @unique
+  email                 String    @unique
+  password_hash         String?
+  auth0_id              String?   @unique
+  google_id             String?   @unique
+  github_id             String?   @unique
+  apple_id              String?   @unique
+  phone                 String?
+  bio                   String?
+  profile_photo_url     String?
+  role                  UserRole  @default(user)
+  pending_role          UserRole?
+  educational_center_id Int?
+  is_active             Boolean   @default(true)
+  created_at            DateTime  @default(now())
+
+  country               Country?              @relation(fields: [country_id], references: [id])
+  educationalCenter     EducationalCenter?    @relation("UserCenter", fields: [educational_center_id], references: [id])
+  adminOfCenters        EducationalCenter[]   @relation("CenterAdmin")
+  posts                 Post[]                @relation("PostAuthor")
+  postLikes             PostLike[]
+  comments              Comment[]             @relation("CommentAuthor")
+  teamMembers           TeamMember[]
+  teamMessages          TeamMessage[]
+  teamFiles             TeamFile[]            @relation("TeamFileUploader")
+  galleryUploads        Gallery[]             @relation("GalleryUploader")
+  archiveUploads        Archive[]             @relation("ArchiveUploader")
+  robotFileUploads      RobotFile[]           @relation("RobotFileUploader")
+  mediaUploads          Media[]               @relation("MediaUploader")
+  notifications         Notification[]
+  systemLogs            SystemLog[]
+  teamLogs              TeamLog[]             @relation("TeamLogAuthor")
+  centerAdminRequests   CenterAdminRequest[]  @relation("CenterAdminRequestUser")
+  centerAdminDecisions  CenterAdminRequest[]  @relation("CenterAdminDecider")
+  registrationApprovals Registration[]        @relation("RegistrationCenterApprover")
+  createdTeams          Team[]                @relation("TeamCreator")
+  reviews               Review[]
+
+  @@map("User")
+}
+
+model Country {
+  id         Int     @id @default(autoincrement())
+  name       String
+  code       String
+  flag_emoji String?
+
+  users               User[]
+  teams               Team[]
+  educationalCenters  EducationalCenter[]
+
+  @@map("Country")
+}
+
+model EducationalCenter {
+  id              Int            @id @default(autoincrement())
+  name            String         @unique
+  country_id      Int?
+  city            String?
+  address         String?
+  website_url     String?
+  phone           String?
+  email           String?
+  logo_url        String?
+  description     String?
+  admin_user_id   String?        @db.Uuid
+  approval_status ApprovalStatus @default(pending)
+  approval_reason String?
+  approved_at     DateTime?
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+
+  country             Country?             @relation(fields: [country_id], references: [id])
+  admin               User?                @relation("CenterAdmin", fields: [admin_user_id], references: [id])
+  users               User[]               @relation("UserCenter")
+  teams               Team[]
+  streams             Stream[]
+  centerAdminRequests CenterAdminRequest[]
+
+  @@map("EducationalCenter")
+}
+
+model Competition {
+  id                 Int               @id @default(autoincrement())
+  title              String
+  slug               String
+  description        String?
+  status             CompetitionStatus @default(draft)
+  location           String?
+  max_teams          Int?
+  registration_start DateTime?
+  registration_end   DateTime?
+  start_date         DateTime?
+  end_date           DateTime?
+  rules_url          String?
+  is_active          Boolean           @default(false)
+  stream_url         Json?
+
+  streams       Stream[]
+  registrations Registration[]
+  teams         Team[]
+  galleries     Gallery[]
+  archives      Archive[]
+  robotFiles    RobotFile[]
+  teamLogs      TeamLog[]
+
+  @@map("Competition")
+}
+
+model Team {
+  id                    Int       @id @default(autoincrement())
+  name                  String
+  slug                  String?   @unique
+  country_id            Int?
+  city                  String?
+  institution           String?
+  description           String?
+  website_url           String?
+  logo_url              String?
+  stream_url            String?
+  social_links          Json?
+  educational_center_id Int?
+  competition_id        Int?
+  created_by_user_id    String?   @db.Uuid
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+
+  country           Country?           @relation(fields: [country_id], references: [id])
+  educationalCenter EducationalCenter? @relation(fields: [educational_center_id], references: [id])
+  competition       Competition?        @relation(fields: [competition_id], references: [id])
+  createdBy         User?              @relation("TeamCreator", fields: [created_by_user_id], references: [id])
+  streams           Stream[]
+  registrations     Registration[]
+  teamMembers       TeamMember[]
+  teamMessages      TeamMessage[]
+  teamFiles         TeamFile[]
+  teamPage          TeamPage?
+  teamLogs          TeamLog[]
+  robotFiles        RobotFile[]
+  teamInvites       TeamInvite[]
+  teamJoinRequests  TeamJoinRequest[]
+
+  @@map("Team")
+}
+
+model TeamMember {
+  id        Int       @id @default(autoincrement())
+  team_id   Int
+  user_id   String    @db.Uuid
+  role      String
+  joined_at DateTime  @default(now())
+  left_at   DateTime?
+
+  team Team @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("TeamMembers")
+}
+
+model Registration {
+  id                       Int            @id @default(autoincrement())
+  team_id                  Int?
+  competition_id           Int?
+  status                   ApprovalStatus @default(pending)
+  decision_reason          String?
+  center_approval_status   ApprovalStatus @default(pending)
+  center_approved_by       String?        @db.Uuid
+  center_approval_reason   String?
+  center_approved_at       DateTime?
+  registration_password    String?
+  is_password_registration Boolean        @default(false)
+  registration_date        DateTime
+
+  team           Team?        @relation(fields: [team_id], references: [id])
+  competition    Competition? @relation(fields: [competition_id], references: [id])
+  centerApprover User?        @relation("RegistrationCenterApprover", fields: [center_approved_by], references: [id])
+
+  @@map("Registration")
+}
+
+model Post {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String
+  author_id   String?  @db.Uuid
+  media_urls  Json?
+  likes_count Int      @default(0)
+  views_count Int      @default(0)
+  is_pinned   Boolean  @default(false)
+  is_edited   Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  author    User?      @relation("PostAuthor", fields: [author_id], references: [id])
+  postLikes PostLike[]
+  comments  Comment[]
+
+  @@map("Post")
+}
+
+model PostLike {
+  id         Int      @id @default(autoincrement())
+  post_id    Int
+  user_id    String   @db.Uuid
+  created_at DateTime @default(now())
+
+  post Post @relation(fields: [post_id], references: [id])
+  user User @relation(fields: [user_id], references: [id])
+
+  @@map("PostLike")
+}
+
+model Comment {
+  id         Int      @id @default(autoincrement())
+  content    String
+  post_id    Int
+  author_id  String   @db.Uuid
+  parent_id  Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  post    Post      @relation(fields: [post_id], references: [id])
+  author  User      @relation("CommentAuthor", fields: [author_id], references: [id])
+  parent  Comment?  @relation("CommentReplies", fields: [parent_id], references: [id])
+  replies Comment[] @relation("CommentReplies")
+
+  @@map("Comment")
+}
+
+model Stream {
+  id                    Int          @id @default(autoincrement())
+  title                 String
+  description           String?
+  stream_url            String?
+  status                StreamStatus @default(offline)
+  competition_id        Int?
+  team_id               Int?
+  educational_center_id Int?
+  created_at            DateTime     @default(now())
+  updated_at            DateTime     @updatedAt
+
+  competition       Competition?       @relation(fields: [competition_id], references: [id])
+  team              Team?              @relation(fields: [team_id], references: [id])
+  educationalCenter EducationalCenter? @relation(fields: [educational_center_id], references: [id])
+
+  @@map("Stream")
+}
+
+model Sponsor {
+  id          Int      @id @default(autoincrement())
+  name        String
+  logo_url    String?
+  website_url String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("Sponsor")
+}
+
+model Notification {
+  id         String           @id @default(uuid()) @db.Uuid
+  user_id    String           @db.Uuid
+  title      String
+  message    String
+  type       NotificationType
+  meta       Json?
+  is_read    Boolean          @default(false)
+  created_at DateTime         @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, is_read])
+  @@map("Notification")
+}
+
+model SystemLog {
+  id          Int              @id @default(autoincrement())
+  user_id     String?          @db.Uuid
+  action      SystemAction
+  entity_type SystemEntityType
+  entity_id   String?
+  old_values  Json?
+  new_values  Json?
+  ip_address  String?
+  user_agent  String?
+  details     String?
+  created_at  DateTime         @default(now())
+
+  user User? @relation(fields: [user_id], references: [id])
+
+  @@index([user_id])
+  @@index([entity_type, entity_id])
+  @@index([action])
+  @@index([created_at])
+  @@map("SystemLog")
+}
+
+model TeamMessage {
+  id          Int         @id @default(autoincrement())
+  team_id     Int
+  user_id     String      @db.Uuid
+  content     String?
+  type        MessageType @default(text)
+  file_url    String?
+  attachments Json?
+  created_at  DateTime    @default(now())
+
+  team Team @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("TeamMessages")
+}
+
+model TeamLog {
+  id             Int      @id @default(autoincrement())
+  team_id        Int
+  competition_id Int
+  content        String
+  author_id      String?  @db.Uuid
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  team        Team        @relation(fields: [team_id], references: [id])
+  competition Competition @relation(fields: [competition_id], references: [id])
+  author      User?       @relation("TeamLogAuthor", fields: [author_id], references: [id])
+
+  @@map("TeamLogs")
+}
+
+model TeamInvite {
+  id         String       @id @default(uuid()) @db.Uuid
+  team_id    Int
+  email      String?
+  user_id    String?      @db.Uuid
+  token      String       @unique
+  status     InviteStatus @default(pending)
+  expires_at DateTime?
+  created_at DateTime     @default(now())
+
+  team Team @relation(fields: [team_id], references: [id])
+
+  @@map("TeamInvite")
+}
+
+model TeamJoinRequest {
+  id         Int            @id @default(autoincrement())
+  team_id    Int
+  user_id    String         @db.Uuid
+  status     ApprovalStatus @default(pending)
+  created_at DateTime       @default(now())
+
+  team Team @relation(fields: [team_id], references: [id])
+
+  @@map("TeamJoinRequest")
+}
+
+model TeamFile {
+  id            Int      @id @default(autoincrement())
+  team_id       Int
+  uploaded_by   String   @db.Uuid
+  filename      String
+  original_name String
+  mime_type     String
+  size          BigInt
+  r2_key        String   @db.VarChar(1024)
+  url           String   @db.VarChar(2048)
+  created_at    DateTime @default(now())
+
+  team     Team @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  uploader User @relation("TeamFileUploader", fields: [uploaded_by], references: [id], onDelete: Cascade)
+
+  @@map("TeamFiles")
+}
+
+model TeamPage {
+  id             Int      @id @default(autoincrement())
+  team_id        Int      @unique
+  layout         Json     @default("[]")
+  theme          String   @default("default") @db.VarChar(50)
+  custom_css     String?
+  hero_image_url String?
+  accent_color   String?  @db.VarChar(7)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  team Team @relation(fields: [team_id], references: [id], onDelete: Cascade)
+
+  @@map("TeamPage")
+}
+
+model Gallery {
+  id            Int       @id @default(autoincrement())
+  filename      String
+  original_name String
+  mime_type     String
+  size          Int
+  url           String
+  title         String?
+  description   String?
+  media_type    MediaType @default(image)
+  thumbnail_url String?
+  duration      Int?
+  competition_id Int?
+  sort_order    Int       @default(0)
+  is_featured   Boolean   @default(false)
+  uploaded_by   String    @db.Uuid
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  uploader    User         @relation("GalleryUploader", fields: [uploaded_by], references: [id])
+  competition Competition? @relation(fields: [competition_id], references: [id])
+
+  @@map("Gallery")
+}
+
+model Archive {
+  id             Int         @id @default(autoincrement())
+  title          String
+  description    String?
+  content_type   ContentType @default(text)
+  file_url       String?
+  file_name      String?
+  file_mime_type String?
+  file_size      Int?
+  competition_id Int?
+  visibility     Visibility  @default(hidden)
+  allowed_emails Json?
+  sort_order     Int         @default(0)
+  uploaded_by    String      @db.Uuid
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+
+  competition Competition? @relation(fields: [competition_id], references: [id])
+  uploader    User         @relation("ArchiveUploader", fields: [uploaded_by], references: [id])
+
+  @@map("Archive")
+}
+
+model RobotFile {
+  id             Int      @id @default(autoincrement())
+  team_id        Int
+  competition_id Int
+  file_url       String
+  file_name      String
+  file_type      String?
+  description    String?
+  uploaded_by    String?  @db.Uuid
+  is_public      Boolean  @default(false)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  team        Team        @relation(fields: [team_id], references: [id])
+  competition Competition @relation(fields: [competition_id], references: [id])
+  uploader    User?       @relation("RobotFileUploader", fields: [uploaded_by], references: [id])
+
+  @@map("RobotFiles")
+}
+
+model Media {
+  id            Int      @id @default(autoincrement())
+  filename      String
+  original_name String
+  mime_type     String
+  size          Int
+  url           String
+  thumbnail_url String?
+  uploaded_by   String   @db.Uuid
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  uploader User @relation("MediaUploader", fields: [uploaded_by], references: [id])
+
+  @@map("Media")
+}
+
+model CenterAdminRequest {
+  id                    Int            @id @default(autoincrement())
+  user_id               String         @db.Uuid
+  educational_center_id Int
+  status                ApprovalStatus @default(pending)
+  request_type          RequestType
+  decision_reason       String?
+  decided_by_user_id    String?        @db.Uuid
+  decided_at            DateTime?
+  created_at            DateTime       @default(now())
+  updated_at            DateTime?
+
+  requestingUser User              @relation("CenterAdminRequestUser", fields: [user_id], references: [id])
+  center         EducationalCenter @relation(fields: [educational_center_id], references: [id])
+  decidedBy      User?             @relation("CenterAdminDecider", fields: [decided_by_user_id], references: [id])
+
+  @@map("CenterAdminRequest")
+}
+
+model ContactMessage {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(120)
+  email        String   @db.VarChar(200)
+  organization String?  @db.VarChar(200)
+  message      String
+  ip_address   String?  @db.VarChar(64)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  @@map("ContactMessage")
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  user_id    String   @db.Uuid
+  rating     Int
+  message    String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@index([user_id])
+  @@map("Review")
+}
+
+model R2Stats {
+  id          Int    @id @default(autoincrement())
+  month       String @unique @db.VarChar(7)
+  class_a_ops BigInt @default(0)
+  class_b_ops BigInt @default(0)
+
+  @@map("R2Stats")
+}

@@ -9,6 +9,14 @@ const __dirname = path.dirname(__filename);
 const MIGRATIONS_DIR = path.resolve(__dirname, '../migrations');
 const META_TABLE = 'SequelizeMeta';
 
+function quoteIdentifier(queryInterface, value) {
+  return queryInterface.queryGenerator.quoteIdentifier(value);
+}
+
+function quoteTable(queryInterface, value) {
+  return queryInterface.queryGenerator.quoteTable(value);
+}
+
 function normalizeTableName(tableEntry) {
   if (typeof tableEntry === 'string') return tableEntry;
   if (!tableEntry || typeof tableEntry !== 'object') return '';
@@ -33,8 +41,10 @@ async function ensureMetaTable(queryInterface) {
 }
 
 async function getAppliedMigrations(queryInterface) {
+  const tableSql = quoteTable(queryInterface, META_TABLE);
+  const nameSql = quoteIdentifier(queryInterface, 'name');
   const rows = await queryInterface.sequelize.query(
-    `SELECT name FROM \`${META_TABLE}\``,
+    `SELECT ${nameSql} FROM ${tableSql}`,
     { type: Sequelize.QueryTypes.SELECT }
   );
 
@@ -42,13 +52,42 @@ async function getAppliedMigrations(queryInterface) {
 }
 
 async function markMigrationAsApplied(queryInterface, migrationName) {
-  await queryInterface.sequelize.query(
-    `INSERT IGNORE INTO \`${META_TABLE}\` (name) VALUES (:name)`,
-    {
-      replacements: { name: migrationName },
-      type: Sequelize.QueryTypes.INSERT,
+  const dialect = queryInterface.sequelize.getDialect();
+  const tableSql = quoteTable(queryInterface, META_TABLE);
+  const nameSql = quoteIdentifier(queryInterface, 'name');
+
+  if (dialect === 'postgres') {
+    await queryInterface.sequelize.query(
+      `INSERT INTO ${tableSql} (${nameSql}) VALUES (:name) ON CONFLICT (${nameSql}) DO NOTHING`,
+      {
+        replacements: { name: migrationName },
+        type: Sequelize.QueryTypes.INSERT,
+      }
+    );
+    return;
+  }
+
+  if (dialect === 'mysql' || dialect === 'mariadb') {
+    await queryInterface.sequelize.query(
+      `INSERT IGNORE INTO ${tableSql} (${nameSql}) VALUES (:name)`,
+      {
+        replacements: { name: migrationName },
+        type: Sequelize.QueryTypes.INSERT,
+      }
+    );
+    return;
+  }
+
+  try {
+    await queryInterface.bulkInsert(META_TABLE, [{ name: migrationName }]);
+  } catch (error) {
+    const raw = `${error?.message || ''} ${error?.original?.message || ''}`.toLowerCase();
+    const code = String(error?.original?.code || '').toUpperCase();
+    const uniqueCodes = new Set(['23505', 'SQLITE_CONSTRAINT', 'SQLITE_CONSTRAINT_UNIQUE']);
+    if (!uniqueCodes.has(code) && !raw.includes('unique')) {
+      throw error;
     }
-  );
+  }
 }
 
 function getMigrationFiles() {
@@ -92,11 +131,21 @@ function isSafeAlreadyAppliedError(error) {
     'ER_BAD_FIELD_ERROR',
   ]);
 
-  if (mysqlCodes.has(code)) return true;
+  const postgresCodes = new Set([
+    '42P07', // duplicate_table
+    '42701', // duplicate_column
+    '42710', // duplicate_object
+    '42703', // undefined_column
+    '42P01', // undefined_table
+    '23505', // unique_violation
+  ]);
+
+  if (mysqlCodes.has(code) || postgresCodes.has(code)) return true;
 
   return (
     message.includes('already exists') ||
     message.includes('duplicate column name') ||
+    message.includes('duplicate key value violates unique constraint') ||
     message.includes('duplicate key name') ||
     message.includes("can't drop") ||
     message.includes('check that column/key exists') ||
