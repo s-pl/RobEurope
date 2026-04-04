@@ -18,11 +18,12 @@ const getClaim = (payload, claimKey) => {
 };
 
 const getRoleFromToken = (payload) => {
-  const configuredRoleClaim = normalizeString(process.env.AUTH0_ROLE_CLAIM);
+  const appMeta = payload?.app_metadata ?? {};
+  const userMeta = payload?.user_metadata ?? {};
   const candidates = [
-    getClaim(payload, configuredRoleClaim),
-    payload?.['https://robeurope.samuelponce.es/role'],
-    payload?.['https://robeurope.eu/role'],
+    appMeta?.role,
+    appMeta?.roles,
+    userMeta?.role,
     payload?.role,
     payload?.roles,
   ];
@@ -41,11 +42,11 @@ const getRoleFromToken = (payload) => {
 };
 
 const getCenterIdFromToken = (payload) => {
-  const configuredCenterClaim = normalizeString(process.env.AUTH0_CENTER_ID_CLAIM);
+  const appMeta = payload?.app_metadata ?? {};
+  const userMeta = payload?.user_metadata ?? {};
   const candidates = [
-    getClaim(payload, configuredCenterClaim),
-    payload?.['https://robeurope.samuelponce.es/educational_center_id'],
-    payload?.['https://robeurope.eu/educational_center_id'],
+    appMeta?.educational_center_id,
+    userMeta?.educational_center_id,
     payload?.educational_center_id,
   ];
 
@@ -72,9 +73,10 @@ const mapUserForRequest = (user) => ({
 });
 
 async function generateUniqueUsername(payload, email, auth0Id) {
-  const fromNickname = normalizeString(payload?.nickname) || normalizeString(payload?.preferred_username);
+  const meta = payload?.user_metadata ?? {};
+  const fromNickname = normalizeString(meta?.username) || normalizeString(payload?.nickname) || normalizeString(payload?.preferred_username);
   const fromEmail = normalizeString(email).split('@')[0];
-  const fromSub = normalizeString(auth0Id).replace(/\|/g, '_');
+  const fromSub = normalizeString(auth0Id).replace(/[^a-z0-9]/gi, '_');
   const base = safeSlug(fromNickname || fromEmail || fromSub || 'user').slice(0, 24) || 'user';
 
   let username = base;
@@ -113,11 +115,12 @@ async function findOrCreateUserFromAuth(payload) {
   }
 
   if (!user) {
-    const email = tokenEmail || `${auth0Id.replace(/\|/g, '_')}@auth0.local`;
-    const fullName = normalizeString(payload?.name);
-    const firstName = normalizeString(payload?.given_name) || fullName.split(' ')[0] || 'User';
+    const email = tokenEmail || `${auth0Id.replace(/[^a-z0-9]/gi, '_')}@supabase.local`;
+    const meta = payload?.user_metadata ?? {};
+    const fullName = normalizeString(meta?.full_name || payload?.name);
+    const firstName = normalizeString(meta?.first_name || payload?.given_name) || fullName.split(' ')[0] || 'User';
     const lastName =
-      normalizeString(payload?.family_name) ||
+      normalizeString(meta?.last_name || payload?.family_name) ||
       fullName.split(' ').slice(1).join(' ') ||
       'User';
 

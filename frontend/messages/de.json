@@ -1,0 +1,546 @@
+{
+  "brand": "RobEurope",
+  "languages": {
+    "es": "ES",
+    "en": "EN",
+    "de": "DE"
+  },
+  "nav": {
+    "home": "Start",
+    "competitions": "Wettkämpfe",
+    "teams": "Teams",
+    "sponsors": "Sponsoren",
+    "streams": "Streaming",
+    "contact": "Kontakt",
+    "terms": "Bedingungen",
+    "profile": "Profil",
+    "menu": "Menü",
+    "userMenu": "Benutzermenü",
+    "primaryNavigation": "Hauptnavigation",
+    "myTeam": "Mein Team",
+    "theme": "Thema",
+    "posts": "Nachrichten",
+    "gallery": "Galerie",
+    "archives": "Archiv",
+    "educationalCenters": "Bildungseinrichtungen",
+    "feedback": "Feedback",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "logout": "Abmelden",
+    "adminSection": "Verwaltung",
+    "manageCenters": "Zentren verwalten",
+    "manageArchives": "Archiv verwalten",
+    "managePosts": "Beiträge verwalten",
+    "adminRequests": "Admin-Anfragen",
+    "notifications": "Benachrichtigungen",
+    "language": "Sprache",
+    "adminLabel": "Admin"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "empty": "Keine Benachrichtigungen"
+  },
+  "buttons": {
+    "login": "Login",
+    "register": "Registrieren",
+    "logout": "Abmelden",
+    "save": "Speichern",
+    "saveChanges": "Änderungen speichern",
+    "send": "Senden",
+    "sending": "Wird gesendet…",
+    "createAccount": "Konto erstellen",
+    "alreadyAccount": "Hast du schon ein Konto?",
+    "noAccount": "Noch kein Konto?",
+    "goToLogin": "Anmelden",
+    "goToRegister": "Hier registrieren",
+    "calendar": "Kalender",
+    "docs": "API-Dokumentation",
+    "changePhoto": "Aktualisieren",
+    "uploading": "Wird hochgeladen…",
+    "saving": "Wird gespeichert…",
+    "creating": "Wird erstellt…",
+    "entering": "Anmeldung…",
+    "apply": "Anwenden"
+  },
+  "footer": {
+    "tagline": "Europäische Robotik-Plattform für Teams, Wettbewerbe und Community.",
+    "explore": "Entdecken",
+    "info": "Information",
+    "centers": "Zentren",
+    "madeWith": "Mit ♥ für die Robotik gemacht",
+    "description": "RobEurope bietet die beste Erfahrung in der Robotik. Wir arbeiten mit echten Fachleuten —den Besten auf ihrem Gebiet— um Innovation und Exzellenz in jedes Projekt zu bringen.",
+    "projects": "PROJEKTE",
+    "competitions": "Wettkämpfe",
+    "teams": "Teams",
+    "streaming": "Streaming",
+    "resources": "RESSOURCEN",
+    "gallery": "Galerie",
+    "sponsors": "Sponsoren",
+    "feedback": "Feedback",
+    "company": "UNTERNEHMEN",
+    "about": "Über uns",
+    "contact": "Kontakt",
+    "terms": "Bedingungen",
+    "copyright": "Alle Rechte vorbehalten."
+  },
+  "common": {
+    "save": "Speichern",
+    "saving": "Wird gespeichert...",
+    "delete": "Löschen",
+    "cancel": "Abbrechen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "loading": "Lädt...",
+    "skipToContent": "Zum Inhalt springen",
+    "adminModeActive": "Admin-Modus aktiv",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen",
+    "create": "Erstellen",
+    "approve": "Genehmigen",
+    "reject": "Ablehnen",
+    "search": "Suchen"
+  },
+  "theme": {
+    "toggle": "Design wechseln",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
+  },
+  "auth": {
+    "signIn": "Anmelden",
+    "signOut": "Abmelden",
+    "loading": "Sitzung wird geladen..."
+  },
+  "home": {
+    "hero": {
+      "tagline": "Europäische Bildungsrobotik",
+      "title": "RobEurope 2025 · die kontinentale Bildungsrobotik-Liga",
+      "description": "Offizielles Streaming, Echtzeit-Daten und offene APIs, damit jede Schule ihren Roboter entwerfen, simulieren und einsetzen kann.",
+      "primaryCta": "Kalender",
+      "secondaryCta": "API Docs"
+    },
+    "callouts": {
+      "nextQualifier": {
+        "label": "Nächster Qualifikator",
+        "fallback": "Noch unbekannt"
+      },
+      "streaming": {
+        "label": "Live-Stream",
+        "fallback": "Offline"
+      },
+      "teams": {
+        "label": "Registrierte Teams",
+        "detail": "Saison 2025"
+      }
+    },
+    "pillars": {
+      "stem": {
+        "title": "Angewandtes MINT",
+        "body": "Echte Mechatronik-, KI- und Computer-Vision-Herausforderungen."
+      },
+      "europe": {
+        "title": "Vernetztes Europa",
+        "body": "Schulen aus mehreren Ländern in einer Liga."
+      },
+      "impact": {
+        "title": "Gesellschaftliche Wirkung",
+        "body": "Öffentliche Programme, Stipendien und Frauenbeteiligung."
+      }
+    },
+    "howItWorks": {
+      "title": "So funktioniert es",
+      "description": "Die Teilnahme an RobEurope ist ganz einfach.",
+      "steps": {
+        "register": {
+          "title": "Registrieren",
+          "description": "Erstelle dein RobEurope-Konto."
+        },
+        "team": {
+          "title": "Team bilden",
+          "description": "Tritt einem bestehenden Team bei oder erstelle ein neues."
+        },
+        "enroll": {
+          "title": "Einschreiben",
+          "description": "Finde aktive Wettbewerbe und melde dein Team an."
+        },
+        "compete": {
+          "title": "Antreten und gewinnen",
+          "description": "Zeige deine Fähigkeiten und gewinne Preise."
+        }
+      }
+    },
+    "stats": {
+      "teams": "Aktive Teams",
+      "competitions": "Jährliche Wettbewerbe",
+      "viewers": "Zuschauer",
+      "countries": "Länder"
+    },
+    "latest": {
+      "title": "Neueste Nachrichten",
+      "description": "Bleib mit den neuesten Nachrichten und Wettbewerben auf dem Laufenden.",
+      "news": "Nachrichten",
+      "viewAll": "Alle ansehen",
+      "competitions": "Wettkämpfe",
+      "viewCalendar": "Kalender anzeigen",
+      "noCompetitions": "Noch keine Wettbewerbe",
+      "noNews": "Noch keine Nachrichten"
+    },
+    "cta": {
+      "title": "Bereit anzutreten?",
+      "description": "Tritt der größten Robotik-Community Europas bei.",
+      "button": "Jetzt registrieren"
+    },
+    "noCompetitions": "Noch keine Wettbewerbe",
+    "noNews": "Noch keine Nachrichten",
+    "loading": "Wird mit der API synchronisiert...",
+    "error": "Informationen konnten nicht geladen werden"
+  },
+  "competitions": {
+    "title": "RobEurope-Wettbewerbe",
+    "loading": "Kalender wird synchronisiert...",
+    "error": "Wettbewerbe konnten nicht synchronisiert werden.",
+    "empty": "Noch keine Wettbewerbe registriert.",
+    "viewDetails": "Details anzeigen",
+    "create": "Wettbewerb erstellen",
+    "noActive": "Derzeit keine aktiven Wettbewerbe.",
+    "searchPlace": "Name, Stadt...",
+    "onlyActive": "Nur aktive",
+    "card": {
+      "start": "Beginn",
+      "status": "Status",
+      "venue": "Veranstaltungsort",
+      "teams": "Teams",
+      "tbd": "Noch unbekannt"
+    },
+    "status": {
+      "draft": "Entwurf",
+      "published": "Veröffentlicht",
+      "archived": "Archiviert",
+      "active": "Aktiv"
+    },
+    "detail": {
+      "back": "Zurück",
+      "share": "Teilen",
+      "linkCopied": "Link kopiert",
+      "loading": "Lädt...",
+      "notFound": "Wettbewerb nicht gefunden",
+      "aboutEvent": "Über die Veranstaltung",
+      "liveStreams": "Live-Streams",
+      "participatingTeams": "Teilnehmende Teams",
+      "noTeamsYet": "Noch keine Teams registriert.",
+      "publicFiles": "Öffentliche Dateien",
+      "information": "Information"
+    }
+  },
+  "teams": {
+    "title": "Teams",
+    "subtitle": "Entdecke und tritt den besten Robotik-Teams bei",
+    "create": "Team erstellen",
+    "searchPlaceholder": "Teams suchen...",
+    "allCountries": "Alle Länder",
+    "members": "Mitglieder",
+    "manage": "Mein Team verwalten",
+    "requestJoin": "Beitrittsanfrage stellen",
+    "loginToJoin": "Anmelden um beizutreten",
+    "noTeams": "Keine Teams gefunden.",
+    "feedback": {
+      "created": "Team erfolgreich erstellt",
+      "createError": "Team konnte nicht erstellt werden",
+      "requestSent": "Anfrage gesendet",
+      "joinError": "Beitrittsanfrage konnte nicht gesendet werden"
+    }
+  },
+  "myTeam": {
+    "title": "Mein Team",
+    "createTitle": "Team erstellen",
+    "createDesc": "Du gehörst noch keinem Team an. Erstelle ein neues.",
+    "tabs": {
+      "overview": "Übersicht",
+      "members": "Mitglieder",
+      "competitions": "Wettbewerbe",
+      "chat": "Chat",
+      "settings": "Einstellungen"
+    },
+    "roles": {
+      "owner": "Inhaber",
+      "member": "Mitglied"
+    },
+    "actions": {
+      "leave": "Team verlassen",
+      "delete": "Team löschen",
+      "removeMember": "Entfernen",
+      "invite": "Einladen",
+      "approve": "Genehmigen",
+      "register": "Anmeldung beantragen"
+    },
+    "members": {
+      "title": "Teammitglieder",
+      "inviteTitle": "Mitglieder einladen",
+      "inviteEmail": "Per E-Mail einladen",
+      "requestsTitle": "Zugriffsanfragen",
+      "noRequests": "Keine ausstehenden Anfragen.",
+      "noMembers": "Keine Mitglieder."
+    },
+    "chat": {
+      "placeholder": "Nachricht schreiben...",
+      "send": "Senden",
+      "empty": "Schreibe als Erster etwas."
+    },
+    "settings": {
+      "editTitle": "Informationen bearbeiten",
+      "streamTitle": "Streaming-Konfiguration",
+      "dangerZone": "Gefahrenzone",
+      "deleteWarning": "Das Löschen des Teams löscht alle Daten, Mitglieder und Anmeldungen unwiderruflich."
+    },
+    "feedback": {
+      "created": "Team erfolgreich erstellt",
+      "saved": "Änderungen gespeichert",
+      "invited": "Einladung gesendet",
+      "memberRemoved": "Mitglied entfernt",
+      "left": "Du hast das Team verlassen",
+      "deleted": "Team gelöscht",
+      "registrationSent": "Anmeldungsanfrage gesendet"
+    }
+  },
+  "posts": {
+    "title": "Nachrichten",
+    "subtitle": "Bleib mit den neuesten Updates auf dem Laufenden",
+    "search": "Nachrichten suchen...",
+    "create": "Beitrag erstellen",
+    "empty": "Noch keine Nachrichten.",
+    "created": "Beitrag erfolgreich erstellt",
+    "confirmDelete": "Diesen Beitrag wirklich löschen?",
+    "deleted": "Beitrag gelöscht",
+    "pinned": "Angeheftet",
+    "comments": "Kommentare",
+    "noComments": "Noch keine Kommentare.",
+    "writeComment": "Kommentar schreiben...",
+    "tabs": {
+      "all": "Alle",
+      "pinned": "Angeheftet"
+    }
+  },
+  "gallery": {
+    "title": "Galerie",
+    "description": "Eine Sammlung von Momenten unserer Robotik-Veranstaltung",
+    "uploadImage": "Bild",
+    "uploadCta": "Hochladen",
+    "loading": "Lädt...",
+    "delete": "Löschen",
+    "seeMore": "Mehr anzeigen",
+    "seeLess": "Weniger anzeigen",
+    "loginForFavorites": "Anmelden um Favoriten zu speichern"
+  },
+  "archives": {
+    "title": "Informationsarchiv",
+    "description": "Dokumente, Dateien und Informationstexte nach Wettbewerb",
+    "empty": "Keine Dateien gefunden",
+    "visibility": {
+      "hidden": "Versteckt",
+      "public": "Öffentlich",
+      "restricted": "Eingeschränkt"
+    },
+    "actions": {
+      "create": "Element erstellen",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "download": "Herunterladen"
+    }
+  },
+  "educationalCenters": {
+    "title": "Bildungseinrichtungen",
+    "description": "Teilnehmende Bildungseinrichtungen",
+    "status": {
+      "pending": "Ausstehend",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt"
+    },
+    "actions": {
+      "create": "Zentrum registrieren",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "approve": "Genehmigen",
+      "reject": "Ablehnen"
+    },
+    "subtitle": "Bildungseinrichtungen, die an Wettbewerben teilnehmen",
+    "empty": "Keine Zentren registriert"
+  },
+  "sponsors": {
+    "title": "Sponsoren",
+    "empty": "Keine Sponsoren gefunden",
+    "form": {
+      "name": "Name",
+      "logo": "Logo-URL",
+      "website": "Website"
+    }
+  },
+  "streams": {
+    "title": "Streams",
+    "subtitle": "Alle Wettbewerbs-Streams ansehen",
+    "loading": "Streams werden geladen...",
+    "noStreams": "Keine Streams verfügbar.",
+    "status": {
+      "live": "Live",
+      "offline": "Offline",
+      "scheduled": "Geplant"
+    },
+    "watch": "Stream ansehen"
+  },
+  "contact": {
+    "title": "Kontakt",
+    "contactUs": "Kontakt aufnehmen",
+    "contactUsDesc": "Wir sind für dich da. Füll das Formular aus und wir melden uns.",
+    "sentTitle": "Nachricht gesendet!",
+    "sentDesc": "Danke für deine Nachricht. Wir antworten bald.",
+    "sendAnother": "Weitere Nachricht senden",
+    "send": "Nachricht senden",
+    "errorGeneric": "Senden fehlgeschlagen. Bitte erneut versuchen.",
+    "placeholders": {
+      "name": "Dein Name",
+      "email": "du@email.com"
+    }
+  },
+  "feedback": {
+    "title": "Feedback",
+    "description": "Meinungen unserer Nutzer"
+  },
+  "profile": {
+    "title": "Mein Profil",
+    "personalInfo": "Persönliche Informationen",
+    "bio": "Biografie",
+    "bioEmpty": "Keine Biografie angegeben",
+    "photo": "Profilfoto",
+    "feedback": {
+      "success": "Profil erfolgreich aktualisiert.",
+      "error": "Fehler beim Aktualisieren des Profils.",
+      "photoSuccess": "Foto erfolgreich aktualisiert.",
+      "photoError": "Foto-Upload fehlgeschlagen."
+    }
+  },
+  "admin": {
+    "layout": {
+      "title": "Admin-Bereich",
+      "logout": "Abmelden",
+      "nav": {
+        "dashboard": "Dashboard",
+        "users": "Benutzer",
+        "teams": "Teams",
+        "competitions": "Wettkämpfe",
+        "registrations": "Anmeldungen",
+        "posts": "Beiträge",
+        "centers": "Zentren",
+        "archives": "Archive",
+        "requests": "Anfragen",
+        "logs": "Protokolle"
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Systemübersicht",
+      "stats": {
+        "users": "Benutzer",
+        "competitions": "Wettkämpfe",
+        "posts": "Beiträge",
+        "registrations": "Anmeldungen"
+      }
+    },
+    "users": {
+      "title": "Benutzer",
+      "searchPlaceholder": "Suchen…",
+      "empty": "Keine Benutzer gefunden",
+      "confirmDelete": "Benutzer löschen?"
+    },
+    "teams": {
+      "title": "Teams",
+      "searchPlaceholder": "Team suchen…",
+      "empty": "Keine Teams gefunden",
+      "confirmDelete": "Team löschen?"
+    },
+    "competitions": {
+      "title": "Wettkämpfe",
+      "searchPlaceholder": "Wettbewerb suchen…",
+      "empty": "Keine Wettbewerbe gefunden",
+      "status": {
+        "draft": "Entwurf",
+        "published": "Veröffentlicht",
+        "archived": "Archiviert"
+      }
+    },
+    "registrations": {
+      "title": "Anmeldungen",
+      "empty": "Keine Anmeldungen gefunden",
+      "tabAll": "Alle",
+      "tabPending": "Ausstehend",
+      "tabApproved": "Genehmigt",
+      "tabRejected": "Abgelehnt",
+      "statusPending": "Ausstehend",
+      "statusApproved": "Genehmigt",
+      "statusRejected": "Abgelehnt",
+      "btnApprove": "Genehmigen",
+      "btnReject": "Ablehnen"
+    },
+    "posts": {
+      "title": "Beitragsverwaltung",
+      "create": "Neuer Beitrag",
+      "noPosts": "Keine Beiträge vorhanden.",
+      "confirmDelete": "Diesen Beitrag löschen?",
+      "pinned": "Angeheftet"
+    },
+    "centers": {
+      "title": "Zentren verwalten",
+      "empty": "Keine Zentren gefunden",
+      "status": {
+        "pending": "Ausstehend",
+        "approved": "Genehmigt",
+        "rejected": "Abgelehnt"
+      }
+    },
+    "archives": {
+      "title": "Archive verwalten",
+      "empty": "Keine Dateien gefunden"
+    },
+    "requests": {
+      "title": "Zentrums-Admin-Anfragen",
+      "empty": "Keine Anfragen gefunden",
+      "status": {
+        "pending": "Ausstehend",
+        "approved": "Genehmigt",
+        "rejected": "Abgelehnt"
+      },
+      "type": {
+        "create": "Zentrum erstellen",
+        "join": "Zentrum beitreten"
+      }
+    },
+    "logs": {
+      "title": "Systemprotokolle",
+      "empty": "Keine Protokolle gefunden",
+      "columnAction": "Aktion",
+      "columnEntity": "Entität",
+      "columnUser": "Benutzer",
+      "columnDate": "Datum"
+    }
+  },
+  "forms": {
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "username": "Benutzername",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "organization": "Organisation",
+    "message": "Nachricht",
+    "country": "Land",
+    "name": "Name"
+  },
+  "notFound": {
+    "title": "Ups…",
+    "subtitle": "Hast du dich verirrt?",
+    "description": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
+    "goBack": "Zurück",
+    "goHome": "Zur Startseite"
+  },
+  "terms": {
+    "title": "Nutzungsbedingungen"
+  }
+}

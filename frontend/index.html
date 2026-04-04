@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RobEurope</title>
+    <meta name="description" content="Plataforma oficial de la competición de robótica RobEurope — equipos, competiciones, resultados y más." />
+    <meta name="robots" content="index, follow, max-snippet:150, max-image-preview:large" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#09090b" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8f7f4" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://robeurope.samuelponce.es/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="RobEurope — Competición de Robótica" />
+    <meta property="og:description" content="Plataforma oficial de la competición de robótica RobEurope." />
+    <meta property="og:url" content="https://robeurope.samuelponce.es/" />
+    <meta property="og:site_name" content="RobEurope" />
+
+    <!-- Hreflang (ES/EN/DE) -->
+    <link rel="alternate" hreflang="es" href="https://robeurope.samuelponce.es/" />
+    <link rel="alternate" hreflang="en" href="https://robeurope.samuelponce.es/" />
+    <link rel="alternate" hreflang="de" href="https://robeurope.samuelponce.es/" />
+    <link rel="alternate" hreflang="x-default" href="https://robeurope.samuelponce.es/" />
+
+    <!-- Preconnect to font origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+
+    <!-- Structured data: Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "RobEurope",
+      "url": "https://robeurope.samuelponce.es",
+      "description": "Plataforma oficial de la competición de robótica europea RobEurope.",
+      "sameAs": []
+    }
+    </script>
+
+    <!-- Structured data: WebSite (enables sitelinks search) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "RobEurope",
+      "url": "https://robeurope.samuelponce.es",
+      "inLanguage": ["es", "en", "de"],
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://robeurope.samuelponce.es/posts?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
